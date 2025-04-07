@@ -1,0 +1,13 @@
+# wrangler.toml 配置文件
+name = "pi-sale-web"
+
+# Pages 构建配置
+[build]
+command = "yarn && yarn build"
+
+[build.output]
+directory = "out"
+
+# Pages 配置
+[site]
+bucket = "out" 

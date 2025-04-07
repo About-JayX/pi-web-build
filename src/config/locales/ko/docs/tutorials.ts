@@ -1,0 +1,137 @@
+export default {
+  // Tutorials Page
+  'tutorials': '튜토리얼',
+  'tutorialsIntro': 'Pi.Sale 플랫폼 튜토리얼',
+  'tutorialsDescription': '다음 튜토리얼은 Pi.Sale 플랫폼에서 토큰을 배포, 민팅 및 거래하는 방법을 이해하는 데 도움이 됩니다.',
+  'deployTokenTutorial': '토큰 배포 튜토리얼',
+  'mintTokenTutorial': '토큰 민팅 튜토리얼',
+  'tradeTokenTutorial': '토큰 거래 튜토리얼',
+  'startLearning': '학습 시작하기',
+  
+  // Card descriptions
+  'deployTokenDescription': 'Pi 및 SOL 네트워크에서 MEME 토큰을 생성하고 배포하는 방법을 배웁니다.',
+  'mintTokenDescription': 'MEME 토큰 민팅에 참여하고 토큰을 관리하는 방법을 이해합니다.',
+  'tradeTokenDescription': 'Pi.Sale에서 MEME 토큰을 거래하고 마켓 기능을 사용하는 방법을 배웁니다.',
+  'readGuide': '가이드 읽기',
+  'walletConnectionGuideDesc': '지갑을 안전하게 연결하고, 승인을 관리하며, 자산을 보호하는 방법을 이해합니다.',
+  'tokenEconomicsGuideDesc': '공급 메커니즘, 인플레이션 제어 및 가치 동인을 포함한 토큰 경제 모델을 탐색합니다.',
+  
+  // Requirements
+  'deployTokenRequirements': '배포 요구사항',
+  'piWallet': '블록체인 지갑',
+  'minimumBalance': '최소 잔액',
+  'tokenInformation': '토큰 정보',
+  'deployTokenSteps': '배포 단계',
+  'connectWalletFirst': '지갑 연결하기',
+  'fillTokenForm': '토큰 양식 작성하기',
+  'confirmDeploy': '배포 확인하기',
+  'waitForConfirmation': '확인 대기하기',
+  'additionalResources': '추가 자료',
+  'walletConnectionGuide': '지갑 연결 가이드',
+  'tokenEconomicsGuide': '토큰 경제학 가이드',
+  
+  // Deploy Tutorial
+  'tutorialDeployTitle': 'MEME 토큰 배포 가이드',
+  'preparationSteps': '1단계: 준비',
+  'preparationDesc': 'MEME 토큰을 배포하기 전에 다음을 준비하세요:',
+  'piWalletReq': '배포 수수료에 충분한 자금이 있는 Pi 또는 SOL 지갑',
+  'minBalanceReq': '최소 잔액(일반적으로 2-5 Pi 또는 동등한 SOL)',
+  'tokenInfoReq': '토큰 정보(이름, 심볼, 토큰 아이콘 등)',
+  'marketingMaterialsReq': '선택 사항: 총 공급량, 토큰 설명 및 소셜 미디어 링크',
+  
+  'additionalOptions': '2단계: 추가 옵션',
+  'additionalOptionsDesc': '선택적 토큰 설정:',
+  'logoSetting': '토큰 파라미터 설정',
+  'descriptionSetting': '배포 옵션 설정',
+  'websiteSetting': '웹사이트 주소 추가',
+  'socialMediaSetting': '소셜 미디어 링크 추가',
+  
+  'deploymentConfirmation': '3단계: 배포 확인',
+  'deploymentConfirmationDesc': '토큰 배포를 위한 마지막 단계:',
+  'reviewInfoStep': '모든 정보를 신중하게 검토',
+  'approveTransactionStep': '지갑에서 트랜잭션 승인',
+  'deploymentTimeNote': '배포는 일반적으로 1-3분이 소요됩니다',
+  'successfulDeploymentNote': '성공적인 배포 시 확인 알림을 받게 됩니다',
+  
+  // Mint Tutorial
+  'mintTitle': 'MEME 토큰 민팅 가이드',
+  'mintPreparation': '1단계: 민팅 준비',
+  'mintPreparationDesc': '토큰을 민팅하기 전에 다음을 준비하세요:',
+  'activeWalletReq': '충분한 잔액이 있는 활성 지갑',
+  'researchSuggestion': '관심 있는 토큰 프로젝트 조사',
+  'understandTokenTerms': '토큰 민팅 조건 이해',
+  
+  'mintStepsTitle': '2단계: 민팅 과정',
+  'mintStepsDesc': '토큰 민팅에 참여하는 단계:',
+  'browseMintPage': '민팅 페이지를 탐색하고 관심 있는 토큰 선택',
+  'viewTokenDetails': '토큰 세부 정보, 팀 정보 및 소셜 미디어 링크 보기',
+  'tutorialConnectWallet': '지갑 연결',
+  'enterMintAmount': '민팅할 금액 입력',
+  'confirmMintTx': '트랜잭션을 확인하여 민팅 완료',
+  
+  'mintManagement': '3단계: 민팅된 토큰 관리',
+  'mintManagementDesc': '민팅 후 다음을 수행할 수 있습니다:',
+  'viewMintedTokens': '지갑에서 민팅된 토큰 보기',
+  'trackProgressStep': '토큰 민팅 진행 상황 추적',
+  'refundOption': '필요한 경우 환불 요청(환불 정책에 따라 다름)',
+  'participateCommunity': '토큰 커뮤니티 활동에 참여',
+  
+  // Trade Tutorial
+  'tradeTitle': '토큰 거래 가이드',
+  'tradePreparation': '1단계: 거래 준비',
+  'tradePreparationDesc': '토큰 거래 전:',
+  'ensureWalletConnected': '지갑이 연결되어 있는지 확인',
+  'understandTrading': '거래 메커니즘 이해',
+  'checkTokenLiquidity': '토큰 유동성 및 가격 차트 확인',
+  
+  'buyingTokens': '2단계: 타사 DEX에서 토큰 구매',
+  'buyingTokensDesc': '분산형 거래소에서 토큰을 구매하는 방법:',
+  'tutorialConnectWalletBuy': 'DEX 플랫폼에 지갑 연결',
+  'enterBuyAmount': '구매할 금액 또는 토큰 수량 입력',
+  'confirmPriceDetails': '가격 및 거래 세부 정보 확인',
+  'clickBuyConfirm': '"구매" 클릭 및 트랜잭션 확인',
+  
+  'sellingTokens': '3단계: 타사 DEX에서 토큰 판매',
+  'sellingTokensDesc': '분산형 거래소에서 토큰을 판매하는 방법:',
+  'navigateToMarket': 'DEX 거래 페이지로 이동',
+  'selectTokenToSell': '판매할 토큰 선택',
+  'enterSellAmount': '판매할 금액 입력',
+  'reviewSaleTerms': '판매 조건 및 예상 수익 검토',
+  'confirmSaleTx': '판매 트랜잭션 확인',
+  
+  // Advanced Trading
+  'tradingTips': '거래 팁',
+  'tradingTipsDesc': '성공적인 거래를 위한 팁:',
+  'dyor': '거래 전 자체 조사(DYOR) 수행',
+  'startSmall': '플랫폼에 익숙해지기 위해 소액으로 시작',
+  'considerFees': '계산 시 거래 수수료 고려',
+  'monitorMarket': '시장 동향 및 토큰 성능 모니터링',
+  'setLimits': '감정적인 거래를 피하기 위해 개인 한도 설정',
+  
+  'dexFunctionality': 'DEX 기능',
+  'dexFunctionalityDesc': '고급 DEX 기능:',
+  'swapFeature': '토큰 페어 교환',
+  'limitOrders': '지정가 주문(특정 매수/매도 가격 설정)',
+  'liquidityProvision': '유동성 제공 옵션',
+  'analyticsTools': '분석 및 차트 도구',
+  
+  // Other sections
+  'faqSection': '자주 묻는 질문',
+  'mintingFaq': '민팅 FAQ',
+  'tradingFaq': '거래 FAQ',
+  'deploymentFaq': '배포 FAQ',
+  
+  // Legacy keys - retained for backward compatibility
+  'deployYourToken': 'MEME 토큰 배포 가이드',
+  'mintTokenGuide': 'MEME 토큰 민팅 가이드',
+  'tradeToken': 'MEME 토큰 거래 가이드',
+  'moreResources': '추가 학습 자료',
+  'fillTokenInfo': '2단계: 토큰 정보 작성',
+  'confirmAndDeploy': '3단계: 확인 및 배포',
+  'understandMintProcess': '1단계: 민팅 프로세스 이해',
+  'selectTokenAndMint': '2단계: 토큰 선택 및 민팅',
+  'manageYourTokens': '3단계: 토큰 관리',
+  'understandMarketBasics': '1단계: 시장 기본 사항 이해',
+  'buyToken': '2단계: 토큰 구매',
+  'sellToken': '3단계: 토큰 판매',
+}; 

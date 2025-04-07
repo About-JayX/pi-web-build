@@ -1,0 +1,137 @@
+export default {
+  // Tutorials Page
+  'tutorials': 'Tutorials',
+  'tutorialsIntro': 'Pi.Sale Platform Tutorials',
+  'tutorialsDescription': 'The following tutorials will help you understand how to deploy, mint, and trade tokens on the Pi.Sale platform.',
+  'deployTokenTutorial': 'Token Deployment Tutorial',
+  'mintTokenTutorial': 'Token Minting Tutorial',
+  'tradeTokenTutorial': 'Token Trading Tutorial',
+  'startLearning': 'Start Learning',
+  
+  // Card descriptions
+  'deployTokenDescription': 'Learn how to create and deploy MEME tokens on Pi and SOL networks.',
+  'mintTokenDescription': 'Understand how to participate in MEME token minting and manage tokens.',
+  'tradeTokenDescription': 'Learn how to trade MEME tokens on Pi.Sale and use market features.',
+  'readGuide': 'Read Guide',
+  'walletConnectionGuideDesc': 'Understand how to securely connect your wallet, manage authorizations, and protect your assets.',
+  'tokenEconomicsGuideDesc': 'Explore token economic models, including supply mechanisms, inflation controls, and value drivers.',
+  
+  // Requirements
+  'deployTokenRequirements': 'Deployment Requirements',
+  'piWallet': 'Blockchain Wallet',
+  'minimumBalance': 'Minimum Balance',
+  'tokenInformation': 'Token Information',
+  'deployTokenSteps': 'Deployment Steps',
+  'connectWalletFirst': 'Connect your wallet',
+  'fillTokenForm': 'Fill token form',
+  'confirmDeploy': 'Confirm deployment',
+  'waitForConfirmation': 'Wait for confirmation',
+  'additionalResources': 'Additional Resources',
+  'walletConnectionGuide': 'Wallet Connection Guide',
+  'tokenEconomicsGuide': 'Token Economics Guide',
+  
+  // Deploy Tutorial
+  'tutorialDeployTitle': 'MEME Token Deployment Guide',
+  'preparationSteps': 'Step 1: Preparation',
+  'preparationDesc': 'Before deploying a MEME token, prepare the following:',
+  'piWalletReq': 'Pi or SOL wallet with sufficient funds for deployment fees',
+  'minBalanceReq': 'Minimum balance (typically 2-5 Pi or equivalent SOL)',
+  'tokenInfoReq': 'Token information (name, symbol, token icon, etc.)',
+  'marketingMaterialsReq': 'Optional: total supply, token description, and social media links',
+  
+  'additionalOptions': 'Step 2: Additional Options',
+  'additionalOptionsDesc': 'Optional token settings:',
+  'logoSetting': 'Set token parameters',
+  'descriptionSetting': 'Set deployment options',
+  'websiteSetting': 'Add website address',
+  'socialMediaSetting': 'Add social media links',
+  
+  'deploymentConfirmation': 'Step 3: Deployment Confirmation',
+  'deploymentConfirmationDesc': 'Final steps for token deployment:',
+  'reviewInfoStep': 'Carefully review all information',
+  'approveTransactionStep': 'Approve transaction in your wallet',
+  'deploymentTimeNote': 'Deployment typically takes 1-3 minutes',
+  'successfulDeploymentNote': 'You will receive a confirmation notification upon successful deployment',
+  
+  // Mint Tutorial
+  'mintTitle': 'MEME Token Minting Guide',
+  'mintPreparation': 'Step 1: Minting Preparation',
+  'mintPreparationDesc': 'Before minting tokens, prepare the following:',
+  'activeWalletReq': 'Active wallet with sufficient balance',
+  'researchSuggestion': 'Research token projects of interest',
+  'understandTokenTerms': 'Understand token minting terms',
+  
+  'mintStepsTitle': 'Step 2: Minting Process',
+  'mintStepsDesc': 'Steps to participate in token minting:',
+  'browseMintPage': 'Browse minting page and select tokens of interest',
+  'viewTokenDetails': 'View token details, team information, and social media links',
+  'tutorialConnectWallet': 'Connect your wallet',
+  'enterMintAmount': 'Enter amount to mint',
+  'confirmMintTx': 'Confirm transaction to complete minting',
+  
+  'mintManagement': 'Step 3: Managing Minted Tokens',
+  'mintManagementDesc': 'After minting, you can:',
+  'viewMintedTokens': 'View minted tokens in your wallet',
+  'trackProgressStep': 'Track token minting progress',
+  'refundOption': 'Request refunds if needed (subject to refund policy)',
+  'participateCommunity': 'Participate in token community activities',
+  
+  // Trade Tutorial
+  'tradeTitle': 'Token Trading Guide',
+  'tradePreparation': 'Step 1: Trading Preparation',
+  'tradePreparationDesc': 'Before trading tokens:',
+  'ensureWalletConnected': 'Ensure your wallet is connected',
+  'understandTrading': 'Understand trading mechanisms',
+  'checkTokenLiquidity': 'Check token liquidity and price charts',
+  
+  'buyingTokens': 'Step 2: Buying Tokens on Third-party DEX',
+  'buyingTokensDesc': 'How to buy tokens on decentralized exchanges:',
+  'tutorialConnectWalletBuy': 'Connect your wallet to the DEX platform',
+  'enterBuyAmount': 'Enter amount or token quantity to purchase',
+  'confirmPriceDetails': 'Confirm price and transaction details',
+  'clickBuyConfirm': 'Click "Buy" and confirm transaction',
+  
+  'sellingTokens': 'Step 3: Selling Tokens on Third-party DEX',
+  'sellingTokensDesc': 'How to sell your tokens on decentralized exchanges:',
+  'navigateToMarket': 'Navigate to DEX trading page',
+  'selectTokenToSell': 'Select token to sell',
+  'enterSellAmount': 'Enter amount to sell',
+  'reviewSaleTerms': 'Review sale terms and expected proceeds',
+  'confirmSaleTx': 'Confirm sale transaction',
+  
+  // Advanced Trading
+  'tradingTips': 'Trading Tips',
+  'tradingTipsDesc': 'Tips for successful trading:',
+  'dyor': 'Do Your Own Research (DYOR) before trading',
+  'startSmall': 'Start with small amounts to familiarize yourself with the platform',
+  'considerFees': 'Consider transaction fees in calculations',
+  'monitorMarket': 'Monitor market trends and token performance',
+  'setLimits': 'Set personal limits to avoid emotional trading',
+  
+  'dexFunctionality': 'DEX Features',
+  'dexFunctionalityDesc': 'Advanced DEX functions:',
+  'swapFeature': 'Token pair exchanges',
+  'limitOrders': 'Limit orders (set specific buy/sell prices)',
+  'liquidityProvision': 'Liquidity provision options',
+  'analyticsTools': 'Analytics and charting tools',
+  
+  // Other sections
+  'faqSection': 'Frequently Asked Questions',
+  'mintingFaq': 'Minting FAQs',
+  'tradingFaq': 'Trading FAQs',
+  'deploymentFaq': 'Deployment FAQs',
+  
+  // Legacy keys - retained for backward compatibility
+  'deployYourToken': 'MEME Token Deployment Guide',
+  'mintTokenGuide': 'MEME Token Minting Guide',
+  'tradeToken': 'MEME Token Trading Guide',
+  'moreResources': 'More Learning Resources',
+  'fillTokenInfo': 'Step 2: Fill Token Information',
+  'confirmAndDeploy': 'Step 3: Confirm and Deploy',
+  'understandMintProcess': 'Step 1: Understanding the Minting Process',
+  'selectTokenAndMint': 'Step 2: Select Token and Mint',
+  'manageYourTokens': 'Step 3: Manage Tokens',
+  'understandMarketBasics': 'Step 1: Understanding Market Basics',
+  'buyToken': 'Step 2: Buy Tokens',
+  'sellToken': 'Step 3: Sell Tokens',
+}; 

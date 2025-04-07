@@ -1,0 +1,65 @@
+export default {
+  // Navigation
+  'home': '홈',
+  'mint': '민트',
+  'market': '마켓',
+  'swap': '스왑',
+  'news': '뉴스',
+  'tutorials': '튜토리얼',
+  'points': '포인트',
+  
+  // Navigation with prefix (to avoid conflicts)
+  'nav.home': '홈',
+  'nav.mint': '민트',
+  'nav.market': '마켓',
+  'nav.swap': '스왑',
+  'nav.news': '뉴스',
+  'nav.tutorials': '튜토리얼',
+  'nav.points': '포인트',
+  
+  'connectWallet': '연결',
+  'selectNetwork': '네트워크 선택',
+  'language': '언어',
+  
+  // Languages
+  'chinese': '中文',
+  'english': 'English',
+  'korean': '한국어',
+  
+  // Common buttons and text
+  'website': '웹사이트',
+  'twitter': '트위터',
+  'telegram': '텔레그램',
+  'share': '공유',
+  'copySuccess': '복사 성공',
+  'copyAddressSuccess': '계약 주소가 복사되었습니다',
+  'copyLinkSuccess': '링크가 복사되었습니다',
+  'copy': '복사',
+  'failed': '실패',
+  'token': '토큰',
+  'detail': '상세',
+  'search': '검색',
+  'noResults': '일치하는 결과가 없습니다',
+  'clearSearch': '검색 지우기',
+
+  // Swap Page
+  'swapDescription': '최상의 비율로 즉시 토큰 교환',
+  'from': '보내는 화폐',
+  'to': '받는 화폐',
+  'balance': '잔액',
+  'max': '최대',
+  'rate': '비율',
+  'slippageTolerance': '슬리피지 허용 범위',
+  'slippageTooltip': '가격이 이 비율보다 불리하게 변경되면 거래가 취소됩니다',
+  'swapNow': '지금 스왑',
+  'swapping': '스왑 중...',
+  'swapSuccess': '스왑 성공',
+  'swapCompleted': '{{fromAmount}} {{fromSymbol}}을(를) {{toAmount}} {{toSymbol}}(으)로 성공적으로 교환했습니다',
+  'swapError': '스왑 오류',
+  'enterValidAmount': '유효한 금액을 입력하세요',
+  'selectToken': '토큰 선택',
+  'recentSwaps': '최근 스왑',
+  'minutesAgo': '분 전',
+  'hourAgo': '시간 전',
+  'completed': '완료',
+}; 

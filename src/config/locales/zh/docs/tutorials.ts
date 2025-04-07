@@ -1,0 +1,137 @@
+export default {
+  // 使用教程页面
+  'tutorials': '使用教程',
+  'tutorialsIntro': 'Pi.Sale平台使用教程',
+  'tutorialsDescription': '以下教程将帮助您了解如何在Pi.Sale平台上部署、铸造和交易代币。',
+  'deployTokenTutorial': '代币部署教程',
+  'mintTokenTutorial': '代币铸造教程',
+  'tradeTokenTutorial': '代币交易教程',
+  'startLearning': '开始学习',
+  
+  // 卡片描述
+  'deployTokenDescription': '学习如何在 Pi 和 SOL 网络上创建和部署 MEME 代币。',
+  'mintTokenDescription': '了解如何参与 MEME 代币的铸造过程和管理代币。',
+  'tradeTokenDescription': '学习如何在 Pi.Sale 上交易 MEME 代币以及使用市场功能。',
+  'readGuide': '阅读指南',
+  'walletConnectionGuideDesc': '了解如何安全地连接您的钱包，管理授权，以及保护您的资产安全。',
+  'tokenEconomicsGuideDesc': '深入了解代币经济学模型，包括供应机制、通货膨胀控制和价值驱动因素。',
+  
+  // 要求
+  'deployTokenRequirements': '部署代币要求',
+  'piWallet': '区块链钱包',
+  'minimumBalance': '最低余额要求',
+  'tokenInformation': '代币信息',
+  'deployTokenSteps': '部署代币步骤',
+  'connectWalletFirst': '首先连接您的钱包',
+  'fillTokenForm': '填写代币表单',
+  'confirmDeploy': '确认部署',
+  'waitForConfirmation': '等待确认',
+  'additionalResources': '更多资源',
+  'walletConnectionGuide': '钱包连接指南',
+  'tokenEconomicsGuide': '代币经济学指南',
+  
+  // 部署教程详细内容
+  'tutorialDeployTitle': 'MEME 代币部署指南',
+  'preparationSteps': '步骤 1: 准备工作',
+  'preparationDesc': '在开始部署 MEME 代币之前，您需要准备以下内容：',
+  'piWalletReq': 'Pi 或 SOL 钱包，并确保有足够的币支付部署费用',
+  'minBalanceReq': '最低余额要求（通常为 2-5 Pi 或等值 SOL）',
+  'tokenInfoReq': '代币信息（名称、符号、代币图标等）',
+  'marketingMaterialsReq': '可选：总供应量、代币描述和社交媒体链接',
+  
+  'additionalOptions': '步骤 2: 附加选项',
+  'additionalOptionsDesc': '代币的可选设置：',
+  'logoSetting': '设置代币参数',
+  'descriptionSetting': '设置部署选项',
+  'websiteSetting': '添加网站地址',
+  'socialMediaSetting': '添加社交媒体链接',
+  
+  'deploymentConfirmation': '步骤 3: 部署确认',
+  'deploymentConfirmationDesc': '部署代币的最后步骤：',
+  'reviewInfoStep': '仔细检查所有信息',
+  'approveTransactionStep': '在钱包中批准交易',
+  'deploymentTimeNote': '部署通常需要 1-3 分钟',
+  'successfulDeploymentNote': '部署成功后，您将收到确认通知',
+  
+  // 铸造教程详细内容
+  'mintTitle': 'MEME 代币铸造指南',
+  'mintPreparation': '步骤 1: 铸造准备',
+  'mintPreparationDesc': '在铸造代币前，请准备以下内容：',
+  'activeWalletReq': '活跃的钱包及余额',
+  'researchSuggestion': '研究您感兴趣的代币项目',
+  'understandTokenTerms': '了解代币铸造条款',
+  
+  'mintStepsTitle': '步骤 2: 铸造流程',
+  'mintStepsDesc': '参与代币铸造的步骤：',
+  'browseMintPage': '浏览铸造页面，选择您感兴趣的代币',
+  'viewTokenDetails': '查看代币详情、团队信息和社交媒体链接',
+  'tutorialConnectWallet': '连接您的钱包',
+  'enterMintAmount': '输入您想要铸造的币数量',
+  'confirmMintTx': '确认交易并完成铸造',
+  
+  'mintManagement': '步骤 3: 管理铸造的代币',
+  'mintManagementDesc': '铸造后，您可以：',
+  'viewMintedTokens': '在您的钱包中查看铸造的代币',
+  'trackProgressStep': '追踪代币铸造的进度',
+  'refundOption': '如需要可以退还代币（遵循退款政策）',
+  'participateCommunity': '参与代币社区活动',
+  
+  // 交易教程详细内容
+  'tradeTitle': '代币交易指南',
+  'tradePreparation': '步骤 1: 交易准备',
+  'tradePreparationDesc': '在交易代币前：',
+  'ensureWalletConnected': '确保您的钱包已连接',
+  'understandTrading': '了解交易机制',
+  'checkTokenLiquidity': '检查代币流动性和价格图表',
+  
+  'buyingTokens': '步骤 2: 在第三方DEX购买代币',
+  'buyingTokensDesc': '如何在第三方去中心化交易所购买代币：',
+  'tutorialConnectWalletBuy': '连接您的钱包到DEX平台',
+  'enterBuyAmount': '输入您想要购买的金额或代币数量',
+  'confirmPriceDetails': '确认价格和交易详情',
+  'clickBuyConfirm': '点击"购买"并确认交易',
+  
+  'sellingTokens': '步骤 3: 在第三方DEX出售代币',
+  'sellingTokensDesc': '如何在第三方去中心化交易所出售您的代币：',
+  'navigateToMarket': '导航到DEX交易页面',
+  'selectTokenToSell': '选择您想要出售的代币',
+  'enterSellAmount': '输入您想要出售的数量',
+  'reviewSaleTerms': '查看出售条款和预计收到的金额',
+  'confirmSaleTx': '确认出售交易',
+  
+  // 高级交易
+  'tradingTips': '交易技巧',
+  'tradingTipsDesc': '成功交易的小贴士：',
+  'dyor': '交易前做好自己的研究(DYOR)',
+  'startSmall': '从小额开始，熟悉平台',
+  'considerFees': '在计算中考虑交易费用',
+  'monitorMarket': '关注市场趋势和代币表现',
+  'setLimits': '设置自己的限制，避免情绪化交易',
+  
+  'dexFunctionality': 'DEX 功能',
+  'dexFunctionalityDesc': '高级 DEX 功能：',
+  'swapFeature': '不同代币对之间的兑换',
+  'limitOrders': '限价订单（设置特定价格的买卖）',
+  'liquidityProvision': '流动性提供选项',
+  'analyticsTools': '分析和图表工具',
+  
+  // 其他部分
+  'faqSection': '常见问题解答',
+  'mintingFaq': '铸造常见问题',
+  'tradingFaq': '交易常见问题',
+  'deploymentFaq': '部署常见问题',
+  
+  // 遗留键值 - 为向后兼容保留
+  'deployYourToken': 'MEME 代币部署指南',
+  'mintTokenGuide': 'MEME 代币铸造指南',
+  'tradeToken': 'MEME 代币交易指南',
+  'moreResources': '更多学习资源',
+  'fillTokenInfo': '步骤 2: 填写代币信息',
+  'confirmAndDeploy': '步骤 3: 确认并部署',
+  'understandMintProcess': '步骤 1: 了解铸造流程',
+  'selectTokenAndMint': '步骤 2: 选择代币并铸造',
+  'manageYourTokens': '步骤 3: 管理代币',
+  'understandMarketBasics': '步骤 1: 了解市场基础',
+  'buyToken': '步骤 2: 购买代币',
+  'sellToken': '步骤 3: 出售代币',
+}; 

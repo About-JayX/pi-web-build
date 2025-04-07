@@ -1,0 +1,65 @@
+export default {
+  // Navigation
+  'home': 'Home',
+  'mint': 'Mint',
+  'market': 'Market',
+  'swap': 'Swap',
+  'news': 'News',
+  'tutorials': 'Tutorials',
+  'points': 'Points',
+  
+  // Navigation with prefix (to avoid conflicts)
+  'nav.home': 'Home',
+  'nav.mint': 'Mint',
+  'nav.market': 'Market',
+  'nav.swap': 'Swap',
+  'nav.news': 'News',
+  'nav.tutorials': 'Tutorials',
+  'nav.points': 'Points',
+  
+  'connectWallet': 'Connect',
+  'selectNetwork': 'Select Network',
+  'language': 'Language',
+  
+  // Languages
+  'chinese': '中文',
+  'english': 'English',
+  'korean': '한국어',
+  
+  // Common buttons and text
+  'website': 'Website',
+  'twitter': 'Twitter',
+  'telegram': 'Telegram',
+  'share': 'Share',
+  'copySuccess': 'Copy Success',
+  'copyAddressSuccess': 'Contract Address Copied',
+  'copyLinkSuccess': 'Link Copied',
+  'copy': 'Copy',
+  'failed': 'Failed',
+  'token': 'Token',
+  'detail': 'Detail',
+  'search': 'Search',
+  'noResults': 'No matching results found',
+  'clearSearch': 'Clear Search',
+
+  // Swap Page
+  'swapDescription': 'Exchange tokens instantly with the best rates',
+  'from': 'From',
+  'to': 'To',
+  'balance': 'Balance',
+  'max': 'MAX',
+  'rate': 'Rate',
+  'slippageTolerance': 'Slippage Tolerance',
+  'slippageTooltip': 'Your transaction will revert if the price changes unfavorably by more than this percentage',
+  'swapNow': 'Swap Now',
+  'swapping': 'Swapping...',
+  'swapSuccess': 'Swap Successful',
+  'swapCompleted': 'Successfully swapped {{fromAmount}} {{fromSymbol}} to {{toAmount}} {{toSymbol}}',
+  'swapError': 'Swap Error',
+  'enterValidAmount': 'Please enter a valid amount',
+  'selectToken': 'Select Token',
+  'recentSwaps': 'Recent Swaps',
+  'minutesAgo': 'minutes ago',
+  'hourAgo': 'hour ago',
+  'completed': 'Completed',
+}; 
