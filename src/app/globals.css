@@ -1,9 +1,11 @@
-@tailwind base;
+/* @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
+
 
 :root {
   --brand-primary: #7B2CBF;
+  --brand-primary-50: #7a2cbf50;
   --brand-secondary: #E6B325;
   --brand-light: #9D4EDD;
   --brand-dark: #5A189A;
@@ -33,4 +35,19 @@ a {
   html {
     color-scheme: dark;
   }
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--brand-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--brand-primary-50);
+  border-radius: 4px;
+  opacity: 0.1;
 }

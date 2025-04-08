@@ -75,7 +75,7 @@ export default function DisclaimerPage() {
 
         {/* 免责声明内容 */}
         <Card bg={cardBg} shadow="md" borderRadius="lg">
-          <CardBody>
+          <CardBody p={{base:0,sm:6}}>
             <VStack align="stretch" spacing={8}>
               {/* 重要提示 */}
               <Alert

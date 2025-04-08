@@ -581,10 +581,10 @@ export default function DeployPage() {
           mx="auto"
           width="100%"
         >
-          <CardBody py={{ base: 5, md: 6 }}>
+          <CardBody p={{base:2,sm:6}}>
             <Box width="100%">
               <VStack spacing={{ base: 4, md: 6 }} align="stretch">
-                <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
+                <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
                   <FormControl isRequired>
                     <FormLabel color={labelColor} fontWeight="semibold">{t('tokenSymbol')}</FormLabel>
                     <Input 

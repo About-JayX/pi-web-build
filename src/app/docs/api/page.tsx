@@ -79,14 +79,14 @@ export default function ApiDocsPage() {
         <VStack spacing={8} align="stretch">
           {/* 简介部分 */}
           <Card bg={cardBg} shadow="md" borderRadius="lg">
-            <CardBody>
+            <CardBody p={{base:0,sm:6}}>
               <Heading size="lg" mb={4} color="brand.primary">
                 {t('apiIntroduction')}
               </Heading>
               <Text mb={4}>
                 {t('apiDescriptionText', 'Pi.Sale API 允许开发者与 Pi.Sale 平台交互，获取代币数据、部署代币合约，以及访问市场信息。本文档提供了所有可用 API 的详细信息。')}
               </Text>
-              <HStack mb={4}>
+              <HStack mb={4} flexWrap="wrap" >
                 <Badge colorScheme="green" fontSize="sm">
                   {t('apiVersion')}: v1.0.0
                 </Badge>
@@ -102,9 +102,9 @@ export default function ApiDocsPage() {
 
           {/* API选项卡 */}
           <Card bg={cardBg} shadow="md" borderRadius="lg">
-            <CardBody>
+            <CardBody p={{base:0,sm:6}}>
               <Tabs colorScheme="purple" isFitted variant="enclosed">
-                <TabList mb="1em">
+                <TabList mb="1em" overflow="hidden" overflowX="auto">
                   <Tab>{t('authentication')}</Tab>
                   <Tab>{t('tokenEndpoints')}</Tab>
                   <Tab>{t('marketEndpoints')}</Tab>
@@ -275,7 +275,7 @@ export default function ApiDocsPage() {
 
           {/* SDK部分 */}
           <Card bg={cardBg} shadow="md" borderRadius="lg">
-            <CardBody>
+            <CardBody p={{base:0,sm:6}}>
               <Heading size="lg" mb={4} color="brand.primary">
                 {t('sdkIntegration', 'SDK & 集成')}
               </Heading>

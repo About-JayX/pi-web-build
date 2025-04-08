@@ -314,7 +314,7 @@ function TokenListView({ tokens, sortColumn, sortDirection, onSort }: {
               <Td>
                 <Button 
                   as={NextLink}
-                  href={`/market/${token.id}`}
+                  href={`/market/${token.contractAddress}`}
                   colorScheme="purple" 
                   size="sm"
                   bg="brand.primary"
