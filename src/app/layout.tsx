@@ -1,62 +1,62 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import Script from "next/script";
-import { Providers } from "./providers";
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import Script from 'next/script'
+import { Providers } from './providers'
 
 const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
+  variable: '--font-inter',
+  subsets: ['latin'],
+})
 
 export const metadata: Metadata = {
-  title: "Pi.Sale - MEME Token Launch Platform on Pi Network",
-  description: "One-stop MEME token deployment and trading ecosystem, efficient, secure, and convenient",
+  title: 'Pi.Sale - MEME Token Launch Platform on Pi Network',
+  description:
+    'One-stop MEME token deployment and trading ecosystem, efficient, secure, and convenient',
   icons: {
-    icon: [
-      { url: '/icon.png', type: 'image/png' },
-      { url: '/pis.png' }
-    ],
+    icon: [{ url: '/icon.png', type: 'image/png' }, { url: '/pis.png' }],
     apple: '/pis.png',
-    shortcut: '/pis.png'
+    shortcut: '/pis.png',
   },
   openGraph: {
-    title: "Pi.Sale - MEME Token Launch Platform on Pi Network",
-    description: "One-stop MEME token deployment and trading ecosystem, efficient, secure, and convenient",
-    url: "https://pi.sale",
-    siteName: "Pi.Sale",
+    title: 'Pi.Sale - MEME Token Launch Platform on Pi Network',
+    description:
+      'One-stop MEME token deployment and trading ecosystem, efficient, secure, and convenient',
+    url: 'https://pi.sale',
+    siteName: 'Pi.Sale',
     images: [
       {
-        url: "https://p.pi.sale/banner.png",
+        url: 'https://p.pi.sale/banner.png',
         width: 1200,
         height: 630,
-        alt: "Pi.Sale - Pi Network MEME Token Platform Banner"
-      }
+        alt: 'Pi.Sale - Pi Network MEME Token Platform Banner',
+      },
     ],
-    locale: "en_US",
-    type: "website",
+    locale: 'en_US',
+    type: 'website',
   },
   twitter: {
-    card: "summary_large_image",
-    title: "Pi.Sale - MEME Token Launch Platform on Pi Network",
-    description: "One-stop MEME token deployment and trading ecosystem, efficient, secure, and convenient",
-    images: ["https://p.pi.sale/banner.png"],
-    creator: "@PiSale_official"
+    card: 'summary_large_image',
+    title: 'Pi.Sale - MEME Token Launch Platform on Pi Network',
+    description:
+      'One-stop MEME token deployment and trading ecosystem, efficient, secure, and convenient',
+    images: ['https://p.pi.sale/banner.png'],
+    creator: '@PiSale_official',
   },
-  metadataBase: new URL("https://pi.sale"),
+  metadataBase: new URL('https://pi.sale'),
   alternates: {
-    canonical: "https://pi.sale",
+    canonical: 'https://pi.sale',
   },
   robots: {
     index: true,
     follow: true,
   },
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html suppressHydrationWarning data-js-focus-visible>
@@ -80,10 +80,8 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.variable} suppressHydrationWarning>
-        <Providers>
-          {children}
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
-  );
+  )
 }
