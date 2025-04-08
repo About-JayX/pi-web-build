@@ -1,18 +1,13 @@
 import {
-  Connection,
   PublicKey,
   Keypair,
   SystemProgram,
   SYSVAR_RENT_PUBKEY,
-  Transaction,
-  sendAndConfirmTransaction,
-  VersionedTransaction,
 } from '@solana/web3.js'
-import { Program, AnchorProvider, web3, BN, utils } from '@coral-xyz/anchor'
+import { Program, AnchorProvider, BN } from '@coral-xyz/anchor'
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
-  createAssociatedTokenAccountInstruction,
   getAssociatedTokenAddress,
 } from '@solana/spl-token'
 
@@ -23,46 +18,18 @@ import idl from '../idl/fair_mint.json'
 import { useSolana } from '@/contexts/solanaProvider'
 
 export const useProgram = () => {
-  const { conn, publicKey } = useSolana()
-  const programId = new PublicKey(
-    '74Vcnsny6346VKieUkDZuDtUCeNrv4UA8kKb8re7U5yc'
-  )
+  const { conn, FAIR_CURVE_SEED, programId, wallet, publicKey } = useSolana()
+  const provider = new AnchorProvider(conn, wallet, {
+    commitment: 'confirmed',
+  })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const program = new Program(idl as any, provider)
+
   const createToken = async (formData: TokenFormData) => {
     const metaplex = new Metaplex(conn)
-    const key = new PublicKey(publicKey)
-    const FAIR_CURVE_SEED = Buffer.from('fair_curve')
-
-    const wallet = {
-      publicKey: key,
-      signTransaction: async <T extends Transaction | VersionedTransaction>(
-        transaction: T
-      ): Promise<T> => {
-        // 检查是否为 VersionedTransaction
-        if ('version' in transaction) {
-          // 处理 VersionedTransaction
-          return (await window.solana.signTransaction(transaction)) as T
-        } else {
-          // 处理普通 Transaction
-          return (await window.solana.signTransaction(transaction)) as T
-        }
-      },
-      signAllTransactions: async <T extends Transaction | VersionedTransaction>(
-        transactions: T[]
-      ): Promise<T[]> => {
-        return (await window.solana.signAllTransactions(transactions)) as T[]
-      },
-    }
-    const provider = new AnchorProvider(conn, wallet, {
-      commitment: 'confirmed',
-    })
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const program = new Program(idl as any, provider)
 
     const mintKeypair = Keypair.generate()
-
     const supply = new BN(Number(1000000000) * Math.pow(10, 6))
-
     const [fairCurvePda] = PublicKey.findProgramAddressSync(
       [FAIR_CURVE_SEED, mintKeypair.publicKey.toBuffer()],
       programId
@@ -79,7 +46,6 @@ export const useProgram = () => {
       fairCurvePda, // 所有者
       true // 允许 PDA 作为所有者
     )
-
     // 提交创建代币的交易
     const tx = await program.methods
       .createToken(
@@ -109,5 +75,44 @@ export const useProgram = () => {
     await conn.confirmTransaction(tx, 'confirmed')
   }
 
-  return { createToken }
+  const mintToken = async () => {
+    const solAmountLamports = new BN(1_000_000_000)
+
+    const mintPublicKey = new PublicKey(
+      'FvyoWQ7ZegVB17c7hbwHiPGAmS7CcjhcpTJnJUoyQEHH'
+    )
+
+    const [fairCurvePda] = PublicKey.findProgramAddressSync(
+      [FAIR_CURVE_SEED, mintPublicKey.toBuffer()],
+      programId
+    )
+
+    const key = new PublicKey(publicKey)
+    // 找到代币保管库账户
+    const tokenVault = await getAssociatedTokenAddress(
+      mintPublicKey,
+      fairCurvePda,
+      true
+    )
+
+    // 找到或创建用户的代币账户
+    const userTokenAccount = await getAssociatedTokenAddress(mintPublicKey, key)
+    const tx = await program.methods
+      .mintToken(solAmountLamports) // 传入 SOL 金额
+      .accounts({
+        signer: publicKey, // 签名者和付款人
+        mint: mintPublicKey, // 代币的 mint 地址
+        fairCurve: fairCurvePda, // FairCurve PDA
+        tokenVault: tokenVault, // 代币保管库账户
+        userTokenAccount: userTokenAccount, // 用户的代币账户
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID, // 关联代币程序
+        tokenProgram: TOKEN_PROGRAM_ID, // 代币程序
+        systemProgram: SystemProgram.programId, // 系统程序
+      })
+      .rpc()
+
+    // 等待交易确认
+    await conn.confirmTransaction(tx, 'confirmed')
+  }
+  return { createToken, mintToken }
 }

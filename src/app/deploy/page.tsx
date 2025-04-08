@@ -38,7 +38,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNetwork } from '@/contexts/NetworkContext'
 import { useTranslation } from 'react-i18next'
 import { useSolana } from '@/contexts/solanaProvider'
-import { useProgram } from '@/web3/fairMint/hooks/createToken'
+import { useProgram } from '@/web3/fairMint/hooks/useProgram'
 
 // 定义 TokenParametersSection 组件的属性接口
 interface TokenParametersSectionProps {
@@ -565,7 +565,7 @@ export default function DeployPage() {
   const [totalSupplyTabIndex, setTotalSupplyTabIndex] = useState(0)
   const [targetAmountTabIndex, setTargetAmountTabIndex] = useState(0)
   const totalSupplyValues = ['314000000', '1000000000']
-  const { createToken } = useProgram()
+  const { createToken, mintToken } = useProgram()
   // 设置当前网络
   // 的计价单位
   const currencyUnit = useMemo(() => {
@@ -853,12 +853,7 @@ export default function DeployPage() {
           >
             <Button
               onClick={() => {
-                createToken({
-                  name: 'test',
-                  symbol: 'test',
-                  uri: 'https://test.com',
-                  supply: '1000000000',
-                })
+                mintToken()
               }}
               colorScheme="purple"
               bg="brand.primary"
