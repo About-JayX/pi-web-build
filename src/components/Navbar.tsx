@@ -10,7 +10,6 @@ import {
   Icon,
   Link,
   useColorModeValue,
-  useBreakpointValue,
   useDisclosure,
   Container,
   HStack,
@@ -18,52 +17,59 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
-  Collapse,
   Image,
-  Tooltip,
-} from "@chakra-ui/react";
-import {
-  HamburgerIcon,
-  CloseIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-} from "@chakra-ui/icons";
-import NextLink from "next/link";
-import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
-import { useNetwork } from "@/contexts/NetworkContext";
-import { useI18n } from "@/contexts/I18nProvider";
-import { useTranslation } from "react-i18next";
-import { FaGlobeAsia } from "react-icons/fa";
+} from '@chakra-ui/react'
+import { HamburgerIcon, CloseIcon, ChevronDownIcon } from '@chakra-ui/icons'
+import NextLink from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
+import { useNetwork } from '@/contexts/NetworkContext'
+import { useI18n } from '@/contexts/I18nProvider'
+import { useTranslation } from 'react-i18next'
+import { FaGlobeAsia } from 'react-icons/fa'
+import { useSolana } from '@/contexts/solanaProvider'
 
 // 动态导入LogoText组件，禁用服务器端渲染
-const LogoText = dynamic(() => import("./LogoText"), { ssr: false });
+const LogoText = dynamic(() => import('./LogoText'), { ssr: false })
 
 // 客户端专用组件，防止服务器端渲染不匹配
 const ClientSideOnly = ({ children }: { children: React.ReactNode }) => {
-  const [isClient, setIsClient] = useState(false);
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    setIsClient(true)
+  }, [])
 
-  return isClient ? <>{children}</> : null;
-};
+  return isClient ? <>{children}</> : null
+}
 
 export default function Navbar() {
-  const { isOpen, onToggle } = useDisclosure();
-  const bgColor = useColorModeValue("white", "gray.800");
-  const borderColor = useColorModeValue("gray.200", "gray.700");
-  const { network, handleNetworkChange } = useNetwork();
-  const { t } = useTranslation();
-  const { language, changeLanguage, availableLanguages } = useI18n();
-  const pathname = usePathname();
+  const { isOpen, onToggle } = useDisclosure()
+  const bgColor = useColorModeValue('white', 'gray.800')
+  const borderColor = useColorModeValue('gray.200', 'gray.700')
+  const { network, handleNetworkChange } = useNetwork()
+  const { publicKey, setPublicKey } = useSolana()
+  const { t } = useTranslation()
+  const { language, changeLanguage } = useI18n()
+  const pathname = usePathname()
 
+  const connectwallet = async () => {
+    if (network === 'Solana') {
+      if (publicKey) return
+      try {
+        const result = await window.solana.connect()
+        setPublicKey(result.publicKey.toString())
+      } catch (error) {
+        console.log(error,"error_");
+        
+      }
+    }
+  }
   // 组件加载时检查路径，确保网络选择器已同步
   useEffect(() => {
     // 逻辑已移至NetworkContext中处理
-  }, [pathname, handleNetworkChange]);
+  }, [pathname, handleNetworkChange])
 
   return (
     <Box
@@ -204,12 +210,12 @@ export default function Navbar() {
                 as={Button}
                 variant="outline"
                 colorScheme="purple"
-                size={{ base: "sm", md: "md" }}
+                size={{ base: 'sm', md: 'md' }}
                 rightIcon={<ChevronDownIcon />}
                 fontWeight={600}
                 borderWidth="2px"
-                h={{ base: "36px", md: "40px" }}
-                minW={{ base: "auto", md: "initial" }}
+                h={{ base: '36px', md: '40px' }}
+                minW={{ base: 'auto', md: 'initial' }}
               >
                 {network}
               </MenuButton>
@@ -254,19 +260,24 @@ export default function Navbar() {
             </Menu>
 
             <Button
+              onClick={connectwallet}
               as="a"
-              fontSize={{ base: "xs", md: "sm" }}
+              fontSize={{ base: 'xs', md: 'sm' }}
               fontWeight={600}
               variant="solid"
               bg="brand.primary"
               color="white"
               _hover={{ bg: "brand.light" }}
               href="#"
-              h={{ base: "36px", md: "40px" }}
+              h={{ base: '36px', md: '40px' }}
               px={{ base: 3, md: 4 }}
-              size={{ base: "sm", md: "md" }}
+              size={{ base: 'sm', md: 'md' }}
             >
-              {t("connectWallet")}
+              {network === 'Solana'
+                ? publicKey
+                  ? publicKey
+                  : t('connectWallet')
+                : '连接Pi钱包'}
             </Button>
           </Stack>
         </Flex>
@@ -274,22 +285,22 @@ export default function Navbar() {
         <Box>{isOpen && <MobileNav onClose={onToggle} />}</Box>
       </Container>
     </Box>
-  );
+  )
 }
 
 const DesktopNav = () => {
-  const pathname = usePathname();
-  const linkColor = useColorModeValue("gray.600", "gray.200");
-  const linkHoverColor = useColorModeValue("brand.primary", "white");
-  const activeLinkColor = useColorModeValue("brand.primary", "brand.light");
-  const activeBgColor = useColorModeValue("brand.background", "gray.700");
-  const hoverBgColor = useColorModeValue("gray.50", "gray.700");
-  const { t } = useTranslation();
+  const pathname = usePathname()
+  const linkColor = useColorModeValue('gray.600', 'gray.200')
+  const linkHoverColor = useColorModeValue('brand.primary', 'white')
+  const activeLinkColor = useColorModeValue('brand.primary', 'brand.light')
+  const activeBgColor = useColorModeValue('brand.background', 'gray.700')
+  const hoverBgColor = useColorModeValue('gray.50', 'gray.700')
+  const { t } = useTranslation()
 
   return (
-    <HStack spacing={3}>
-      {NAV_ITEMS.map((navItem) => {
-        const isActive = pathname === navItem.href;
+    <HStack spacing={4}>
+      {NAV_ITEMS.map(navItem => {
+        const isActive = pathname === navItem.href
 
         return (
           <Box key={navItem.label}>
@@ -310,15 +321,15 @@ const DesktopNav = () => {
                   {t(navItem.label)} <ChevronDownIcon />
                 </MenuButton>
                 <MenuList>
-                  {navItem.children.map((child) => (
+                  {navItem.children.map(child => (
                     <MenuItem
                       key={child.label}
                       as={NextLink}
-                      href={child.href ?? "#"}
+                      href={child.href ?? '#'}
                     >
                       <Text>{t(child.label)}</Text>
                       <Text fontSize="xs" color="gray.500">
-                        {t(child.subLabel || "")}
+                        {t(child.subLabel || '')}
                       </Text>
                     </MenuItem>
                   ))}
@@ -359,11 +370,11 @@ const DesktopNav = () => {
               </Link>
             )}
           </Box>
-        );
+        )
       })}
     </HStack>
-  );
-};
+  )
+}
 
 const MobileNav = ({ onClose }: { onClose: () => void }) => {
   const pathname = usePathname();
@@ -375,9 +386,9 @@ const MobileNav = ({ onClose }: { onClose: () => void }) => {
     <Stack
       bg={useColorModeValue("white", "gray.800")}
       p={4}
-      display={{ xl: "none" }}
+      display={{ md: 'none' }}
     >
-      {NAV_ITEMS.map((navItem) => (
+      {NAV_ITEMS.map(navItem => (
         <MobileNavItem
           key={navItem.label}
           {...navItem}
@@ -482,8 +493,8 @@ const MobileNav = ({ onClose }: { onClose: () => void }) => {
         </Button>
       </Box>
     </Stack>
-  );
-};
+  )
+}
 
 const MobileNavItem = ({
   label,
@@ -499,11 +510,11 @@ const MobileNavItem = ({
 
   const handleClick = () => {
     if (href && !children) {
-      onClose(); // 点击普通链接时关闭菜单
+      onClose() // 点击普通链接时关闭菜单
     } else {
-      onToggle(); // 点击有子菜单的项时切换子菜单
+      onToggle() // 点击有子菜单的项时切换子菜单
     }
-  };
+  }
 
   return (
     <Stack spacing={4} onClick={handleClick}>
@@ -538,7 +549,7 @@ const MobileNavItem = ({
           }
           onClick={(e) => {
             if (children) {
-              e.preventDefault(); // 阻止链接导航，只触发onToggle
+              e.preventDefault() // 阻止链接导航，只触发onToggle
             }
           }}
         >
@@ -575,7 +586,7 @@ const MobileNavItem = ({
           align="start"
         >
           {children &&
-            children.map((child) => (
+            children.map(child => (
               <Link
                 key={child.label}
                 as={NextLink}
@@ -588,14 +599,14 @@ const MobileNavItem = ({
         </Stack>
       </Box>
     </Stack>
-  );
-};
+  )
+}
 
 interface NavItem {
-  label: string;
-  subLabel?: string;
-  children?: Array<NavItem>;
-  href?: string;
+  label: string
+  subLabel?: string
+  children?: Array<NavItem>
+  href?: string
 }
 
 const NAV_ITEMS: Array<NavItem> = [

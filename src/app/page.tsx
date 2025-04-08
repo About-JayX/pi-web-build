@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import {
   Container,
@@ -40,14 +40,35 @@ import {
   Td,
   useToast,
   Circle,
-} from '@chakra-ui/react';
-import NextLink from 'next/link';
-import { FaRocket, FaChartLine, FaLayerGroup, FaGlobe, FaTwitter, FaTelegram, FaShareAlt, FaUsers, FaArrowUp, FaArrowDown, FaFileContract } from 'react-icons/fa';
-import TokenCard from '@/components/TokenCard';
-import { recentTokens, featuredTokens, platformStatsPi, platformStatsSol, marketTokens, mintingTokensPi, mintingTokensSol } from '@/mock';
-import { useNetwork } from '@/contexts/NetworkContext';
-import MintingTokenCard from '@/components/MintingTokenCard';
-import { useTranslation } from 'react-i18next';
+} from '@chakra-ui/react'
+import NextLink from 'next/link'
+import {
+  FaRocket,
+  FaChartLine,
+  FaLayerGroup,
+  FaGlobe,
+  FaTwitter,
+  FaTelegram,
+  FaShareAlt,
+  FaUsers,
+  FaArrowUp,
+  FaArrowDown,
+  FaFileContract,
+} from 'react-icons/fa'
+import TokenCard from '@/components/TokenCard'
+import {
+  recentTokens,
+  featuredTokens,
+  platformStatsPi,
+  platformStatsSol,
+  marketTokens,
+  mintingTokensPi,
+  mintingTokensSol,
+} from '@/mock'
+import { useNetwork } from '@/contexts/NetworkContext'
+import MintingTokenCard from '@/components/MintingTokenCard'
+import { useTranslation } from 'react-i18next'
+import { useEffect } from 'react'
 
 // 功能特点组件
 interface FeatureProps {
@@ -66,7 +87,8 @@ const Feature = ({ text, icon, iconBg }: FeatureProps) => {
         align={'center'}
         justify={'center'}
         rounded={'full'}
-        bg={iconBg}>
+        bg={iconBg}
+      >
         {icon}
       </Flex>
       <Text fontWeight={600}>{text}</Text>
@@ -76,17 +98,18 @@ const Feature = ({ text, icon, iconBg }: FeatureProps) => {
 
 export default function HomePage() {
   // 获取当前网络上下文
-  const { network } = useNetwork();
-  
+  const { network } = useNetwork()
+
   // 获取翻译函数
-  const { t } = useTranslation();
-  
+  const { t } = useTranslation()
+
   // 根据当前网络选择统计数据
-  const platformStats = network === 'Solana' ? platformStatsSol : platformStatsPi;
-  
+  const platformStats =
+    network === 'Solana' ? platformStatsSol : platformStatsPi
+
   // 根据当前网络选择铸造数据
-  const mintingData = network === 'Solana' ? mintingTokensSol : mintingTokensPi;
-  
+  const mintingData = network === 'Solana' ? mintingTokensSol : mintingTokensPi
+
   return (
     <Box>
       {/* Hero区域 */}
@@ -95,9 +118,15 @@ export default function HomePage() {
           align={'center'}
           spacing={{ base: 8, xl: 10 }}
           py={{ base: 20, md: 28 }}
+<<<<<<< HEAD
           pt={{base:10,md:20}}
           direction={{ base: 'column', lg: 'row' }}>
           <Stack flex={1} spacing={{ base: 5, md:5,xl:6 }}>
+=======
+          direction={{ base: 'column', md: 'row' }}
+        >
+          <Stack flex={1} spacing={{ base: 5, md: 10 }}>
+>>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
             <Heading
               lineHeight={1.2}
               fontWeight={600}
@@ -111,7 +140,8 @@ export default function HomePage() {
                 bgClip="text"
                 fontWeight="900"
                 letterSpacing="wide"
-                textShadow="0 2px 4px rgba(0,0,0,0.1)">
+                textShadow="0 2px 4px rgba(0,0,0,0.1)"
+              >
                 {t('heroTitlePart1')}
               </Text>
               <Text
@@ -124,8 +154,10 @@ export default function HomePage() {
                 fontWeight="900"
                 letterSpacing="wide"
                 textShadow="0 2px 4px rgba(0,0,0,0.15)"
-                whiteSpace="nowrap">
-                {t('heroTitlePiNetwork')}{t('heroTitlePart2')}
+                whiteSpace="nowrap"
+              >
+                {t('heroTitlePiNetwork')}
+                {t('heroTitlePart2')}
               </Text>
               <Text
                 as={'span'}
@@ -136,36 +168,44 @@ export default function HomePage() {
                 bgClip="text"
                 fontWeight="900"
                 letterSpacing="wide"
-                textShadow="0 2px 4px rgba(0,0,0,0.1)">
+                textShadow="0 2px 4px rgba(0,0,0,0.1)"
+              >
                 {t('heroTitlePart3')}
               </Text>
             </Heading>
+<<<<<<< HEAD
             <Text color={'gray.500'} fontSize={{ base: "md", md: "md", xl: "lg" }}>
               {t('heroDescription')}
             </Text>
+=======
+            <Text color={'gray.500'}>{t('heroDescription')}</Text>
+>>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
             <Stack
               spacing={{ base: 4, sm: 6 }}
-              direction={{ base: 'column', sm: 'row' }}>
+              direction={{ base: 'column', sm: 'row' }}
+            >
               <Button
                 as={NextLink}
-                href='/deploy'
+                href="/deploy"
                 rounded={'full'}
                 size={'lg'}
                 fontWeight={'normal'}
                 px={6}
                 colorScheme={'purple'}
                 bg={'brand.primary'}
-                _hover={{ bg: 'brand.light' }}>
+                _hover={{ bg: 'brand.light' }}
+              >
                 {t('startDeploy')}
               </Button>
               <Button
                 as={NextLink}
-                href='/market'
+                href="/market"
                 rounded={'full'}
                 size={'lg'}
                 fontWeight={'normal'}
                 px={6}
-                leftIcon={<FaChartLine />}>
+                leftIcon={<FaChartLine />}
+              >
                 {t('tokenMarket')}
               </Button>
             </Stack>
@@ -175,7 +215,8 @@ export default function HomePage() {
             justify={'center'}
             align={'center'}
             position={'relative'}
-            w={'full'}>
+            w={'full'}
+          >
             <Box
               position={'relative'}
               py={{base: 10, md: 16,xl:20}}
@@ -187,9 +228,9 @@ export default function HomePage() {
               href="/mint"
               cursor="pointer"
               transition="transform 0.3s ease-in-out"
-              _hover={{ 
+              _hover={{
                 transform: 'scale(1.02)',
-                boxShadow: '3xl'
+                boxShadow: '3xl',
               }}
               bg="brand.primary"
               backgroundImage="linear-gradient(135deg, #7B2CBF 0%, #5A189A 100%)"
@@ -213,7 +254,7 @@ export default function HomePage() {
                 borderRadius="full"
                 bg="rgba(230, 179, 37, 0.15)"
               />
-              
+
               {/* 主要内容 */}
               <Flex
                 position="relative"
@@ -225,8 +266,12 @@ export default function HomePage() {
                 zIndex={2}
               >
                 <Text
+<<<<<<< HEAD
                   lineHeight={1.6}
                   fontSize={{ base: "2xl", md: "4xl", xl: "5xl" }}
+=======
+                  fontSize={{ base: '3xl', md: '5xl' }}
+>>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                   fontWeight="900"
                   letterSpacing="wider"
                   textAlign="center"
@@ -238,7 +283,7 @@ export default function HomePage() {
                   {t('mintMemeTokens')}
                 </Text>
                 <Text
-                  fontSize={{ base: "md", md: "xl" }}
+                  fontSize={{ base: 'md', md: 'xl' }}
                   fontWeight="medium"
                   color="white"
                   textAlign="center"
@@ -248,6 +293,7 @@ export default function HomePage() {
                 >
                   {t('mintDescription')}
                 </Text>
+<<<<<<< HEAD
                 
                 <HStack 
                   spacing={{base:2,md:4}}
@@ -260,12 +306,18 @@ export default function HomePage() {
                     fontSize={{base: "md",md:"lg"}}
                     textAlign="center"
                   >
+=======
+
+                <HStack spacing={4} mt={4}>
+                  <Icon as={FaRocket} color="brand.secondary" w={6} h={6} />
+                  <Text color="whiteAlpha.900" fontWeight="bold" fontSize="lg">
+>>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                     {t('viewMintingTokens')}
                   </Text>
                   <Icon as={FaRocket} color="brand.secondary" w={6} h={6} />
                 </HStack>
               </Flex>
-              
+
               {/* 底部装饰 */}
               <Box
                 position="absolute"
@@ -305,7 +357,7 @@ export default function HomePage() {
                 left: 0,
                 right: 0,
                 height: '8px',
-                bgGradient: 'linear(to-r, blue.400, teal.400)'
+                bgGradient: 'linear(to-r, blue.400, teal.400)',
               }}
             >
               <Flex mb={3} justify="center">
@@ -314,7 +366,16 @@ export default function HomePage() {
               <Text fontWeight="bold" fontSize={{base:"md",lg:"lg"}} lineHeight={1.3} textAlign="center" mb={1}>
                 {t('totalMintedTokens')}
               </Text>
+<<<<<<< HEAD
               <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('blue.600', 'blue.300')}>
+=======
+              <Text
+                fontSize="3xl"
+                fontWeight="bold"
+                textAlign="center"
+                color={useColorModeValue('blue.600', 'blue.300')}
+              >
+>>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                 {platformStats.tokensCount}
               </Text>
             </Box>
@@ -336,7 +397,7 @@ export default function HomePage() {
                 left: 0,
                 right: 0,
                 height: '8px',
-                bgGradient: 'linear(to-r, green.400, teal.400)'
+                bgGradient: 'linear(to-r, green.400, teal.400)',
               }}
             >
               <Flex mb={3} justify="center">
@@ -345,7 +406,16 @@ export default function HomePage() {
               <Text fontWeight="bold" fontSize={{base:"md",lg:"lg"}} lineHeight={1.3} textAlign="center" mb={1}>
                 {t('tradingVolume24h')}
               </Text>
+<<<<<<< HEAD
               <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('green.600', 'green.300')}>
+=======
+              <Text
+                fontSize="3xl"
+                fontWeight="bold"
+                textAlign="center"
+                color={useColorModeValue('green.600', 'green.300')}
+              >
+>>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                 {platformStats.tradingVolume24h}
               </Text>
             </Box>
@@ -367,7 +437,7 @@ export default function HomePage() {
                 left: 0,
                 right: 0,
                 height: '8px',
-                bgGradient: 'linear(to-r, purple.400, pink.400)'
+                bgGradient: 'linear(to-r, purple.400, pink.400)',
               }}
             >
               <Flex mb={3} justify="center">
@@ -376,7 +446,16 @@ export default function HomePage() {
               <Text fontWeight="bold" fontSize={{base:"md",lg:"lg"}} lineHeight={1.3} textAlign="center" mb={1}>
                 {t('activeUsers')}
               </Text>
+<<<<<<< HEAD
               <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('purple.600', 'purple.300')}>
+=======
+              <Text
+                fontSize="3xl"
+                fontWeight="bold"
+                textAlign="center"
+                color={useColorModeValue('purple.600', 'purple.300')}
+              >
+>>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                 {platformStats.activeUsers}
               </Text>
             </Box>
@@ -398,7 +477,7 @@ export default function HomePage() {
                 left: 0,
                 right: 0,
                 height: '8px',
-                bgGradient: 'linear(to-r, orange.400, red.400)'
+                bgGradient: 'linear(to-r, orange.400, red.400)',
               }}
             >
               <Flex mb={3} justify="center">
@@ -407,7 +486,16 @@ export default function HomePage() {
               <Text fontWeight="bold" fontSize={{base:"md",lg:"lg"}} lineHeight={1.3} textAlign="center" mb={1}>
                 {t('totalLockedValue')}
               </Text>
+<<<<<<< HEAD
               <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('orange.600', 'orange.300')}>
+=======
+              <Text
+                fontSize="3xl"
+                fontWeight="bold"
+                textAlign="center"
+                color={useColorModeValue('orange.600', 'orange.300')}
+              >
+>>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                 {platformStats.totalLockedValue}
               </Text>
             </Box>
@@ -423,64 +511,63 @@ export default function HomePage() {
         <Text color={'gray.500'} mb={8}>
           {t('discoverHotProjects')}
         </Text>
-        
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={{ base: 6, md: 5, lg: 4 }}>
+
+        <SimpleGrid
+          columns={{ base: 1, md: 2, lg: 4 }}
+          spacing={{ base: 6, md: 5, lg: 4 }}
+        >
           {mintingData
             .filter(token => token.progress < 100)
             .filter(token => token.participants > 200 && token.progress > 60)
             .sort((a, b) => b.progress - a.progress)
             .slice(0, 4)
-            .map((token) => {
+            .map(token => {
               return (
-                <MintingTokenCard 
-                  key={token.id} 
-                  token={token} 
-                  currencyUnit={network === 'Solana' ? 'SOL' : 'Pi'} 
+                <MintingTokenCard
+                  key={token.id}
+                  token={token}
+                  currencyUnit={network === 'Solana' ? 'SOL' : 'Pi'}
                 />
-              );
+              )
             })}
         </SimpleGrid>
-        
+
         <Box textAlign="center" mt={10}>
           <Button
             as={NextLink}
             href="/mint"
             size="lg"
             variant="outline"
-            colorScheme="brand">
+            colorScheme="brand"
+          >
             {t('moreMintingProjects')}
           </Button>
         </Box>
       </Container>
 
       {/* 功能特点 */}
-      <Box 
-        py={10} 
+      <Box
+        py={10}
         bg={useColorModeValue('gray.50', 'gray.700')}
         position="relative"
       >
         <Container maxW={'container.xl'} position="relative" textAlign="center">
           <VStack spacing={4} mb={10}>
-            <Heading 
-              as="h2" 
-              size="xl" 
-              textAlign="center"
-              color="brand.primary"
-            >
+            <Heading as="h2" size="xl" textAlign="center" color="brand.primary">
               {t('platformFeatures')}
             </Heading>
-            <Text 
-              color={useColorModeValue('gray.600', 'gray.400')} 
-              maxW="container.md" 
+            <Text
+              color={useColorModeValue('gray.600', 'gray.400')}
+              maxW="container.md"
               textAlign="center"
               fontSize="lg"
             >
               {t('platformFeaturesDesc')}
             </Text>
           </VStack>
-          
+
           <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8}>
-            <Box 
+            <Box
               bg={useColorModeValue('white', 'gray.800')}
               borderRadius="xl"
               boxShadow="md"
@@ -491,9 +578,9 @@ export default function HomePage() {
               px={6}
             >
               {/* 卡片顶部装饰 */}
-              <Box 
-                w="full" 
-                h="8px" 
+              <Box
+                w="full"
+                h="8px"
                 bg="brand.primary"
                 position="absolute"
                 top="0"
@@ -501,9 +588,9 @@ export default function HomePage() {
                 borderTopLeftRadius="xl"
                 borderTopRightRadius="xl"
               />
-              
+
               {/* 圆形图标 */}
-              <Circle 
+              <Circle
                 size="76px"
                 bg="brand.primary"
                 position="absolute"
@@ -516,23 +603,23 @@ export default function HomePage() {
                 boxShadow="0 4px 10px rgba(0,0,0,0.1)"
                 border="4px solid white"
                 _dark={{
-                  border: "4px solid gray.800"
+                  border: '4px solid gray.800',
                 }}
               >
-                <Icon 
-                  as={FaRocket}
-                  color="white" 
-                  boxSize={6}
-                />
+                <Icon as={FaRocket} color="white" boxSize={6} />
               </Circle>
-              
+
               {/* 内容部分 */}
               <VStack spacing={3} align="center">
+<<<<<<< HEAD
                 <Heading 
                   fontSize={{base:"lg",lg:"xl"}} 
                   fontWeight="bold"
                   color="brand.primary"
                 >
+=======
+                <Heading fontSize="xl" fontWeight="bold" color="brand.primary">
+>>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                   {t('easyMinting')}
                 </Heading>
                 <Text
@@ -545,7 +632,7 @@ export default function HomePage() {
               </VStack>
             </Box>
 
-            <Box 
+            <Box
               bg={useColorModeValue('white', 'gray.800')}
               borderRadius="xl"
               boxShadow="md"
@@ -556,9 +643,9 @@ export default function HomePage() {
               px={6}
             >
               {/* 卡片顶部装饰 */}
-              <Box 
-                w="full" 
-                h="8px" 
+              <Box
+                w="full"
+                h="8px"
                 bg="teal.500"
                 position="absolute"
                 top="0"
@@ -566,9 +653,9 @@ export default function HomePage() {
                 borderTopLeftRadius="xl"
                 borderTopRightRadius="xl"
               />
-              
+
               {/* 圆形图标 */}
-              <Circle 
+              <Circle
                 size="76px"
                 bg="teal.500"
                 position="absolute"
@@ -581,23 +668,23 @@ export default function HomePage() {
                 boxShadow="0 4px 10px rgba(0,0,0,0.1)"
                 border="4px solid white"
                 _dark={{
-                  border: "4px solid gray.800"
+                  border: '4px solid gray.800',
                 }}
               >
-                <Icon 
-                  as={FaChartLine}
-                  color="white" 
-                  boxSize={6}
-                />
+                <Icon as={FaChartLine} color="white" boxSize={6} />
               </Circle>
-              
+
               {/* 内容部分 */}
               <VStack spacing={3} align="center">
+<<<<<<< HEAD
                 <Heading 
                   fontSize={{base:"lg",lg:"xl"}} 
                   fontWeight="bold"
                   color="teal.500"
                 >
+=======
+                <Heading fontSize="xl" fontWeight="bold" color="teal.500">
+>>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                   {t('safeTransparent')}
                 </Heading>
                 <Text
@@ -610,7 +697,7 @@ export default function HomePage() {
               </VStack>
             </Box>
 
-            <Box 
+            <Box
               bg={useColorModeValue('white', 'gray.800')}
               borderRadius="xl"
               boxShadow="md"
@@ -621,9 +708,9 @@ export default function HomePage() {
               px={6}
             >
               {/* 卡片顶部装饰 */}
-              <Box 
-                w="full" 
-                h="8px" 
+              <Box
+                w="full"
+                h="8px"
                 bg="orange.500"
                 position="absolute"
                 top="0"
@@ -631,9 +718,9 @@ export default function HomePage() {
                 borderTopLeftRadius="xl"
                 borderTopRightRadius="xl"
               />
-              
+
               {/* 圆形图标 */}
-              <Circle 
+              <Circle
                 size="76px"
                 bg="orange.500"
                 position="absolute"
@@ -646,23 +733,23 @@ export default function HomePage() {
                 boxShadow="0 4px 10px rgba(0,0,0,0.1)"
                 border="4px solid white"
                 _dark={{
-                  border: "4px solid gray.800"
+                  border: '4px solid gray.800',
                 }}
               >
-                <Icon 
-                  as={FaLayerGroup}
-                  color="white" 
-                  boxSize={6}
-                />
+                <Icon as={FaLayerGroup} color="white" boxSize={6} />
               </Circle>
-              
+
               {/* 内容部分 */}
               <VStack spacing={3} align="center">
+<<<<<<< HEAD
                 <Heading 
                   fontSize={{base:"lg",lg:"xl"}} 
                   fontWeight="bold"
                   color="orange.500"
                 >
+=======
+                <Heading fontSize="xl" fontWeight="bold" color="orange.500">
+>>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                   {t('tokenMarketplace')}
                 </Heading>
                 <Text
@@ -693,11 +780,16 @@ export default function HomePage() {
                   <StackDivider
                     borderColor={useColorModeValue('gray.100', 'gray.700')}
                   />
-                }>
+                }
+              >
                 <Feature
+<<<<<<< HEAD
                   icon={
                     <Icon as={FaRocket} color={'yellow.500'} w={4} h={4} />
                   }
+=======
+                  icon={<Icon as={FaRocket} color={'yellow.500'} w={5} h={5} />}
+>>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                   iconBg={useColorModeValue('yellow.100', 'yellow.900')}
                   text={t('quickDeploy')}
                 />
@@ -748,11 +840,11 @@ export default function HomePage() {
                   borderRadius="full"
                   bg="rgba(230, 179, 37, 0.15)"
                 />
-                
+
                 {/* 中心Logo */}
-                <Flex 
-                  height="100%" 
-                  alignItems="center" 
+                <Flex
+                  height="100%"
+                  alignItems="center"
                   justifyContent="center"
                   direction="column"
                   p={6}
@@ -776,7 +868,7 @@ export default function HomePage() {
                     {t('unleashCreativity')}
                   </Text>
                 </Flex>
-                
+
                 {/* 底部装饰 */}
                 <Box
                   position="absolute"
@@ -798,14 +890,12 @@ export default function HomePage() {
           <Heading as="h2" size="xl" color={'brand.primary'}>
             {t('marketHot')}
           </Heading>
-          <Text color={'gray.500'}>
-            {t('marketHotDesc')}
-          </Text>
+          <Text color={'gray.500'}>{t('marketHotDesc')}</Text>
         </VStack>
-        
-        <Box 
-          boxShadow="md" 
-          borderRadius="lg" 
+
+        <Box
+          boxShadow="md"
+          borderRadius="lg"
           overflow="hidden"
           bg={useColorModeValue('white', 'gray.800')}
           mb={6}
@@ -814,179 +904,255 @@ export default function HomePage() {
             <Table variant="simple">
               <Thead>
                 <Tr>
-                  <Th bg={useColorModeValue('gray.50', 'gray.700')} borderBottom="2px" borderColor="brand.primary">{t('tokenColumn')}</Th>
-                  <Th bg={useColorModeValue('gray.50', 'gray.700')} borderBottom="2px" borderColor="brand.primary" isNumeric textAlign="right">{t('priceColumn')}</Th>
-                  <Th bg={useColorModeValue('gray.50', 'gray.700')} borderBottom="2px" borderColor="brand.primary" isNumeric textAlign="right">{t('change24hColumn')}</Th>
-                  <Th bg={useColorModeValue('gray.50', 'gray.700')} borderBottom="2px" borderColor="brand.primary" isNumeric textAlign="right">{t('marketCapColumn')}</Th>
-                  <Th bg={useColorModeValue('gray.50', 'gray.700')} borderBottom="2px" borderColor="brand.primary" isNumeric textAlign="right">{t('totalSupplyColumn')}</Th>
-                  <Th bg={useColorModeValue('gray.50', 'gray.700')} borderBottom="2px" borderColor="brand.primary" isNumeric textAlign="right">{t('volumeColumn')}</Th>
-                  <Th bg={useColorModeValue('gray.50', 'gray.700')} borderBottom="2px" borderColor="brand.primary" isNumeric textAlign="right">{t('linksColumn')}</Th>
-                  <Th bg={useColorModeValue('gray.50', 'gray.700')} borderBottom="2px" borderColor="brand.primary"></Th>
+                  <Th
+                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    borderBottom="2px"
+                    borderColor="brand.primary"
+                  >
+                    {t('tokenColumn')}
+                  </Th>
+                  <Th
+                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    borderBottom="2px"
+                    borderColor="brand.primary"
+                    isNumeric
+                    textAlign="right"
+                  >
+                    {t('priceColumn')}
+                  </Th>
+                  <Th
+                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    borderBottom="2px"
+                    borderColor="brand.primary"
+                    isNumeric
+                    textAlign="right"
+                  >
+                    {t('change24hColumn')}
+                  </Th>
+                  <Th
+                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    borderBottom="2px"
+                    borderColor="brand.primary"
+                    isNumeric
+                    textAlign="right"
+                  >
+                    {t('marketCapColumn')}
+                  </Th>
+                  <Th
+                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    borderBottom="2px"
+                    borderColor="brand.primary"
+                    isNumeric
+                    textAlign="right"
+                  >
+                    {t('totalSupplyColumn')}
+                  </Th>
+                  <Th
+                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    borderBottom="2px"
+                    borderColor="brand.primary"
+                    isNumeric
+                    textAlign="right"
+                  >
+                    {t('volumeColumn')}
+                  </Th>
+                  <Th
+                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    borderBottom="2px"
+                    borderColor="brand.primary"
+                    isNumeric
+                    textAlign="right"
+                  >
+                    {t('linksColumn')}
+                  </Th>
+                  <Th
+                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    borderBottom="2px"
+                    borderColor="brand.primary"
+                  ></Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {marketTokens
                   .filter(token => {
                     // 移除逗号并转为数字，比较市值是否超过50,000
-                    const marketCapValue = parseFloat(token.marketCap.replace(/,/g, ''));
-                    return marketCapValue > 50000;
+                    const marketCapValue = parseFloat(
+                      token.marketCap.replace(/,/g, '')
+                    )
+                    return marketCapValue > 50000
                   })
                   .sort((a, b) => {
                     // 根据交易量排序（降序）
-                    const volumeA = parseFloat(a.volume24h.replace(/,/g, ''));
-                    const volumeB = parseFloat(b.volume24h.replace(/,/g, ''));
-                    return volumeB - volumeA;
+                    const volumeA = parseFloat(a.volume24h.replace(/,/g, ''))
+                    const volumeB = parseFloat(b.volume24h.replace(/,/g, ''))
+                    return volumeB - volumeA
                   })
                   .slice(0, 5)
                   .map(token => {
-                  const iconColor = useColorModeValue('gray.600', 'gray.400');
-                  const iconHoverColor = useColorModeValue('brand.primary', 'brand.light');
-                  const isPositiveChange = token.change24hValue > 0;
-                  const hoverBg = useColorModeValue('gray.50', 'gray.700');
-                  
-                  // 分享功能处理
-                  const handleShare = (token: any) => {
-                    if (navigator.share) {
-                      navigator.share({
-                        title: `${token.name} (${token.symbol})`,
-                        text: `${t('share')} ${token.name} ${t('token')}`,
-                        url: window.location.origin + `/market/${token.id}`
-                      })
-                      .catch((error) => console.log(`${t('share')} ${t('failed')}:`, error));
-                    } else {
-                      // 如果浏览器不支持，可以复制链接到剪贴板
-                      const url = window.location.origin + `/market/${token.id}`;
-                      navigator.clipboard.writeText(url)
-                        .then(() => alert(`${t('copySuccess')}`))
-                        .catch((error) => console.log(`${t('copy')} ${t('failed')}:`, error));
+                    const iconColor = useColorModeValue('gray.600', 'gray.400')
+                    const iconHoverColor = useColorModeValue(
+                      'brand.primary',
+                      'brand.light'
+                    )
+                    const isPositiveChange = token.change24hValue > 0
+                    const hoverBg = useColorModeValue('gray.50', 'gray.700')
+
+                    // 分享功能处理
+                    const handleShare = (token: any) => {
+                      if (navigator.share) {
+                        navigator
+                          .share({
+                            title: `${token.name} (${token.symbol})`,
+                            text: `${t('share')} ${token.name} ${t('token')}`,
+                            url: window.location.origin + `/market/${token.id}`,
+                          })
+                          .catch(error =>
+                            console.log(`${t('share')} ${t('failed')}:`, error)
+                          )
+                      } else {
+                        // 如果浏览器不支持，可以复制链接到剪贴板
+                        const url =
+                          window.location.origin + `/market/${token.id}`
+                        navigator.clipboard
+                          .writeText(url)
+                          .then(() => alert(`${t('copySuccess')}`))
+                          .catch(error =>
+                            console.log(`${t('copy')} ${t('failed')}:`, error)
+                          )
+                      }
                     }
-                  };
-                  
-                  return (
-                    <Tr 
-                      key={token.id} 
-                      _hover={{ bg: hoverBg }}
-                      transition="background-color 0.2s"
-                    >
-                      <Td>
-                        <HStack spacing={2} align="center">
-                          <Image 
-                            src={token.image} 
-                            alt={token.name}
-                            boxSize="40px"
-                            borderRadius="full"
-                            objectFit="cover"
-                            border="2px solid"
-                            borderColor="brand.light"
-                          />
-                          <Box>
-                            <Text 
-                              fontSize="lg" 
-                              fontWeight="bold" 
-                              color="brand.primary"
-                              lineHeight="1.2"
+
+                    return (
+                      <Tr
+                        key={token.id}
+                        _hover={{ bg: hoverBg }}
+                        transition="background-color 0.2s"
+                      >
+                        <Td>
+                          <HStack spacing={2} align="center">
+                            <Image
+                              src={token.image}
+                              alt={token.name}
+                              boxSize="40px"
+                              borderRadius="full"
+                              objectFit="cover"
+                              border="2px solid"
+                              borderColor="brand.light"
+                            />
+                            <Box>
+                              <Text
+                                fontSize="lg"
+                                fontWeight="bold"
+                                color="brand.primary"
+                                lineHeight="1.2"
+                              >
+                                {token.symbol}
+                              </Text>
+                              <Text
+                                fontSize="xs"
+                                color="gray.500"
+                                mt={0.5}
+                                noOfLines={1}
+                                maxW="150px"
+                              >
+                                {token.name}
+                              </Text>
+                            </Box>
+                          </HStack>
+                        </Td>
+                        <Td isNumeric fontWeight="bold">
+                          $ {token.price}
+                        </Td>
+                        <Td isNumeric>
+                          <Flex justify="flex-end">
+                            <Text
+                              fontWeight="bold"
+                              color={isPositiveChange ? 'green.500' : 'red.500'}
                             >
-                              {token.symbol}
+                              <Icon
+                                as={isPositiveChange ? FaArrowUp : FaArrowDown}
+                                boxSize="12px"
+                                mr={1}
+                              />
+                              {Math.abs(token.change24hValue)}%
                             </Text>
-                            <Text 
-                              fontSize="xs" 
-                              color="gray.500" 
-                              mt={0.5}
-                              noOfLines={1}
-                              maxW="150px"
+                          </Flex>
+                        </Td>
+                        <Td isNumeric>$ {token.marketCap}</Td>
+                        <Td isNumeric>{token.totalSupply}</Td>
+                        <Td isNumeric>$ {token.volume24h}</Td>
+                        <Td isNumeric>
+                          <HStack spacing={3} justify="flex-end">
+                            {token.website && (
+                              <Box
+                                as="a"
+                                href={token.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                color={iconColor}
+                                _hover={{ color: iconHoverColor }}
+                                transition="color 0.2s"
+                              >
+                                <Icon as={FaGlobe} boxSize="16px" />
+                              </Box>
+                            )}
+                            {token.twitter && (
+                              <Box
+                                as="a"
+                                href={token.twitter}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                color={iconColor}
+                                _hover={{ color: iconHoverColor }}
+                                transition="color 0.2s"
+                              >
+                                <Icon as={FaTwitter} boxSize="16px" />
+                              </Box>
+                            )}
+                            {token.telegram && (
+                              <Box
+                                as="a"
+                                href={token.telegram}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                color={iconColor}
+                                _hover={{ color: iconHoverColor }}
+                                transition="color 0.2s"
+                              >
+                                <Icon as={FaTelegram} boxSize="16px" />
+                              </Box>
+                            )}
+                            <Box
+                              as="button"
+                              onClick={() => handleShare(token)}
+                              color={iconColor}
+                              _hover={{ color: iconHoverColor }}
+                              transition="color 0.2s"
                             >
-                              {token.name}
-                            </Text>
-                          </Box>
-                        </HStack>
-                      </Td>
-                      <Td isNumeric fontWeight="bold">$ {token.price}</Td>
-                      <Td isNumeric>
-                        <Flex justify="flex-end">
-                          <Text 
-                            fontWeight="bold" 
-                            color={isPositiveChange ? "green.500" : "red.500"}
+                              <Icon as={FaShareAlt} boxSize="16px" />
+                            </Box>
+                          </HStack>
+                        </Td>
+                        <Td>
+                          <Button
+                            as={NextLink}
+                            href={`/market/${token.id}`}
+                            colorScheme="purple"
+                            size="sm"
+                            bg="brand.primary"
+                            _hover={{ bg: 'brand.light' }}
                           >
-                            <Icon as={isPositiveChange ? FaArrowUp : FaArrowDown} boxSize="12px" mr={1} />
-                            {Math.abs(token.change24hValue)}%
-                          </Text>
-                        </Flex>
-                      </Td>
-                      <Td isNumeric>$ {token.marketCap}</Td>
-                      <Td isNumeric>{token.totalSupply}</Td>
-                      <Td isNumeric>$ {token.volume24h}</Td>
-                      <Td isNumeric>
-                        <HStack spacing={3} justify="flex-end">
-                          {token.website && (
-                            <Box 
-                              as="a" 
-                              href={token.website} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              color={iconColor}
-                              _hover={{ color: iconHoverColor }}
-                              transition="color 0.2s"
-                            >
-                              <Icon as={FaGlobe} boxSize="16px" />
-                            </Box>
-                          )}
-                          {token.twitter && (
-                            <Box 
-                              as="a" 
-                              href={token.twitter} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              color={iconColor}
-                              _hover={{ color: iconHoverColor }}
-                              transition="color 0.2s"
-                            >
-                              <Icon as={FaTwitter} boxSize="16px" />
-                            </Box>
-                          )}
-                          {token.telegram && (
-                            <Box 
-                              as="a" 
-                              href={token.telegram} 
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              color={iconColor}
-                              _hover={{ color: iconHoverColor }}
-                              transition="color 0.2s"
-                            >
-                              <Icon as={FaTelegram} boxSize="16px" />
-                            </Box>
-                          )}
-                          <Box 
-                            as="button"
-                            onClick={() => handleShare(token)}
-                            color={iconColor}
-                            _hover={{ color: iconHoverColor }}
-                            transition="color 0.2s"
-                          >
-                            <Icon as={FaShareAlt} boxSize="16px" />
-                          </Box>
-                        </HStack>
-                      </Td>
-                      <Td>
-                        <Button 
-                          as={NextLink}
-                          href={`/market/${token.id}`}
-                          colorScheme="purple" 
-                          size="sm"
-                          bg="brand.primary"
-                          _hover={{ bg: 'brand.light' }}
-                        >
-                          {t('detail')}
-                        </Button>
-                      </Td>
-                    </Tr>
-                  );
-                })}
+                            {t('detail')}
+                          </Button>
+                        </Td>
+                      </Tr>
+                    )
+                  })}
               </Tbody>
             </Table>
           </TableContainer>
         </Box>
-        
+
         <Box textAlign="center" mt={8}>
           <Button
             as={NextLink}
@@ -997,7 +1163,8 @@ export default function HomePage() {
             colorScheme={'purple'}
             bg={'brand.primary'}
             _hover={{ bg: 'brand.light' }}
-            px={6}>
+            px={6}
+          >
             {t('tokenMarket')}
           </Button>
         </Box>
@@ -1009,14 +1176,13 @@ export default function HomePage() {
           <Flex
             direction={{ base: 'column', md: 'row' }}
             align={'center'}
-            justify={'space-between'}>
+            justify={'space-between'}
+          >
             <Stack spacing={4} mb={{ base: 8, md: 0 }} maxW={{ md: '50%' }}>
               <Heading color={'white'} size={'lg'}>
                 {t('readyToDeployQuestion')}
               </Heading>
-              <Text color={'whiteAlpha.800'}>
-                {t('readyToDeployDesc')}
-              </Text>
+              <Text color={'whiteAlpha.800'}>{t('readyToDeployDesc')}</Text>
             </Stack>
             <Button
               as={NextLink}
@@ -1027,19 +1193,19 @@ export default function HomePage() {
               color={'white'}
               px={8}
               _hover={{ bg: 'yellow.400' }}
-              rightIcon={<Icon as={FaRocket} />}>
+              rightIcon={<Icon as={FaRocket} />}
+            >
               {t('startDeploy')}
             </Button>
           </Flex>
         </Container>
       </Box>
     </Box>
-  );
+  )
 }
 
 const PlayIcon = createIcon({
   displayName: 'PlayIcon',
   viewBox: '0 0 58 58',
-  d:
-    'M28.9999 0.562988C13.3196 0.562988 0.562378 13.3202 0.562378 29.0005C0.562378 44.6808 13.3196 57.438 28.9999 57.438C44.6801 57.438 57.4374 44.6808 57.4374 29.0005C57.4374 13.3202 44.6801 0.562988 28.9999 0.562988ZM39.2223 30.272L23.5749 39.7247C23.3506 39.8591 23.0946 39.9314 22.8332 39.9342C22.5717 39.9369 22.3142 39.8701 22.0871 39.7406C21.86 39.611 21.6715 39.4234 21.5408 39.1969C21.4102 38.9705 21.3421 38.7133 21.3436 38.4519V19.5491C21.3421 19.2877 21.4102 19.0305 21.5408 18.8041C21.6715 18.5776 21.86 18.3899 22.0871 18.2604C22.3142 18.1308 22.5717 18.064 22.8332 18.0668C23.0946 18.0696 23.3506 18.1419 23.5749 18.2763L39.2223 27.729C39.4404 27.8619 39.6207 28.0486 39.7458 28.2713C39.8709 28.494 39.9366 28.7451 39.9366 29.0005C39.9366 29.2559 39.8709 29.507 39.7458 29.7297C39.6207 29.9523 39.4404 30.1391 39.2223 30.272Z',
-});
+  d: 'M28.9999 0.562988C13.3196 0.562988 0.562378 13.3202 0.562378 29.0005C0.562378 44.6808 13.3196 57.438 28.9999 57.438C44.6801 57.438 57.4374 44.6808 57.4374 29.0005C57.4374 13.3202 44.6801 0.562988 28.9999 0.562988ZM39.2223 30.272L23.5749 39.7247C23.3506 39.8591 23.0946 39.9314 22.8332 39.9342C22.5717 39.9369 22.3142 39.8701 22.0871 39.7406C21.86 39.611 21.6715 39.4234 21.5408 39.1969C21.4102 38.9705 21.3421 38.7133 21.3436 38.4519V19.5491C21.3421 19.2877 21.4102 19.0305 21.5408 18.8041C21.6715 18.5776 21.86 18.3899 22.0871 18.2604C22.3142 18.1308 22.5717 18.064 22.8332 18.0668C23.0946 18.0696 23.3506 18.1419 23.5749 18.2763L39.2223 27.729C39.4404 27.8619 39.6207 28.0486 39.7458 28.2713C39.8709 28.494 39.9366 28.7451 39.9366 29.0005C39.9366 29.2559 39.8709 29.507 39.7458 29.7297C39.6207 29.9523 39.4404 30.1391 39.2223 30.272Z',
+})
