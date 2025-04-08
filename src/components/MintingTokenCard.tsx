@@ -120,7 +120,7 @@ export default function MintingTokenCard({ token, currencyUnit = 'Pi' }: Minting
       }}
       position="relative"
     >      
-      <CardBody p={4}>
+      <CardBody p={{base:1,md:0,xl:4}}>
         <Stack spacing={3}>
           <HStack spacing={2} align="center">
             <Image 
@@ -153,7 +153,7 @@ export default function MintingTokenCard({ token, currencyUnit = 'Pi' }: Minting
             </Box>
           </HStack>
           
-          <Stack spacing={2}>
+          <Stack spacing={{base:1.5,xl:2}}>
             <HStack justify="space-between">
               <Text fontSize="xs" color={textColor}>{t('mintingAmount')}</Text>
               <Text fontWeight="bold" fontSize="sm">{token.target}</Text>

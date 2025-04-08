@@ -99,6 +99,8 @@ export default function TutorialsPage() {
                 justify="center"
                 flexDir="column"
                 color="white"
+                p={4}
+                textAlign={'center'}
               >
                 <Icon as={FaRocket} w={12} h={12} mb={3} />
                 <Text fontSize="xl" fontWeight="bold" color="white">
@@ -138,6 +140,8 @@ export default function TutorialsPage() {
                 justify="center"
                 flexDir="column"
                 color="white"
+                p={4}
+                textAlign={'center'}
               >
                 <Icon as={FaCoins} w={12} h={12} mb={3} />
                 <Text fontSize="xl" fontWeight="bold" color="white">
@@ -177,6 +181,8 @@ export default function TutorialsPage() {
                 justify="center"
                 flexDir="column"
                 color="white"
+                p={4}
+                textAlign={'center'}
               >
                 <Icon as={FaExchangeAlt} w={12} h={12} mb={3} />
                 <Text fontSize="xl" fontWeight="bold" color="white">
@@ -209,7 +215,7 @@ export default function TutorialsPage() {
         <Box id="deploy-tutorial" mt={16} mb={16} scrollMarginTop="100px">
           <Heading 
             as="h2" 
-            size="xl" 
+            size={{base:"md",md:"xl"}} 
             mb={6} 
             p={4} 
             bg="brand.primary" 
@@ -330,7 +336,7 @@ export default function TutorialsPage() {
         <Box id="mint-tutorial" mt={16} mb={16} scrollMarginTop="100px">
           <Heading 
             as="h2" 
-            size="xl" 
+            size={{base:"md",md:"xl"}} 
             mb={6} 
             p={4} 
             bg="teal.500" 
@@ -451,7 +457,7 @@ export default function TutorialsPage() {
         <Box id="trade-tutorial" mt={16} mb={16} scrollMarginTop="100px">
           <Heading 
             as="h2" 
-            size="xl" 
+            size={{base:"md",md:"xl"}} 
             mb={6} 
             p={4} 
             bg="orange.500" 

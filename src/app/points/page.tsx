@@ -248,16 +248,15 @@ export default function PointsPage() {
           boxShadow="lg"
         >
           <Grid 
-            templateColumns={{ base: "1fr", md: "2fr 1fr" }} 
+            templateColumns={{ base: "1fr", lg: "2fr 1fr" }} 
             gap={{ base: 4, md: 6 }}
-            height="100%"
+            height="auto"
           >
             {/* 左侧：用户信息和积分 */}
             <GridItem display="flex" flexDirection="column">
               <Flex 
                 direction={{ base: "column", sm: "row" }} 
                 alignItems={{ base: "center", sm: "flex-start" }}
-                spacing={{ base: 3, md: 6 }} 
                 mb={{ base: 3, md: 4 }}
               >
                 {/* 用户头像和名称 */}
@@ -275,7 +274,7 @@ export default function PointsPage() {
                 
                 <VStack 
                   align={{ base: "center", sm: "flex-start" }} 
-                  spacing={1}
+                  spacing={0}
                   w="full"
                 >
                   <Text 
@@ -291,8 +290,10 @@ export default function PointsPage() {
                   {/* 钱包地址显示 - 调整颜色和格式 */}
                   <Flex 
                     mt={1} 
-                    direction={{ base: "column", md: "row" }}
-                    spacing={{ base: 2, md: 2 }}
+                    direction="row"
+                    flexWrap="wrap"
+                    gap={{base:3,sm:2,md:2}}
+                    justifyContent={{base:"center",sm:"flex-start"}}
                     alignItems="center"
                     width="100%"
                   >
@@ -303,7 +304,6 @@ export default function PointsPage() {
                       borderRadius="full"
                       borderWidth="1px"
                       borderColor="whiteAlpha.400"
-                      mb={{ base: 2, md: 0 }}
                       mr={{ base: 0, md: 2 }}
                     >
                       <Icon as={FaWallet} color="yellow.300" boxSize={4} />
@@ -452,19 +452,19 @@ export default function PointsPage() {
                   </ModalHeader>
                   <ModalCloseButton color="white" />
                   <ModalBody p={4}>
-                    <Box overflowX="auto">
-                      <Table variant="simple">
+                    <Box overflow="auto">
+                      <Table variant="simple" whiteSpace="nowrap">
                         <Thead>
                           <Tr>
-                            <Th>{t('activity')}</Th>
-                            <Th isNumeric>{t('pointsEarned')}</Th>
-                            <Th>{t('date')}</Th>
+                            <Th textAlign="left">{t('activity')}</Th>
+                            <Th isNumeric textAlign="center">{t('pointsEarned')}</Th>
+                            <Th textAlign="right">{t('date')}</Th>
                           </Tr>
                         </Thead>
                         <Tbody>
                           {user.pointsHistory.map((entry) => (
                             <Tr key={entry.id}>
-                              <Td>
+                              <Td textAlign="left" fontSize="sm" fontWeight="medium">
                                 <HStack>
                                   {entry.activity === 'checkedIn' && <Icon as={FaCheck} color="green.500" />}
                                   {entry.activity === 'inviteAccepted' && <Icon as={FaUserPlus} color="blue.500" />}
@@ -475,9 +475,9 @@ export default function PointsPage() {
                                 </HStack>
                               </Td>
                               <Td isNumeric>
-                                <Text color="green.500" fontWeight="bold">+{entry.points}</Text>
+                                <Text color="green.500" fontWeight="bold"  textAlign="center">+{entry.points}</Text>
                               </Td>
-                              <Td>{formatDate(entry.date)}</Td>
+                              <Td textAlign="right" fontSize="sm" fontWeight="medium">{formatDate(entry.date)}</Td>
                             </Tr>
                           ))}
                         </Tbody>
@@ -620,8 +620,8 @@ export default function PointsPage() {
           boxShadow="sm"
           bg={bgColor}
         >
-          <CardBody p={6}>
-            <VStack spacing={6} align="stretch">
+          <CardBody p={{base:0,sm:6}}>
+            <VStack spacing={5} align="stretch">
               <Flex justifyContent="space-between" alignItems={{ base: "flex-start", md: "center" }} flexDirection={{ base: "column", md: "row" }}>
                 <HStack spacing={3} mb={{ base: 3, md: 0 }}>
                   <Icon as={FaUserPlus} color={accentColor} boxSize={5} />
@@ -738,10 +738,10 @@ export default function PointsPage() {
             color="white"
           >
             <HStack>
-              <Icon as={FaTrophy} color="white" boxSize={6} />
-              <Heading size="md" color="white">{t('leaderboard')}</Heading>
+              <Icon as={FaTrophy} color="white" boxSize={{base:5,sm:6}} />
+              <Heading size={{base:"sm",sm:"md"}} color="white">{t('leaderboard')}</Heading>
               {user.rank && (
-                <Badge ml="auto" colorScheme="yellow" px={2} py={1}>
+                <Badge ml="auto" colorScheme="yellow" px={2} py={1} fontSize={{base:"xs",sm:"sm"}}>
                   {t('yourRank')}: #{user.rank}
                 </Badge>
               )}

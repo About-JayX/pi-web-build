@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 
 const ListHeader = ({ children }: { children: React.ReactNode }) => {
   return (
-    <Text fontWeight='500' fontSize='lg' mb={2}>
+    <Text fontWeight='600' fontSize='lg' mb={{base:1,md:2}}>
       {children}
     </Text>
   );
@@ -65,21 +65,21 @@ export default function Footer() {
       color={useColorModeValue('gray.700', 'gray.200')}>
       <Container as={Stack} maxW='container.xl' py={10}>
         <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={8}>
-          <Stack align='flex-start'>
+          <Stack align='flex-start' spacing={{base:1,md:2}}>
             <ListHeader>{t('product')}</ListHeader>
             <Link as={NextLink} href='/mint'>{t('mint')}</Link>
             <Link as={NextLink} href='/market'>{t('market')}</Link>
             <Link as={NextLink} href='/deploy'>{t('deploy')}</Link>
           </Stack>
 
-          <Stack align='flex-start'>
+          <Stack align='flex-start' spacing={{base:1,md:2}}>
             <ListHeader>{t('platform')}</ListHeader>
             <Link href='https://x.com/X_Pi_S' target="_blank" rel="noopener noreferrer">{t('about')}</Link>
             <Link href='https://x.com/X_Pi_S' target="_blank" rel="noopener noreferrer">{t('team')}</Link>
             <Link href='https://x.com/X_Pi_S' target="_blank" rel="noopener noreferrer">{t('contact')}</Link>
           </Stack>
 
-          <Stack align='flex-start'>
+          <Stack align='flex-start' spacing={{base:1,md:2}}>
             <ListHeader>{t('support')}</ListHeader>
             <Link as={NextLink} href='/docs/api'>{t('apiDocs')}</Link>
             <Link as={NextLink} href='/docs/tutorials'>{t('tutorials')}</Link>
@@ -113,9 +113,9 @@ export default function Footer() {
           maxW='container.xl'
           py={4}
           direction={{ base: 'column', md: 'row' }}
-          gap={4}
-          justify={{ md: 'space-between' }}
-          align={{ md: 'center' }}>
+          gap={2}
+          justify={{base: 'center', md: 'space-between' }}
+          align={{base: 'center', md: 'center' }}>
           <Text>{t('copyright')}</Text>
           <Text>{t('builtBy')}</Text>
         </Container>

@@ -80,7 +80,7 @@ export default function PrivacyPolicyPage() {
 
         {/* 简介 */}
         <Card bg={cardBg} shadow="md" borderRadius="lg" mb={8}>
-          <CardBody>
+          <CardBody p={{base:0,sm:6}}>
             <HStack mb={6}>
               <Icon as={FaShieldAlt} boxSize={8} color="brand.primary" />
               <Heading size="lg">{t('privacySummary')}</Heading>
@@ -351,7 +351,7 @@ export default function PrivacyPolicyPage() {
 
         {/* 联系我们 */}
         <Card bg={cardBg} shadow="md" borderRadius="lg">
-          <CardBody>
+          <CardBody p={{base:0,sm:6}}>
             <Heading size="lg" color="brand.primary" mb={4}>{t('contactUs')}</Heading>
             <Text mb={4}>
               {t('contactUsText')}

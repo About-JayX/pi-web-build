@@ -195,7 +195,7 @@ export default function Announcement() {
             <TabPanels>
               {availableLanguages.map((lang) => (
                 <TabPanel key={lang} p={0}>
-                  <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4}>
+                  <Box border="1px solid" borderColor="gray.200" borderRadius="md" p={4} maxH="360px" overflowY="auto">
                     {renderAnnouncementContent(lang)}
                   </Box>
                 </TabPanel>

@@ -225,6 +225,7 @@ export default function SwapPage() {
       mb={4}
       boxShadow="sm"
       display={showSettings ? 'block' : 'none'}
+      p={0}
     >
       <CardBody>
         <VStack align="stretch" spacing={4}>
@@ -316,13 +317,13 @@ export default function SwapPage() {
             borderColor={borderColor}
             overflow="hidden"
           >
-            <CardBody>
+            <CardBody p={0}>
               <VStack spacing={4} align="stretch">
                 <Flex justify="space-between" align="center">
                   <Text fontWeight="bold" fontSize="lg">{t('swap')}</Text>
                   <IconButton
                     aria-label="Settings"
-                    icon={<SettingsIcon />}
+                    icon={<SettingsIcon w={4} h={4}/>}
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowSettings(!showSettings)}
@@ -359,6 +360,8 @@ export default function SwapPage() {
                         border="none"
                         fontSize="xl"
                         fontWeight="bold"
+                        pl={0}
+                        pr={16}
                         _focus={{
                           boxShadow: "none",
                         }}
@@ -370,6 +373,7 @@ export default function SwapPage() {
                           onClick={handleMaxAmount}
                           colorScheme="purple"
                           variant="ghost"
+                          ml={3}
                         >
                           {t('max')}
                         </Button>
@@ -427,6 +431,7 @@ export default function SwapPage() {
                       fontWeight="bold"
                       flex="1"
                       mr={2}
+                      px={0}
                       _focus={{
                         boxShadow: "none",
                       }}
