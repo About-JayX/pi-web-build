@@ -118,15 +118,9 @@ export default function HomePage() {
           align={'center'}
           spacing={{ base: 8, xl: 10 }}
           py={{ base: 20, md: 28 }}
-<<<<<<< HEAD
           pt={{base:10,md:20}}
           direction={{ base: 'column', lg: 'row' }}>
           <Stack flex={1} spacing={{ base: 5, md:5,xl:6 }}>
-=======
-          direction={{ base: 'column', md: 'row' }}
-        >
-          <Stack flex={1} spacing={{ base: 5, md: 10 }}>
->>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
             <Heading
               lineHeight={1.2}
               fontWeight={600}
@@ -173,13 +167,9 @@ export default function HomePage() {
                 {t('heroTitlePart3')}
               </Text>
             </Heading>
-<<<<<<< HEAD
             <Text color={'gray.500'} fontSize={{ base: "md", md: "md", xl: "lg" }}>
               {t('heroDescription')}
             </Text>
-=======
-            <Text color={'gray.500'}>{t('heroDescription')}</Text>
->>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
             <Stack
               spacing={{ base: 4, sm: 6 }}
               direction={{ base: 'column', sm: 'row' }}
@@ -266,12 +256,8 @@ export default function HomePage() {
                 zIndex={2}
               >
                 <Text
-<<<<<<< HEAD
                   lineHeight={1.6}
                   fontSize={{ base: "2xl", md: "4xl", xl: "5xl" }}
-=======
-                  fontSize={{ base: '3xl', md: '5xl' }}
->>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                   fontWeight="900"
                   letterSpacing="wider"
                   textAlign="center"
@@ -293,7 +279,6 @@ export default function HomePage() {
                 >
                   {t('mintDescription')}
                 </Text>
-<<<<<<< HEAD
                 
                 <HStack 
                   spacing={{base:2,md:4}}
@@ -306,12 +291,6 @@ export default function HomePage() {
                     fontSize={{base: "md",md:"lg"}}
                     textAlign="center"
                   >
-=======
-
-                <HStack spacing={4} mt={4}>
-                  <Icon as={FaRocket} color="brand.secondary" w={6} h={6} />
-                  <Text color="whiteAlpha.900" fontWeight="bold" fontSize="lg">
->>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                     {t('viewMintingTokens')}
                   </Text>
                   <Icon as={FaRocket} color="brand.secondary" w={6} h={6} />
@@ -366,16 +345,7 @@ export default function HomePage() {
               <Text fontWeight="bold" fontSize={{base:"md",lg:"lg"}} lineHeight={1.3} textAlign="center" mb={1}>
                 {t('totalMintedTokens')}
               </Text>
-<<<<<<< HEAD
               <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('blue.600', 'blue.300')}>
-=======
-              <Text
-                fontSize="3xl"
-                fontWeight="bold"
-                textAlign="center"
-                color={useColorModeValue('blue.600', 'blue.300')}
-              >
->>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                 {platformStats.tokensCount}
               </Text>
             </Box>
@@ -406,16 +376,7 @@ export default function HomePage() {
               <Text fontWeight="bold" fontSize={{base:"md",lg:"lg"}} lineHeight={1.3} textAlign="center" mb={1}>
                 {t('tradingVolume24h')}
               </Text>
-<<<<<<< HEAD
               <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('green.600', 'green.300')}>
-=======
-              <Text
-                fontSize="3xl"
-                fontWeight="bold"
-                textAlign="center"
-                color={useColorModeValue('green.600', 'green.300')}
-              >
->>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                 {platformStats.tradingVolume24h}
               </Text>
             </Box>
@@ -446,16 +407,7 @@ export default function HomePage() {
               <Text fontWeight="bold" fontSize={{base:"md",lg:"lg"}} lineHeight={1.3} textAlign="center" mb={1}>
                 {t('activeUsers')}
               </Text>
-<<<<<<< HEAD
               <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('purple.600', 'purple.300')}>
-=======
-              <Text
-                fontSize="3xl"
-                fontWeight="bold"
-                textAlign="center"
-                color={useColorModeValue('purple.600', 'purple.300')}
-              >
->>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                 {platformStats.activeUsers}
               </Text>
             </Box>
@@ -486,16 +438,7 @@ export default function HomePage() {
               <Text fontWeight="bold" fontSize={{base:"md",lg:"lg"}} lineHeight={1.3} textAlign="center" mb={1}>
                 {t('totalLockedValue')}
               </Text>
-<<<<<<< HEAD
               <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('orange.600', 'orange.300')}>
-=======
-              <Text
-                fontSize="3xl"
-                fontWeight="bold"
-                textAlign="center"
-                color={useColorModeValue('orange.600', 'orange.300')}
-              >
->>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                 {platformStats.totalLockedValue}
               </Text>
             </Box>
@@ -611,15 +554,11 @@ export default function HomePage() {
 
               {/* 内容部分 */}
               <VStack spacing={3} align="center">
-<<<<<<< HEAD
                 <Heading 
                   fontSize={{base:"lg",lg:"xl"}} 
                   fontWeight="bold"
                   color="brand.primary"
                 >
-=======
-                <Heading fontSize="xl" fontWeight="bold" color="brand.primary">
->>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                   {t('easyMinting')}
                 </Heading>
                 <Text
@@ -676,15 +615,11 @@ export default function HomePage() {
 
               {/* 内容部分 */}
               <VStack spacing={3} align="center">
-<<<<<<< HEAD
                 <Heading 
                   fontSize={{base:"lg",lg:"xl"}} 
                   fontWeight="bold"
                   color="teal.500"
                 >
-=======
-                <Heading fontSize="xl" fontWeight="bold" color="teal.500">
->>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                   {t('safeTransparent')}
                 </Heading>
                 <Text
@@ -741,15 +676,11 @@ export default function HomePage() {
 
               {/* 内容部分 */}
               <VStack spacing={3} align="center">
-<<<<<<< HEAD
                 <Heading 
                   fontSize={{base:"lg",lg:"xl"}} 
                   fontWeight="bold"
                   color="orange.500"
                 >
-=======
-                <Heading fontSize="xl" fontWeight="bold" color="orange.500">
->>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                   {t('tokenMarketplace')}
                 </Heading>
                 <Text
@@ -783,13 +714,9 @@ export default function HomePage() {
                 }
               >
                 <Feature
-<<<<<<< HEAD
                   icon={
                     <Icon as={FaRocket} color={'yellow.500'} w={4} h={4} />
                   }
-=======
-                  icon={<Icon as={FaRocket} color={'yellow.500'} w={5} h={5} />}
->>>>>>> c14baf1c00fe6c2a8c8ee2808f3bf2a372baebfd
                   iconBg={useColorModeValue('yellow.100', 'yellow.900')}
                   text={t('quickDeploy')}
                 />
