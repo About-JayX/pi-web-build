@@ -114,5 +114,69 @@ export const useProgram = () => {
     // 等待交易确认
     await conn.confirmTransaction(tx, 'confirmed')
   }
-  return { createToken, mintToken }
+
+  //
+  const returnToken = async (
+    mintAddress: string,
+    amount: number,
+    feeAccountAddress: string
+  ) => {
+    try {
+      // 转换为 PublicKey 对象
+      const mintPublicKey = new PublicKey(mintAddress)
+      const feeAccount = new PublicKey(feeAccountAddress)
+      const key = new PublicKey(publicKey)
+
+      // 查找 FairCurve PDA
+      const [fairCurvePda] = PublicKey.findProgramAddressSync(
+        [FAIR_CURVE_SEED, mintPublicKey.toBuffer()],
+        programId
+      )
+
+      // 找到代币保管库账户
+      const tokenVault = await getAssociatedTokenAddress(
+        mintPublicKey,
+        fairCurvePda,
+        true
+      )
+
+      // 找到用户的代币账户
+      const userTokenAccount = await getAssociatedTokenAddress(
+        mintPublicKey,
+        key
+      )
+
+      // 调用return_token方法
+      const tx = await program.methods
+        .returnToken(new BN(amount))
+        .accounts({
+          signer: publicKey,
+          mint: mintPublicKey,
+          fairCurve: fairCurvePda,
+          tokenSender: userTokenAccount,
+          tokenVault: tokenVault,
+          feeAccount: feeAccount,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc()
+
+      // 等待交易确认
+      await conn.confirmTransaction(tx, 'confirmed')
+
+      return {
+        success: true,
+        signature: tx,
+        message: `代币返还成功! 数量: ${amount / 1_000_000}`,
+      }
+    } catch (error) {
+      console.error('代币返还失败:', error)
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        message: '代币返还失败',
+      }
+    }
+  }
+  return { createToken, mintToken, returnToken }
 }
