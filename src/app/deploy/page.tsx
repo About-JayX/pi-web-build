@@ -565,7 +565,9 @@ export default function DeployPage() {
   const [totalSupplyTabIndex, setTotalSupplyTabIndex] = useState(0)
   const [targetAmountTabIndex, setTargetAmountTabIndex] = useState(0)
   const totalSupplyValues = ['314000000', '1000000000']
-  const { createToken, mintToken } = useProgram()
+  const { mintToken } = useProgram()
+  const [tokenSymbol, setTokenSymbol] = useState('')
+  const [tokenName, setTokenName] = useState('')
   // 设置当前网络
   // 的计价单位
   const currencyUnit = useMemo(() => {
@@ -745,7 +747,7 @@ export default function DeployPage() {
           mx="auto"
           width="100%"
         >
-          <CardBody p={{base:2,sm:6}}>
+          <CardBody p={{ base: 2, sm: 6 }}>
             <Box width="100%">
               <VStack spacing={{ base: 4, md: 6 }} align="stretch">
                 <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
@@ -754,6 +756,8 @@ export default function DeployPage() {
                       {t('tokenSymbol')}
                     </FormLabel>
                     <Input
+                      value={tokenSymbol}
+                      onChange={e => setTokenSymbol(e.target.value)}
                       placeholder=""
                       bg={inputBg}
                       borderColor={borderColor}
@@ -767,6 +771,8 @@ export default function DeployPage() {
                       {t('tokenName')}
                     </FormLabel>
                     <Input
+                      value={tokenName}
+                      onChange={e => setTokenName(e.target.value)}
                       placeholder=""
                       bg={inputBg}
                       borderColor={borderColor}

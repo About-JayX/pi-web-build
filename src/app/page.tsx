@@ -117,10 +117,9 @@ export default function HomePage() {
           align={'center'}
           spacing={{ base: 8, md: 10 }}
           py={{ base: 20, md: 28 }}
-          pt={{ base: 10, md: 20 }}
-          direction={{ base: 'column', lg: 'row' }}
-        >
-          <Stack flex={1} spacing={{ base: 5, md: 5, xl: 6 }}>
+          pt={{base:10,md:20}}
+          direction={{ base: 'column', lg: 'row' }}>
+          <Stack flex={1} spacing={{ base: 5, md:5,xl:6 }}>
             <Heading
               lineHeight={1.1}
               fontWeight={600}
@@ -168,10 +167,7 @@ export default function HomePage() {
                 {t('heroTitlePart3')}
               </Text>
             </Heading>
-            <Text
-              color={'gray.500'}
-              fontSize={{ base: 'md', md: 'md', xl: 'lg' }}
-            >
+            <Text color={'gray.500'} fontSize={{ base: "md", md: "md", xl: "lg" }}>
               {t('heroDescription')}
             </Text>
             <Stack
@@ -261,7 +257,7 @@ export default function HomePage() {
               >
                 <Text
                   lineHeight={1.6}
-                  fontSize={{ base: '2xl', md: '4xl', xl: '5xl' }}
+                  fontSize={{ base: "2xl", md: "4xl", xl: "5xl" }}
                   fontWeight="900"
                   letterSpacing="wider"
                   textAlign="center"
@@ -283,13 +279,16 @@ export default function HomePage() {
                 >
                   {t('mintDescription')}
                 </Text>
-
-                <HStack spacing={{ base: 2, md: 4 }} mt={{ base: 1, md: 6 }}>
+                
+                <HStack 
+                  spacing={{base:2,md:4}}
+                  mt={{base:1,md:6}}
+                >
                   <Icon as={FaRocket} color="brand.secondary" w={6} h={6} />
-                  <Text
-                    color="whiteAlpha.900"
-                    fontWeight="bold"
-                    fontSize={{ base: 'md', md: 'lg' }}
+                  <Text 
+                    color="whiteAlpha.900" 
+                    fontWeight="bold" 
+                    fontSize={{base: "md",md:"lg"}}
                     textAlign="center"
                   >
                     {t('viewMintingTokens')}
@@ -346,12 +345,7 @@ export default function HomePage() {
               <Text fontWeight="bold" fontSize="lg" textAlign="center" mb={1}>
                 {t('totalMintedTokens')}
               </Text>
-              <Text
-                fontSize={{ base: '2xl', lg: '3xl' }}
-                fontWeight="bold"
-                textAlign="center"
-                color={useColorModeValue('blue.600', 'blue.300')}
-              >
+              <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('blue.600', 'blue.300')}>
                 {platformStats.tokensCount}
               </Text>
             </Box>
@@ -382,12 +376,7 @@ export default function HomePage() {
               <Text fontWeight="bold" fontSize="lg" textAlign="center" mb={1}>
                 {t('tradingVolume24h')}
               </Text>
-              <Text
-                fontSize={{ base: '2xl', lg: '3xl' }}
-                fontWeight="bold"
-                textAlign="center"
-                color={useColorModeValue('green.600', 'green.300')}
-              >
+              <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('green.600', 'green.300')}>
                 {platformStats.tradingVolume24h}
               </Text>
             </Box>
@@ -418,12 +407,7 @@ export default function HomePage() {
               <Text fontWeight="bold" fontSize="lg" textAlign="center" mb={1}>
                 {t('activeUsers')}
               </Text>
-              <Text
-                fontSize={{ base: '2xl', lg: '3xl' }}
-                fontWeight="bold"
-                textAlign="center"
-                color={useColorModeValue('purple.600', 'purple.300')}
-              >
+              <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('purple.600', 'purple.300')}>
                 {platformStats.activeUsers}
               </Text>
             </Box>
@@ -454,12 +438,7 @@ export default function HomePage() {
               <Text fontWeight="bold" fontSize="lg" textAlign="center" mb={1}>
                 {t('totalLockedValue')}
               </Text>
-              <Text
-                fontSize={{ base: '2xl', lg: '3xl' }}
-                fontWeight="bold"
-                textAlign="center"
-                color={useColorModeValue('orange.600', 'orange.300')}
-              >
+              <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('orange.600', 'orange.300')}>
                 {platformStats.totalLockedValue}
               </Text>
             </Box>
@@ -575,8 +554,8 @@ export default function HomePage() {
 
               {/* 内容部分 */}
               <VStack spacing={3} align="center">
-                <Heading
-                  fontSize={{ base: 'lg', lg: 'xl' }}
+                <Heading 
+                  fontSize={{base:"lg",lg:"xl"}} 
                   fontWeight="bold"
                   color="brand.primary"
                 >
@@ -636,8 +615,8 @@ export default function HomePage() {
 
               {/* 内容部分 */}
               <VStack spacing={3} align="center">
-                <Heading
-                  fontSize={{ base: 'lg', lg: 'xl' }}
+                <Heading 
+                  fontSize={{base:"lg",lg:"xl"}} 
                   fontWeight="bold"
                   color="teal.500"
                 >
@@ -697,8 +676,8 @@ export default function HomePage() {
 
               {/* 内容部分 */}
               <VStack spacing={3} align="center">
-                <Heading
-                  fontSize={{ base: 'lg', lg: 'xl' }}
+                <Heading 
+                  fontSize={{base:"lg",lg:"xl"}} 
                   fontWeight="bold"
                   color="orange.500"
                 >
@@ -735,7 +714,9 @@ export default function HomePage() {
                 }
               >
                 <Feature
-                  icon={<Icon as={FaRocket} color={'yellow.500'} w={4} h={4} />}
+                  icon={
+                    <Icon as={FaRocket} color={'yellow.500'} w={4} h={4} />
+                  }
                   iconBg={useColorModeValue('yellow.100', 'yellow.900')}
                   text={t('quickDeploy')}
                 />
