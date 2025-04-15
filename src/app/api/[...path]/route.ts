@@ -2,11 +2,25 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic' // 禁用路由缓存
 
+// 处理路径的辅助函数
+function processPath(pathname: string): string {
+  // 移除开头的 /api
+  let targetPath = pathname.replace(/^\/api/, '')
+
+  // 如果路径为空，设置为根路径
+  if (!targetPath) {
+    targetPath = '/'
+  }
+
+  return targetPath
+}
+
 export async function GET(request: NextRequest) {
   console.log('=== API Route GET triggered ===')
   const pathname = request.nextUrl.pathname
   console.log('Pathname:', pathname)
 
+  const targetPath = processPath(pathname)
   // 移除 /api 前缀
   const targetUrl = `https://fairmint.piweb3.xyz${targetPath}`
 
@@ -54,6 +68,7 @@ export async function POST(request: NextRequest) {
   const pathname = request.nextUrl.pathname
   console.log('Pathname:', pathname)
 
+  const targetPath = processPath(pathname)
   // 移除 /api 前缀
   const targetUrl = `https://fairmint.piweb3.xyz${targetPath}`
 
@@ -100,7 +115,7 @@ export async function POST(request: NextRequest) {
 }
 
 // 添加 OPTIONS 处理
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS(_request: NextRequest) {
   return new NextResponse(null, {
     status: 204,
     headers: {

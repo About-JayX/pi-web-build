@@ -80,10 +80,16 @@ const TokenParametersSection = ({
   const { t } = useTranslation()
 
   // 当选项改变时通知父组件
-  const currentTotalSupply = totalSupplyOptions[totalSupplyTabIndex]
+  const currentTotalSupply =
+    totalSupplyOptions[totalSupplyTabIndex] || totalSupplyOptions[0]
   const currentTargetAmountWithUnit =
-    targetAmountOptionsMap[currentTotalSupply][targetAmountTabIndex]
-  const currentTargetAmount = currentTargetAmountWithUnit?.split(' ')[0] || '0'
+    targetAmountOptionsMap[currentTotalSupply]?.[targetAmountTabIndex] ||
+    targetAmountOptionsMap[currentTotalSupply]?.[0]
+
+  // 安全地提取数字部分
+  const currentTargetAmount = currentTargetAmountWithUnit
+    ? currentTargetAmountWithUnit.split(' ')[0]
+    : '0'
 
   useEffect(() => {
     if (onValuesChange) {
@@ -104,11 +110,16 @@ const TokenParametersSection = ({
 
   // 计算代币单价
   const getTokenPrice = (totalSupply: string, targetAmount: string) => {
+    if (!totalSupply || !targetAmount) return '0'
+
     const supply = parseFloat(totalSupply)
-    const amount = parseFloat(targetAmount.split(' ')[0])
+    const amountParts = targetAmount.split(' ')
+    const amount = parseFloat(amountParts[0])
+
     if (isNaN(supply) || isNaN(amount) || amount === 0) {
       return '0'
     }
+
     return (supply / 2 / amount).toLocaleString('en-US', {
       maximumFractionDigits: 8,
     })
@@ -594,7 +605,9 @@ export default function DeployPage() {
         name: tokenName,
         symbol: tokenSymbol,
         logo: tokenIcon,
-        init_liquidity: parseFloat(selectedValues.targetAmount),
+        init_liquidity: selectedValues.targetAmount,
+        total_supply: selectedValues.totalSupply,
+        description: '测试',
       }
 
       const result = await TokenAPI.createToken(params)

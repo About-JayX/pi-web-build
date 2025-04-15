@@ -9,14 +9,14 @@ const nextConfig = {
     // 在构建时忽略 TypeScript 错误
     ignoreBuildErrors: true,
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: '/api/:path*',
-      },
-    ]
-  },
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/api/:path*',
+  //       destination: 'http://192.168.1.97:8888/:path*',
+  //     },
+  //   ]
+  // },
 }
 
 module.exports = nextConfig

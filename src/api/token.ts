@@ -14,8 +14,10 @@ export interface Token {
 export interface CreateTokenParams {
   name: string
   symbol: string
-  init_liquidity: number
   logo: File
+  init_liquidity: string
+  total_supply: string
+  description: string
 }
 
 /**
@@ -35,11 +37,12 @@ export const TokenAPI = {
    */
   createToken: (data: CreateTokenParams): Promise<Token> => {
     const formData = new FormData()
-    formData.append('name[0]', data.name)
-    formData.append('symbol[0]', data.symbol)
-    formData.append('init_liquidity[0]', data.init_liquidity.toString())
-    formData.append('logo', data.logo)
-
+    formData.append('name', data.name)
+    formData.append('symbol', data.symbol)
+    formData.append('init_liquidity', 50 * 1e9)
+    formData.append('total_supply', Number(data.total_supply) * 1e6)
+    formData.append('file', data.logo)
+    formData.append('description', data.description)
     return request.post('/token/create', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',

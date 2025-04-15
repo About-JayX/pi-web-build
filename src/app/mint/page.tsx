@@ -40,9 +40,6 @@ import {
   FaList,
   FaSort,
   FaSearch,
-  FaGlobe,
-  FaTwitter,
-  FaTelegram,
   FaShareAlt,
   FaFileContract,
   FaChevronLeft,
@@ -56,6 +53,22 @@ import { useNetwork } from '@/contexts/NetworkContext'
 import MintingTokenCard from '@/components/MintingTokenCard'
 import { useTranslation } from 'react-i18next'
 import { useAppSelector } from '@/store/hooks'
+
+interface MintToken {
+  id: number
+  name: string
+  symbol: string
+  address: string
+  totalSupply: string
+  participants: number
+  progress: number
+  image: string
+  target: string
+  raised: string
+  presaleRate: string
+  created_at: string
+  deployedAt?: number
+}
 
 // 排序指示器组件
 function SortIndicator({
@@ -90,20 +103,17 @@ function TokenListView({
   sortColumn,
   sortDirection,
   onSort,
-  currencyUnit,
 }: {
-  tokens: any[]
+  tokens: MintToken[]
   sortColumn: string
   sortDirection: 'asc' | 'desc'
   onSort: (column: string) => void
-  currencyUnit?: string
 }) {
   const router = useRouter()
   const bg = useColorModeValue('white', 'gray.800')
   const hoverBg = useColorModeValue('gray.50', 'gray.700')
   const thBg = useColorModeValue('gray.50', 'gray.700')
   const thHoverBg = useColorModeValue('gray.100', 'gray.600')
-  const textColor = useColorModeValue('gray.600', 'gray.400')
   const iconColor = useColorModeValue('gray.600', 'gray.400')
   const iconHoverColor = useColorModeValue('brand.primary', 'brand.light')
   const toast = useToast()
@@ -123,7 +133,7 @@ function TokenListView({
   }
 
   // 分享功能处理
-  const handleShare = (token: any) => {
+  const handleShare = (token: MintToken) => {
     if (navigator.share) {
       navigator
         .share({
@@ -234,7 +244,6 @@ function TokenListView({
               key={token.id}
               _hover={{ bg: hoverBg, cursor: 'pointer' }}
               onClick={e => {
-                // 防止点击链接和按钮时触发行的点击事件
                 if (
                   (e.target as HTMLElement).tagName !== 'A' &&
                   !(e.target as HTMLElement).closest('a') &&
@@ -278,7 +287,7 @@ function TokenListView({
                 </HStack>
               </Td>
               <Td>
-                {token.contractAddress && (
+                {token.address && (
                   <Box
                     as="button"
                     px={2}
@@ -290,10 +299,10 @@ function TokenListView({
                     bg="gray.50"
                     border="1px solid"
                     borderColor="gray.200"
-                    title={token.contractAddress}
+                    title={token.address}
                     cursor="pointer"
                     width="fit-content"
-                    onClick={() => copyContractAddress(token.contractAddress)}
+                    onClick={() => copyContractAddress(token.address)}
                     _hover={{
                       bg: 'gray.100',
                       borderColor: 'brand.primary',
@@ -301,7 +310,7 @@ function TokenListView({
                     transition="all 0.2s"
                   >
                     <Icon as={FaFileContract} mr={1} fontSize="10px" />
-                    {formatContractAddress(token.contractAddress)}
+                    {formatContractAddress(token.address)}
                   </Box>
                 )}
               </Td>
@@ -338,45 +347,6 @@ function TokenListView({
               </Td>
               <Td>
                 <HStack spacing={3} justify="center">
-                  {token.website && (
-                    <Box
-                      as="a"
-                      href={token.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      color={iconColor}
-                      _hover={{ color: iconHoverColor }}
-                      transition="color 0.2s"
-                    >
-                      <Icon as={FaGlobe} boxSize="16px" />
-                    </Box>
-                  )}
-                  {token.twitter && (
-                    <Box
-                      as="a"
-                      href={token.twitter}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      color={iconColor}
-                      _hover={{ color: iconHoverColor }}
-                      transition="color 0.2s"
-                    >
-                      <Icon as={FaTwitter} boxSize="16px" />
-                    </Box>
-                  )}
-                  {token.telegram && (
-                    <Box
-                      as="a"
-                      href={token.telegram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      color={iconColor}
-                      _hover={{ color: iconHoverColor }}
-                      transition="color 0.2s"
-                    >
-                      <Icon as={FaTelegram} boxSize="16px" />
-                    </Box>
-                  )}
                   <Box
                     as="button"
                     onClick={() => handleShare(token)}
@@ -391,7 +361,7 @@ function TokenListView({
               <Td>
                 <Button
                   as={NextLink}
-                  href={`/mint/${token.contractAddress}`}
+                  href={`/mint/${token.address}`}
                   colorScheme="purple"
                   size="sm"
                   bg="brand.primary"
@@ -571,45 +541,30 @@ function PaginationControl({
 
 export default function MintPage() {
   const { tokenList } = useAppSelector(state => state.token)
-  const [viewMode, setViewMode] = useState<'card' | 'list'>('card')
-  const [sortColumn, setSortColumn] = useState<string>('progress')
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
-  const [searchQuery, setSearchQuery] = useState<string>('')
-  const [currentPage, setCurrentPage] = useState<number>(1)
-  const [pageSize, setPageSize] = useState<number>(12)
-  const [tabIndex, setTabIndex] = useState<number>(0)
-
-  // 获取当前网络上下文
   const { network } = useNetwork()
-
-  // 获取翻译函数
   const { t } = useTranslation()
 
-  // 从本地存储加载视图模式和标签页选择
-  useEffect(() => {
-    // 确保只在客户端执行
+  const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
     if (typeof window !== 'undefined') {
-      // 加载视图模式选择
-      const savedViewMode = localStorage.getItem('mint_view_mode')
-      if (
-        savedViewMode &&
-        (savedViewMode === 'card' || savedViewMode === 'list')
-      ) {
-        setViewMode(savedViewMode as 'card' | 'list')
-      }
-
-      // 加载标签页选择
-      const savedTabIndex = localStorage.getItem('mint_tab_index')
-      if (savedTabIndex && !isNaN(Number(savedTabIndex))) {
-        setTabIndex(Number(savedTabIndex))
-      }
+      return (
+        (localStorage.getItem('mint_view_mode') as 'card' | 'list') || 'card'
+      )
     }
-  }, [])
+    return 'card'
+  })
 
-  // 根据当前网络选择数据集和货币单位
-  const tokensData = useMemo(() => {
-    return tokenList || []
-  }, [tokenList])
+  const [tabIndex, setTabIndex] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return parseInt(localStorage.getItem('mint_tab_index') || '0', 10)
+    }
+    return 0
+  })
+
+  const [sortColumn, setSortColumn] = useState('created_at')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(12)
 
   // 设置当前网络的计价单位
   const currencyUnit = useMemo(() => {
@@ -617,29 +572,18 @@ export default function MintPage() {
   }, [network])
 
   // 保存视图模式到本地存储
-  const handleViewModeChange = (mode: 'card' | 'list') => {
-    setViewMode(mode)
-    localStorage.setItem('mint_view_mode', mode)
-  }
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mint_view_mode', viewMode)
+    }
+  }, [viewMode])
 
   // 保存标签页选择到本地存储
-  const handleTabChange = (index: number) => {
-    setTabIndex(index)
-    localStorage.setItem('mint_tab_index', String(index))
-  }
-
-  // 移除已完成铸造的代币（进度100%）
-
-  // 获取最新部署的代币（按deployedAt倒序排列）
-  const latestDeployedTokens = useMemo(() => {
-    return [...tokenList].sort((a, b) => {
-      // 如果没有deployedAt字段或值为空，将其放在最后
-      if (!a.deployedAt) return 1
-      if (!b.deployedAt) return -1
-      // 倒序排列，最新的在前面
-      return b.deployedAt - a.deployedAt
-    })
-  }, [tokenList])
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mint_tab_index', String(tabIndex))
+    }
+  }, [tabIndex])
 
   // 共享排序逻辑
   const handleSort = (column: string) => {
@@ -650,7 +594,7 @@ export default function MintPage() {
   }
 
   // 搜索过滤逻辑
-  const filterTokensBySearch = (tokens: any[]) => {
+  const filterTokensBySearch = (tokens: MintToken[]) => {
     if (!searchQuery.trim()) return tokens
 
     const query = searchQuery.toLowerCase().trim()
@@ -658,34 +602,40 @@ export default function MintPage() {
       token =>
         token.name.toLowerCase().includes(query) ||
         token.symbol.toLowerCase().includes(query) ||
-        (token.contractAddress &&
-          token.contractAddress.toLowerCase().includes(query))
+        (token.address && token.address.toLowerCase().includes(query))
     )
   }
 
   // 对数据进行排序
-  const getSortedTokens = (tokens: any[]) => {
+  const getSortedTokens = (tokens: MintToken[]) => {
     return [...tokens].sort((a, b) => {
-      if (
-        sortColumn === 'totalSupply' ||
-        sortColumn === 'target' ||
-        sortColumn === 'raised'
-      ) {
-        // 移除非数字字符并转换为数字
-        const aValue = parseFloat(a[sortColumn].replace(/[^0-9.]/g, ''))
-        const bValue = parseFloat(b[sortColumn].replace(/[^0-9.]/g, ''))
-        return sortDirection === 'asc' ? aValue - bValue : bValue - aValue
-      } else {
-        // 数字类型的字段直接比较
-        return sortDirection === 'asc'
-          ? a[sortColumn] - b[sortColumn]
-          : b[sortColumn] - a[sortColumn]
+      switch (sortColumn) {
+        case 'totalSupply':
+          const aSupply = parseFloat(a.totalSupply)
+          const bSupply = parseFloat(b.totalSupply)
+          return sortDirection === 'asc' ? aSupply - bSupply : bSupply - aSupply
+        case 'progress':
+          return sortDirection === 'asc'
+            ? a.progress - b.progress
+            : b.progress - a.progress
+        case 'participants':
+          return sortDirection === 'asc'
+            ? a.participants - b.participants
+            : b.participants - a.participants
+        case 'created_at':
+          return sortDirection === 'asc'
+            ? new Date(a.created_at).getTime() -
+                new Date(b.created_at).getTime()
+            : new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime()
+        default:
+          return 0
       }
     })
   }
 
   // 处理分页逻辑
-  const paginateTokens = (tokens: any[]) => {
+  const paginateTokens = (tokens: MintToken[]) => {
     const startIndex = (currentPage - 1) * pageSize
     return tokens.slice(startIndex, startIndex + pageSize)
   }
@@ -712,14 +662,10 @@ export default function MintPage() {
     setCurrentPage(1)
   }, [sortColumn, sortDirection, searchQuery])
 
-  const renderTabContent = (tokens: any[], isLatestDeployed = false) => {
+  const renderTabContent = (tokens: MintToken[]) => {
     // 先过滤搜索结果，再排序
     const filteredTokens = filterTokensBySearch(tokens)
-
-    // 如果是最新部署标签页，则直接使用已经按deployedAt排序的代币列表
-    const sortedTokens = isLatestDeployed
-      ? filteredTokens
-      : getSortedTokens(filteredTokens)
+    const sortedTokens = getSortedTokens(filteredTokens)
 
     // 计算总页数
     const totalPages = Math.ceil(sortedTokens.length / pageSize)
@@ -766,10 +712,9 @@ export default function MintPage() {
         ) : (
           <TokenListView
             tokens={paginatedTokens}
-            sortColumn={isLatestDeployed ? 'deployedAt' : sortColumn}
-            sortDirection={isLatestDeployed ? 'desc' : sortDirection}
-            onSort={isLatestDeployed ? () => {} : handleSort}
-            currencyUnit={currencyUnit}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={handleSort}
           />
         )}
 
@@ -808,7 +753,7 @@ export default function MintPage() {
                 variant={viewMode === 'card' ? 'solid' : 'outline'}
                 bg={viewMode === 'card' ? 'brand.primary' : undefined}
                 color={viewMode === 'card' ? 'white' : 'brand.primary'}
-                onClick={() => handleViewModeChange('card')}
+                onClick={() => setViewMode('card')}
               >
                 {t('cardView')}
               </Button>
@@ -817,7 +762,7 @@ export default function MintPage() {
                 variant={viewMode === 'list' ? 'solid' : 'outline'}
                 bg={viewMode === 'list' ? 'brand.primary' : undefined}
                 color={viewMode === 'list' ? 'white' : 'brand.primary'}
-                onClick={() => handleViewModeChange('list')}
+                onClick={() => setViewMode('list')}
               >
                 {t('listView')}
               </Button>
@@ -828,7 +773,7 @@ export default function MintPage() {
             colorScheme="purple"
             variant="enclosed"
             index={tabIndex}
-            onChange={handleTabChange}
+            onChange={setTabIndex}
           >
             <TabList
               borderBottom="2px"
@@ -899,11 +844,7 @@ export default function MintPage() {
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
                 />
-                {renderTabContent(
-                  tokenList.filter(
-                    token => token.participants > 200 && token.progress > 60
-                  )
-                )}
+                {renderTabContent(tokenList)}
               </TabPanel>
 
               <TabPanel px={0}>
@@ -925,7 +866,7 @@ export default function MintPage() {
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
                 />
-                {renderTabContent(latestDeployedTokens, true)}
+                {renderTabContent(tokenList)}
               </TabPanel>
             </TabPanels>
           </Tabs>
