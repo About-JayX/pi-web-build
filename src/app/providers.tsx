@@ -13,6 +13,9 @@ import Footer from '@/components/Footer'
 import { NetworkProvider } from '@/contexts/NetworkContext'
 import { SolanaProvider } from '@/contexts/solanaProvider'
 import { I18nProvider } from '@/contexts/I18nProvider'
+import { Provider } from 'react-redux'
+import { store } from '../store'
+import { fetchTokenList } from '@/store/slices/tokenSlice'
 
 // 动态导入Navbar，避免SSR
 const Navbar = dynamic(() => import('@/components/Navbar'), { ssr: false })
@@ -42,11 +45,12 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    console.log('providers')
+    // 在应用启动时获取代币列表
+    store.dispatch(fetchTokenList())
   }, [])
 
   return (
-    <>
+    <Provider store={store}>
       {/* ColorModeScript 应该在 ClientOnly 之外，以便在服务器端渲染 */}
       <ColorModeScript initialColorMode={theme.config.initialColorMode} />
 
@@ -72,6 +76,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
           </ChakraProvider>
         </ClientOnly>
       </CacheProvider>
-    </>
+    </Provider>
   )
 }

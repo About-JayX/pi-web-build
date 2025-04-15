@@ -10,19 +10,10 @@ import {
   HStack,
   VStack,
   Progress,
-  Card,
-  CardBody,
-  Divider,
-  Badge,
   Button,
   useColorModeValue,
   Flex,
   Icon,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  StatArrow,
   Image,
   Tab,
   TabList,
@@ -40,16 +31,11 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
-  Spacer,
   useToast,
   Select,
   IconButton,
-  Wrap,
 } from '@chakra-ui/react'
 import {
-  FaUsers,
-  FaCalendarAlt,
-  FaChartPie,
   FaThLarge,
   FaList,
   FaSort,
@@ -63,14 +49,13 @@ import {
   FaChevronRight,
 } from 'react-icons/fa'
 import NextLink from 'next/link'
-import { mintingTokensPi, mintingTokensSol } from '@/mock'
 import { useState, useEffect, useMemo } from 'react'
 import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import { useRouter } from 'next/navigation'
 import { useNetwork } from '@/contexts/NetworkContext'
 import MintingTokenCard from '@/components/MintingTokenCard'
 import { useTranslation } from 'react-i18next'
-import { TokenAPI } from '@/api'
+import { useAppSelector } from '@/store/hooks'
 
 // 排序指示器组件
 function SortIndicator({
@@ -144,12 +129,12 @@ function TokenListView({
         .share({
           title: `${token.name} (${token.symbol})`,
           text: `${t('share')} ${token.name} ${t('token')}`,
-          url: window.location.origin + `/mint/${token.contractAddress}`,
+          url: window.location.origin + `/mint/${token.address}`,
         })
         .catch(error => console.log(`${t('share')} ${t('failed')}:`, error))
     } else {
       // 如果浏览器不支持，可以复制链接到剪贴板
-      const url = window.location.origin + `/mint/${token.contractAddress}`
+      const url = window.location.origin + `/mint/${token.address}`
       navigator.clipboard
         .writeText(url)
         .then(() =>
@@ -255,7 +240,7 @@ function TokenListView({
                   !(e.target as HTMLElement).closest('a') &&
                   !(e.target as HTMLElement).closest('button')
                 ) {
-                  navigateToMintPage(token.contractAddress)
+                  navigateToMintPage(token.address)
                 }
               }}
               sx={{
@@ -585,6 +570,7 @@ function PaginationControl({
 }
 
 export default function MintPage() {
+  const { tokenList } = useAppSelector(state => state.token)
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card')
   const [sortColumn, setSortColumn] = useState<string>('progress')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
@@ -599,25 +585,8 @@ export default function MintPage() {
   // 获取翻译函数
   const { t } = useTranslation()
 
-  // 根据当前网络选择数据集和货币单位
-  const tokensData = useMemo(() => {
-    if (network === 'Solana') {
-      return mintingTokensSol
-    } else {
-      return mintingTokensPi
-    }
-  }, [network])
-
-  // 设置当前网络的计价单位
-  const currencyUnit = useMemo(() => {
-    return network === 'Solana' ? 'SOL' : 'Pi'
-  }, [network])
-
   // 从本地存储加载视图模式和标签页选择
   useEffect(() => {
-    init()
-    console.log('mint?')
-
     // 确保只在客户端执行
     if (typeof window !== 'undefined') {
       // 加载视图模式选择
@@ -637,10 +606,15 @@ export default function MintPage() {
     }
   }, [])
 
-  const init = async () => {
-    const res = await TokenAPI.getTokenList()
-    console.log(res)
-  }
+  // 根据当前网络选择数据集和货币单位
+  const tokensData = useMemo(() => {
+    return tokenList || []
+  }, [tokenList])
+
+  // 设置当前网络的计价单位
+  const currencyUnit = useMemo(() => {
+    return network === 'Solana' ? 'SOL' : 'Pi'
+  }, [network])
 
   // 保存视图模式到本地存储
   const handleViewModeChange = (mode: 'card' | 'list') => {
@@ -655,18 +629,17 @@ export default function MintPage() {
   }
 
   // 移除已完成铸造的代币（进度100%）
-  const activeTokens = tokensData.filter(token => token.progress < 100)
 
   // 获取最新部署的代币（按deployedAt倒序排列）
   const latestDeployedTokens = useMemo(() => {
-    return [...activeTokens].sort((a, b) => {
+    return [...tokenList].sort((a, b) => {
       // 如果没有deployedAt字段或值为空，将其放在最后
       if (!a.deployedAt) return 1
       if (!b.deployedAt) return -1
       // 倒序排列，最新的在前面
       return b.deployedAt - a.deployedAt
     })
-  }, [activeTokens])
+  }, [tokenList])
 
   // 共享排序逻辑
   const handleSort = (column: string) => {
@@ -927,7 +900,7 @@ export default function MintPage() {
                   onSearchChange={setSearchQuery}
                 />
                 {renderTabContent(
-                  activeTokens.filter(
+                  tokenList.filter(
                     token => token.participants > 200 && token.progress > 60
                   )
                 )}
@@ -941,7 +914,7 @@ export default function MintPage() {
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
                 />
-                {renderTabContent(activeTokens)}
+                {renderTabContent(tokenList)}
               </TabPanel>
 
               <TabPanel px={0}>

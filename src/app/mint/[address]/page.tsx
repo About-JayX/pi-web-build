@@ -5,8 +5,6 @@ import { useParams, useRouter } from 'next/navigation'
 import { Box, Container, Heading, Text, VStack, Stack } from '@chakra-ui/react'
 import { useNetwork } from '@/contexts/NetworkContext'
 import { useTranslation } from 'react-i18next'
-import { mintingTokensPi, mintingTokensSol } from '@/mock'
-import { TokenAPI } from '@/api'
 
 export default function TokenDetailRedirectPage() {
   const params = useParams()

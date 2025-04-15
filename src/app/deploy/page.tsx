@@ -11,7 +11,6 @@ import {
   Icon,
   Flex,
   useColorModeValue,
-  useColorMode,
   Card,
   CardBody,
   CardFooter,
@@ -32,27 +31,29 @@ import {
   ModalCloseButton,
   IconButton,
   useBreakpointValue,
+  useToast,
+  Image,
 } from '@chakra-ui/react'
 import { FaUpload, FaChevronDown, FaChevronUp, FaEdit } from 'react-icons/fa'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNetwork } from '@/contexts/NetworkContext'
 import { useTranslation } from 'react-i18next'
 import { useSolana } from '@/contexts/solanaProvider'
-import { useProgram } from '@/web3/fairMint/hooks/useProgram'
+import { TokenAPI, CreateTokenParams } from '@/api/token'
 
-// 定义 TokenParametersSection 组件的属性接口
+// 定义代币参数组件的属性接口
 interface TokenParametersSectionProps {
   totalSupplyTabIndex: number
   setTotalSupplyTabIndex: (index: number) => void
   targetAmountTabIndex: number
   setTargetAmountTabIndex: (index: number) => void
-  totalSupplyValues: any // 根据实际类型调整
-  targetAmountOptions: any // 根据实际类型调整
-  totalSupply: number | string
+  totalSupplyOptions: string[]
+  targetAmountOptionsMap: Record<string, string[]>
   labelColor: string
-  getFormattedPrice: string | number
-  getFormattedInversePrice: string | number
-  currencyUnit: string
+  onValuesChange?: (values: {
+    totalSupply: string
+    targetAmount: string
+  }) => void
 }
 
 // 代币参数响应式组件
@@ -61,13 +62,10 @@ const TokenParametersSection = ({
   setTotalSupplyTabIndex,
   targetAmountTabIndex,
   setTargetAmountTabIndex,
-  totalSupplyValues,
-  targetAmountOptions,
-  totalSupply,
+  totalSupplyOptions,
+  targetAmountOptionsMap,
   labelColor,
-  getFormattedPrice,
-  getFormattedInversePrice,
-  currencyUnit,
+  onValuesChange,
 }: TokenParametersSectionProps) => {
   const isMobile = useBreakpointValue({ base: true, md: false })
   const {
@@ -79,6 +77,23 @@ const TokenParametersSection = ({
   const { isOpen: isTokenParamsOpen, onToggle: onTokenParamsToggle } =
     useDisclosure()
 
+  const { t } = useTranslation()
+
+  // 当选项改变时通知父组件
+  const currentTotalSupply = totalSupplyOptions[totalSupplyTabIndex]
+  const currentTargetAmountWithUnit =
+    targetAmountOptionsMap[currentTotalSupply][targetAmountTabIndex]
+  const currentTargetAmount = currentTargetAmountWithUnit?.split(' ')[0] || '0'
+
+  useEffect(() => {
+    if (onValuesChange) {
+      onValuesChange({
+        totalSupply: currentTotalSupply,
+        targetAmount: currentTargetAmount,
+      })
+    }
+  }, [currentTotalSupply, currentTargetAmount, onValuesChange])
+
   const handleParamsClick = () => {
     if (isMobile) {
       onTokenParamsToggle()
@@ -87,7 +102,17 @@ const TokenParametersSection = ({
     }
   }
 
-  const { t } = useTranslation() // 添加翻译函数
+  // 计算代币单价
+  const getTokenPrice = (totalSupply: string, targetAmount: string) => {
+    const supply = parseFloat(totalSupply)
+    const amount = parseFloat(targetAmount.split(' ')[0])
+    if (isNaN(supply) || isNaN(amount) || amount === 0) {
+      return '0'
+    }
+    return (supply / 2 / amount).toLocaleString('en-US', {
+      maximumFractionDigits: 8,
+    })
+  }
 
   return (
     <Box>
@@ -142,7 +167,7 @@ const TokenParametersSection = ({
             {t('totalSupply')}
           </Text>
           <Text fontWeight="bold" color={labelColor}>
-            {totalSupplyTabIndex === 0 ? '314,000,000' : '1,000,000,000'}
+            {totalSupplyOptions[totalSupplyTabIndex]}
           </Text>
         </Box>
         <Box>
@@ -150,7 +175,11 @@ const TokenParametersSection = ({
             {t('mintingAmount')}
           </Text>
           <Text fontWeight="bold" color={labelColor}>
-            {targetAmountOptions[totalSupply][targetAmountTabIndex]}
+            {
+              targetAmountOptionsMap[totalSupplyOptions[totalSupplyTabIndex]][
+                targetAmountTabIndex
+              ]
+            }
           </Text>
         </Box>
         <Box>
@@ -158,7 +187,13 @@ const TokenParametersSection = ({
             {t('exchangeRate')}
           </Text>
           <Text fontWeight="bold" color={labelColor}>
-            1 : {getFormattedPrice}
+            1 :{' '}
+            {getTokenPrice(
+              totalSupplyOptions[totalSupplyTabIndex],
+              targetAmountOptionsMap[totalSupplyOptions[totalSupplyTabIndex]][
+                targetAmountTabIndex
+              ]
+            )}
           </Text>
         </Box>
         <Box>
@@ -166,7 +201,11 @@ const TokenParametersSection = ({
             {t('tokenPrice')}
           </Text>
           <Text fontWeight="bold" color={labelColor}>
-            {getFormattedInversePrice} {currencyUnit}
+            {
+              targetAmountOptionsMap[totalSupplyOptions[totalSupplyTabIndex]][
+                targetAmountTabIndex
+              ]
+            }
           </Text>
         </Box>
       </SimpleGrid>
@@ -194,18 +233,15 @@ const TokenParametersSection = ({
                 isFitted
               >
                 <TabList bg="gray.50" p={1} borderRadius="md">
-                  <Tab
-                    _selected={{ color: 'white', bg: 'brand.primary' }}
-                    fontWeight="semibold"
-                  >
-                    314,000,000
-                  </Tab>
-                  <Tab
-                    _selected={{ color: 'white', bg: 'brand.primary' }}
-                    fontWeight="semibold"
-                  >
-                    1,000,000,000
-                  </Tab>
+                  {totalSupplyOptions.map((option, index) => (
+                    <Tab
+                      key={index}
+                      _selected={{ color: 'white', bg: 'brand.primary' }}
+                      fontWeight="semibold"
+                    >
+                      {option}
+                    </Tab>
+                  ))}
                 </TabList>
               </Tabs>
             </FormControl>
@@ -217,82 +253,32 @@ const TokenParametersSection = ({
                 {t('mintingAmount')}
               </FormLabel>
 
-              {totalSupplyTabIndex === 0 ? (
-                <Tabs
-                  variant="soft-rounded"
-                  colorScheme="purple"
-                  index={targetAmountTabIndex}
-                  onChange={setTargetAmountTabIndex}
-                  size="sm"
+              <Tabs
+                variant="soft-rounded"
+                colorScheme="purple"
+                index={targetAmountTabIndex}
+                onChange={setTargetAmountTabIndex}
+                size="sm"
+              >
+                <TabList
+                  bg="gray.50"
+                  p={1}
+                  borderRadius="md"
+                  justifyContent="start"
                 >
-                  <TabList
-                    bg="gray.50"
-                    p={1}
-                    borderRadius="md"
-                    justifyContent="start"
-                  >
+                  {targetAmountOptionsMap[
+                    totalSupplyOptions[totalSupplyTabIndex]
+                  ].map((option, index) => (
                     <Tab
+                      key={index}
                       _selected={{ color: 'white', bg: 'brand.primary' }}
                       mx={1}
                     >
-                      314 {currencyUnit}
+                      {option}
                     </Tab>
-                    <Tab
-                      _selected={{ color: 'white', bg: 'brand.primary' }}
-                      mx={1}
-                    >
-                      157 {currencyUnit}
-                    </Tab>
-                    <Tab
-                      _selected={{ color: 'white', bg: 'brand.primary' }}
-                      mx={1}
-                    >
-                      78.5 {currencyUnit}
-                    </Tab>
-                  </TabList>
-                </Tabs>
-              ) : (
-                <Tabs
-                  variant="soft-rounded"
-                  colorScheme="purple"
-                  index={targetAmountTabIndex}
-                  onChange={setTargetAmountTabIndex}
-                  size="sm"
-                >
-                  <TabList bg="gray.50" p={1} borderRadius="md" flexWrap="wrap">
-                    <Tab
-                      _selected={{ color: 'white', bg: 'brand.primary' }}
-                      m={1}
-                    >
-                      100 {currencyUnit}
-                    </Tab>
-                    <Tab
-                      _selected={{ color: 'white', bg: 'brand.primary' }}
-                      m={1}
-                    >
-                      200 {currencyUnit}
-                    </Tab>
-                    <Tab
-                      _selected={{ color: 'white', bg: 'brand.primary' }}
-                      m={1}
-                    >
-                      250 {currencyUnit}
-                    </Tab>
-                    <Tab
-                      _selected={{ color: 'white', bg: 'brand.primary' }}
-                      m={1}
-                    >
-                      400 {currencyUnit}
-                    </Tab>
-                    <Tab
-                      _selected={{ color: 'white', bg: 'brand.primary' }}
-                      m={1}
-                    >
-                      500 {currencyUnit}
-                    </Tab>
-                  </TabList>
-                </Tabs>
-              )}
+                  ))}
+                </TabList>
+              </Tabs>
             </FormControl>
             <Button
               colorScheme="purple"
@@ -337,18 +323,15 @@ const TokenParametersSection = ({
                     isFitted
                   >
                     <TabList bg="gray.50" p={1} borderRadius="md">
-                      <Tab
-                        _selected={{ color: 'white', bg: 'brand.primary' }}
-                        fontWeight="semibold"
-                      >
-                        314,000,000
-                      </Tab>
-                      <Tab
-                        _selected={{ color: 'white', bg: 'brand.primary' }}
-                        fontWeight="semibold"
-                      >
-                        1,000,000,000
-                      </Tab>
+                      {totalSupplyOptions.map((option, index) => (
+                        <Tab
+                          key={index}
+                          _selected={{ color: 'white', bg: 'brand.primary' }}
+                          fontWeight="semibold"
+                        >
+                          {option}
+                        </Tab>
+                      ))}
                     </TabList>
                   </Tabs>
                 </FormControl>
@@ -364,87 +347,32 @@ const TokenParametersSection = ({
                     {t('mintingAmount')}
                   </FormLabel>
 
-                  {totalSupplyTabIndex === 0 ? (
-                    <Tabs
-                      variant="soft-rounded"
-                      colorScheme="purple"
-                      index={targetAmountTabIndex}
-                      onChange={setTargetAmountTabIndex}
-                      size="sm"
+                  <Tabs
+                    variant="soft-rounded"
+                    colorScheme="purple"
+                    index={targetAmountTabIndex}
+                    onChange={setTargetAmountTabIndex}
+                    size="sm"
+                  >
+                    <TabList
+                      bg="gray.50"
+                      p={1}
+                      borderRadius="md"
+                      justifyContent="start"
                     >
-                      <TabList
-                        bg="gray.50"
-                        p={1}
-                        borderRadius="md"
-                        justifyContent="start"
-                      >
+                      {targetAmountOptionsMap[
+                        totalSupplyOptions[totalSupplyTabIndex]
+                      ].map((option, index) => (
                         <Tab
+                          key={index}
                           _selected={{ color: 'white', bg: 'brand.primary' }}
                           mx={1}
                         >
-                          314 {currencyUnit}
+                          {option}
                         </Tab>
-                        <Tab
-                          _selected={{ color: 'white', bg: 'brand.primary' }}
-                          mx={1}
-                        >
-                          157 {currencyUnit}
-                        </Tab>
-                        <Tab
-                          _selected={{ color: 'white', bg: 'brand.primary' }}
-                          mx={1}
-                        >
-                          78.5 {currencyUnit}
-                        </Tab>
-                      </TabList>
-                    </Tabs>
-                  ) : (
-                    <Tabs
-                      variant="soft-rounded"
-                      colorScheme="purple"
-                      index={targetAmountTabIndex}
-                      onChange={setTargetAmountTabIndex}
-                      size="sm"
-                    >
-                      <TabList
-                        bg="gray.50"
-                        p={1}
-                        borderRadius="md"
-                        flexWrap="wrap"
-                      >
-                        <Tab
-                          _selected={{ color: 'white', bg: 'brand.primary' }}
-                          m={1}
-                        >
-                          100 {currencyUnit}
-                        </Tab>
-                        <Tab
-                          _selected={{ color: 'white', bg: 'brand.primary' }}
-                          m={1}
-                        >
-                          200 {currencyUnit}
-                        </Tab>
-                        <Tab
-                          _selected={{ color: 'white', bg: 'brand.primary' }}
-                          m={1}
-                        >
-                          250 {currencyUnit}
-                        </Tab>
-                        <Tab
-                          _selected={{ color: 'white', bg: 'brand.primary' }}
-                          m={1}
-                        >
-                          400 {currencyUnit}
-                        </Tab>
-                        <Tab
-                          _selected={{ color: 'white', bg: 'brand.primary' }}
-                          m={1}
-                        >
-                          500 {currencyUnit}
-                        </Tab>
-                      </TabList>
-                    </Tabs>
-                  )}
+                      ))}
+                    </TabList>
+                  </Tabs>
                 </FormControl>
               </VStack>
             </ModalBody>
@@ -475,6 +403,12 @@ interface SocialLinksSectionProps {
   labelColor: string
   inputBg: string
   borderColor: string
+  onWebsiteChange?: (value: string) => void
+  onTwitterChange?: (value: string) => void
+  onTelegramChange?: (value: string) => void
+  website?: string
+  twitter?: string
+  telegram?: string
 }
 
 // 社媒链接响应式组件
@@ -484,8 +418,14 @@ const SocialLinksSection = ({
   labelColor,
   inputBg,
   borderColor,
+  onWebsiteChange,
+  onTwitterChange,
+  onTelegramChange,
+  website = '',
+  twitter = '',
+  telegram = '',
 }: SocialLinksSectionProps) => {
-  const { t } = useTranslation() // 添加翻译函数
+  const { t } = useTranslation()
 
   return (
     <Box>
@@ -518,6 +458,8 @@ const SocialLinksSection = ({
             {t('website')}
           </FormLabel>
           <Input
+            value={website}
+            onChange={e => onWebsiteChange?.(e.target.value)}
             placeholder=""
             bg={inputBg}
             borderColor={borderColor}
@@ -531,6 +473,8 @@ const SocialLinksSection = ({
             {t('twitter')}
           </FormLabel>
           <Input
+            value={twitter}
+            onChange={e => onTwitterChange?.(e.target.value)}
             placeholder=""
             bg={inputBg}
             borderColor={borderColor}
@@ -544,6 +488,8 @@ const SocialLinksSection = ({
             {t('telegram')}
           </FormLabel>
           <Input
+            value={telegram}
+            onChange={e => onTelegramChange?.(e.target.value)}
             placeholder=""
             bg={inputBg}
             borderColor={borderColor}
@@ -558,121 +504,70 @@ const SocialLinksSection = ({
 
 export default function DeployPage() {
   const { publicKey } = useSolana()
-  const { colorMode } = useColorMode()
-  const { network } = useNetwork() // 获取当前网络上下文
-  const { t } = useTranslation() // 初始化翻译函数
-  const [tokenIcon, setTokenIcon] = useState<File | null>(null)
-  const [totalSupplyTabIndex, setTotalSupplyTabIndex] = useState(0)
-  const [targetAmountTabIndex, setTargetAmountTabIndex] = useState(0)
-  const totalSupplyValues = ['314000000', '1000000000']
-  const { mintToken } = useProgram()
-  const [tokenSymbol, setTokenSymbol] = useState('')
-  const [tokenName, setTokenName] = useState('')
-  // 设置当前网络
-  // 的计价单位
-  const currencyUnit = useMemo(() => {
-    return network === 'Solana' ? 'SOL' : 'Pi'
-  }, [network])
+  const { network } = useNetwork()
+  const { t } = useTranslation()
+  const toast = useToast()
 
+  // Theme colors
   const cardBg = useColorModeValue('white', 'gray.800')
-  const highlightColor = useColorModeValue('brand.primary', 'brand.light')
-  const boxBgGradient = useColorModeValue(
-    'linear(to-r, brand.primary, brand.dark)',
-    'linear(to-r, brand.primary, brand.dark)'
-  )
   const inputBg = useColorModeValue('gray.50', 'whiteAlpha.100')
   const textColor = useColorModeValue('gray.700', 'gray.200')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
   const labelColor = useColorModeValue('brand.primary', 'brand.light')
 
-  // 社媒信息折叠状态
+  // 组件状态
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [tokenIcon, setTokenIcon] = useState<File | null>(null)
+  const [totalSupplyTabIndex, setTotalSupplyTabIndex] = useState(0)
+  const [targetAmountTabIndex, setTargetAmountTabIndex] = useState(0)
+  const [tokenSymbol, setTokenSymbol] = useState('')
+  const [tokenName, setTokenName] = useState('')
+
+  // 折叠面板状态
   const { isOpen: isSocialOpen, onToggle: onSocialToggle } = useDisclosure()
-  // const initWallet = async () => {
-  //   let publicKey = await window.solana.publicKey
-  //   if (!publicKey) {
-  //     const result = await window.solana.connect()
-  //     publicKey = result.publicKey
-  //   }
-  // }
-  // useEffect(() => {
-  //   initWallet()
-  // }, [])
-  useEffect(() => {
-    setTargetAmountTabIndex(0)
-  }, [totalSupplyTabIndex])
 
-  // 根据网络生成铸造总额选项数据，同时包含单位
-  const targetAmountOptions = useMemo(() => {
-    const unit = currencyUnit
-    return {
-      '314000000': [`314 ${unit}`, `157 ${unit}`, `78.5 ${unit}`],
-      '1000000000': [
-        `100 ${unit}`,
-        `200 ${unit}`,
-        `250 ${unit}`,
-        `400 ${unit}`,
-        `500 ${unit}`,
+  // 定义当前网络的计价单位
+  const currencyUnit = useMemo(() => {
+    return network === 'Solana' ? 'SOL' : 'Pi'
+  }, [network])
+
+  // 定义代币发行总量选项
+  const totalSupplyOptions = ['314000000', '1000000000']
+
+  // 定义目标铸造金额选项映射（带单位的值）
+  const targetAmountOptionsMap = useMemo(
+    () => ({
+      '314000000': [
+        `314 ${currencyUnit}`,
+        `157 ${currencyUnit}`,
+        `78.5 ${currencyUnit}`,
       ],
-    }
-  }, [currencyUnit])
+      '1000000000': [
+        `100 ${currencyUnit}`,
+        `200 ${currencyUnit}`,
+        `250 ${currencyUnit}`,
+        `400 ${currencyUnit}`,
+        `500 ${currencyUnit}`,
+      ],
+    }),
+    [currencyUnit]
+  )
 
-  const totalSupply: string = totalSupplyValues[totalSupplyTabIndex]
-  const targetAmount: string =
-    targetAmountOptions[totalSupply][targetAmountTabIndex]
+  // 当前选中的值
+  const [selectedValues, setSelectedValues] = useState<{
+    totalSupply: string
+    targetAmount: string
+  }>({
+    totalSupply: totalSupplyOptions[0],
+    targetAmount: '314', // 初始值不带单位
+  })
 
-  const tokenPrice = useMemo(() => {
-    const supply = parseFloat(totalSupply)
-    const target = parseFloat(targetAmount)
-
-    if (isNaN(supply) || isNaN(target) || target === 0) {
-      return 0
-    }
-
-    return supply / 2 / target
-  }, [totalSupply, targetAmount])
-
-  const formatNumberNoExponent = (num: number): string => {
-    const str = num.toString()
-    if (str.includes('e')) {
-      const exponent = parseInt(str.split('e-')[1], 10)
-      const coefficient = parseFloat(str.split('e-')[0])
-
-      if (!isNaN(exponent)) {
-        let result = '0.'
-        for (let i = 0; i < exponent - 1; i++) {
-          result += '0'
-        }
-        result += coefficient.toString().replace('.', '')
-        return result
-      }
-    }
-    return str
-  }
-
-  const formattedPrice = useMemo(() => {
-    if (tokenPrice > 1000000) {
-      return parseFloat(tokenPrice.toFixed(0)).toLocaleString('zh-CN')
-    } else if (tokenPrice > 1) {
-      return parseFloat(tokenPrice.toFixed(2))
-        .toString()
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-    } else {
-      return formatNumberNoExponent(parseFloat(tokenPrice.toFixed(8)))
-    }
-  }, [tokenPrice])
-
-  const inversePrice = useMemo(() => {
-    if (tokenPrice <= 0) return 0
-    return 1 / tokenPrice
-  }, [tokenPrice])
-
-  const formattedInversePrice = useMemo(() => {
-    if (inversePrice >= 1) {
-      return parseFloat(inversePrice.toFixed(6)).toString()
-    } else {
-      return formatNumberNoExponent(parseFloat(inversePrice.toFixed(8)))
-    }
-  }, [inversePrice])
+  const handleValuesChange = useCallback(
+    (values: { totalSupply: string; targetAmount: string }) => {
+      setSelectedValues(values)
+    },
+    []
+  )
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -680,44 +575,116 @@ export default function DeployPage() {
     }
   }
 
-  const getTokenPrice = () => {
-    let totalSupply: string = totalSupplyValues[totalSupplyTabIndex]
-    let targetAmount: number
-
-    const targetAmountStr: string =
-      targetAmountOptions[totalSupply][targetAmountTabIndex]
-    targetAmount = parseFloat(targetAmountStr.replace(` ${currencyUnit}`, ''))
-
-    const price = parseFloat(totalSupply) / 2 / targetAmount
-
-    let formattedPrice: string
-    if (price > 1000000) {
-      formattedPrice = parseFloat(price.toFixed(0)).toLocaleString('zh-CN')
-    } else if (price > 1) {
-      formattedPrice = parseFloat(price.toFixed(2))
-        .toString()
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-    } else {
-      formattedPrice = formatNumberNoExponent(parseFloat(price.toFixed(8)))
+  const handleCreateToken = async () => {
+    if (!tokenIcon || !tokenName || !tokenSymbol) {
+      toast({
+        title: t('error'),
+        description: t('pleaseCompleteForm'),
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      })
+      return
     }
 
-    const inversePrice = 1 / price
-    let formattedInversePrice: string
-    if (inversePrice >= 1) {
-      formattedInversePrice = parseFloat(inversePrice.toFixed(6)).toString()
-    } else {
-      formattedInversePrice = formatNumberNoExponent(
-        parseFloat(inversePrice.toFixed(8))
-      )
-    }
+    try {
+      setIsSubmitting(true)
 
-    return { formattedPrice, formattedInversePrice }
+      const params: CreateTokenParams = {
+        name: tokenName,
+        symbol: tokenSymbol,
+        logo: tokenIcon,
+        init_liquidity: parseFloat(selectedValues.targetAmount),
+      }
+
+      const result = await TokenAPI.createToken(params)
+      console.log('创建成功：', result)
+
+      toast({
+        title: t('success'),
+        description: t('tokenCreated'),
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      })
+    } catch (error) {
+      console.error('创建失败：', error)
+      toast({
+        title: t('error'),
+        description: t('createTokenFailed'),
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const {
-    formattedPrice: getFormattedPrice,
-    formattedInversePrice: getFormattedInversePrice,
-  } = getTokenPrice()
+  // 社交媒体链接状态
+  const [website, setWebsite] = useState('')
+  const [twitter, setTwitter] = useState('')
+  const [telegram, setTelegram] = useState('')
+
+  // 监听创建代币所需的所有参数
+  useEffect(() => {
+    const params = {
+      // 基本信息
+      name: tokenName,
+      symbol: tokenSymbol,
+      file: tokenIcon
+        ? {
+            name: tokenIcon.name,
+            size: tokenIcon.size,
+            type: tokenIcon.type,
+          }
+        : null,
+
+      // 代币参数
+      total_supply: selectedValues.totalSupply,
+      init_liquidity: selectedValues.targetAmount,
+
+      // 社交媒体链接
+      website: website || null,
+      twitter: twitter || null,
+      telegram: telegram || null,
+
+      // 其他信息
+      network,
+      currencyUnit,
+      publicKey: publicKey?.toString() || null,
+    }
+
+    console.log('代币创建参数:', params)
+
+    // 验证必填参数
+    const requiredFields = {
+      name: '代币名称',
+      symbol: '代币符号',
+      file: '代币图标',
+      total_supply: '发行总量',
+      init_liquidity: '目标铸造金额',
+    }
+
+    const missingFields = Object.entries(requiredFields)
+      .filter(([fieldName]) => !params[fieldName])
+      .map(([, label]) => label)
+
+    if (missingFields.length > 0) {
+      console.warn('缺少必填参数:', missingFields.join(', '))
+    }
+  }, [
+    tokenName,
+    tokenSymbol,
+    tokenIcon,
+    selectedValues,
+    website,
+    twitter,
+    telegram,
+    network,
+    currencyUnit,
+    publicKey,
+  ])
 
   return (
     <Box bg="brand.background" minH="100vh" color={textColor}>
@@ -787,6 +754,8 @@ export default function DeployPage() {
                     {t('tokenIcon')}
                   </FormLabel>
                   <Box
+                    as="label"
+                    htmlFor="token-icon-upload"
                     borderWidth="1px"
                     borderStyle="dashed"
                     borderColor={borderColor}
@@ -804,22 +773,41 @@ export default function DeployPage() {
                     transition="all 0.2s"
                     _hover={{ bg: 'gray.100', borderColor: 'brand.primary' }}
                     mx="0"
+                    position="relative"
                   >
-                    <Icon
-                      as={FaUpload}
-                      fontSize="2xl"
-                      mb={3}
-                      color="brand.primary"
+                    <Input
+                      id="token-icon-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      hidden
                     />
-                    <Text fontSize="sm" color="gray.500">
-                      {t('uploadIcon')}
-                      <br />
-                      <span
-                        dangerouslySetInnerHTML={{
-                          __html: t('iconRequirements'),
-                        }}
+                    {tokenIcon ? (
+                      <Image
+                        src={URL.createObjectURL(tokenIcon)}
+                        alt="Token Icon"
+                        boxSize="150px"
+                        objectFit="contain"
                       />
-                    </Text>
+                    ) : (
+                      <>
+                        <Icon
+                          as={FaUpload}
+                          fontSize="2xl"
+                          mb={3}
+                          color="brand.primary"
+                        />
+                        <Text fontSize="sm" color="gray.500">
+                          {t('uploadIcon')}
+                          <br />
+                          <span
+                            dangerouslySetInnerHTML={{
+                              __html: t('iconRequirements'),
+                            }}
+                          />
+                        </Text>
+                      </>
+                    )}
                   </Box>
                 </FormControl>
 
@@ -829,13 +817,10 @@ export default function DeployPage() {
                   setTotalSupplyTabIndex={setTotalSupplyTabIndex}
                   targetAmountTabIndex={targetAmountTabIndex}
                   setTargetAmountTabIndex={setTargetAmountTabIndex}
-                  totalSupplyValues={totalSupplyValues}
-                  targetAmountOptions={targetAmountOptions}
-                  totalSupply={totalSupply}
+                  totalSupplyOptions={totalSupplyOptions}
+                  targetAmountOptionsMap={targetAmountOptionsMap}
                   labelColor={labelColor}
-                  getFormattedPrice={getFormattedPrice}
-                  getFormattedInversePrice={getFormattedInversePrice}
-                  currencyUnit={currencyUnit}
+                  onValuesChange={handleValuesChange}
                 />
 
                 {/* 社媒链接部分 - 使用专门的客户端组件 */}
@@ -845,6 +830,12 @@ export default function DeployPage() {
                   labelColor={labelColor}
                   inputBg={inputBg}
                   borderColor={borderColor}
+                  website={website}
+                  twitter={twitter}
+                  telegram={telegram}
+                  onWebsiteChange={setWebsite}
+                  onTwitterChange={setTwitter}
+                  onTelegramChange={setTelegram}
                 />
               </VStack>
             </Box>
@@ -858,9 +849,7 @@ export default function DeployPage() {
             bg="gray.50"
           >
             <Button
-              onClick={() => {
-                mintToken()
-              }}
+              onClick={handleCreateToken}
               colorScheme="purple"
               bg="brand.primary"
               color="white"
@@ -869,8 +858,10 @@ export default function DeployPage() {
               height={{ base: '54px', md: '48px' }}
               fontSize={{ base: 'md', md: 'md' }}
               width="full"
+              isLoading={isSubmitting}
+              loadingText={t('creating')}
             >
-              {publicKey ? '铸造' : t('connectWallet')}
+              {publicKey ? t('createToken') : t('connectWallet')}
             </Button>
           </CardFooter>
         </Card>

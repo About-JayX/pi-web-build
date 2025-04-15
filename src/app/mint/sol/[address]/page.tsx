@@ -1,8 +1,8 @@
-'use client';
+'use client'
 
-import React from 'react';
-import { useParams } from 'next/navigation';
-import { useEffect, useState, useRef } from 'react';
+import React from 'react'
+import { useParams } from 'next/navigation'
+import { useEffect, useState, useRef } from 'react'
 import {
   Box,
   Container,
@@ -21,99 +21,111 @@ import {
   Center,
   Text,
   Stack,
-} from '@chakra-ui/react';
-import { FaArrowLeft, FaExclamationTriangle } from 'react-icons/fa';
-import { mintingTokensSol, getTokenHolders, TokenHolder } from '@/mock';
-import NextLink from 'next/link';
-import Link from 'next/link';
-import { useTranslation } from 'react-i18next';
+} from '@chakra-ui/react'
+import { FaArrowLeft, FaExclamationTriangle } from 'react-icons/fa'
+import { getTokenHolders, TokenHolder } from '@/mock'
+import NextLink from 'next/link'
+import Link from 'next/link'
+import { useTranslation } from 'react-i18next'
 
 // 导入组件
 import {
   TokenInfo,
   MintingForm,
   TokenHolders,
-  MintingInstructions
-} from '@/components/token-detail';
+  MintingInstructions,
+} from '@/components/token-detail'
+import { useAppSelector } from '@/store/hooks'
 
 export default function SolTokenDetailPage() {
-  const params = useParams();
-  const address = params.address as string;
-  const [token, setToken] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [holders, setHolders] = useState<TokenHolder[]>([]);
-  const { t } = useTranslation();
-  
+  const params = useParams()
+  const address = params.address as string
+  const [token, setToken] = useState<any>(null)
+  const { tokenList } = useAppSelector(state => state.token)
+  const [loading, setLoading] = useState(true)
+  const [holders, setHolders] = useState<TokenHolder[]>([])
+  const { t } = useTranslation()
+
   // 创建mintRef来引用铸造按钮
-  const mintRef = useRef<HTMLButtonElement>(null) as React.MutableRefObject<HTMLButtonElement>;
-  
-  const softBg = useColorModeValue('gray.50', 'gray.700');
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
-  
+  const mintRef = useRef<HTMLButtonElement>(
+    null
+  ) as React.MutableRefObject<HTMLButtonElement>
+
+  const softBg = useColorModeValue('gray.50', 'gray.700')
+  const cardBg = useColorModeValue('white', 'gray.800')
+  const borderColor = useColorModeValue('gray.200', 'gray.600')
+
   // 使用SOL作为货币单位
-  const currencyUnit = 'SOL';
+  const currencyUnit = 'SOL'
   // 使用Solana网络
-  const network = 'Solana';
-  
+  const network = 'Solana'
+
   useEffect(() => {
     // 模拟从API获取数据
-    setLoading(true);
-    
+    setLoading(true)
+
     // 从Solana网络的mock数据中查找匹配的代币
-    const found = mintingTokensSol.find(t => 
-      t.contractAddress === address || t.id.toString() === address
-    );
-    
+    const found = tokenList.find(
+      t => t.address === address || t.id.toString() === address
+    )
+
     setTimeout(() => {
-      setToken(found || null);
+      setToken(found || null)
       // 获取持有人数据
-      if (found?.contractAddress) {
-        setHolders(getTokenHolders(found.contractAddress));
+      if (found?.address) {
+        setHolders(getTokenHolders(found.address))
       }
-      setLoading(false);
-    }, 500); // 添加一点延迟以模拟加载
-  }, [address]);
-  
+      setLoading(false)
+    }, 500) // 添加一点延迟以模拟加载
+  }, [address])
+
   // 返回按钮组件
   const BackButton = () => (
-    <Button 
-      as={NextLink} 
+    <Button
+      as={NextLink}
       href="/mint"
-      leftIcon={<FaArrowLeft />} 
-      variant="ghost" 
+      leftIcon={<FaArrowLeft />}
+      variant="ghost"
       mb={{ base: 3, md: 6 }}
-      size={{ base: "sm", md: "md" }}
+      size={{ base: 'sm', md: 'md' }}
       color="brand.primary"
       _hover={{ bg: 'purple.50' }}
       px={{ base: 2, md: 4 }}
-      fontSize={{ base: "sm", md: "md" }}
+      fontSize={{ base: 'sm', md: 'md' }}
     >
       {t('backToMintingHome')}
     </Button>
-  );
-  
+  )
+
   // 加载状态UI
   if (loading) {
     return (
       <Box bg={softBg} minH="100vh" w="100%" pb={10} overflowX="hidden">
         <Container maxW="container.xl" py={12}>
           <VStack spacing={10} align="stretch">
-            <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'flex-start', md: 'center' }}>
+            <Stack
+              direction={{ base: 'column', md: 'row' }}
+              justify="space-between"
+              align={{ base: 'flex-start', md: 'center' }}
+            >
               <Box>
                 <Skeleton height="32px" width="180px" mb={2} />
                 <Skeleton height="16px" width="240px" />
               </Box>
               <Skeleton height="32px" width="120px" />
             </Stack>
-            
-            <Grid templateColumns={{ base: "1fr", lg: "3fr 2fr" }} gap={8} width="100%">
+
+            <Grid
+              templateColumns={{ base: '1fr', lg: '3fr 2fr' }}
+              gap={8}
+              width="100%"
+            >
               <GridItem width="100%" overflow="hidden">
                 <Box
                   bg={cardBg}
                   borderRadius="lg"
                   boxShadow="md"
-                  height={{ base: "320px", md: "400px" }}
+                  height={{ base: '320px', md: '400px' }}
                   width="100%"
                 >
                   <Skeleton height="100%" width="100%" />
@@ -126,7 +138,7 @@ export default function SolTokenDetailPage() {
                   borderRadius="lg"
                   boxShadow="md"
                   p={{ base: 4, md: 6 }}
-                  height={{ base: "300px", md: "400px" }}
+                  height={{ base: '300px', md: '400px' }}
                   width="100%"
                 >
                   <VStack spacing={6} align="stretch">
@@ -143,16 +155,20 @@ export default function SolTokenDetailPage() {
           </VStack>
         </Container>
       </Box>
-    );
+    )
   }
-  
+
   // 找不到代币的提示UI
   if (!token) {
     return (
       <Box bg={softBg} minH="100vh" w="100%" pb={10} overflowX="hidden">
         <Container maxW="container.xl" py={12}>
           <VStack spacing={10} align="stretch">
-            <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'flex-start', md: 'center' }}>
+            <Stack
+              direction={{ base: 'column', md: 'row' }}
+              justify="space-between"
+              align={{ base: 'flex-start', md: 'center' }}
+            >
               <Box>
                 <Heading as="h2" size="lg" mb={2}>
                   {t('tokenInfoNetwork').replace('{network}', 'Solana')}
@@ -161,31 +177,44 @@ export default function SolTokenDetailPage() {
               </Box>
               <BackButton />
             </Stack>
-            
+
             <Center flexDirection="column" py={10} px={4} width="100%">
-              <Icon as={FaExclamationTriangle} boxSize={12} color="yellow.500" mb={4} />
+              <Icon
+                as={FaExclamationTriangle}
+                boxSize={12}
+                color="yellow.500"
+                mb={4}
+              />
               <Heading as="h1" size="lg" textAlign="center" mb={4}>
                 {t('tokenNotFound')}
               </Heading>
-              <Alert status="warning" borderRadius="md" mb={6} width="100%" maxW="600px">
+              <Alert
+                status="warning"
+                borderRadius="md"
+                mb={6}
+                width="100%"
+                maxW="600px"
+              >
                 <AlertIcon />
-                <AlertDescription>
-                  {t('tokenNotFoundDesc')}
-                </AlertDescription>
+                <AlertDescription>{t('tokenNotFoundDesc')}</AlertDescription>
               </Alert>
             </Center>
           </VStack>
         </Container>
       </Box>
-    );
+    )
   }
-  
+
   // 主内容UI
   return (
     <Box bg={softBg} minH="100vh" w="100%" pb={10} overflowX="hidden">
       <Container maxW="container.xl" py={12}>
         <VStack spacing={10} align="stretch">
-          <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'flex-start', md: 'center' }}>
+          <Stack
+            direction={{ base: 'column', md: 'row' }}
+            justify="space-between"
+            align={{ base: 'flex-start', md: 'center' }}
+          >
             <Box>
               <Heading as="h2" size="lg" mb={2}>
                 {t('tokenInfoNetwork').replace('{network}', 'Solana')}
@@ -195,23 +224,35 @@ export default function SolTokenDetailPage() {
             <BackButton />
           </Stack>
 
-          <Grid templateColumns={{ base: "1fr", lg: "3fr 2fr" }} gap={8} width="100%">
+          <Grid
+            templateColumns={{ base: '1fr', lg: '3fr 2fr' }}
+            gap={8}
+            width="100%"
+          >
             <GridItem width="100%" overflow="hidden">
-              <TokenInfo token={token} mintRef={mintRef} currencyUnit={currencyUnit} />
-              
+              <TokenInfo
+                token={token}
+                mintRef={mintRef}
+                currencyUnit={currencyUnit}
+              />
+
               <Box width="100%" mt={6}>
                 <TokenHolders holders={holders} tokenSymbol={token.symbol} />
               </Box>
             </GridItem>
 
             {/* PC端显示MintingForm，移动端隐藏 */}
-            <GridItem width="100%" overflow="hidden" display={{ base: "none", lg: "block" }}>
-              <MintingForm 
+            <GridItem
+              width="100%"
+              overflow="hidden"
+              display={{ base: 'none', lg: 'block' }}
+            >
+              <MintingForm
                 token={{
                   symbol: token.symbol,
                   presaleRate: token.presaleRate || '0.000001',
                   network: network,
-                  currencyUnit: currencyUnit
+                  currencyUnit: currencyUnit,
                 }}
               />
             </GridItem>
@@ -219,5 +260,5 @@ export default function SolTokenDetailPage() {
         </VStack>
       </Container>
     </Box>
-  );
-} 
+  )
+}

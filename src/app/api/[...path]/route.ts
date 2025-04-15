@@ -8,8 +8,7 @@ export async function GET(request: NextRequest) {
   console.log('Pathname:', pathname)
 
   // 移除 /api 前缀
-  const targetPath = pathname.replace(/^\/api/, '')
-  const targetUrl = `http://192.168.1.97:8888${targetPath}`
+  const targetUrl = `https://fairmint.piweb3.xyz${targetPath}`
 
   console.log('Forwarding to:', targetUrl)
   console.log('Request headers:', Object.fromEntries(request.headers))
@@ -56,8 +55,7 @@ export async function POST(request: NextRequest) {
   console.log('Pathname:', pathname)
 
   // 移除 /api 前缀
-  const targetPath = pathname.replace(/^\/api/, '')
-  const targetUrl = `http://192.168.1.97:8888${targetPath}`
+  const targetUrl = `https://fairmint.piweb3.xyz${targetPath}`
 
   console.log('Forwarding to:', targetUrl)
 

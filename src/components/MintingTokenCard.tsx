@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import {
   Box,
@@ -14,99 +14,115 @@ import {
   Icon,
   Image,
   useToast,
-} from '@chakra-ui/react';
-import { FaGlobe, FaTwitter, FaTelegram, FaShareAlt, FaFileContract } from 'react-icons/fa';
-import NextLink from 'next/link';
-import { useTranslation } from 'react-i18next';
+} from '@chakra-ui/react'
+import {
+  FaGlobe,
+  FaTwitter,
+  FaTelegram,
+  FaShareAlt,
+  FaFileContract,
+} from 'react-icons/fa'
+import NextLink from 'next/link'
+import { useTranslation } from 'react-i18next'
 
 interface MintingTokenCardProps {
   token: {
-    id: number;
-    name: string;
-    symbol: string;
-    image: string;
-    target: string;
-    raised: string;
-    progress: number;
-    participants: number;
-    totalSupply: string;
-    presaleRate?: string;
-    contractAddress?: string;
-    website?: string;
-    twitter?: string;
-    telegram?: string;
-  };
-  currencyUnit?: string;
+    id: number
+    name: string
+    symbol: string
+    image: string
+    target: string
+    raised: string
+    progress: number
+    participants: number
+    totalSupply: string
+    presaleRate?: string
+    address?: string
+    website?: string
+    twitter?: string
+    telegram?: string
+  }
+  currencyUnit?: string
 }
 
-export default function MintingTokenCard({ token, currencyUnit = 'Pi' }: MintingTokenCardProps) {
-  const cardBg = useColorModeValue('white', 'gray.800');
-  const textColor = useColorModeValue('gray.600', 'gray.400');
-  const iconColor = useColorModeValue('gray.600', 'gray.400');
-  const iconHoverColor = useColorModeValue('brand.primary', 'brand.light');
-  const toast = useToast();
-  const { t } = useTranslation();
-  
+export default function MintingTokenCard({
+  token,
+  currencyUnit = 'Pi',
+}: MintingTokenCardProps) {
+  const cardBg = useColorModeValue('white', 'gray.800')
+  const textColor = useColorModeValue('gray.600', 'gray.400')
+  const iconColor = useColorModeValue('gray.600', 'gray.400')
+  const iconHoverColor = useColorModeValue('brand.primary', 'brand.light')
+  const toast = useToast()
+  const { t } = useTranslation()
+
   // 缩略显示合约地址
   const formatContractAddress = (address: string) => {
-    if (!address) return '';
-    const start = address.substring(0, 6);
-    const end = address.substring(address.length - 4);
-    return `${start}...${end}`;
-  };
-  
+    if (!address) return ''
+    const start = address.substring(0, 6)
+    const end = address.substring(address.length - 4)
+    return `${start}...${end}`
+  }
+
   // 格式化总供应量，以便在有限空间显示
   const formatSupply = (supply: string) => {
-    const num = parseFloat(supply.replace(/,/g, ''));
+    const num = parseFloat((supply && supply.replace(/,/g, '')) || '0')
     if (num >= 1000000000) {
-      return (num / 1000000).toFixed(1) + 'M';
+      return (num / 1000000).toFixed(1) + 'M'
     } else if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M';
+      return (num / 1000000).toFixed(1) + 'M'
     }
-    return supply;
-  };
-  
+    return supply
+  }
+
   // 分享功能处理
   const handleShare = () => {
     if (navigator.share) {
-      navigator.share({
-        title: `${token.name} (${token.symbol})`,
-        text: `${t('share')} ${token.name} ${t('token')}`,
-        url: window.location.origin + `/mint/${token.contractAddress}`
-      })
-      .catch((error) => console.log(`${t('share')} ${t('failed')}:`, error));
+      navigator
+        .share({
+          title: `${token.name} (${token.symbol})`,
+          text: `${t('share')} ${token.name} ${t('token')}`,
+          url: window.location.origin + `/mint/${token.address}`,
+        })
+        .catch(error => console.log(`${t('share')} ${t('failed')}:`, error))
     } else {
       // 如果浏览器不支持，可以复制链接到剪贴板
-      const url = window.location.origin + `/mint/${token.contractAddress}`;
-      navigator.clipboard.writeText(url)
-        .then(() => toast({
-          title: t('copySuccess'),
-          description: t('copyLinkSuccess'),
-          status: "success",
-          duration: 2000,
-          isClosable: true,
-          position: "top"
-        }))
-        .catch((error) => console.log(`${t('copy')} ${t('failed')}:`, error));
+      const url = window.location.origin + `/mint/${token.address}`
+      navigator.clipboard
+        .writeText(url)
+        .then(() =>
+          toast({
+            title: t('copySuccess'),
+            description: t('copyLinkSuccess'),
+            status: 'success',
+            duration: 2000,
+            isClosable: true,
+            position: 'top',
+          })
+        )
+        .catch(error => console.log(`${t('copy')} ${t('failed')}:`, error))
     }
-  };
-  
+  }
+
   // 复制合约地址
   const copyContractAddress = () => {
-    if (token.contractAddress) {
-      navigator.clipboard.writeText(token.contractAddress)
-        .then(() => toast({
-          title: t('copySuccess'),
-          description: t('copyAddressSuccess'),
-          status: "success",
-          duration: 2000,
-          isClosable: true,
-          position: "top"
-        }))
-        .catch(err => console.error(`${t('copy')} ${t('failed')}:`, err));
+    if (token.address) {
+      navigator.clipboard
+        .writeText(token.address)
+        .then(() =>
+          toast({
+            title: t('copySuccess'),
+            description: t('copyAddressSuccess'),
+            status: 'success',
+            duration: 2000,
+            isClosable: true,
+            position: 'top',
+          })
+        )
+        .catch(err => console.error(`${t('copy')} ${t('failed')}:`, err))
     }
-  };
-  
+  }
+
   return (
     <Card
       bg={cardBg}
@@ -119,12 +135,12 @@ export default function MintingTokenCard({ token, currencyUnit = 'Pi' }: Minting
         boxShadow: 'lg',
       }}
       position="relative"
-    >      
-      <CardBody p={{base:1,md:0,xl:4}}>
+    >
+      <CardBody p={{ base: 1, md: 0, xl: 4 }}>
         <Stack spacing={3}>
           <HStack spacing={2} align="center">
-            <Image 
-              src={token.image} 
+            <Image
+              src={token.image}
               alt={token.name}
               boxSize="40px"
               borderRadius="full"
@@ -133,17 +149,17 @@ export default function MintingTokenCard({ token, currencyUnit = 'Pi' }: Minting
               borderColor="brand.light"
             />
             <Box>
-              <Text 
-                fontSize="lg" 
-                fontWeight="bold" 
+              <Text
+                fontSize="lg"
+                fontWeight="bold"
                 color="brand.primary"
                 lineHeight="1.2"
               >
                 {token.symbol}
               </Text>
-              <Text 
-                fontSize="xs" 
-                color="gray.500" 
+              <Text
+                fontSize="xs"
+                color="gray.500"
                 mt={0.5}
                 noOfLines={1}
                 maxW="150px"
@@ -152,54 +168,78 @@ export default function MintingTokenCard({ token, currencyUnit = 'Pi' }: Minting
               </Text>
             </Box>
           </HStack>
-          
-          <Stack spacing={{base:1.5,xl:2}}>
+
+          <Stack spacing={{ base: 1.5, xl: 2 }}>
             <HStack justify="space-between">
-              <Text fontSize="xs" color={textColor}>{t('mintingAmount')}</Text>
-              <Text fontWeight="bold" fontSize="sm">{token.target}</Text>
+              <Text fontSize="xs" color={textColor}>
+                {t('mintingAmount')}
+              </Text>
+              <Text fontWeight="bold" fontSize="sm">
+                {token.target}
+              </Text>
             </HStack>
             <HStack justify="space-between">
-              <Text fontSize="xs" color={textColor}>{t('raisedAmount')}</Text>
-              <Text fontWeight="bold" fontSize="sm" color="brand.primary">{token.raised}</Text>
+              <Text fontSize="xs" color={textColor}>
+                {t('raisedAmount')}
+              </Text>
+              <Text fontWeight="bold" fontSize="sm" color="brand.primary">
+                {token.raised}
+              </Text>
             </HStack>
-          
+
             <Box py={1}>
               <HStack justify="space-between" mb={1}>
-                <Text fontSize="xs" color={textColor}>{t('progress')}</Text>
-                <Text fontSize="xs" fontWeight="bold">{token.progress}%</Text>
+                <Text fontSize="xs" color={textColor}>
+                  {t('progress')}
+                </Text>
+                <Text fontSize="xs" fontWeight="bold">
+                  {token.progress}%
+                </Text>
               </HStack>
-              <Progress 
-                value={token.progress} 
-                colorScheme="purple" 
-                borderRadius="full" 
+              <Progress
+                value={token.progress}
+                colorScheme="purple"
+                borderRadius="full"
                 size="sm"
               />
             </Box>
-            
+
             <Divider />
-            
+
             <HStack justify="space-between">
-              <Text fontSize="xs" color={textColor}>{t('participants')}</Text>
-              <Text fontWeight="bold" fontSize="sm">{token.participants}</Text>
+              <Text fontSize="xs" color={textColor}>
+                {t('participants')}
+              </Text>
+              <Text fontWeight="bold" fontSize="sm">
+                {token.participants}
+              </Text>
             </HStack>
-            
+
             <HStack justify="space-between">
-              <Text fontSize="xs" color={textColor}>{t('totalSupply')}</Text>
-              <Text fontWeight="bold" fontSize="sm">{formatSupply(token.totalSupply)}</Text>
+              <Text fontSize="xs" color={textColor}>
+                {t('totalSupply')}
+              </Text>
+              <Text fontWeight="bold" fontSize="sm">
+                {formatSupply(token.totalSupply)}
+              </Text>
             </HStack>
-            
+
             {token.presaleRate && (
               <HStack justify="space-between">
-                <Text fontSize="xs" color={textColor}>{t('mintingPrice')}</Text>
+                <Text fontSize="xs" color={textColor}>
+                  {t('mintingPrice')}
+                </Text>
                 <Text fontWeight="bold" fontSize="sm">
                   {token.presaleRate}
                 </Text>
               </HStack>
             )}
-            
-            {token.contractAddress && (
+
+            {token.address && (
               <HStack justify="space-between">
-                <Text fontSize="xs" color={textColor}>{t('contractAddress')}</Text>
+                <Text fontSize="xs" color={textColor}>
+                  {t('contractAddress')}
+                </Text>
                 <Box
                   as="button"
                   onClick={copyContractAddress}
@@ -216,23 +256,23 @@ export default function MintingTokenCard({ token, currencyUnit = 'Pi' }: Minting
                   px={2}
                   py={0.5}
                   _hover={{
-                    bg: "gray.100",
-                    borderColor: "brand.primary"
+                    bg: 'gray.100',
+                    borderColor: 'brand.primary',
                   }}
                   transition="all 0.2s"
                   title={t('copyAddressSuccess')}
                 >
                   <Icon as={FaFileContract} mr={1} fontSize="10px" />
-                  {formatContractAddress(token.contractAddress)}
+                  {formatContractAddress(token.address)}
                 </Box>
               </HStack>
             )}
           </Stack>
-          
-          <Button 
+
+          <Button
             as={NextLink}
-            href={`/mint/${token.contractAddress}`}
-            colorScheme="purple" 
+            href={`/mint/${token.address}`}
+            colorScheme="purple"
             bg="brand.primary"
             _hover={{ bg: 'brand.light' }}
             size="sm"
@@ -241,15 +281,15 @@ export default function MintingTokenCard({ token, currencyUnit = 'Pi' }: Minting
           >
             {t('joinMinting')}
           </Button>
-          
+
           {/* 社交媒体链接和分享按钮 */}
           <HStack justify="space-between" mt={1}>
             <HStack spacing={3}>
               {token.website && (
-                <Box 
-                  as="a" 
-                  href={token.website} 
-                  target="_blank" 
+                <Box
+                  as="a"
+                  href={token.website}
+                  target="_blank"
                   rel="noopener noreferrer"
                   color={iconColor}
                   _hover={{ color: iconHoverColor }}
@@ -259,10 +299,10 @@ export default function MintingTokenCard({ token, currencyUnit = 'Pi' }: Minting
                 </Box>
               )}
               {token.twitter && (
-                <Box 
-                  as="a" 
-                  href={token.twitter} 
-                  target="_blank" 
+                <Box
+                  as="a"
+                  href={token.twitter}
+                  target="_blank"
                   rel="noopener noreferrer"
                   color={iconColor}
                   _hover={{ color: iconHoverColor }}
@@ -272,10 +312,10 @@ export default function MintingTokenCard({ token, currencyUnit = 'Pi' }: Minting
                 </Box>
               )}
               {token.telegram && (
-                <Box 
-                  as="a" 
-                  href={token.telegram} 
-                  target="_blank" 
+                <Box
+                  as="a"
+                  href={token.telegram}
+                  target="_blank"
                   rel="noopener noreferrer"
                   color={iconColor}
                   _hover={{ color: iconHoverColor }}
@@ -285,7 +325,7 @@ export default function MintingTokenCard({ token, currencyUnit = 'Pi' }: Minting
                 </Box>
               )}
             </HStack>
-            <Box 
+            <Box
               as="button"
               onClick={handleShare}
               color={iconColor}
@@ -298,5 +338,5 @@ export default function MintingTokenCard({ token, currencyUnit = 'Pi' }: Minting
         </Stack>
       </CardBody>
     </Card>
-  );
-} 
+  )
+}

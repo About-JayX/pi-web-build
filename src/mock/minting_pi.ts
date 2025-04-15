@@ -14,8 +14,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSW7ZmBnbdQoZH8NLygHbEoEABqXRZvKy5ToQA7JGj9pD4cK',
-    deployedAt: 1708234567000
+    address: 'PiSW7ZmBnbdQoZH8NLygHbEoEABqXRZvKy5ToQA7JGj9pD4cK',
+    deployedAt: 1708234567000,
   },
   {
     id: 2,
@@ -31,8 +31,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiS9q5Jd2HrKnVzjJcUzfLDkT8a6Z3XgYbR4mPE7NwQsFv1B',
-    deployedAt: 1707543210000
+    address: 'PiS9q5Jd2HrKnVzjJcUzfLDkT8a6Z3XgYbR4mPE7NwQsFv1B',
+    deployedAt: 1707543210000,
   },
   {
     id: 3,
@@ -48,8 +48,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSV2rnKqLmcD8p9gH1XzQfER5vT6tWxYsBZ7aJN4uCe3kP',
-    deployedAt: 1709012345000
+    address: 'PiSV2rnKqLmcD8p9gH1XzQfER5vT6tWxYsBZ7aJN4uCe3kP',
+    deployedAt: 1709012345000,
   },
   {
     id: 4,
@@ -65,8 +65,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSKx5Nz2qJwY8ThBf6m7eRdA3p4VgC9sLQU1Ha3FoXc5vt',
-    deployedAt: 1708743852000
+    address: 'PiSKx5Nz2qJwY8ThBf6m7eRdA3p4VgC9sLQU1Ha3FoXc5vt',
+    deployedAt: 1708743852000,
   },
   {
     id: 5,
@@ -82,8 +82,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSDbL7vEhZfTq1W96gp3K8YxMnRQs4GaCjo25XcNtAur2m',
-    deployedAt: 1706954321000
+    address: 'PiSDbL7vEhZfTq1W96gp3K8YxMnRQs4GaCjo25XcNtAur2m',
+    deployedAt: 1706954321000,
   },
   {
     id: 6,
@@ -99,8 +99,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSG4nfPqbZc28rWmTyL1s3aKxDve9NjH7YR6F5pQkwgSVh',
-    deployedAt: 1708126732000
+    address: 'PiSG4nfPqbZc28rWmTyL1s3aKxDve9NjH7YR6F5pQkwgSVh',
+    deployedAt: 1708126732000,
   },
   {
     id: 7,
@@ -116,8 +116,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSUwP6b4Qe9zTfAyJrL7nMh5mGc3SkN8xDa2vXqZ1Cs1Hd',
-    deployedAt: 1707398765000
+    address: 'PiSUwP6b4Qe9zTfAyJrL7nMh5mGc3SkN8xDa2vXqZ1Cs1Hd',
+    deployedAt: 1707398765000,
   },
   {
     id: 8,
@@ -133,8 +133,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSJyF3s1kEpVd7BZtXNr9c2hQw4M5LaPmG6qA8gRvWzT2f',
-    deployedAt: 1707691234000
+    address: 'PiSJyF3s1kEpVd7BZtXNr9c2hQw4M5LaPmG6qA8gRvWzT2f',
+    deployedAt: 1707691234000,
   },
   {
     id: 9,
@@ -150,8 +150,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSrEvx5FhT8jYbLq3Cs1Z9n7WgKp4VdAmG6aNw2mQyH3fB',
-    deployedAt: 1709867532000
+    address: 'PiSrEvx5FhT8jYbLq3Cs1Z9n7WgKp4VdAmG6aNw2mQyH3fB',
+    deployedAt: 1709867532000,
   },
   {
     id: 10,
@@ -167,8 +167,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSb8zMq1LgWxRfH9aPsY4Kj3nT7vC5tZeD6wNcEu2AdVmk',
-    deployedAt: 1708356789000
+    address: 'PiSb8zMq1LgWxRfH9aPsY4Kj3nT7vC5tZeD6wNcEu2AdVmk',
+    deployedAt: 1708356789000,
   },
   {
     id: 11,
@@ -184,8 +184,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSq6aZ7TwPj2RcE1hXnL9k3YsD5Vb8xFgNmG4uHQfKpBva',
-    deployedAt: 1709967841000
+    address: 'PiSq6aZ7TwPj2RcE1hXnL9k3YsD5Vb8xFgNmG4uHQfKpBva',
+    deployedAt: 1709967841000,
   },
   {
     id: 12,
@@ -201,8 +201,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSd2vEx5QnR7YzJp9aMb3c6K1FgT8WsU4LhkZwNqP6jHmS',
-    deployedAt: 1708674321000
+    address: 'PiSd2vEx5QnR7YzJp9aMb3c6K1FgT8WsU4LhkZwNqP6jHmS',
+    deployedAt: 1708674321000,
   },
   {
     id: 13,
@@ -218,8 +218,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiS1tLnJvP9dHyMcQ2BfkRgW8x6Z7sSaX3Ep5AcNq4YurFh',
-    deployedAt: 1706765432000
+    address: 'PiS1tLnJvP9dHyMcQ2BfkRgW8x6Z7sSaX3Ep5AcNq4YurFh',
+    deployedAt: 1706765432000,
   },
   {
     id: 14,
@@ -235,8 +235,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSm3nGcQ7LfKpVs9ZrWx4HyJt5B6a2N8d1EPXmTkYvUhAg',
-    deployedAt: 1709543219000
+    address: 'PiSm3nGcQ7LfKpVs9ZrWx4HyJt5B6a2N8d1EPXmTkYvUhAg',
+    deployedAt: 1709543219000,
   },
   {
     id: 15,
@@ -252,8 +252,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSp9xB5wC7NaT2fgEkRv6j3qLh4s8mDZn1QYyKXdG1A7eu',
-    deployedAt: 1707876543000
+    address: 'PiSp9xB5wC7NaT2fgEkRv6j3qLh4s8mDZn1QYyKXdG1A7eu',
+    deployedAt: 1707876543000,
   },
   {
     id: 16,
@@ -269,8 +269,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSX6wYrPqNzK3g9cTdM1fBvEh5j7A8sG2JmRa4H1VbFyLn',
-    deployedAt: 1707345678000
+    address: 'PiSX6wYrPqNzK3g9cTdM1fBvEh5j7A8sG2JmRa4H1VbFyLn',
+    deployedAt: 1707345678000,
   },
   {
     id: 17,
@@ -286,8 +286,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSk4QvD7mZnLf2h6WpRxBg1sY3TaJc9E5b8HKACjNsG3tF',
-    deployedAt: 1708789012000
+    address: 'PiSk4QvD7mZnLf2h6WpRxBg1sY3TaJc9E5b8HKACjNsG3tF',
+    deployedAt: 1708789012000,
   },
   {
     id: 18,
@@ -303,8 +303,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSR5gEd9HqWvM8xZ2YnKb6CaNySjs7Bk1A3PfXcQ4LrGem',
-    deployedAt: 1708246813000
+    address: 'PiSR5gEd9HqWvM8xZ2YnKb6CaNySjs7Bk1A3PfXcQ4LrGem',
+    deployedAt: 1708246813000,
   },
   {
     id: 19,
@@ -320,8 +320,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSeCn4Pf2gDk5r8vTmQ1HsJ6xBa9zWyS7Y3LAjR3pVuGKh',
-    deployedAt: 1709165432000
+    address: 'PiSeCn4Pf2gDk5r8vTmQ1HsJ6xBa9zWyS7Y3LAjR3pVuGKh',
+    deployedAt: 1709165432000,
   },
   {
     id: 20,
@@ -337,8 +337,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSaVz3k9PcRqG7n6hEyJ5mBdXrHs8Tg2Q1LfYx4NpWwCje',
-    deployedAt: 1708945678000
+    address: 'PiSaVz3k9PcRqG7n6hEyJ5mBdXrHs8Tg2Q1LfYx4NpWwCje',
+    deployedAt: 1708945678000,
   },
   {
     id: 21,
@@ -354,8 +354,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSn2PhX7Bk1DdRsG6vEwZcq8LfTaYmN5j3HrQCAa9uSxKp',
-    deployedAt: 1708367890000
+    address: 'PiSn2PhX7Bk1DdRsG6vEwZcq8LfTaYmN5j3HrQCAa9uSxKp',
+    deployedAt: 1708367890000,
   },
   {
     id: 22,
@@ -371,8 +371,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSt7UgYcX5WqRdP8sBaL2v3KpH9mMn4E6f1TQjZ2NkFrAh',
-    deployedAt: 1707654387000
+    address: 'PiSt7UgYcX5WqRdP8sBaL2v3KpH9mMn4E6f1TQjZ2NkFrAh',
+    deployedAt: 1707654387000,
   },
   {
     id: 23,
@@ -388,8 +388,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSw6VjQcTy2B9nMkLsH5GbZrfD3xXa8P1gJhK4Fp7WvS3d',
-    deployedAt: 1707987654000
+    address: 'PiSw6VjQcTy2B9nMkLsH5GbZrfD3xXa8P1gJhK4Fp7WvS3d',
+    deployedAt: 1707987654000,
   },
   {
     id: 24,
@@ -405,8 +405,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSz8vRqS6kWpNhBYxL2fCj7TaG3Dm4n9E5yA1ZcVt1PbQ2',
-    deployedAt: 1709378901000
+    address: 'PiSz8vRqS6kWpNhBYxL2fCj7TaG3Dm4n9E5yA1ZcVt1PbQ2',
+    deployedAt: 1709378901000,
   },
   {
     id: 25,
@@ -422,8 +422,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSfTyXm9NqLaCr7b8G2H1g5jEkV4wS3Z6dKpRnBhQxAsze',
-    deployedAt: 1708123456000
+    address: 'PiSfTyXm9NqLaCr7b8G2H1g5jEkV4wS3Z6dKpRnBhQxAsze',
+    deployedAt: 1708123456000,
   },
   {
     id: 26,
@@ -439,8 +439,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiS2cMvWqKx6BpTzNfGy8L1aRd9hYj7s4QgSr3FnEH5PvJu',
-    deployedAt: 1709725432000
+    address: 'PiS2cMvWqKx6BpTzNfGy8L1aRd9hYj7s4QgSr3FnEH5PvJu',
+    deployedAt: 1709725432000,
   },
   {
     id: 27,
@@ -456,8 +456,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiS3jLkNfQyS4m9zVwBa2TgDhXc5Gp8RtZ6K7eFxLqP1nUv',
-    deployedAt: 1708245679000
+    address: 'PiS3jLkNfQyS4m9zVwBa2TgDhXc5Gp8RtZ6K7eFxLqP1nUv',
+    deployedAt: 1708245679000,
   },
   {
     id: 28,
@@ -473,8 +473,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSa2dCv8nJhErFgW7YmP5XbL4qZuS9s3K6TkDpQ1RfBtNx',
-    deployedAt: 1707123789000
+    address: 'PiSa2dCv8nJhErFgW7YmP5XbL4qZuS9s3K6TkDpQ1RfBtNx',
+    deployedAt: 1707123789000,
   },
   {
     id: 29,
@@ -490,8 +490,8 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSd7FhG2mN5vTs8aLqW9cRxKj3BpZ6YbV4eA1XnSuC7ygf',
-    deployedAt: 1708967483000
+    address: 'PiSd7FhG2mN5vTs8aLqW9cRxKj3BpZ6YbV4eA1XnSuC7ygf',
+    deployedAt: 1708967483000,
   },
   {
     id: 30,
@@ -507,7 +507,7 @@ export const mintingTokensPi = [
     website: 'https://x.pi.sale',
     twitter: 'https://x.com/X_Pi_S',
     telegram: 'https://t.me/XPi_S',
-    contractAddress: 'PiSt9RxMqW3j8hBkA4nGcFf6ZvPaY1D5s2LbVdE7HyNpQeS',
-    deployedAt: 1707234876000
-  }
-]; 
+    address: 'PiSt9RxMqW3j8hBkA4nGcFf6ZvPaY1D5s2LbVdE7HyNpQeS',
+    deployedAt: 1707234876000,
+  },
+]
