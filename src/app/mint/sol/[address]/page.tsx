@@ -30,15 +30,32 @@ import { selectTokenByAddress, fetchTokenList } from '@/store/slices/tokenSlice'
 import { useTranslation } from 'react-i18next'
 import { FaCoins, FaUsers, FaChartPie } from 'react-icons/fa'
 import MintingForm from '@/components/token-detail/MintingForm'
+import { useSolana } from '@/contexts/solanaProvider'
+import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
+import { formatFairCurveState } from '@/web3/fairMint/utils/format'
 
 export default function TokenMintPage() {
   const { address } = useParams()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
+  const { conn } = useSolana()
 
-  const { token: selectedToken, loading, error } = useAppSelector(
-    selectTokenByAddress(address as string)
-  )
+  const {
+    token: selectedToken,
+    loading: tokenLoading,
+    error: tokenError,
+  } = useAppSelector(selectTokenByAddress(address as string))
+
+  const {
+    data: fairCurveData,
+    loading: fairCurveLoading,
+    error: fairCurveError,
+  } = useFairCurve(conn, selectedToken?.address || '')
+
+  const formattedData = fairCurveData
+    ? formatFairCurveState(fairCurveData)
+    : null
+
   const cardBg = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.700')
   const statBg = useColorModeValue('gray.50', 'gray.700')
@@ -53,7 +70,78 @@ export default function TokenMintPage() {
     dispatch(fetchTokenList())
   }, [dispatch])
 
-  if (loading) {
+  // 添加数据监听和日志输出
+  useEffect(() => {
+    if (address) {
+      console.log('当前地址:', address)
+    }
+  }, [address])
+
+  useEffect(() => {
+    console.log('Solana 连接状态:', {
+      hasConnection: !!conn,
+      connectionUrl: conn?.rpcEndpoint,
+      selectedToken: selectedToken?.address,
+    })
+  }, [conn, selectedToken])
+
+  useEffect(() => {
+    if (selectedToken) {
+      console.log('Token 数据:', {
+        name: selectedToken.name,
+        symbol: selectedToken.symbol,
+        address: selectedToken.address,
+        totalSupply: selectedToken.totalSupply,
+        participants: selectedToken.participants,
+      })
+    }
+  }, [selectedToken])
+
+  useEffect(() => {
+    if (fairCurveData) {
+      console.log('合约状态:', {
+        liquidityAdded: fairCurveData.liquidityAdded,
+        feeRate: fairCurveData.feeRate,
+        tokenDecimal: fairCurveData.tokenDecimal,
+        solDecimal: fairCurveData.solDecimal,
+        mint: fairCurveData.mint,
+        remaining: fairCurveData.remaining.toString(),
+        supply: fairCurveData.supply.toString(),
+        supplied: fairCurveData.supplied.toString(),
+        solReceived: fairCurveData.solReceived.toString(),
+        liquiditySol: fairCurveData.liquiditySol.toString(),
+        liquidityToken: fairCurveData.liquidityToken.toString(),
+        liquiditySolFee: fairCurveData.liquiditySolFee.toString(),
+        liquidityTokenFee: fairCurveData.liquidityTokenFee.toString(),
+        fee: fairCurveData.fee.toString(),
+      })
+    }
+  }, [fairCurveData])
+
+  useEffect(() => {
+    if (formattedData) {
+      console.log('格式化数据:', {
+        supply: formattedData.supply,
+        remaining: formattedData.remaining,
+        supplied: formattedData.supplied,
+        solReceived: formattedData.solReceived,
+        progress: formattedData.progress,
+        feeRate: formattedData.feeRate,
+      })
+    }
+  }, [formattedData])
+
+  if (!conn) {
+    return (
+      <Center minH="60vh">
+        <VStack spacing={4}>
+          <Text color="red.500">{t('noConnection')}</Text>
+        </VStack>
+      </Center>
+    )
+  }
+
+  if (tokenLoading || fairCurveLoading) {
     return (
       <Center minH="60vh">
         <Spinner size="xl" color="brand.primary" />
@@ -61,17 +149,17 @@ export default function TokenMintPage() {
     )
   }
 
-  if (error) {
+  if (tokenError || fairCurveError) {
     return (
       <Center minH="60vh">
         <VStack spacing={4}>
-          <Text color="red.500">{error}</Text>
+          <Text color="red.500">{tokenError || fairCurveError}</Text>
         </VStack>
       </Center>
     )
   }
 
-  if (!selectedToken) {
+  if (!selectedToken || !formattedData) {
     return (
       <Center minH="60vh">
         <Text>{t('tokenNotFound')}</Text>
@@ -110,7 +198,7 @@ export default function TokenMintPage() {
                             <Text>{t('totalSupply')}</Text>
                           </HStack>
                         </StatLabel>
-                        <StatNumber>{selectedToken.totalSupply}</StatNumber>
+                        <StatNumber>{formattedData.supply}</StatNumber>
                       </Stat>
 
                       <Stat bg={statBg} p={4} borderRadius="lg">
@@ -130,10 +218,10 @@ export default function TokenMintPage() {
                             <Text>{t('progress')}</Text>
                           </HStack>
                         </StatLabel>
-                        <StatNumber>{selectedToken.progress}%</StatNumber>
+                        <StatNumber>{formattedData.progress}%</StatNumber>
                         <StatHelpText>
                           <Progress
-                            value={selectedToken.progress}
+                            value={formattedData.progress}
                             size="sm"
                             colorScheme="purple"
                             borderRadius="full"
@@ -171,17 +259,24 @@ export default function TokenMintPage() {
                   <VStack align="stretch" spacing={3}>
                     <HStack justify="space-between">
                       <Text color="gray.500">{t('presaleRate')}:</Text>
-                      <Text fontWeight="bold">{selectedToken.presaleRate}</Text>
+                      <Text fontWeight="bold">{formattedData.feeRate}</Text>
                     </HStack>
                     <Divider />
                     <HStack justify="space-between">
-                      <Text color="gray.500">{t('target')}:</Text>
-                      <Text fontWeight="bold">{selectedToken.target}</Text>
+                      <Text color="gray.500">{t('remaining')}:</Text>
+                      <Text fontWeight="bold">{formattedData.remaining}</Text>
                     </HStack>
                     <Divider />
                     <HStack justify="space-between">
-                      <Text color="gray.500">{t('raised')}:</Text>
-                      <Text fontWeight="bold">{selectedToken.raised}</Text>
+                      <Text color="gray.500">{t('supplied')}:</Text>
+                      <Text fontWeight="bold">{formattedData.supplied}</Text>
+                    </HStack>
+                    <Divider />
+                    <HStack justify="space-between">
+                      <Text color="gray.500">{t('solReceived')}:</Text>
+                      <Text fontWeight="bold">
+                        {formattedData.solReceived} SOL
+                      </Text>
                     </HStack>
                   </VStack>
                 </Stack>

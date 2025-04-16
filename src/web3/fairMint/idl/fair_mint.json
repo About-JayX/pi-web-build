@@ -1,5 +1,5 @@
 {
-  "address": "74Vcnsny6346VKieUkDZuDtUCeNrv4UA8kKb8re7U5yc",
+  "address": "EXvMSxRmAVhFteebkv3QvefzBCjvB5b1PSoHbgHiqXYQ",
   "metadata": {
     "name": "fair_mint",
     "version": "0.1.0",
@@ -8,9 +8,80 @@
   },
   "instructions": [
     {
-      "name": "create_pool",
-      "discriminator": [233, 146, 209, 142, 207, 104, 64, 188],
+      "name": "create_config",
+      "discriminator": [
+        201,
+        207,
+        243,
+        114,
+        75,
+        111,
+        47,
+        189
+      ],
       "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "init_liquidity_sol"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "init_liquidity_sol",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "create_pool",
+      "discriminator": [
+        233,
+        146,
+        209,
+        142,
+        207,
+        104,
+        64,
+        188
+      ],
+      "accounts": [
+        {
+          "name": "clmm_program",
+          "address": "CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK"
+        },
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
         {
           "name": "fair_curve",
           "writable": true,
@@ -18,294 +89,239 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [102, 97, 105, 114, 95, 99, 117, 114, 118, 101]
+                "value": [
+                  102,
+                  97,
+                  105,
+                  114,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
               },
               {
                 "kind": "account",
-                "path": "amm_pc_mint"
+                "path": "token_mint_1"
               }
             ]
           }
         },
         {
-          "name": "amm_program"
-        },
-        {
-          "name": "associated_token_program",
-          "docs": ["Associated token program"],
-          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-        },
-        {
-          "name": "system_program",
-          "docs": ["System program"],
-          "address": "11111111111111111111111111111111"
-        },
-        {
-          "name": "sysvar_rent",
-          "docs": ["Rent sysvar"],
-          "address": "SysvarRent111111111111111111111111111111111"
-        },
-        {
-          "name": "amm",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "amm_program"
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  97, 109, 109, 95, 97, 115, 115, 111, 99, 105, 97, 116, 101,
-                  100, 95, 115, 101, 101, 100
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "amm_program"
-            }
-          }
-        },
-        {
-          "name": "amm_authority",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  97, 109, 109, 32, 97, 117, 116, 104, 111, 114, 105, 116, 121
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "amm_program"
-            }
-          }
-        },
-        {
-          "name": "amm_open_orders",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "amm_program"
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  111, 112, 101, 110, 95, 111, 114, 100, 101, 114, 95, 97, 115,
-                  115, 111, 99, 105, 97, 116, 101, 100, 95, 115, 101, 101, 100
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "amm_program"
-            }
-          }
-        },
-        {
-          "name": "amm_lp_mint",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "amm_program"
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  116, 101, 109, 112, 95, 108, 112, 95, 116, 111, 107, 101, 110,
-                  95, 97, 115, 115, 111, 99, 105, 97, 116, 101, 100, 95, 115,
-                  101, 101, 100
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "amm_program"
-            }
-          }
-        },
-        {
-          "name": "amm_coin_mint"
-        },
-        {
-          "name": "amm_pc_mint"
-        },
-        {
-          "name": "amm_coin_vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "amm_program"
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  99, 111, 105, 110, 95, 118, 97, 117, 108, 116, 95, 97, 115,
-                  115, 111, 99, 105, 97, 116, 101, 100, 95, 115, 101, 101, 100
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "amm_program"
-            }
-          }
-        },
-        {
-          "name": "amm_pc_vault",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "amm_program"
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  112, 99, 95, 118, 97, 117, 108, 116, 95, 97, 115, 115, 111,
-                  99, 105, 97, 116, 101, 100, 95, 115, 101, 101, 100
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "amm_program"
-            }
-          }
-        },
-        {
-          "name": "amm_target_orders",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "account",
-                "path": "amm_program"
-              },
-              {
-                "kind": "account",
-                "path": "market"
-              },
-              {
-                "kind": "const",
-                "value": [
-                  116, 97, 114, 103, 101, 116, 95, 97, 115, 115, 111, 99, 105,
-                  97, 116, 101, 100, 95, 115, 101, 101, 100
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "amm_program"
-            }
-          }
-        },
-        {
-          "name": "amm_config",
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  97, 109, 109, 95, 99, 111, 110, 102, 105, 103, 95, 97, 99, 99,
-                  111, 117, 110, 116, 95, 115, 101, 101, 100
-                ]
-              }
-            ],
-            "program": {
-              "kind": "account",
-              "path": "amm_program"
-            }
-          }
-        },
-        {
-          "name": "create_fee_destination"
-        },
-        {
-          "name": "market_program"
-        },
-        {
-          "name": "market"
-        },
-        {
-          "name": "user_wallet",
-          "docs": ["User wallet that's creating the pool"],
+          "name": "position_nft_mint",
           "writable": true,
           "signer": true
         },
         {
-          "name": "user_token_coin",
+          "name": "position_nft_account",
           "writable": true
         },
         {
-          "name": "user_token_pc",
+          "name": "pool_state",
           "writable": true
         },
         {
-          "name": "user_token_lp",
+          "name": "protocol_position",
+          "writable": true
+        },
+        {
+          "name": "personal_position",
+          "writable": true
+        },
+        {
+          "name": "tick_array_lower",
+          "writable": true
+        },
+        {
+          "name": "tick_array_upper",
+          "writable": true
+        },
+        {
+          "name": "metadata_account",
+          "writable": true
+        },
+        {
+          "name": "metadata_program",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        },
+        {
+          "name": "token_vault",
+          "writable": true
+        },
+        {
+          "name": "token_account_0",
+          "writable": true
+        },
+        {
+          "name": "token_account_1",
+          "writable": true
+        },
+        {
+          "name": "token_vault_0",
+          "writable": true
+        },
+        {
+          "name": "token_vault_1",
+          "writable": true
+        },
+        {
+          "name": "token_mint_0",
+          "writable": true
+        },
+        {
+          "name": "token_mint_1",
+          "writable": true
+        },
+        {
+          "name": "fee_receiver_account",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "amm_program"
-              },
-              {
-                "kind": "account",
-                "path": "market"
+                "path": "fee_receiver"
               },
               {
                 "kind": "const",
                 "value": [
-                  116, 101, 109, 112, 95, 108, 112, 95, 116, 111, 107, 101, 110,
-                  95, 97, 115, 115, 111, 99, 105, 97, 116, 101, 100, 95, 115,
-                  101, 101, 100
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
                 ]
+              },
+              {
+                "kind": "account",
+                "path": "token_mint_1"
               }
             ],
             "program": {
-              "kind": "account",
-              "path": "amm_program"
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
             }
           }
+        },
+        {
+          "name": "fee_receiver",
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "token_2022_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        },
+        {
+          "name": "tick_array_bitmap_extension",
+          "writable": true
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "tick_lower_index",
+          "type": "i32"
+        },
+        {
+          "name": "tick_upper_index",
+          "type": "i32"
+        },
+        {
+          "name": "tick_array_lower_start_index",
+          "type": "i32"
+        },
+        {
+          "name": "tick_array_upper_start_index",
+          "type": "i32"
+        }
+      ]
     },
     {
       "name": "create_token",
-      "discriminator": [84, 52, 204, 228, 24, 140, 234, 75],
+      "discriminator": [
+        84,
+        52,
+        204,
+        228,
+        24,
+        140,
+        234,
+        75
+      ],
       "accounts": [
         {
           "name": "signer",
@@ -315,6 +331,9 @@
         {
           "name": "authority",
           "writable": true
+        },
+        {
+          "name": "launch_config"
         },
         {
           "name": "mint",
@@ -328,7 +347,18 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [102, 97, 105, 114, 95, 99, 117, 114, 118, 101]
+                "value": [
+                  102,
+                  97,
+                  105,
+                  114,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
               },
               {
                 "kind": "account",
@@ -351,7 +381,9 @@
         },
         {
           "name": "token_program",
-          "docs": ["spl token or spl-2022 token"]
+          "docs": [
+            "spl token or spl-2022 token"
+          ]
         },
         {
           "name": "associated_token_program",
@@ -387,7 +419,16 @@
     },
     {
       "name": "mint_token",
-      "discriminator": [172, 137, 183, 14, 207, 110, 234, 56],
+      "discriminator": [
+        172,
+        137,
+        183,
+        14,
+        207,
+        110,
+        234,
+        56
+      ],
       "accounts": [
         {
           "name": "signer",
@@ -404,7 +445,18 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [102, 97, 105, 114, 95, 99, 117, 114, 118, 101]
+                "value": [
+                  102,
+                  97,
+                  105,
+                  114,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
               },
               {
                 "kind": "account",
@@ -438,9 +490,38 @@
             "program": {
               "kind": "const",
               "value": [
-                140, 151, 37, 143, 78, 36, 137, 241, 187, 61, 16, 41, 20, 142,
-                13, 131, 11, 90, 19, 153, 218, 255, 16, 132, 4, 142, 123, 216,
-                219, 233, 248, 89
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
               ]
             }
           }
@@ -451,7 +532,9 @@
         },
         {
           "name": "token_program",
-          "docs": ["spl token or spl-2022 token"]
+          "docs": [
+            "spl token or spl-2022 token"
+          ]
         },
         {
           "name": "system_program",
@@ -467,7 +550,16 @@
     },
     {
       "name": "return_token",
-      "discriminator": [44, 110, 255, 181, 72, 150, 205, 156],
+      "discriminator": [
+        44,
+        110,
+        255,
+        181,
+        72,
+        150,
+        205,
+        156
+      ],
       "accounts": [
         {
           "name": "signer",
@@ -484,7 +576,18 @@
             "seeds": [
               {
                 "kind": "const",
-                "value": [102, 97, 105, 114, 95, 99, 117, 114, 118, 101]
+                "value": [
+                  102,
+                  97,
+                  105,
+                  114,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ]
               },
               {
                 "kind": "account",
@@ -507,7 +610,9 @@
         },
         {
           "name": "token_program",
-          "docs": ["spl token or spl-2022 token"]
+          "docs": [
+            "spl token or spl-2022 token"
+          ]
         },
         {
           "name": "system_program",
@@ -525,52 +630,175 @@
   "accounts": [
     {
       "name": "FairCurve",
-      "discriminator": [218, 149, 243, 196, 210, 100, 233, 1]
+      "discriminator": [
+        218,
+        149,
+        243,
+        196,
+        210,
+        100,
+        233,
+        1
+      ]
+    },
+    {
+      "name": "LaunchConfig",
+      "discriminator": [
+        18,
+        161,
+        9,
+        224,
+        102,
+        145,
+        29,
+        94
+      ]
+    },
+    {
+      "name": "PoolState",
+      "discriminator": [
+        247,
+        237,
+        227,
+        245,
+        215,
+        195,
+        222,
+        70
+      ]
     }
   ],
   "events": [
     {
-      "name": "CreatePool",
-      "discriminator": [59, 140, 255, 33, 76, 64, 175, 42]
+      "name": "BuyTokenEvent",
+      "discriminator": [
+        90,
+        138,
+        104,
+        84,
+        222,
+        143,
+        82,
+        123
+      ]
+    },
+    {
+      "name": "IncreaseLiquidityEvent",
+      "discriminator": [
+        49,
+        79,
+        105,
+        212,
+        32,
+        34,
+        30,
+        84
+      ]
+    },
+    {
+      "name": "LiquidityEvent",
+      "discriminator": [
+        164,
+        92,
+        200,
+        16,
+        136,
+        60,
+        73,
+        17
+      ]
+    },
+    {
+      "name": "NewConfigEvent",
+      "discriminator": [
+        101,
+        58,
+        38,
+        101,
+        61,
+        208,
+        27,
+        249
+      ]
+    },
+    {
+      "name": "SellTokenEvent",
+      "discriminator": [
+        148,
+        185,
+        126,
+        171,
+        239,
+        120,
+        196,
+        178
+      ]
+    },
+    {
+      "name": "TokenCreatedEvent",
+      "discriminator": [
+        96,
+        122,
+        113,
+        138,
+        50,
+        227,
+        149,
+        57
+      ]
     }
   ],
   "errors": [
     {
       "code": 6000,
+      "name": "UnauthorizedSigner",
+      "msg": "unauthorized signer"
+    },
+    {
+      "code": 6001,
       "name": "MinimalAmount",
       "msg": "minimal sol > 0.001 sol"
     },
     {
-      "code": 6001,
+      "code": 6002,
       "name": "InvalidSolAmount",
       "msg": "Must be an integer multiple of 0.001 sol"
     },
     {
-      "code": 6002,
+      "code": 6003,
       "name": "InsufficientBalance",
       "msg": "Insufficient balance remaining"
+    },
+    {
+      "code": 6004,
+      "name": "LiquidityAdded",
+      "msg": "liquidity already added"
     }
   ],
   "types": [
     {
-      "name": "CreatePool",
+      "name": "BuyTokenEvent",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "token_mint_0",
+            "name": "token",
             "type": "pubkey"
           },
           {
-            "name": "token_mint_1",
+            "name": "authority",
             "type": "pubkey"
           },
           {
-            "name": "amount_0",
+            "name": "destination",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
             "type": "u64"
           },
           {
-            "name": "amount_1",
+            "name": "quote_amount",
             "type": "u64"
           },
           {
@@ -635,14 +863,519 @@
             "type": "u64"
           },
           {
+            "name": "liquidity_sol_fee",
+            "type": "u64"
+          },
+          {
+            "name": "liquidity_token_fee",
+            "type": "u64"
+          },
+          {
             "name": "fee",
             "type": "u64"
           },
           {
             "name": "reserved",
             "type": {
-              "array": ["u8", 64]
+              "array": [
+                "u8",
+                64
+              ]
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "IncreaseLiquidityEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "lp_token",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "LaunchConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "init_liquidity_sol",
+            "type": "u64"
+          },
+          {
+            "name": "reserved",
+            "type": {
+              "array": [
+                "u8",
+                64
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "LiquidityEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "token_mint_0",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint_1",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount_0",
+            "type": "u64"
+          },
+          {
+            "name": "amount_1",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "NewConfigEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "address",
+            "type": "pubkey"
+          },
+          {
+            "name": "init_liquidity",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PoolState",
+      "docs": [
+        "The pool state",
+        "",
+        "PDA of `[POOL_SEED, config, token_mint_0, token_mint_1]`",
+        ""
+      ],
+      "serialization": "bytemuckunsafe",
+      "repr": {
+        "kind": "c",
+        "packed": true
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "bump",
+            "docs": [
+              "Bump to identify PDA"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                1
+              ]
+            }
+          },
+          {
+            "name": "amm_config",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint_0",
+            "docs": [
+              "Token pair of the pool, where token_mint_0 address < token_mint_1 address"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "token_mint_1",
+            "type": "pubkey"
+          },
+          {
+            "name": "token_vault_0",
+            "docs": [
+              "Token pair vault"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "token_vault_1",
+            "type": "pubkey"
+          },
+          {
+            "name": "observation_key",
+            "docs": [
+              "observation account key"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "mint_decimals_0",
+            "docs": [
+              "mint0 and mint1 decimals"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "mint_decimals_1",
+            "type": "u8"
+          },
+          {
+            "name": "tick_spacing",
+            "docs": [
+              "The minimum number of ticks between initialized ticks"
+            ],
+            "type": "u16"
+          },
+          {
+            "name": "liquidity",
+            "docs": [
+              "The currently in range liquidity available to the pool."
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "sqrt_price_x64",
+            "docs": [
+              "The current price of the pool as a sqrt(token_1/token_0) Q64.64 value"
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "tick_current",
+            "docs": [
+              "The current tick of the pool, i.e. according to the last tick transition that was run."
+            ],
+            "type": "i32"
+          },
+          {
+            "name": "padding3",
+            "type": "u16"
+          },
+          {
+            "name": "padding4",
+            "type": "u16"
+          },
+          {
+            "name": "fee_growth_global_0_x64",
+            "docs": [
+              "The fee growth as a Q64.64 number, i.e. fees of token_0 and token_1 collected per",
+              "unit of liquidity for the entire life of the pool."
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "fee_growth_global_1_x64",
+            "type": "u128"
+          },
+          {
+            "name": "protocol_fees_token_0",
+            "docs": [
+              "The amounts of token_0 and token_1 that are owed to the protocol."
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "protocol_fees_token_1",
+            "type": "u64"
+          },
+          {
+            "name": "swap_in_amount_token_0",
+            "docs": [
+              "The amounts in and out of swap token_0 and token_1"
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "swap_out_amount_token_1",
+            "type": "u128"
+          },
+          {
+            "name": "swap_in_amount_token_1",
+            "type": "u128"
+          },
+          {
+            "name": "swap_out_amount_token_0",
+            "type": "u128"
+          },
+          {
+            "name": "status",
+            "docs": [
+              "Bitwise representation of the state of the pool",
+              "bit0, 1: disable open position and increase liquidity, 0: normal",
+              "bit1, 1: disable decrease liquidity, 0: normal",
+              "bit2, 1: disable collect fee, 0: normal",
+              "bit3, 1: disable collect reward, 0: normal",
+              "bit4, 1: disable swap, 0: normal"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "docs": [
+              "Leave blank for future use"
+            ],
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            }
+          },
+          {
+            "name": "reward_infos",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "RewardInfo"
+                  }
+                },
+                3
+              ]
+            }
+          },
+          {
+            "name": "tick_array_bitmap",
+            "docs": [
+              "Packed initialized tick array state"
+            ],
+            "type": {
+              "array": [
+                "u64",
+                16
+              ]
+            }
+          },
+          {
+            "name": "total_fees_token_0",
+            "docs": [
+              "except protocol_fee and fund_fee"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_fees_claimed_token_0",
+            "docs": [
+              "except protocol_fee and fund_fee"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "total_fees_token_1",
+            "type": "u64"
+          },
+          {
+            "name": "total_fees_claimed_token_1",
+            "type": "u64"
+          },
+          {
+            "name": "fund_fees_token_0",
+            "type": "u64"
+          },
+          {
+            "name": "fund_fees_token_1",
+            "type": "u64"
+          },
+          {
+            "name": "open_time",
+            "type": "u64"
+          },
+          {
+            "name": "recent_epoch",
+            "type": "u64"
+          },
+          {
+            "name": "padding1",
+            "type": {
+              "array": [
+                "u64",
+                24
+              ]
+            }
+          },
+          {
+            "name": "padding2",
+            "type": {
+              "array": [
+                "u64",
+                32
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "RewardInfo",
+      "serialization": "bytemuckunsafe",
+      "repr": {
+        "kind": "c",
+        "packed": true
+      },
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "reward_state",
+            "docs": [
+              "Reward state"
+            ],
+            "type": "u8"
+          },
+          {
+            "name": "open_time",
+            "docs": [
+              "Reward open time"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "end_time",
+            "docs": [
+              "Reward end time"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "last_update_time",
+            "docs": [
+              "Reward last update time"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "emissions_per_second_x64",
+            "docs": [
+              "Q64.64 number indicates how many tokens per second are earned per unit of liquidity."
+            ],
+            "type": "u128"
+          },
+          {
+            "name": "reward_total_emissioned",
+            "docs": [
+              "The total amount of reward emissioned"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "reward_claimed",
+            "docs": [
+              "The total amount of claimed reward"
+            ],
+            "type": "u64"
+          },
+          {
+            "name": "token_mint",
+            "docs": [
+              "Reward token mint."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "token_vault",
+            "docs": [
+              "Reward vault token account."
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "authority",
+            "docs": [
+              "The owner that has permission to set reward param"
+            ],
+            "type": "pubkey"
+          },
+          {
+            "name": "reward_growth_global_x64",
+            "docs": [
+              "Q64.64 number that tracks the total tokens earned per unit of liquidity since the reward",
+              "emissions were turned on."
+            ],
+            "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SellTokenEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "token",
+            "type": "pubkey"
+          },
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "user_token_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "fee",
+            "type": "u64"
+          },
+          {
+            "name": "refund",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenCreatedEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_supply",
+            "type": "u64"
+          },
+          {
+            "name": "metadata",
+            "type": "string"
+          },
+          {
+            "name": "decimal",
+            "type": "u8"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
           }
         ]
       }

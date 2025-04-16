@@ -29,7 +29,7 @@ export const SolanaContext = createContext<solanaContextType>({
   setPublicKey: () => {},
   conn: null,
   FAIR_CURVE_SEED: Buffer.from('fair_curve'),
-  programId: new PublicKey('74Vcnsny6346VKieUkDZuDtUCeNrv4UA8kKb8re7U5yc'),
+  programId: new PublicKey('EXvMSxRmAVhFteebkv3QvefzBCjvB5b1PSoHbgHiqXYQ'),
   wallet: null,
 })
 
@@ -39,7 +39,7 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
   const [conn, setConn] = useState<Connection | null>(null)
   const FAIR_CURVE_SEED = Buffer.from('fair_curve')
   const programId = new PublicKey(
-    '74Vcnsny6346VKieUkDZuDtUCeNrv4UA8kKb8re7U5yc'
+    'EXvMSxRmAVhFteebkv3QvefzBCjvB5b1PSoHbgHiqXYQ'
   )
   const key = (publicKey && new PublicKey(publicKey)) || null
   const wallet = {
