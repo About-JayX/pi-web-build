@@ -385,7 +385,7 @@ const MobileNav = ({ onClose }: { onClose: () => void }) => {
     <Stack
       bg={useColorModeValue('white', 'gray.800')}
       p={4}
-      display={{ md: 'none' }}
+      display={{ xl: 'none' }}
     >
       {NAV_ITEMS.map(navItem => (
         <MobileNavItem

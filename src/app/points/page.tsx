@@ -256,7 +256,7 @@ export default function PointsPage() {
             <GridItem display="flex" flexDirection="column">
               <Flex 
                 direction={{ base: "column", sm: "row" }} 
-                alignItems={{ base: "center", sm: "flex-start" }}
+                alignItems={{ base: "center" }}
                 mb={{ base: 3, md: 4 }}
               >
                 {/* 用户头像和名称 */}
@@ -620,7 +620,7 @@ export default function PointsPage() {
           boxShadow="sm"
           bg={bgColor}
         >
-          <CardBody p={{base:0,sm:6}}>
+          <CardBody p={{base:0,sm:4}}>
             <VStack spacing={5} align="stretch">
               <Flex justifyContent="space-between" alignItems={{ base: "flex-start", md: "center" }} flexDirection={{ base: "column", md: "row" }}>
                 <HStack spacing={3} mb={{ base: 3, md: 0 }}>
