@@ -66,3 +66,50 @@ export interface SolanaLoginParams {
   signature: number[]
   code: string
 }
+
+export interface RankItem {
+  rank: number
+  userId: number
+  token: string
+  nickname: string
+  avatar_url: string
+  solana_wallet?: string
+}
+
+export interface RankResponse {
+  success: boolean
+  msg?: string
+  data: {
+    total: string
+    data: RankItem[]
+    userRank: number | null
+  }
+}
+
+interface SignInReward {
+  day: number
+  signedIn: boolean | null
+}
+
+interface SignInTask {
+  day: number
+  type: 'continuous' | 'accumulation'
+  reward: string
+  canClaim: boolean
+}
+
+export interface SignInInfo {
+  currentStreak: number
+  todaySignedIn: boolean
+  Dailyrewards: string
+  rewards: SignInReward[]
+  task: SignInTask[]
+  message: string
+  status: boolean
+}
+
+export interface SignInInfoResponse {
+  success: boolean
+  msg?: string
+  data: SignInInfo
+}
