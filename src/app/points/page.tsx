@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -60,28 +60,18 @@ export default function PointsPage() {
   const highlightBg = useColorModeValue("purple.50", "purple.900");
   const tableHeadBg = useColorModeValue("gray.50", "gray.700");
 
-  // const { userInfo, authToken, signInInfo } = useAppSelector(
-  //   state => state.user
-  // )
-  const { authToken, signInInfo } = useAppSelector((state) => state.user);
-  const userInfo = {
-    nickname: "张三",
-    avatar_url: "https://example.com/avatar.jpg",
-    solana_wallet: "1234567890",
-    telegramId: "1234567890",
-    twitterId: "1234567890",
-  };
-  const [rankList, setRankList] = useState<RankItem[]>([
-    {
-      rank: 1,
-      userId: "1234567890",
-      token: 1000,
-      nickname: "张三",
-      avatar_url: "https://example.com/avatar.jpg",
-      solana_wallet: "0xE5d5F07C8B22640Ed554E31D5458D6A3C11c5C1a",
-    },
-    { rank: 2, userId: "1234567890", token: 1000 },
-  ]);
+  const { userInfo, authToken, signInInfo } = useAppSelector(
+    state => state.user
+  )
+  // const { authToken, signInInfo } = useAppSelector((state) => state.user);
+  // const userInfo = {
+  //   nickname: "张三",
+  //   avatar_url: "https://example.com/avatar.jpg",
+  //   solana_wallet: "1234567890",
+  //   telegramId: "1234567890",
+  //   twitterId: "1234567890",
+  // };
+  const [rankList, setRankList] = useState<RankItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -173,37 +163,37 @@ export default function PointsPage() {
   const handleShareToTelegram = () => {
     if (!userInfo?.code) return;
     const text = encodeURIComponent(
-      `${t('inviteSuccessReward')}\n${userInfo.code}`
-    )
-    window.open(`https://t.me/share/url?url=${text}`, '_blank')
-  }
+      `${t("inviteSuccessReward")}\n${userInfo.code}`
+    );
+    window.open(`https://t.me/share/url?url=${text}`, "_blank");
+  };
 
   // 分享到Twitter/X
   const handleShareToX = () => {
     if (!userInfo?.code) return;
     const text = encodeURIComponent(
-      `${t('inviteSuccessReward')}\n${userInfo.code}`
-    )
-    window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank')
-  }
+      `${t("inviteSuccessReward")}\n${userInfo.code}`
+    );
+    window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+  };
 
   // 连接社交账号
   const handleConnectSocial = (platform: "telegram" | "twitter") => {
     if (!userInfo) return;
     const isConnected =
-      platform === 'telegram' ? userInfo.telegramId : userInfo.twitterId
+      platform === "telegram" ? userInfo.telegramId : userInfo.twitterId;
 
-    if (isConnected) return
+    if (isConnected) return;
 
     toast({
-      title: platform === 'telegram' ? t('socialBound') : t('socialBound'),
-      description: t('connectReward', { points: REWARDS.connectSocial }),
-      status: 'success',
+      title: platform === "telegram" ? t("socialBound") : t("socialBound"),
+      description: t("connectReward", { points: REWARDS.connectSocial }),
+      status: "success",
       duration: 3000,
       isClosable: true,
-      position: 'top',
-    })
-  }
+      position: "top",
+    });
+  };
 
   // 在钱包地址显示部分为SOL格式缩短处理函数
   const formatSolAddress = (address: string | undefined, length = 6) => {
@@ -213,8 +203,8 @@ export default function PointsPage() {
         address.length - length
       )}`;
     }
-    return address
-  }
+    return address;
+  };
 
   // 获取排行榜数据
   useEffect(() => {
@@ -247,8 +237,8 @@ export default function PointsPage() {
     <Container maxW="container.xl" py={8}>
       {!userInfo ? (
         <VStack spacing={4} align="center">
-          <Heading size="lg">{t('请先登录')}</Heading>
-          <Text color="gray.500">{t('登录后查看您的积分信息')}</Text>
+          <Heading size="lg">{t("请先登录")}</Heading>
+          <Text color="gray.500">{t("登录后查看您的积分信息")}</Text>
         </VStack>
       ) : (
         <VStack spacing={8} align="stretch">
@@ -523,8 +513,114 @@ export default function PointsPage() {
                     </Badge>
                   </HStack>
 
-                  <Text fontSize="sm" opacity={0.9} mb={3} color="white"></Text>
-
+                  {/* <Text fontSize="sm" opacity={0.9} mb={3} color="white"></Text> */}
+                  {/* 签到状态周一到周日 */}
+                  <Flex
+                    justifyContent="center"
+                    gap={{ base: 1.5, md: 2.5 }}
+                    flexWrap="wrap"
+                  >
+                    {[
+                      {
+                        day: "周一",
+                        reward: 1,
+                        signedIn: true,
+                      },
+                      {
+                        day: "周二",
+                        reward: 10,
+                        signedIn: false,
+                      },
+                      {
+                        day: "周三",
+                        reward: 15,
+                        signedIn: false,
+                      },
+                      {
+                        day: "周四",
+                        reward: 20,
+                        signedIn: false,
+                      },
+                      {
+                        day: "周五",
+                        reward: 25,
+                        signedIn: false,
+                      },
+                      {
+                        day: "周六",
+                        reward: 30,
+                        signedIn: false,
+                      },
+                      {
+                        day: "周日",
+                        reward: 40,
+                        signedIn: false,
+                      },
+                    ].map((itme, index) => (
+                      <Grid key={index}>
+                        <GridItem
+                          display="grid"
+                          justifyItems="center"
+                          gap={1.5}
+                        >
+                          <HStack
+                            w={{ base: 8, md: 9 }}
+                            h={{ base: 8, md: 9 }}
+                            bg={
+                              itme.signedIn
+                                ? "rgba(230, 179, 37,0.85)"
+                                : "whiteAlpha.400"
+                            }
+                            borderRadius="full"
+                            p={1}
+                          >
+                            <HStack
+                              w="100%"
+                              h="100%"
+                              bg={
+                                itme.signedIn
+                                  ? "rgba(230, 179, 37, 0.7)"
+                                  : "whiteAlpha.400"
+                              }
+                              borderRadius="full"
+                              justifyContent="center"
+                              alignItems="center"
+                            >
+                              <Text
+                                fontSize={9}
+                                fontWeight="bold"
+                                color={itme.signedIn ? "white" : "gray.300"}
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center"
+                              >
+                                {itme.signedIn ? (
+                                  <Icon
+                                    as={FaCheck}
+                                    color="white"
+                                    boxSize={3}
+                                    ml={1}
+                                    m={0}
+                                  />
+                                ) : (
+                                  "+" + itme.reward
+                                )}
+                              </Text>
+                            </HStack>
+                          </HStack>
+                          <Text
+                            fontSize={12}
+                            color="white"
+                            fontWeight="bold"
+                            opacity={itme.signedIn ? 1 : 0.5}
+                          >
+                            {itme.day}
+                          </Text>
+                        </GridItem>
+                      </Grid>
+                    ))}
+                  </Flex>
+                  {/* 签到按钮 */}
                   <Button
                     colorScheme="yellow"
                     onClick={handleCheckin}
@@ -655,7 +751,7 @@ export default function PointsPage() {
                 <Text
                   fontSize="sm"
                   color="gray.600"
-                  _dark={{ color: 'gray.300' }}
+                  _dark={{ color: "gray.300" }}
                 >
                   {t("inviteSuccessReward")}
                 </Text>
@@ -848,7 +944,7 @@ export default function PointsPage() {
                       <Text color="red.500">{error}</Text>
                     </Flex>
                   ) : rankList && rankList.length > 0 ? (
-                    <Grid  p={{ base: 4, sm: 0 }} py={6}>
+                    <Grid p={{ base: 4, sm: 0 }} py={6}>
                       {rankList.map((entry) => (
                         <GridItem key={entry.userId} py={2}>
                           <Card
