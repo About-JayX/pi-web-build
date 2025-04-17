@@ -37,6 +37,12 @@ a {
   }
 }
 
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;

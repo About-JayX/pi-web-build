@@ -839,32 +839,40 @@ export default function PointsPage() {
                 </Flex>
                 {/* 排行榜 */}
                 <Box overflowX="auto">
-                  {isLoading ? (
-                    <Flex justify="center" align="center" p={4}>
-                      <Text>{t("加载中...")}</Text>
-                    </Flex>
-                  ) : error ? (
-                    <Flex justify="center" align="center" p={4}>
-                      <Text color="red.500">{error}</Text>
-                    </Flex>
-                  ) : rankList && rankList.length > 0 ? (
-                    <Grid  p={{ base: 4, sm: 0 }} py={6}>
-                      {rankList.map((entry) => (
-                        <GridItem key={entry.userId} py={2}>
-                          <Card
-                            p={4}
-                            transition="transform 0.3s"
-                            _hover={{ transform: "translateY(-5px)" }}
+                  <Table variant="simple">
+                    <Tbody>
+                      {isLoading ? (
+                        <Tr>
+                          <Td colSpan={4}>
+                            <Flex justify="center" align="center" p={4}>
+                              <Text>{t("加载中...")}</Text>
+                            </Flex>
+                          </Td>
+                        </Tr>
+                      ) : error ? (
+                        <Tr>
+                          <Td colSpan={4}>
+                            <Flex justify="center" align="center" p={4}>
+                              <Text color="red.500">{error}</Text>
+                            </Flex>
+                          </Td>
+                        </Tr>
+                      ) : rankList && rankList.length > 0 ? (
+                        rankList.map((entry) => (
+                          <Tr
+                            key={entry.userId}
+                            // bg={
+                            //   entry.userId === userInfo?.userId
+                            //     ? highlightBg
+                            //     : undefined
+                            // }
+                            bg="gray.100"
+                            
                           >
-                            <CardBody
-                              display="flex"
-                              alignItems="center"
-                              p={0}
-                              gap={2}
-                            >
+                            <Td p={2} pl={4} w={0} border="none">
                               <Text
-                                w={4}
-                                fontSize={{ base: "sm", sm: "md" }}
+                                fontSize={{ base: "sm", sm: "dm" }}
+                                textAlign="center"
                                 fontWeight={
                                   entry.userId === userInfo?.userId
                                     ? "bold"
@@ -873,7 +881,9 @@ export default function PointsPage() {
                               >
                                 {entry.rank}
                               </Text>
-                              <HStack w={{ base: "auto", md: 160 }}>
+                            </Td>
+                            <Td p={2} border="none">
+                              <HStack>
                                 <Avatar
                                   size="sm"
                                   name={entry.nickname}
@@ -901,7 +911,7 @@ export default function PointsPage() {
                                     </Text>
                                   </GridItem>
                                   <GridItem
-                                    display={{ base: "flex", md: "none" }}
+                                    display={{ base: "block", sm: "none" }}
                                   >
                                     <HStack>
                                       <Icon
@@ -925,7 +935,13 @@ export default function PointsPage() {
                                   </GridItem>
                                 </Grid>
                               </HStack>
-                              <HStack display={{ base: "none", md: "flex" }}>
+                            </Td>
+                            <Td
+                              p={2}
+                              border="none"
+                              display={{ base: "none", sm: "table-cell" }}
+                            >
+                              <HStack>
                                 <Icon
                                   as={FaWallet}
                                   color="gray.500"
@@ -941,7 +957,8 @@ export default function PointsPage() {
                                     : "-"}
                                 </Text>
                               </HStack>
-                              <HStack flex={1} />
+                            </Td>
+                            <Td isNumeric border="none" p={2} pr={4}>
                               <Text
                                 color={
                                   entry.userId === userInfo?.userId
@@ -958,16 +975,20 @@ export default function PointsPage() {
                               >
                                 {Number(entry.token).toLocaleString()}
                               </Text>
-                            </CardBody>
-                          </Card>
-                        </GridItem>
-                      ))}
-                    </Grid>
-                  ) : (
-                    <Flex justify="center" align="center" p={4}>
-                      <Text>{t("暂无排行数据")}</Text>
-                    </Flex>
-                  )}
+                            </Td>
+                          </Tr>
+                        ))
+                      ) : (
+                        <Tr>
+                          <Td colSpan={4}>
+                            <Flex justify="center" align="center" p={4}>
+                              <Text>{t("暂无排行数据")}</Text>
+                            </Flex>
+                          </Td>
+                        </Tr>
+                      )}
+                    </Tbody>
+                  </Table>
                 </Box>
               </Box>
             </CardBody>
