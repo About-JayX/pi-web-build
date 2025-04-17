@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react'
 import {
   Box,
   Container,
@@ -173,37 +173,37 @@ export default function PointsPage() {
   const handleShareToTelegram = () => {
     if (!userInfo?.code) return;
     const text = encodeURIComponent(
-      `${t("inviteSuccessReward")}\n${userInfo.code}`
-    );
-    window.open(`https://t.me/share/url?url=${text}`, "_blank");
-  };
+      `${t('inviteSuccessReward')}\n${userInfo.code}`
+    )
+    window.open(`https://t.me/share/url?url=${text}`, '_blank')
+  }
 
   // 分享到Twitter/X
   const handleShareToX = () => {
     if (!userInfo?.code) return;
     const text = encodeURIComponent(
-      `${t("inviteSuccessReward")}\n${userInfo.code}`
-    );
-    window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
-  };
+      `${t('inviteSuccessReward')}\n${userInfo.code}`
+    )
+    window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank')
+  }
 
   // 连接社交账号
   const handleConnectSocial = (platform: "telegram" | "twitter") => {
     if (!userInfo) return;
     const isConnected =
-      platform === "telegram" ? userInfo.telegramId : userInfo.twitterId;
+      platform === 'telegram' ? userInfo.telegramId : userInfo.twitterId
 
-    if (isConnected) return;
+    if (isConnected) return
 
     toast({
-      title: platform === "telegram" ? t("socialBound") : t("socialBound"),
-      description: t("connectReward", { points: REWARDS.connectSocial }),
-      status: "success",
+      title: platform === 'telegram' ? t('socialBound') : t('socialBound'),
+      description: t('connectReward', { points: REWARDS.connectSocial }),
+      status: 'success',
       duration: 3000,
       isClosable: true,
-      position: "top",
-    });
-  };
+      position: 'top',
+    })
+  }
 
   // 在钱包地址显示部分为SOL格式缩短处理函数
   const formatSolAddress = (address: string | undefined, length = 6) => {
@@ -213,8 +213,8 @@ export default function PointsPage() {
         address.length - length
       )}`;
     }
-    return address;
-  };
+    return address
+  }
 
   // 获取排行榜数据
   useEffect(() => {
@@ -247,8 +247,8 @@ export default function PointsPage() {
     <Container maxW="container.xl" py={8}>
       {!userInfo ? (
         <VStack spacing={4} align="center">
-          <Heading size="lg">{t("请先登录")}</Heading>
-          <Text color="gray.500">{t("登录后查看您的积分信息")}</Text>
+          <Heading size="lg">{t('请先登录')}</Heading>
+          <Text color="gray.500">{t('登录后查看您的积分信息')}</Text>
         </VStack>
       ) : (
         <VStack spacing={8} align="stretch">
@@ -655,7 +655,7 @@ export default function PointsPage() {
                 <Text
                   fontSize="sm"
                   color="gray.600"
-                  _dark={{ color: "gray.300" }}
+                  _dark={{ color: 'gray.300' }}
                 >
                   {t("inviteSuccessReward")}
                 </Text>
