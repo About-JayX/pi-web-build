@@ -67,7 +67,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
               <SolanaProvider>
                 <I18nProvider>
                   <Navbar />
-                  <main>{children}</main>
+                  <main style={{ minHeight: 'calc(100vh - 362px)' }}>
+                    {children}
+                  </main>
                   <Footer />
                   <Announcement />
                 </I18nProvider>

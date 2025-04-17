@@ -72,7 +72,7 @@ export default function TutorialsPage() {
         <Heading
           as="h1"
           size="2xl"
-          mb={10}
+          mb={3}
           bgGradient="linear(to-r, purple.600, brand.primary)"
           bgClip="text"
           fontWeight="bold"
