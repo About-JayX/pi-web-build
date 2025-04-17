@@ -4,6 +4,7 @@ export interface CreateTokenParams {
   file: File
   init_liquidity: number
   total_supply: string
+  description?: string
 }
 
 export interface TokenInfo {
@@ -28,3 +29,40 @@ export interface TokenInfo {
 }
 
 export type TokenList = TokenInfo[]
+
+export interface UserInfo {
+  userId: number
+  nickname: string
+  avatar_url: string
+  twitterId: string | null
+  telegramId: string | null
+  token: string
+  status: number
+  free_power: number
+  ip_address: string
+  create_time: number
+  last_time: number
+  os: string
+  version: string
+  code: string
+  solana_wallet: string
+  pi_network: string | null
+  from_type: string
+}
+
+export interface LoginResponse {
+  success: boolean
+  code: number
+  msg: string
+  data: {
+    user: UserInfo
+    authToken: string
+  } | null
+}
+
+export interface SolanaLoginParams {
+  publicKey: string
+  message: string
+  signature: number[]
+  code: string
+}

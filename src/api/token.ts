@@ -1,23 +1,9 @@
 import request from '@/config/axios'
+import type { CreateTokenParams, TokenInfo } from './types'
 
-export interface Token {
-  id: number
-  name: string
-  symbol: string
+export interface Token extends TokenInfo {
   logo: string
-  init_liquidity: number
-  total_supply: number
-  created_at?: string
-  updated_at?: string
-}
-
-export interface CreateTokenParams {
-  name: string
-  symbol: string
-  logo: File
-  init_liquidity: string
-  total_supply: string
-  description: string
+  description?: string
 }
 
 /**
@@ -39,10 +25,10 @@ export const TokenAPI = {
     const formData = new FormData()
     formData.append('name', data.name)
     formData.append('symbol', data.symbol)
-    formData.append('init_liquidity', 50 * 1e9)
-    formData.append('total_supply', Number(data.total_supply) * 1e6)
-    formData.append('file', data.logo)
-    formData.append('description', data.description)
+    formData.append('init_liquidity', String(50 * 1e9))
+    formData.append('total_supply', String(Number(data.total_supply) * 1e6))
+    formData.append('file', data.file)
+    formData.append('description', data.description || '')
     return request.post('/token/create', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
