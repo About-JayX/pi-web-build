@@ -12,8 +12,8 @@ const nextConfig = {
   // async rewrites() {
   //   return [
   //     {
-  //       source: '/api/:path*',
-  //       destination: 'http://192.168.1.97:8888/:path*',
+  //       source: '/abi/:path*',
+  //       destination: 'http://192.168.1.88:3053/:path*',
   //     },
   //   ]
   // },

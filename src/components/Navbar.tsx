@@ -18,6 +18,12 @@ import {
   MenuList,
   MenuItem,
   Image,
+  Collapse,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  useToast,
+  Avatar,
 } from '@chakra-ui/react'
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import NextLink from 'next/link'
@@ -29,6 +35,9 @@ import { useI18n } from '@/contexts/I18nProvider'
 import { useTranslation } from 'react-i18next'
 import { FaGlobeAsia } from 'react-icons/fa'
 import { useSolana } from '@/contexts/solanaProvider'
+import { UserAPI } from '@/api'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { setUser } from '@/store/slices/userSlice'
 
 // 动态导入LogoText组件，禁用服务器端渲染
 const LogoText = dynamic(() => import('./LogoText'), { ssr: false })
@@ -53,16 +62,97 @@ export default function Navbar() {
   const { t } = useTranslation()
   const { language, changeLanguage } = useI18n()
   const pathname = usePathname()
+  const toast = useToast()
+  const dispatch = useAppDispatch()
+  const { isLoggedIn, userInfo } = useAppSelector(state => state.user)
 
   const connectwallet = async () => {
     if (network === 'Solana') {
-      if (publicKey) return
-      try {
-        const result = await window.solana.connect()
-        setPublicKey(result.publicKey.toString())
-      } catch (error) {
-        console.log(error, 'error_')
+      if (!window.solana) {
+        toast({
+          title: '错误',
+          description: '请先安装 Phantom 钱包插件',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+          position: 'top',
+        })
+        return
       }
+
+      try {
+        if (!publicKey) {
+          // 如果未连接钱包，先连接钱包
+          const result = await window.solana.connect()
+          setPublicKey(result.publicKey.toString())
+          return
+        }
+
+        // 如果已登录，不需要重复登录
+        if (isLoggedIn) {
+          toast({
+            title: '提示',
+            description: '您已经登录了',
+            status: 'info',
+            duration: 3000,
+            isClosable: true,
+            position: 'top',
+          })
+          return
+        }
+
+        // 如果已连接钱包，执行签名登录
+        const message = 'Hello from PiSale!'
+        const encodedMessage = new TextEncoder().encode(message)
+        const signed = await window.solana.signMessage(encodedMessage, 'utf8')
+        const signatureBytes = new Uint8Array(signed.signature)
+
+        const result = await UserAPI.loginWithSolana({
+          publicKey,
+          message,
+          signature: Array.from(signatureBytes),
+          code: 'K7QEISU9',
+        })
+
+        if (result.data) {
+          dispatch(
+            setUser({
+              user: result.data.user,
+              authToken: result.data.authToken,
+            })
+          )
+
+          toast({
+            title: '登录成功',
+            description: `欢迎回来，${result.data.user.nickname || 'User'}`,
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+            position: 'top',
+          })
+        }
+      } catch (error) {
+        console.error('操作失败:', error)
+        toast({
+          title: '错误',
+          description:
+            error instanceof Error ? error.message : '登录失败，请重试',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+          position: 'top',
+        })
+      }
+    } else {
+      // Pi Network 的连接逻辑
+      toast({
+        title: '提示',
+        description: '即将支持 Pi 钱包连接',
+        status: 'info',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      })
     }
   }
   // 组件加载时检查路径，确保网络选择器已同步
@@ -273,9 +363,11 @@ export default function Navbar() {
               size={{ base: 'sm', md: 'md' }}
             >
               {network === 'Solana'
-                ? publicKey
-                  ? publicKey
-                  : t('connectWallet')
+                ? isLoggedIn
+                  ? userInfo?.nickname || userInfo?.userId
+                  : publicKey
+                  ? '点击登录'
+                  : '连接Solana钱包'
                 : '连接Pi钱包'}
             </Button>
           </Stack>
