@@ -240,9 +240,10 @@ export default function TokenMintPage() {
                     <MintingForm
                       token={{
                         symbol: selectedToken.symbol,
-                        presaleRate: selectedToken.presaleRate || '0.000001',
-                        network: network,
-                        currencyUnit: currencyUnit,
+                        presaleRate: formattedData.feeRate,
+                        network,
+                        currencyUnit,
+                        address: selectedToken.address,
                       }}
                     />
                   </Stack>

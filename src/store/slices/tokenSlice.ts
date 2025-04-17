@@ -46,7 +46,7 @@ const initialState: TokenState = {
 export const fetchTokenList = createAsyncThunk(
   'token/fetchTokenList',
   async () => {
-    const data: TokenList = await axios.get('/api/token/list')
+    const data: TokenList = await axios.get('/token/list')
 
     return data.map(token => ({
       id: token.token_id,

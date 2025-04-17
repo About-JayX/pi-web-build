@@ -47,6 +47,7 @@ import {
   FaPercent,
 } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
+import { useProgram } from '@/web3/fairMint/hooks/useProgram'
 
 interface MintingFormProps {
   token: {
@@ -54,6 +55,7 @@ interface MintingFormProps {
     presaleRate?: string
     network?: string
     currencyUnit?: string
+    address: string
   }
   isOpen?: boolean
   onClose?: () => void
@@ -76,6 +78,7 @@ export default function MintingForm({
   const [refundAmount, setRefundAmount] = useState<string>('') // 新增：退还金额输入
   const [isMobile, setIsMobile] = useState<boolean>(false)
   const { t } = useTranslation()
+  const { mintToken } = useProgram()
 
   const currencyUnit = token.currencyUnit || 'Pi'
   const cardBg = useColorModeValue('white', 'gray.800')
@@ -128,16 +131,18 @@ export default function MintingForm({
   }
 
   // 处理铸造提交
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isAmountValid()) return
 
     setSubmitting(true)
     const mintAmount = parseFloat(amount)
 
-    console.log(amount, '..._____amount_')
+    console.log(token, 'token_??')
 
-    // 模拟铸造过程
-    setTimeout(() => {
+    try {
+      // 调用真实的mintToken函数，传入SOL金额（转换为lamports）和token地址
+      await mintToken(mintAmount * 1e9, token.address)
+
       // 更新钱包余额和已铸造金额
       setWalletBalance(prev => parseFloat((prev - mintAmount).toFixed(2)))
       setMintedAmount(prev => parseFloat((prev + mintAmount).toFixed(2)))
@@ -165,8 +170,19 @@ export default function MintingForm({
       })
 
       setAmount('')
+    } catch (error) {
+      console.error('铸造失败:', error)
+      toast({
+        title: t('error'),
+        description: t('mintingFailed'),
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      })
+    } finally {
       setSubmitting(false)
-    }, 1500)
+    }
   }
 
   // 退还部分修改 - 根据代币数量计算Pi数量

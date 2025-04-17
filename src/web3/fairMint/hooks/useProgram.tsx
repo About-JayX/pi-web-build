@@ -19,9 +19,25 @@ import { useSolana } from '@/contexts/solanaProvider'
 
 export const useProgram = () => {
   const { conn, FAIR_CURVE_SEED, programId, wallet, publicKey } = useSolana()
+
+  if (!conn || !wallet) {
+    return {
+      createToken: async () => {
+        throw new Error('Wallet not connected')
+      },
+      mintToken: async () => {
+        throw new Error('Wallet not connected')
+      },
+      returnToken: async () => {
+        throw new Error('Wallet not connected')
+      },
+    }
+  }
+
   const provider = new AnchorProvider(conn, wallet, {
     commitment: 'confirmed',
   })
+  
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const program = new Program(idl as any, provider)
 
@@ -75,44 +91,65 @@ export const useProgram = () => {
     await conn.confirmTransaction(tx, 'confirmed')
   }
 
-  const mintToken = async () => {
-    const solAmountLamports = new BN(1_000_000_000)
+  const mintToken = async (solAmountLamports: number, tokenAddress: string) => {
+    if (!publicKey) {
+      throw new Error('Wallet not connected')
+    }
 
-    const mintPublicKey = new PublicKey(
-      'FvyoWQ7ZegVB17c7hbwHiPGAmS7CcjhcpTJnJUoyQEHH'
-    )
+    if (!tokenAddress) {
+      throw new Error('Token address is required')
+    }
 
-    const [fairCurvePda] = PublicKey.findProgramAddressSync(
-      [FAIR_CURVE_SEED, mintPublicKey.toBuffer()],
-      programId
-    )
+    try {
+      const solAmount = new BN(solAmountLamports)
+      const mintPublicKey = new PublicKey(tokenAddress)
 
-    const key = new PublicKey(publicKey)
-    // 找到代币保管库账户
-    const tokenVault = await getAssociatedTokenAddress(
-      mintPublicKey,
-      fairCurvePda,
-      true
-    )
+      const [fairCurvePda] = PublicKey.findProgramAddressSync(
+        [FAIR_CURVE_SEED, mintPublicKey.toBuffer()],
+        programId
+      )
 
-    // 找到或创建用户的代币账户
-    const userTokenAccount = await getAssociatedTokenAddress(mintPublicKey, key)
-    const tx = await program.methods
-      .mintToken(solAmountLamports) // 传入 SOL 金额
-      .accounts({
-        signer: publicKey, // 签名者和付款人
-        mint: mintPublicKey, // 代币的 mint 地址
-        fairCurve: fairCurvePda, // FairCurve PDA
-        tokenVault: tokenVault, // 代币保管库账户
-        userTokenAccount: userTokenAccount, // 用户的代币账户
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID, // 关联代币程序
-        tokenProgram: TOKEN_PROGRAM_ID, // 代币程序
-        systemProgram: SystemProgram.programId, // 系统程序
+      const key = new PublicKey(publicKey)
+      // 找到代币保管库账户
+      const tokenVault = await getAssociatedTokenAddress(
+        mintPublicKey,
+        fairCurvePda,
+        true
+      )
+
+      // 找到或创建用户的代币账户
+      const userTokenAccount = await getAssociatedTokenAddress(mintPublicKey, key)
+      
+      console.log('Minting with params:', {
+        solAmount: solAmount.toString(),
+        mintPublicKey: mintPublicKey.toString(),
+        fairCurvePda: fairCurvePda.toString(),
+        tokenVault: tokenVault.toString(),
+        userTokenAccount: userTokenAccount.toString(),
+        publicKey: publicKey.toString()
       })
-      .rpc()
 
-    // 等待交易确认
-    await conn.confirmTransaction(tx, 'confirmed')
+      const tx = await program.methods
+        .mintToken(solAmount)
+        .accounts({
+          signer: publicKey,
+          mint: mintPublicKey,
+          fairCurve: fairCurvePda,
+          tokenVault: tokenVault,
+          userTokenAccount: userTokenAccount,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc()
+
+      // 等待交易确认
+      await conn.confirmTransaction(tx, 'confirmed')
+      return tx
+    } catch (error) {
+      console.error('Mint token error:', error)
+      throw error
+    }
   }
 
   //
