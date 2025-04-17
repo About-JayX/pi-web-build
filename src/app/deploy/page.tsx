@@ -39,7 +39,8 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNetwork } from '@/contexts/NetworkContext'
 import { useTranslation } from 'react-i18next'
 import { useSolana } from '@/contexts/solanaProvider'
-import { TokenAPI, CreateTokenParams } from '@/api/token'
+import { TokenAPI } from '@/api/token'
+import type { CreateTokenParams } from '@/api/types'
 
 // 定义代币参数组件的属性接口
 interface TokenParametersSectionProps {
@@ -604,8 +605,8 @@ export default function DeployPage() {
       const params: CreateTokenParams = {
         name: tokenName,
         symbol: tokenSymbol,
-        logo: tokenIcon,
-        init_liquidity: selectedValues.targetAmount,
+        file: tokenIcon,
+        init_liquidity: Number(selectedValues.targetAmount),
         total_supply: selectedValues.totalSupply,
         description: '测试',
       }
