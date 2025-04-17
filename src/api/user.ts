@@ -1,5 +1,11 @@
 import { userApi } from '@/config/axios'
-import type { LoginResponse, SolanaLoginParams, UserInfo } from './types'
+import type {
+  LoginResponse,
+  SolanaLoginParams,
+  UserInfo,
+  RankResponse,
+  SignInInfoResponse,
+} from './types'
 
 /**
  * 用户相关接口
@@ -25,6 +31,27 @@ export const UserAPI = {
    */
   logout: (): Promise<{ code: number; message: string }> => {
     return userApi.post('/web/user/logout')
+  },
+
+  /**
+   * 签到
+   */
+  signin: (): Promise<{ success: boolean; msg: string }> => {
+    return userApi.post('/web/sginin/sginin')
+  },
+
+  /**
+   * 获取签到信息
+   */
+  getSignInInfo: () => {
+    return userApi.post<SignInInfoResponse>('/web/sginin/signInfo')
+  },
+
+  /**
+   * 获取积分排行榜
+   */
+  getRank: (): Promise<RankResponse> => {
+    return userApi.post('/web/wallet/UserPoints-Rank')
   },
 }
 

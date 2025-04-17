@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios'
+import { store } from '@/store'
 
 // 创建主实例 (fair mint)
 const fairMintInstance = axios.create({
@@ -23,7 +24,7 @@ fairMintInstance.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token')
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = token
     }
     return config
   },
@@ -42,9 +43,9 @@ fairMintInstance.interceptors.response.use(
 // 用户实例请求拦截器
 userInstance.interceptors.request.use(
   config => {
-    const token = localStorage.getItem('token')
+    const token = store.getState().user.authToken
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = token
     }
     return config
   },

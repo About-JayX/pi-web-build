@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { UserInfo as ApiUserInfo } from '@/api/types'
+import { UserInfo as ApiUserInfo, SignInInfo } from '@/api/types'
 
 interface UserInfo extends ApiUserInfo {}
 
@@ -7,12 +7,14 @@ interface UserState {
   userInfo: UserInfo | null
   authToken: string | null
   isLoggedIn: boolean
+  signInInfo: SignInInfo | null
 }
 
 const initialState: UserState = {
   userInfo: null,
   authToken: null,
   isLoggedIn: false,
+  signInInfo: null,
 }
 
 export const userSlice = createSlice({
@@ -36,12 +38,16 @@ export const userSlice = createSlice({
       state.userInfo = null
       state.authToken = null
       state.isLoggedIn = false
+      state.signInInfo = null
       // 清除localStorage中的token
       localStorage.removeItem('token')
+    },
+    setSignInInfo: (state, action: PayloadAction<SignInInfo>) => {
+      state.signInInfo = action.payload
     },
   },
 })
 
-export const { setUser, clearUser } = userSlice.actions
+export const { setUser, clearUser, setSignInInfo } = userSlice.actions
 
 export default userSlice.reducer
