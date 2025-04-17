@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import {
   Container,
@@ -40,8 +40,8 @@ import {
   Td,
   useToast,
   Circle,
-} from '@chakra-ui/react'
-import NextLink from 'next/link'
+} from "@chakra-ui/react";
+import NextLink from "next/link";
 import {
   FaRocket,
   FaChartLine,
@@ -54,8 +54,8 @@ import {
   FaArrowUp,
   FaArrowDown,
   FaFileContract,
-} from 'react-icons/fa'
-import TokenCard from '@/components/TokenCard'
+} from "react-icons/fa";
+import TokenCard from "@/components/TokenCard";
 import {
   recentTokens,
   featuredTokens,
@@ -64,163 +64,164 @@ import {
   marketTokens,
   mintingTokensPi,
   mintingTokensSol,
-} from '@/mock'
-import { useNetwork } from '@/contexts/NetworkContext'
-import MintingTokenCard from '@/components/MintingTokenCard'
-import { useTranslation } from 'react-i18next'
-import { useEffect } from 'react'
+} from "@/mock";
+import { useNetwork } from "@/contexts/NetworkContext";
+import MintingTokenCard from "@/components/MintingTokenCard";
+import { useTranslation } from "react-i18next";
+import { useEffect } from "react";
 
 // 功能特点组件
 interface FeatureProps {
-  text: string
-  iconBg: string
-  icon?: React.ReactElement
+  text: string;
+  iconBg: string;
+  icon?: React.ReactElement;
 }
 
 const Feature = ({ text, icon, iconBg }: FeatureProps) => {
   return (
-    <Stack direction={'row'} align={'center'}>
+    <Stack direction={"row"} align={"center"}>
       <Flex
         w={8}
         h={8}
-        align={'center'}
-        justify={'center'}
-        rounded={'full'}
+        align={"center"}
+        justify={"center"}
+        rounded={"full"}
         bg={iconBg}
       >
         {icon}
       </Flex>
       <Text fontWeight={600}>{text}</Text>
     </Stack>
-  )
-}
+  );
+};
 
 export default function HomePage() {
   // 获取当前网络上下文
-  const { network } = useNetwork()
+  const { network } = useNetwork();
 
   // 获取翻译函数
-  const { t } = useTranslation()
+  const { t } = useTranslation();
 
   // 根据当前网络选择统计数据
   const platformStats =
-    network === 'Solana' ? platformStatsSol : platformStatsPi
+    network === "Solana" ? platformStatsSol : platformStatsPi;
 
   // 根据当前网络选择铸造数据
-  const mintingData = network === 'Solana' ? mintingTokensSol : mintingTokensPi
+  const mintingData = network === "Solana" ? mintingTokensSol : mintingTokensPi;
 
   return (
     <Box>
       {/* Hero区域 */}
-      <Container maxW={'container.xl'}>
+      <Container maxW={"container.xl"}>
         <Stack
-          align={'center'}
+          align={"center"}
           spacing={{ base: 8, md: 10 }}
           py={{ base: 20, md: 28 }}
-          pt={{base:10,md:20}}
-          direction={{ base: 'column', lg: 'row' }}>
-          <Stack flex={1} spacing={{ base: 5, md:5,xl:6 }}>
+          pt={{ base: 10, md: 20 }}
+          direction={{ base: "column", lg: "row" }}
+        >
+          <Stack flex={1} spacing={{ base: 5, md: 5, xl: 6 }}>
             <Heading
-              lineHeight={1.1}
+              lineHeight={1.16}
               fontWeight={600}
-              fontSize={{ base: '3xl', sm: '4xl', lg: '5xl',xl:'6xl' }}
+              fontSize={{ base: "3xl", sm: "4xl", lg: "5xl", xl: "6xl" }}
             >
               <Text
-                as={'span'}
-                position={'relative'}
+                as={"span"}
+                position={"relative"}
                 display="block"
-                color={'brand.primary'}
+                color={"brand.primary"}
                 bgGradient="linear(to-r, purple.600, brand.primary, purple.400)"
                 bgClip="text"
                 fontWeight="900"
                 letterSpacing="wide"
-                textShadow="0 2px 4px rgba(0,0,0,0.1)"
               >
-                {t('heroTitlePart1')}
+                {t("heroTitlePart1")}
               </Text>
               <Text
-                as={'span'}
-                position={'relative'}
+                as={"span"}
+                position={"relative"}
                 display="block"
-                color={'brand.secondary'}
+                color={"brand.secondary"}
                 bgGradient="linear(to-r, gold.400, brand.secondary, gold.500)"
                 bgClip="text"
                 fontWeight="900"
                 letterSpacing="wide"
-                textShadow="0 2px 4px rgba(0,0,0,0.15)"
                 whiteSpace="nowrap"
               >
-                {t('heroTitlePiNetwork')}
-                {t('heroTitlePart2')}
+                {t("heroTitlePiNetwork")}
+                {t("heroTitlePart2")}
               </Text>
               <Text
-                as={'span'}
-                position={'relative'}
+                as={"span"}
+                position={"relative"}
                 display="block"
-                color={'brand.primary'}
+                color={"brand.primary"}
                 bgGradient="linear(to-r, purple.600, brand.primary, purple.400)"
                 bgClip="text"
                 fontWeight="900"
                 letterSpacing="wide"
-                textShadow="0 2px 4px rgba(0,0,0,0.1)"
               >
-                {t('heroTitlePart3')}
+                {t("heroTitlePart3")}
               </Text>
             </Heading>
-            <Text color={'gray.500'} fontSize={{ base: "md", md: "md", xl: "lg" }}>
-              {t('heroDescription')}
+            <Text
+              color={"gray.500"}
+              fontSize={{ base: "md", md: "md", xl: "lg" }}
+            >
+              {t("heroDescription")}
             </Text>
             <Stack
               spacing={{ base: 4, sm: 6 }}
-              direction={{ base: 'column', sm: 'row' }}
+              direction={{ base: "column", sm: "row" }}
             >
               <Button
                 as={NextLink}
                 href="/deploy"
-                rounded={'full'}
-                size={'lg'}
-                fontWeight={'normal'}
+                rounded={"full"}
+                size={"lg"}
+                fontWeight={"normal"}
                 px={6}
-                colorScheme={'purple'}
-                bg={'brand.primary'}
-                _hover={{ bg: 'brand.light' }}
+                colorScheme={"purple"}
+                bg={"brand.primary"}
+                _hover={{ bg: "brand.light" }}
               >
-                {t('startDeploy')}
+                {t("startDeploy")}
               </Button>
               <Button
                 as={NextLink}
                 href="/market"
-                rounded={'full'}
-                size={'lg'}
-                fontWeight={'normal'}
+                rounded={"full"}
+                size={"lg"}
+                fontWeight={"normal"}
                 px={6}
                 leftIcon={<FaChartLine />}
               >
-                {t('tokenMarket')}
+                {t("tokenMarket")}
               </Button>
             </Stack>
           </Stack>
           <Flex
             flex={1}
-            justify={'center'}
-            align={'center'}
-            position={'relative'}
-            w={'full'}
+            justify={"center"}
+            align={"center"}
+            position={"relative"}
+            w={"full"}
           >
             <Box
-              position={'relative'}
-              height={'300px'}
-              rounded={'2xl'}
-              boxShadow={'2xl'}
-              width={'full'}
-              overflow={'hidden'}
+              position={"relative"}
+              height={"300px"}
+              rounded={"2xl"}
+              boxShadow={"2xl"}
+              width={"full"}
+              overflow={"hidden"}
               as={NextLink}
               href="/mint"
               cursor="pointer"
               transition="transform 0.3s ease-in-out"
               _hover={{
-                transform: 'scale(1.02)',
-                boxShadow: '3xl',
+                transform: "scale(1.02)",
+                boxShadow: "3xl",
               }}
               bg="brand.primary"
               backgroundImage="linear-gradient(135deg, #7B2CBF 0%, #5A189A 100%)"
@@ -266,10 +267,10 @@ export default function HomePage() {
                   bgClip="text"
                   textShadow="0 2px 4px rgba(0,0,0,0.1)"
                 >
-                  {t('mintMemeTokens')}
+                  {t("mintMemeTokens")}
                 </Text>
                 <Text
-                  fontSize={{ base: 'md', md: 'xl' }}
+                  fontSize={{ base: "md", md: "xl" }}
                   fontWeight="medium"
                   color="white"
                   textAlign="center"
@@ -277,21 +278,18 @@ export default function HomePage() {
                   mb={8}
                   textShadow="0 1px 2px rgba(0,0,0,0.2)"
                 >
-                  {t('mintDescription')}
+                  {t("mintDescription")}
                 </Text>
-                
-                <HStack 
-                  spacing={{base:2,md:4}}
-                  mt={{base:1,md:6}}
-                >
+
+                <HStack spacing={{ base: 2, md: 4 }} mt={{ base: 1, md: 6 }}>
                   <Icon as={FaRocket} color="brand.secondary" w={6} h={6} />
-                  <Text 
-                    color="whiteAlpha.900" 
-                    fontWeight="bold" 
-                    fontSize={{base: "md",md:"lg"}}
+                  <Text
+                    color="whiteAlpha.900"
+                    fontWeight="bold"
+                    fontSize={{ base: "md", md: "lg" }}
                     textAlign="center"
                   >
-                    {t('viewMintingTokens')}
+                    {t("viewMintingTokens")}
                   </Text>
                   <Icon as={FaRocket} color="brand.secondary" w={6} h={6} />
                 </HStack>
@@ -312,133 +310,153 @@ export default function HomePage() {
       </Container>
 
       {/* 平台统计 */}
-      <Box bg={useColorModeValue('brand.50', 'gray.700')} py={10}>
-        <Container maxW={'container.xl'}>
+      <Box bg={useColorModeValue("brand.50", "gray.700")} py={10}>
+        <Container maxW={"container.xl"}>
           <Heading as="h2" size="lg" mb={8} textAlign="center">
-            {t('platformData')}
+            {t("platformData")}
           </Heading>
           <SimpleGrid columns={{ base: 2, md: 4 }} spacing={{ base: 5, lg: 8 }}>
             <Box
               px={{ base: 4, md: 6 }}
               py={6}
-              shadow={'xl'}
-              borderRadius={'xl'}
+              shadow={"xl"}
+              borderRadius={"xl"}
               bgGradient={useColorModeValue(
-                'linear(to-br, white, blue.50)',
-                'linear(to-br, gray.800, blue.900)'
+                "linear(to-br, white, blue.50)",
+                "linear(to-br, gray.800, blue.900)"
               )}
               position="relative"
               overflow="hidden"
               _before={{
                 content: '""',
-                position: 'absolute',
+                position: "absolute",
                 top: 0,
                 left: 0,
                 right: 0,
-                height: '8px',
-                bgGradient: 'linear(to-r, blue.400, teal.400)',
+                height: "8px",
+                bgGradient: "linear(to-r, blue.400, teal.400)",
               }}
             >
               <Flex mb={4} justify="center">
                 <Icon as={FaLayerGroup} boxSize={12} color="blue.400" />
               </Flex>
               <Text fontWeight="bold" fontSize="lg" textAlign="center" mb={1}>
-                {t('totalMintedTokens')}
+                {t("totalMintedTokens")}
               </Text>
-              <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('blue.600', 'blue.300')}>
+              <Text
+                fontSize={{ base: "2xl", lg: "3xl" }}
+                fontWeight="bold"
+                textAlign="center"
+                color={useColorModeValue("blue.600", "blue.300")}
+              >
                 {platformStats.tokensCount}
               </Text>
             </Box>
             <Box
               px={{ base: 4, md: 6 }}
               py={6}
-              shadow={'xl'}
-              borderRadius={'xl'}
+              shadow={"xl"}
+              borderRadius={"xl"}
               bgGradient={useColorModeValue(
-                'linear(to-br, white, green.50)',
-                'linear(to-br, gray.800, green.900)'
+                "linear(to-br, white, green.50)",
+                "linear(to-br, gray.800, green.900)"
               )}
               position="relative"
               overflow="hidden"
               _before={{
                 content: '""',
-                position: 'absolute',
+                position: "absolute",
                 top: 0,
                 left: 0,
                 right: 0,
-                height: '8px',
-                bgGradient: 'linear(to-r, green.400, teal.400)',
+                height: "8px",
+                bgGradient: "linear(to-r, green.400, teal.400)",
               }}
             >
               <Flex mb={4} justify="center">
                 <Icon as={FaChartLine} boxSize={12} color="green.400" />
               </Flex>
               <Text fontWeight="bold" fontSize="lg" textAlign="center" mb={1}>
-                {t('tradingVolume24h')}
+                {t("tradingVolume24h")}
               </Text>
-              <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('green.600', 'green.300')}>
+              <Text
+                fontSize={{ base: "2xl", lg: "3xl" }}
+                fontWeight="bold"
+                textAlign="center"
+                color={useColorModeValue("green.600", "green.300")}
+              >
                 {platformStats.tradingVolume24h}
               </Text>
             </Box>
             <Box
               px={{ base: 4, md: 6 }}
               py={6}
-              shadow={'xl'}
-              borderRadius={'xl'}
+              shadow={"xl"}
+              borderRadius={"xl"}
               bgGradient={useColorModeValue(
-                'linear(to-br, white, purple.50)',
-                'linear(to-br, gray.800, purple.900)'
+                "linear(to-br, white, purple.50)",
+                "linear(to-br, gray.800, purple.900)"
               )}
               position="relative"
               overflow="hidden"
               _before={{
                 content: '""',
-                position: 'absolute',
+                position: "absolute",
                 top: 0,
                 left: 0,
                 right: 0,
-                height: '8px',
-                bgGradient: 'linear(to-r, purple.400, pink.400)',
+                height: "8px",
+                bgGradient: "linear(to-r, purple.400, pink.400)",
               }}
             >
               <Flex mb={4} justify="center">
                 <Icon as={FaUsers} boxSize={12} color="purple.400" />
               </Flex>
               <Text fontWeight="bold" fontSize="lg" textAlign="center" mb={1}>
-                {t('activeUsers')}
+                {t("activeUsers")}
               </Text>
-              <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('purple.600', 'purple.300')}>
+              <Text
+                fontSize={{ base: "2xl", lg: "3xl" }}
+                fontWeight="bold"
+                textAlign="center"
+                color={useColorModeValue("purple.600", "purple.300")}
+              >
                 {platformStats.activeUsers}
               </Text>
             </Box>
             <Box
               px={{ base: 4, md: 6 }}
               py={6}
-              shadow={'xl'}
-              borderRadius={'xl'}
+              shadow={"xl"}
+              borderRadius={"xl"}
               bgGradient={useColorModeValue(
-                'linear(to-br, white, orange.50)',
-                'linear(to-br, gray.800, orange.900)'
+                "linear(to-br, white, orange.50)",
+                "linear(to-br, gray.800, orange.900)"
               )}
               position="relative"
               overflow="hidden"
               _before={{
                 content: '""',
-                position: 'absolute',
+                position: "absolute",
                 top: 0,
                 left: 0,
                 right: 0,
-                height: '8px',
-                bgGradient: 'linear(to-r, orange.400, red.400)',
+                height: "8px",
+                bgGradient: "linear(to-r, orange.400, red.400)",
               }}
             >
               <Flex mb={4} justify="center">
                 <Icon as={FaFileContract} boxSize={12} color="orange.400" />
               </Flex>
               <Text fontWeight="bold" fontSize="lg" textAlign="center" mb={1}>
-                {t('totalLockedValue')}
+                {t("totalLockedValue")}
               </Text>
-              <Text fontSize={{base:"2xl",lg:"3xl"}} fontWeight="bold" textAlign="center" color={useColorModeValue('orange.600', 'orange.300')}>
+              <Text
+                fontSize={{ base: "2xl", lg: "3xl" }}
+                fontWeight="bold"
+                textAlign="center"
+                color={useColorModeValue("orange.600", "orange.300")}
+              >
                 {platformStats.totalLockedValue}
               </Text>
             </Box>
@@ -447,12 +465,12 @@ export default function HomePage() {
       </Box>
 
       {/* 热门铸造 */}
-      <Container maxW={'container.xl'} py={10}>
+      <Container maxW={"container.xl"} py={10}>
         <Heading as="h2" size="lg" mb={2}>
-          {t('hotMinting')}
+          {t("hotMinting")}
         </Heading>
-        <Text color={'gray.500'} mb={8}>
-          {t('discoverHotProjects')}
+        <Text color={"gray.500"} mb={8}>
+          {t("discoverHotProjects")}
         </Text>
 
         <SimpleGrid
@@ -460,18 +478,18 @@ export default function HomePage() {
           spacing={{ base: 6, md: 5, lg: 4 }}
         >
           {mintingData
-            .filter(token => token.progress < 100)
-            .filter(token => token.participants > 200 && token.progress > 60)
+            .filter((token) => token.progress < 100)
+            .filter((token) => token.participants > 200 && token.progress > 60)
             .sort((a, b) => b.progress - a.progress)
             .slice(0, 4)
-            .map(token => {
+            .map((token) => {
               return (
                 <MintingTokenCard
                   key={token.id}
                   token={token}
-                  currencyUnit={network === 'Solana' ? 'SOL' : 'Pi'}
+                  currencyUnit={network === "Solana" ? "SOL" : "Pi"}
                 />
-              )
+              );
             })}
         </SimpleGrid>
 
@@ -483,7 +501,7 @@ export default function HomePage() {
             variant="outline"
             colorScheme="brand"
           >
-            {t('moreMintingProjects')}
+            {t("moreMintingProjects")}
           </Button>
         </Box>
       </Container>
@@ -491,29 +509,29 @@ export default function HomePage() {
       {/* 功能特点 */}
       <Box
         py={10}
-        bg={useColorModeValue('gray.50', 'gray.700')}
+        bg={useColorModeValue("gray.50", "gray.700")}
         position="relative"
       >
-        <Container maxW={'container.xl'} position="relative">
+        <Container maxW={"container.xl"} position="relative">
           <VStack spacing={4} mb={10}>
             <Heading as="h2" size="xl" textAlign="center" color="brand.primary">
-              {t('platformFeatures')}
+              {t("platformFeatures")}
             </Heading>
             <Text
-              color={useColorModeValue('gray.600', 'gray.400')}
+              color={useColorModeValue("gray.600", "gray.400")}
               maxW="container.md"
               textAlign="center"
               fontSize="lg"
             >
-              {t('platformFeaturesDesc')}
+              {t("platformFeaturesDesc")}
             </Text>
           </VStack>
 
           <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8}>
             <Box
-              bg={useColorModeValue('white', 'gray.800')}
+              bg={useColorModeValue("white", "gray.800")}
               borderRadius="xl"
-              boxShadow="md"
+              boxShadow="none"
               overflow="visible"
               position="relative"
               pt="38px"
@@ -546,7 +564,7 @@ export default function HomePage() {
                 boxShadow="0 4px 10px rgba(0,0,0,0.1)"
                 border="4px solid white"
                 _dark={{
-                  border: '4px solid gray.800',
+                  border: "4px solid gray.800",
                 }}
               >
                 <Icon as={FaRocket} color="white" boxSize={6} />
@@ -554,27 +572,27 @@ export default function HomePage() {
 
               {/* 内容部分 */}
               <VStack spacing={3} align="center">
-                <Heading 
-                  fontSize={{base:"lg",lg:"xl"}} 
+                <Heading
+                  fontSize={{ base: "lg", lg: "xl" }}
                   fontWeight="bold"
                   color="brand.primary"
                 >
-                  {t('easyMinting')}
+                  {t("easyMinting")}
                 </Heading>
                 <Text
-                  color={useColorModeValue('gray.600', 'gray.300')}
+                  color={useColorModeValue("gray.600", "gray.300")}
                   fontSize="md"
                   textAlign="center"
                 >
-                  {t('easyMintingDesc')}
+                  {t("easyMintingDesc")}
                 </Text>
               </VStack>
             </Box>
 
             <Box
-              bg={useColorModeValue('white', 'gray.800')}
+              bg={useColorModeValue("white", "gray.800")}
               borderRadius="xl"
-              boxShadow="md"
+              boxShadow="none"
               overflow="visible"
               position="relative"
               pt="38px"
@@ -607,7 +625,7 @@ export default function HomePage() {
                 boxShadow="0 4px 10px rgba(0,0,0,0.1)"
                 border="4px solid white"
                 _dark={{
-                  border: '4px solid gray.800',
+                  border: "4px solid gray.800",
                 }}
               >
                 <Icon as={FaChartLine} color="white" boxSize={6} />
@@ -615,27 +633,27 @@ export default function HomePage() {
 
               {/* 内容部分 */}
               <VStack spacing={3} align="center">
-                <Heading 
-                  fontSize={{base:"lg",lg:"xl"}} 
+                <Heading
+                  fontSize={{ base: "lg", lg: "xl" }}
                   fontWeight="bold"
                   color="teal.500"
                 >
-                  {t('safeTransparent')}
+                  {t("safeTransparent")}
                 </Heading>
                 <Text
-                  color={useColorModeValue('gray.600', 'gray.300')}
+                  color={useColorModeValue("gray.600", "gray.300")}
                   fontSize="md"
                   textAlign="center"
                 >
-                  {t('safeTransparentDesc')}
+                  {t("safeTransparentDesc")}
                 </Text>
               </VStack>
             </Box>
 
             <Box
-              bg={useColorModeValue('white', 'gray.800')}
+              bg={useColorModeValue("white", "gray.800")}
               borderRadius="xl"
-              boxShadow="md"
+              boxShadow="none"
               overflow="visible"
               position="relative"
               pt="38px"
@@ -668,7 +686,7 @@ export default function HomePage() {
                 boxShadow="0 4px 10px rgba(0,0,0,0.1)"
                 border="4px solid white"
                 _dark={{
-                  border: '4px solid gray.800',
+                  border: "4px solid gray.800",
                 }}
               >
                 <Icon as={FaLayerGroup} color="white" boxSize={6} />
@@ -676,19 +694,19 @@ export default function HomePage() {
 
               {/* 内容部分 */}
               <VStack spacing={3} align="center">
-                <Heading 
-                  fontSize={{base:"lg",lg:"xl"}} 
+                <Heading
+                  fontSize={{ base: "lg", lg: "xl" }}
                   fontWeight="bold"
                   color="orange.500"
                 >
-                  {t('tokenMarketplace')}
+                  {t("tokenMarketplace")}
                 </Heading>
                 <Text
-                  color={useColorModeValue('gray.600', 'gray.300')}
+                  color={useColorModeValue("gray.600", "gray.300")}
                   fontSize="md"
                   textAlign="center"
                 >
-                  {t('tokenMarketplaceDesc')}
+                  {t("tokenMarketplaceDesc")}
                 </Text>
               </VStack>
             </Box>
@@ -697,48 +715,46 @@ export default function HomePage() {
       </Box>
 
       {/* 功能特点部分 */}
-      <Box bg={useColorModeValue('brand.background', 'gray.700')}>
-        <Container maxW={'container.xl'} py={12}>
+      <Box bg={useColorModeValue("brand.background", "gray.700")}>
+        <Container maxW={"container.xl"} py={12}>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
             <Stack spacing={4}>
-              <Heading color={'brand.primary'}>{t('startMemeProject')}</Heading>
-              <Text color={'gray.500'} fontSize={'lg'}>
-                {t('startMemeProjectDesc')}
+              <Heading color={"brand.primary"}>{t("startMemeProject")}</Heading>
+              <Text color={"gray.500"} fontSize={"lg"}>
+                {t("startMemeProjectDesc")}
               </Text>
               <Stack
                 spacing={4}
                 divider={
                   <StackDivider
-                    borderColor={useColorModeValue('gray.100', 'gray.700')}
+                    borderColor={useColorModeValue("gray.100", "gray.700")}
                   />
                 }
               >
                 <Feature
-                  icon={
-                    <Icon as={FaRocket} color={'yellow.500'} w={4} h={4} />
-                  }
-                  iconBg={useColorModeValue('yellow.100', 'yellow.900')}
-                  text={t('quickDeploy')}
+                  icon={<Icon as={FaRocket} color={"yellow.500"} w={4} h={4} />}
+                  iconBg={useColorModeValue("yellow.100", "yellow.900")}
+                  text={t("quickDeploy")}
                 />
                 <Feature
                   icon={
-                    <Icon as={FaLayerGroup} color={'green.500'} w={5} h={5} />
+                    <Icon as={FaLayerGroup} color={"green.500"} w={5} h={5} />
                   }
-                  iconBg={useColorModeValue('green.100', 'green.900')}
-                  text={t('easySettings')}
+                  iconBg={useColorModeValue("green.100", "green.900")}
+                  text={t("easySettings")}
                 />
                 <Feature
                   icon={
-                    <Icon as={FaChartLine} color={'purple.500'} w={5} h={5} />
+                    <Icon as={FaChartLine} color={"purple.500"} w={5} h={5} />
                   }
-                  iconBg={useColorModeValue('purple.100', 'purple.900')}
-                  text={t('instantTrade')}
+                  iconBg={useColorModeValue("purple.100", "purple.900")}
+                  text={t("instantTrade")}
                 />
               </Stack>
             </Stack>
             <Flex>
               <Box
-                rounded={'md'}
+                rounded={"md"}
                 overflow="hidden"
                 position="relative"
                 boxShadow="xl"
@@ -792,7 +808,7 @@ export default function HomePage() {
                     fontWeight="medium"
                     textAlign="center"
                   >
-                    {t('unleashCreativity')}
+                    {t("unleashCreativity")}
                   </Text>
                 </Flex>
 
@@ -812,19 +828,19 @@ export default function HomePage() {
       </Box>
 
       {/* 市场热门 */}
-      <Container maxW={'container.xl'} py={12}>
+      <Container maxW={"container.xl"} py={12}>
         <VStack spacing={2} textAlign="center" mb={10}>
-          <Heading as="h2" size="xl" color={'brand.primary'}>
-            {t('marketHot')}
+          <Heading as="h2" size="xl" color={"brand.primary"}>
+            {t("marketHot")}
           </Heading>
-          <Text color={'gray.500'}>{t('marketHotDesc')}</Text>
+          <Text color={"gray.500"}>{t("marketHotDesc")}</Text>
         </VStack>
 
         <Box
-          boxShadow="md"
+          boxShadow="none"
           borderRadius="lg"
           overflow="hidden"
-          bg={useColorModeValue('white', 'gray.800')}
+          bg={useColorModeValue("white", "gray.800")}
           mb={6}
         >
           <TableContainer>
@@ -832,68 +848,68 @@ export default function HomePage() {
               <Thead>
                 <Tr>
                   <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    bg={useColorModeValue("gray.50", "gray.700")}
                     borderBottom="2px"
                     borderColor="brand.primary"
                   >
-                    {t('tokenColumn')}
+                    {t("tokenColumn")}
                   </Th>
                   <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
-                    borderBottom="2px"
-                    borderColor="brand.primary"
-                    isNumeric
-                    textAlign="right"
-                  >
-                    {t('priceColumn')}
-                  </Th>
-                  <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    bg={useColorModeValue("gray.50", "gray.700")}
                     borderBottom="2px"
                     borderColor="brand.primary"
                     isNumeric
                     textAlign="right"
                   >
-                    {t('change24hColumn')}
+                    {t("priceColumn")}
                   </Th>
                   <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    bg={useColorModeValue("gray.50", "gray.700")}
                     borderBottom="2px"
                     borderColor="brand.primary"
                     isNumeric
                     textAlign="right"
                   >
-                    {t('marketCapColumn')}
+                    {t("change24hColumn")}
                   </Th>
                   <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    bg={useColorModeValue("gray.50", "gray.700")}
                     borderBottom="2px"
                     borderColor="brand.primary"
                     isNumeric
                     textAlign="right"
                   >
-                    {t('totalSupplyColumn')}
+                    {t("marketCapColumn")}
                   </Th>
                   <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    bg={useColorModeValue("gray.50", "gray.700")}
                     borderBottom="2px"
                     borderColor="brand.primary"
                     isNumeric
                     textAlign="right"
                   >
-                    {t('volumeColumn')}
+                    {t("totalSupplyColumn")}
                   </Th>
                   <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    bg={useColorModeValue("gray.50", "gray.700")}
                     borderBottom="2px"
                     borderColor="brand.primary"
                     isNumeric
                     textAlign="right"
                   >
-                    {t('linksColumn')}
+                    {t("volumeColumn")}
                   </Th>
                   <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
+                    bg={useColorModeValue("gray.50", "gray.700")}
+                    borderBottom="2px"
+                    borderColor="brand.primary"
+                    isNumeric
+                    textAlign="right"
+                  >
+                    {t("linksColumn")}
+                  </Th>
+                  <Th
+                    bg={useColorModeValue("gray.50", "gray.700")}
                     borderBottom="2px"
                     borderColor="brand.primary"
                   ></Th>
@@ -901,28 +917,28 @@ export default function HomePage() {
               </Thead>
               <Tbody>
                 {marketTokens
-                  .filter(token => {
+                  .filter((token) => {
                     // 移除逗号并转为数字，比较市值是否超过50,000
                     const marketCapValue = parseFloat(
-                      token.marketCap.replace(/,/g, '')
-                    )
-                    return marketCapValue > 50000
+                      token.marketCap.replace(/,/g, "")
+                    );
+                    return marketCapValue > 50000;
                   })
                   .sort((a, b) => {
                     // 根据交易量排序（降序）
-                    const volumeA = parseFloat(a.volume24h.replace(/,/g, ''))
-                    const volumeB = parseFloat(b.volume24h.replace(/,/g, ''))
-                    return volumeB - volumeA
+                    const volumeA = parseFloat(a.volume24h.replace(/,/g, ""));
+                    const volumeB = parseFloat(b.volume24h.replace(/,/g, ""));
+                    return volumeB - volumeA;
                   })
                   .slice(0, 5)
-                  .map(token => {
-                    const iconColor = useColorModeValue('gray.600', 'gray.400')
+                  .map((token) => {
+                    const iconColor = useColorModeValue("gray.600", "gray.400");
                     const iconHoverColor = useColorModeValue(
-                      'brand.primary',
-                      'brand.light'
-                    )
-                    const isPositiveChange = token.change24hValue > 0
-                    const hoverBg = useColorModeValue('gray.50', 'gray.700')
+                      "brand.primary",
+                      "brand.light"
+                    );
+                    const isPositiveChange = token.change24hValue > 0;
+                    const hoverBg = useColorModeValue("gray.50", "gray.700");
 
                     // 分享功能处理
                     const handleShare = (token: any) => {
@@ -930,24 +946,24 @@ export default function HomePage() {
                         navigator
                           .share({
                             title: `${token.name} (${token.symbol})`,
-                            text: `${t('share')} ${token.name} ${t('token')}`,
+                            text: `${t("share")} ${token.name} ${t("token")}`,
                             url: window.location.origin + `/market/${token.id}`,
                           })
-                          .catch(error =>
-                            console.log(`${t('share')} ${t('failed')}:`, error)
-                          )
+                          .catch((error) =>
+                            console.log(`${t("share")} ${t("failed")}:`, error)
+                          );
                       } else {
                         // 如果浏览器不支持，可以复制链接到剪贴板
                         const url =
-                          window.location.origin + `/market/${token.id}`
+                          window.location.origin + `/market/${token.id}`;
                         navigator.clipboard
                           .writeText(url)
-                          .then(() => alert(`${t('copySuccess')}`))
-                          .catch(error =>
-                            console.log(`${t('copy')} ${t('failed')}:`, error)
-                          )
+                          .then(() => alert(`${t("copySuccess")}`))
+                          .catch((error) =>
+                            console.log(`${t("copy")} ${t("failed")}:`, error)
+                          );
                       }
-                    }
+                    };
 
                     return (
                       <Tr
@@ -994,7 +1010,7 @@ export default function HomePage() {
                           <Flex justify="flex-end">
                             <Text
                               fontWeight="bold"
-                              color={isPositiveChange ? 'green.500' : 'red.500'}
+                              color={isPositiveChange ? "green.500" : "red.500"}
                             >
                               <Icon
                                 as={isPositiveChange ? FaArrowUp : FaArrowDown}
@@ -1067,13 +1083,13 @@ export default function HomePage() {
                             colorScheme="purple"
                             size="sm"
                             bg="brand.primary"
-                            _hover={{ bg: 'brand.light' }}
+                            _hover={{ bg: "brand.light" }}
                           >
-                            {t('detail')}
+                            {t("detail")}
                           </Button>
                         </Td>
                       </Tr>
-                    )
+                    );
                   })}
               </Tbody>
             </Table>
@@ -1084,55 +1100,55 @@ export default function HomePage() {
           <Button
             as={NextLink}
             href="/market"
-            rounded={'full'}
-            size={'lg'}
-            fontWeight={'normal'}
-            colorScheme={'purple'}
-            bg={'brand.primary'}
-            _hover={{ bg: 'brand.light' }}
+            rounded={"full"}
+            size={"lg"}
+            fontWeight={"normal"}
+            colorScheme={"purple"}
+            bg={"brand.primary"}
+            _hover={{ bg: "brand.light" }}
             px={6}
           >
-            {t('tokenMarket')}
+            {t("tokenMarket")}
           </Button>
         </Box>
       </Container>
 
       {/* 行动召唤部分 */}
-      <Box bg={useColorModeValue('brand.primary', 'gray.900')}>
-        <Container maxW={'container.xl'} py={16}>
+      <Box bg={useColorModeValue("brand.primaryGradient", "gray.900")}>
+        <Container maxW={"container.xl"} py={16}>
           <Flex
-            direction={{ base: 'column', md: 'row' }}
-            align={'center'}
-            justify={'space-between'}
+            direction={{ base: "column", md: "row" }}
+            align={"center"}
+            justify={"space-between"}
           >
-            <Stack spacing={4} mb={{ base: 8, md: 0 }} maxW={{ md: '50%' }}>
-              <Heading color={'white'} size={'lg'}>
-                {t('readyToDeployQuestion')}
+            <Stack spacing={4} mb={{ base: 8, md: 0 }} maxW={{ md: "50%" }}>
+              <Heading color={"white"} size={"lg"}>
+                {t("readyToDeployQuestion")}
               </Heading>
-              <Text color={'whiteAlpha.800'}>{t('readyToDeployDesc')}</Text>
+              <Text color={"whiteAlpha.800"}>{t("readyToDeployDesc")}</Text>
             </Stack>
             <Button
               as={NextLink}
               href="/deploy"
-              rounded={'full'}
-              size={'lg'}
-              bg={'brand.secondary'}
-              color={'white'}
+              rounded={"full"}
+              size={"lg"}
+              bg={"brand.secondary"}
+              color={"white"}
               px={8}
-              _hover={{ bg: 'yellow.400' }}
+              _hover={{ bg: "yellow.400" }}
               rightIcon={<Icon as={FaRocket} />}
             >
-              {t('startDeploy')}
+              {t("startDeploy")}
             </Button>
           </Flex>
         </Container>
       </Box>
     </Box>
-  )
+  );
 }
 
 const PlayIcon = createIcon({
-  displayName: 'PlayIcon',
-  viewBox: '0 0 58 58',
-  d: 'M28.9999 0.562988C13.3196 0.562988 0.562378 13.3202 0.562378 29.0005C0.562378 44.6808 13.3196 57.438 28.9999 57.438C44.6801 57.438 57.4374 44.6808 57.4374 29.0005C57.4374 13.3202 44.6801 0.562988 28.9999 0.562988ZM39.2223 30.272L23.5749 39.7247C23.3506 39.8591 23.0946 39.9314 22.8332 39.9342C22.5717 39.9369 22.3142 39.8701 22.0871 39.7406C21.86 39.611 21.6715 39.4234 21.5408 39.1969C21.4102 38.9705 21.3421 38.7133 21.3436 38.4519V19.5491C21.3421 19.2877 21.4102 19.0305 21.5408 18.8041C21.6715 18.5776 21.86 18.3899 22.0871 18.2604C22.3142 18.1308 22.5717 18.064 22.8332 18.0668C23.0946 18.0696 23.3506 18.1419 23.5749 18.2763L39.2223 27.729C39.4404 27.8619 39.6207 28.0486 39.7458 28.2713C39.8709 28.494 39.9366 28.7451 39.9366 29.0005C39.9366 29.2559 39.8709 29.507 39.7458 29.7297C39.6207 29.9523 39.4404 30.1391 39.2223 30.272Z',
-})
+  displayName: "PlayIcon",
+  viewBox: "0 0 58 58",
+  d: "M28.9999 0.562988C13.3196 0.562988 0.562378 13.3202 0.562378 29.0005C0.562378 44.6808 13.3196 57.438 28.9999 57.438C44.6801 57.438 57.4374 44.6808 57.4374 29.0005C57.4374 13.3202 44.6801 0.562988 28.9999 0.562988ZM39.2223 30.272L23.5749 39.7247C23.3506 39.8591 23.0946 39.9314 22.8332 39.9342C22.5717 39.9369 22.3142 39.8701 22.0871 39.7406C21.86 39.611 21.6715 39.4234 21.5408 39.1969C21.4102 38.9705 21.3421 38.7133 21.3436 38.4519V19.5491C21.3421 19.2877 21.4102 19.0305 21.5408 18.8041C21.6715 18.5776 21.86 18.3899 22.0871 18.2604C22.3142 18.1308 22.5717 18.064 22.8332 18.0668C23.0946 18.0696 23.3506 18.1419 23.5749 18.2763L39.2223 27.729C39.4404 27.8619 39.6207 28.0486 39.7458 28.2713C39.8709 28.494 39.9366 28.7451 39.9366 29.0005C39.9366 29.2559 39.8709 29.507 39.7458 29.7297C39.6207 29.9523 39.4404 30.1391 39.2223 30.272Z",
+});

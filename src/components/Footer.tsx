@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 
 const ListHeader = ({ children }: { children: React.ReactNode }) => {
   return (
-    <Text fontWeight='600' fontSize='lg' mb={{base:1,md:2}}>
+    <Text fontWeight='600' fontSize='lg' mb={{base:1,md:2}} color={useColorModeValue('brand.footer.text', 'gray.200')}>
       {children}
     </Text>
   );
@@ -61,8 +61,8 @@ export default function Footer() {
   
   return (
     <Box
-      bg={useColorModeValue('gray.50', 'gray.900')}
-      color={useColorModeValue('gray.700', 'gray.200')}>
+      bg={useColorModeValue('brand.footer.primary', 'gray.900')}
+      color={useColorModeValue('brand.footer.text', 'gray.200')}>
       <Container as={Stack} maxW='container.xl' py={10}>
         <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={8}>
           <Stack align='flex-start' spacing={{base:1,md:2}}>
@@ -107,7 +107,7 @@ export default function Footer() {
       <Box
         borderTopWidth={1}
         borderStyle='solid'
-        borderColor={useColorModeValue('gray.200', 'gray.700')}>
+        borderColor={useColorModeValue('brand.footer.secondary', 'gray.700')} >
         <Container
           as={Stack}
           maxW='container.xl'
@@ -115,9 +115,9 @@ export default function Footer() {
           direction={{ base: 'column', md: 'row' }}
           gap={2}
           justify={{base: 'center', md: 'space-between' }}
-          align={{base: 'center', md: 'center' }}>
-          <Text>{t('copyright')}</Text>
-          <Text>{t('builtBy')}</Text>
+          align={{base: 'center', md: 'center' }} >
+          <Text color={useColorModeValue('brand.footer.text', 'gray.200')}>{t('copyright')}</Text>
+          <Text color={useColorModeValue('brand.footer.text', 'gray.200')}>{t('builtBy')}</Text>
         </Container>
       </Box>
     </Box>

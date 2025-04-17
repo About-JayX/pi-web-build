@@ -126,7 +126,7 @@ export default function MintingTokenCard({
   return (
     <Card
       bg={cardBg}
-      boxShadow="md"
+      boxShadow="none"
       borderRadius="lg"
       overflow="hidden"
       transition="transform 0.3s, box-shadow 0.3s"

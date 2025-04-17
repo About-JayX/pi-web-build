@@ -5,10 +5,16 @@ import { extendTheme, ThemeConfig } from '@chakra-ui/react';
 const colors = {
   brand: {
     primary: '#7B2CBF', // 主紫色
+    primaryGradient: 'linear-gradient(90deg,#8a348e 0%,#423f88 100%)', // 主紫色渐变
+    footer:{
+      primary:'#252525',
+      secondary:'#333',
+      text:'#ccc',
+    }, // 底部
     secondary: '#E6B325', // 金色
     light: '#9D4EDD', // 亮紫色
     dark: '#5A189A', // 深紫色
-    background: '#F9F7FC', // 浅紫背景
+    background: '#f2f2f2',
     cardBg: '#FFFFFF',
     text: {
       primary: '#2D3748',
@@ -34,6 +40,9 @@ const colors = {
     700: '#81630b',
     800: '#503c05',
     900: '#211800',
+  },
+  gray:{
+    50:'#e8e8e8',
   }
 };
 
