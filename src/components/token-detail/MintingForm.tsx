@@ -3,13 +3,16 @@
 import { useState, useEffect } from 'react'
 import {
   Box,
-  Text,
   Button,
-  HStack,
-  VStack,
   Flex,
+  FormControl,
+  FormLabel,
+  HStack,
   Input,
-  Icon,
+  Stack,
+  Text,
+  useBreakpointValue,
+  VStack,
   useColorModeValue,
   useToast,
   Tooltip,
@@ -36,6 +39,7 @@ import {
   ModalBody,
   ModalCloseButton,
   useDisclosure,
+  Icon,
 } from '@chakra-ui/react'
 import {
   FaInfoCircle,
@@ -48,6 +52,10 @@ import {
 } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
 import { useProgram } from '@/web3/fairMint/hooks/useProgram'
+import { useSolana } from '@/contexts/solanaProvider'
+import { PublicKey } from '@solana/web3.js'
+import { useAppSelector } from '@/store/hooks'
+import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
 
 interface MintingFormProps {
   token: {
@@ -68,7 +76,7 @@ export default function MintingForm({
   onClose,
   isModal = false,
 }: MintingFormProps) {
-  const [walletBalance, setWalletBalance] = useState<number>(314) // 钱包余额
+  const [walletBalance, setWalletBalance] = useState<number>(0) // 初始化为0
   const [amount, setAmount] = useState<string>('')
   const [submitting, setSubmitting] = useState(false)
   const [cancelling, setCancelling] = useState(false)
@@ -79,11 +87,41 @@ export default function MintingForm({
   const [isMobile, setIsMobile] = useState<boolean>(false)
   const { t } = useTranslation()
   const { mintToken } = useProgram()
+  const { conn, publicKey } = useSolana()
+  const isLoggedIn = useAppSelector(state => state.user.isLoggedIn)
+  const { data: fairCurveData } = useFairCurve(conn, token.address)
 
   const currencyUnit = token.currencyUnit || 'Pi'
   const cardBg = useColorModeValue('white', 'gray.800')
   const inputBg = useColorModeValue('white', 'gray.700')
   const toast = useToast()
+
+  // 获取钱包余额
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!conn || !publicKey) {
+        setWalletBalance(0)
+        return
+      }
+
+      try {
+        const pubKey = new PublicKey(publicKey)
+        const balance = await conn.getBalance(pubKey)
+        // 将 lamports 转换为 SOL
+        setWalletBalance(balance / 1e9)
+      } catch (error) {
+        console.error('获取钱包余额失败:', error)
+        setWalletBalance(0)
+      }
+    }
+
+    fetchBalance()
+
+    // 设置余额轮询
+    const intervalId = setInterval(fetchBalance, 10000) // 每10秒更新一次余额
+
+    return () => clearInterval(intervalId)
+  }, [conn, publicKey])
 
   // 设置初始移动端状态和监听窗口大小变化
   useEffect(() => {
@@ -132,19 +170,37 @@ export default function MintingForm({
 
   // 处理铸造提交
   const handleSubmit = async () => {
-    if (!isAmountValid()) return
-
-    setSubmitting(true)
-    const mintAmount = parseFloat(amount)
-
-    console.log(token, 'token_??')
-
     try {
+      if (!conn || !publicKey) {
+        toast({
+          title: t('请先连接钱包'),
+          status: 'error',
+        })
+        return
+      }
+
+      if (!isLoggedIn) {
+        toast({
+          title: t('请先登录'),
+          status: 'error',
+        })
+        return
+      }
+
+      if (!isAmountValid()) return
+
+      setSubmitting(true)
+      const mintAmount = parseFloat(amount)
+
       // 调用真实的mintToken函数，传入SOL金额（转换为lamports）和token地址
       await mintToken(mintAmount * 1e9, token.address)
 
-      // 更新钱包余额和已铸造金额
-      setWalletBalance(prev => parseFloat((prev - mintAmount).toFixed(2)))
+      // 获取最新余额
+      const pubKey = new PublicKey(publicKey)
+      const newBalance = await conn.getBalance(pubKey)
+      setWalletBalance(newBalance / 1e9)
+
+      // 更新已铸造金额
       setMintedAmount(prev => parseFloat((prev + mintAmount).toFixed(2)))
 
       // 计算获得的代币并累加到现有的代币数量
@@ -173,8 +229,8 @@ export default function MintingForm({
     } catch (error) {
       console.error('铸造失败:', error)
       toast({
-        title: t('error'),
-        description: t('mintingFailed'),
+        title: t('铸造失败'),
+        description: error instanceof Error ? error.message : t('未知错误'),
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -318,11 +374,40 @@ export default function MintingForm({
     }, 1500)
   }
 
-  // 计算预估获取的代币数量（针对当前输入值）
-  const getEstimatedTokens = () => {
-    if (!isAmountValid()) return '0'
-    const rate = parseFloat(token.presaleRate?.replace(/[^0-9.]/g, '') || '0')
-    return (parseFloat(amount) / rate).toLocaleString()
+  // 计算铸造进度
+  const getMintProgress = () => {
+    if (!fairCurveData) return 0
+
+    const supplied = Number(fairCurveData.supplied)
+    const remaining = Number(fairCurveData.remaining)
+
+    if (!supplied) return 0
+
+    // 使用公式: 1 - remaining/supplied
+    const progress = (1 - remaining / supplied) * 100
+    return progress.toFixed(2)
+  }
+
+  // 计算预估获取的代币数量
+  const getEstimatedTokens = (solAmount: number) => {
+    if (
+      !solAmount ||
+      !fairCurveData?.supplied ||
+      !fairCurveData?.liquiditySol
+    ) {
+      return 0
+    }
+
+    const supplied = Number(fairCurveData.supplied)
+    const liquiditySol = Number(fairCurveData.liquiditySol)
+
+    if (liquiditySol === 0) {
+      return 0
+    }
+
+    // 使用公式: (supplied / liquiditySol) * (solAmount * 1e9)
+    const estimatedAmount = (supplied / liquiditySol) * (solAmount * 1e9)
+    return Number(estimatedAmount.toFixed(2))
   }
 
   // 计算手续费
@@ -565,7 +650,7 @@ export default function MintingForm({
             <Text>{t('estimatedTokens')}:</Text>
             <HStack>
               <Text fontWeight="semibold" color="brand.primary">
-                {getEstimatedTokens()}
+                {getEstimatedTokens(parseFloat(amount))}
               </Text>
               <Text>{token.symbol}</Text>
             </HStack>

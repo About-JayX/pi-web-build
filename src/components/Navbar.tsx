@@ -81,14 +81,46 @@ export default function Navbar() {
       }
 
       try {
+        // 如果未连接钱包，先连接钱包并立即进行登录
         if (!publicKey) {
-          // 如果未连接钱包，先连接钱包
           const result = await window.solana.connect()
-          setPublicKey(result.publicKey.toString())
+          const newPublicKey = result.publicKey.toString()
+          setPublicKey(newPublicKey)
+          
+          // 立即执行登录
+          const message = 'Hello from PiSale!'
+          const encodedMessage = new TextEncoder().encode(message)
+          const signed = await window.solana.signMessage(encodedMessage, 'utf8')
+          const signatureBytes = new Uint8Array(signed.signature)
+
+          const loginResult = await UserAPI.loginWithSolana({
+            publicKey: newPublicKey,
+            message,
+            signature: Array.from(signatureBytes),
+            code: 'K7QEISU9',
+          })
+
+          if (loginResult.data) {
+            dispatch(
+              setUser({
+                user: loginResult.data.user,
+                authToken: loginResult.data.authToken,
+              })
+            )
+
+            toast({
+              title: '登录成功',
+              description: `欢迎回来，${loginResult.data.user.nickname || 'User'}`,
+              status: 'success',
+              duration: 3000,
+              isClosable: true,
+              position: 'top',
+            })
+          }
           return
         }
 
-        // 如果已登录，不需要重复登录
+        // 如果已登录，显示已登录提示
         if (isLoggedIn) {
           toast({
             title: '提示',
@@ -101,7 +133,7 @@ export default function Navbar() {
           return
         }
 
-        // 如果已连接钱包，执行签名登录
+        // 如果已连接钱包但未登录，执行登录
         const message = 'Hello from PiSale!'
         const encodedMessage = new TextEncoder().encode(message)
         const signed = await window.solana.signMessage(encodedMessage, 'utf8')
@@ -135,8 +167,7 @@ export default function Navbar() {
         console.error('操作失败:', error)
         toast({
           title: '错误',
-          description:
-            error instanceof Error ? error.message : '登录失败，请重试',
+          description: error instanceof Error ? error.message : '操作失败，请重试',
           status: 'error',
           duration: 3000,
           isClosable: true,
@@ -365,9 +396,7 @@ export default function Navbar() {
               {network === 'Solana'
                 ? isLoggedIn
                   ? userInfo?.nickname || userInfo?.userId
-                  : publicKey
-                  ? '点击登录'
-                  : '连接Solana钱包'
+                  : '连接并登录'
                 : '连接Pi钱包'}
             </Button>
           </Stack>

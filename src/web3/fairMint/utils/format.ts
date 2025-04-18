@@ -41,6 +41,7 @@ export function formatBN(value: BN, decimals: number): string {
 }
 
 export function formatFairCurveState(state: FairCurveState | null): FormattedFairCurveData {
+  console.log('state', state)
   if (!state) {
     return {
       supply: '0',
@@ -92,11 +93,12 @@ export function formatFairCurveState(state: FairCurveState | null): FormattedFai
 
   // 计算铸造进度
   let progress = 0
-  if (!supplyBN.isZero()) {
+  if (!suppliedBN.isZero()) {
     try {
-      const supplyNum = supplyBN.toNumber()
+      const remainingNum = remainingBN.toNumber()
       const suppliedNum = suppliedBN.toNumber()
-      progress = (suppliedNum / supplyNum) * 100
+      // 使用公式: 1 - remaining/supplied
+      progress = (1 - remainingNum/suppliedNum) * 100
     } catch (err) {
       console.error('计算进度时出错:', err)
       progress = 0
@@ -108,7 +110,7 @@ export function formatFairCurveState(state: FairCurveState | null): FormattedFai
     supplyBN: supplyBN.toString(),
     suppliedBN: suppliedBN.toString(),
     remainingBN: remainingBN.toString(),
-    solReceivedBN: solReceivedBN.toString(),
+    progress: progress
   })
 
   return {

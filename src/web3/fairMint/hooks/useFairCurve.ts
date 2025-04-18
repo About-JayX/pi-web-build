@@ -5,6 +5,7 @@ import { struct, u8, u16, seq } from '@solana/buffer-layout'
 import { u64 } from '@solana/buffer-layout-utils'
 import { publicKey as publicKeyLayout } from '@solana/buffer-layout-utils'
 import { useSolana } from '@/contexts/solanaProvider'
+import { useAppSelector } from '@/store/hooks'
 
 export interface FormattedFairCurveState {
   liquidityAdded: boolean
@@ -194,13 +195,13 @@ export function useFairCurve(
         programId
       )
 
-      console.log('PDA 地址:', fairCurvePda.toBase58())
-
       // 获取账户信息
       const accountInfo = await connection.getAccountInfo(fairCurvePda)
 
       if (!accountInfo) {
-        throw new Error('FairCurve 账户不存在')
+        setError('找不到该代币的铸造信息')
+        setData(null)
+        return
       }
 
       console.log('账户数据长度:', accountInfo.data.length)
@@ -282,6 +283,7 @@ export function useFairCurve(
           fee: decodedData.fee,
         }
 
+      
         console.log('转换后的状态:', fairCurveState)
 
         // 格式化数据
