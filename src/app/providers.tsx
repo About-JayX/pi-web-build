@@ -1,53 +1,53 @@
-'use client'
+"use client";
 
-import { CacheProvider } from '@chakra-ui/next-js'
+import { CacheProvider } from "@chakra-ui/next-js";
 import {
   ChakraProvider,
   ColorModeScript,
   createLocalStorageManager,
-} from '@chakra-ui/react'
-import theme from '@/theme'
-import dynamic from 'next/dynamic'
-import { useState, useEffect } from 'react'
-import Footer from '@/components/Footer'
-import { NetworkProvider } from '@/contexts/NetworkContext'
-import { SolanaProvider } from '@/contexts/solanaProvider'
-import { I18nProvider } from '@/contexts/I18nProvider'
-import { Provider } from 'react-redux'
-import { store } from '../store'
-import { fetchTokenList } from '@/store/slices/tokenSlice'
+} from "@chakra-ui/react";
+import theme from "@/theme";
+import dynamic from "next/dynamic";
+import { useState, useEffect } from "react";
+import Footer from "@/components/Footer";
+import { NetworkProvider } from "@/contexts/NetworkContext";
+import { SolanaProvider } from "@/contexts/solanaProvider";
+import { I18nProvider } from "@/contexts/I18nProvider";
+import { Provider } from "react-redux";
+import { store } from "../store";
+import { fetchTokenList } from "@/store/slices/tokenSlice";
 
 // 动态导入Navbar，避免SSR
-const Navbar = dynamic(() => import('@/components/Navbar'), { ssr: false })
+const Navbar = dynamic(() => import("@/components/Navbar"), { ssr: false });
 // 动态导入公告组件，避免SSR
-const Announcement = dynamic(() => import('@/components/Announcement'), {
+const Announcement = dynamic(() => import("@/components/Announcement"), {
   ssr: false,
-})
+});
 
 // 创建本地存储管理器 - 仅在客户端使用
-const localStorageManager = createLocalStorageManager('pi-sale-color-mode')
+const localStorageManager = createLocalStorageManager("pi-sale-color-mode");
 
 // 解决Chakra UI的SSR问题的ClientOnly组件
 function ClientOnly({ children }: { children: React.ReactNode }) {
-  const [hasMounted, setHasMounted] = useState(false)
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
-    setHasMounted(true)
-  }, [])
+    setHasMounted(true);
+  }, []);
 
   // 在服务器端或者客户端首次渲染前不显示任何内容
   if (!hasMounted) {
-    return null
+    return null;
   }
 
-  return <>{children}</>
+  return <>{children}</>;
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // 在应用启动时获取代币列表
-    store.dispatch(fetchTokenList())
-  }, [])
+    store.dispatch(fetchTokenList());
+  }, []);
 
   return (
     <Provider store={store}>
@@ -67,7 +67,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
               <SolanaProvider>
                 <I18nProvider>
                   <Navbar />
-                  <main style={{ minHeight: 'calc(100vh - 360px)' }}>
+                  <main style={{ minHeight: "calc(100vh - 60px)" }}>
                     {children}
                   </main>
                   <Footer />
@@ -79,5 +79,5 @@ export function Providers({ children }: { children: React.ReactNode }) {
         </ClientOnly>
       </CacheProvider>
     </Provider>
-  )
+  );
 }
