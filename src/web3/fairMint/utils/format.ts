@@ -119,6 +119,6 @@ export function formatFairCurveState(state: FairCurveState | null): FormattedFai
     supplied: suppliedBN.toString(10),
     solReceived: solReceivedBN.toString(10),
     progress: Number(progress.toFixed(2)),
-    feeRate: ((feeRate || 0) / 100).toFixed(2),
+    feeRate: feeRate.toString(),
   }
 } 

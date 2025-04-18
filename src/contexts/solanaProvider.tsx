@@ -14,6 +14,7 @@ import React, {
   ReactNode,
   useEffect,
 } from 'react'
+import { PROGRAM_ID } from '@/config'
 
 interface solanaContextType {
   publicKey: string
@@ -29,21 +30,19 @@ export const SolanaContext = createContext<solanaContextType>({
   setPublicKey: () => {},
   conn: null,
   FAIR_CURVE_SEED: Buffer.from('fair_curve'),
-  programId: new PublicKey('EXvMSxRmAVhFteebkv3QvefzBCjvB5b1PSoHbgHiqXYQ'),
+  programId: new PublicKey(PROGRAM_ID),
   wallet: null,
 })
 
 export const useSolana = () => useContext(SolanaContext)
 export const SolanaProvider = ({ children }: { children: ReactNode }) => {
-  const [publicKey, setPublicKey] = useState<string | null>(null)
+  const [publicKey, setPublicKey] = useState<string>('')
   const [conn, setConn] = useState<Connection | null>(null)
   const FAIR_CURVE_SEED = Buffer.from('fair_curve')
-  const programId = new PublicKey(
-    'EXvMSxRmAVhFteebkv3QvefzBCjvB5b1PSoHbgHiqXYQ'
-  )
-  const key = (publicKey && new PublicKey(publicKey)) || null
-  const wallet = {
-    publicKey: key,
+  const programId = new PublicKey(PROGRAM_ID)
+  const key = publicKey ? new PublicKey(publicKey) : null
+  const wallet = publicKey ? {
+    publicKey: new PublicKey(publicKey),
     signTransaction: async <T extends Transaction | VersionedTransaction>(
       transaction: T
     ): Promise<T> => {
@@ -61,7 +60,7 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
     ): Promise<T[]> => {
       return (await window.solana.signAllTransactions(transactions)) as T[]
     },
-  }
+  } : null
 
   const checkWallet = async () => {
     const key = window.solana.publicKey

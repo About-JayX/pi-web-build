@@ -58,6 +58,8 @@ import { useAppSelector } from '@/store/hooks'
 import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
 import { TokenInfo } from '@/api/types'
 import BN from 'bn.js'
+import { CLMM_PROGRAM_ID } from '@/config'
+import { BigNumber } from 'bignumber.js'
 
 interface Token extends TokenInfo {
   logo: string
@@ -109,6 +111,11 @@ export default function MintingForm({
   const inputBg = useColorModeValue('white', 'gray.700')
   const toast = useToast()
 
+  // 获取钱包余额的显示值
+  const getDisplayBalance = (balance: number) => {
+    return new BigNumber(balance).div(1e9).toFixed(4)
+  }
+
   // 获取钱包余额
   useEffect(() => {
     const fetchBalance = async () => {
@@ -121,7 +128,7 @@ export default function MintingForm({
         // 更新 SOL 余额
         const pubKey = new PublicKey(publicKey)
         const balance = await conn.getBalance(pubKey)
-        setWalletBalance(balance / 1e9)
+        setWalletBalance(balance) // 保存原始值
 
         // 更新代币余额（如果有 tokenAccount）
         if (tokenAccount) {
@@ -130,7 +137,6 @@ export default function MintingForm({
             tokenAccountPubkey
           )
           const newBalance = tokenAccountInfo.value.uiAmount || 0
-          // 通过 props 更新父组件的 tokenBalance
           if (onBalanceUpdate) {
             onBalanceUpdate(newBalance)
           }
@@ -142,10 +148,7 @@ export default function MintingForm({
     }
 
     fetchBalance()
-
-    // 设置余额轮询
-    const intervalId = setInterval(fetchBalance, 5000) // 每5秒更新一次余额
-
+    const intervalId = setInterval(fetchBalance, 5000)
     return () => clearInterval(intervalId)
   }, [conn, publicKey, tokenAccount, onBalanceUpdate])
 
@@ -202,7 +205,7 @@ export default function MintingForm({
       // 更新 SOL 余额
       const pubKey = new PublicKey(publicKey)
       const balance = await conn.getBalance(pubKey)
-      setWalletBalance(balance / 1e9)
+      setWalletBalance(balance)
 
       // 更新代币余额（如果有 tokenAccount）
       if (tokenAccount) {
@@ -310,9 +313,42 @@ export default function MintingForm({
 
   // 快速选择退还代币百分比
   const quickSelectTokenRefundPercent = (percent: number) => {
-    if (!tokenBalance) return
-    const calculatedAmount = (tokenBalance * percent).toFixed(0)
-    setRefundAmount(calculatedAmount)
+    if (
+      !tokenBalance ||
+      !fairCurveData?.supplied ||
+      !fairCurveData?.liquiditySol
+    )
+      return
+
+    // 计算初始的token数量
+    const initialTokenAmount = new BigNumber(tokenBalance).times(percent)
+
+    // 计算对应的SOL数量
+    const tokenAmountInSmallestUnit = initialTokenAmount.times(1e6) // 转换为原始单位
+    const supplied = new BigNumber(fairCurveData.supplied)
+    const liquiditySol = new BigNumber(fairCurveData.liquiditySol)
+
+    // 计算SOL数量
+    const rawSolAmount = tokenAmountInSmallestUnit
+      .times(liquiditySol)
+      .div(supplied)
+      .div(1e9)
+
+    // 向下取整到最接近的0.001
+    const roundedSolAmount = new BigNumber(
+      Math.floor(rawSolAmount.times(1000).toNumber()) / 1000
+    )
+
+    // 反向计算实际可退还的代币数量
+    const actualTokenAmount = roundedSolAmount
+      .times(1e9) // 转回lamports
+      .times(supplied)
+      .div(liquiditySol)
+      .div(1e6) // 转换为代币单位
+      .integerValue(BigNumber.ROUND_FLOOR) // 向下取整到整数
+
+    // 更新退还金额输入框
+    setRefundAmount(actualTokenAmount.toString())
   }
 
   // 计算基于代币数量的 SOL 金额（不含手续费）
@@ -321,40 +357,42 @@ export default function MintingForm({
       !isTokenRefundAmountValid() ||
       !fairCurveData?.supplied ||
       !fairCurveData?.liquiditySol
-    )
-      return 0
-    const tokenAmount = parseFloat(refundAmount)
+    ) {
+      return new BigNumber(0)
+    }
 
-    // 使用与铸造相反的公式计算 SOL 数量
-    // 铸造公式: tokens = (solAmount * 1e3 * supplied) / liquiditySol
-    // 反向计算: solAmount = (tokens * liquiditySol) / (supplied * 1e3)
-    const supplied = Number(fairCurveData.supplied)
-    const liquiditySol = Number(fairCurveData.liquiditySol)
+    const tokenAmount = new BigNumber(refundAmount).times(1e6) // 转换为原始单位
+    const supplied = new BigNumber(fairCurveData.supplied)
+    const liquiditySol = new BigNumber(fairCurveData.liquiditySol)
 
-    return (tokenAmount * liquiditySol) / (supplied * 1e3)
+    // 计算结果后转换为SOL单位
+    const rawAmount = tokenAmount.times(liquiditySol).div(supplied).div(1e9)
+
+    // 向下取整到最接近的0.001
+    return new BigNumber(Math.floor(rawAmount.times(1000).toNumber()) / 1000)
   }
 
   // 计算基于代币数量的实际 SOL 退还金额
   const getActualPiRefundAmount = () => {
     const totalSolAmount = calculateTotalPiAmount()
-    if (totalSolAmount === 0) return '0.00'
+    if (totalSolAmount.isZero()) return '0.000'
 
     // 计算手续费（2%）
-    const feeAmount = totalSolAmount * 0.02
+    const feeAmount = totalSolAmount.times(0.02)
 
     // 实际退还金额应该是总金额减去手续费
-    const actualRefund = totalSolAmount - feeAmount
-    return actualRefund.toFixed(4)
+    const actualRefund = totalSolAmount.minus(feeAmount)
+    return actualRefund.toFixed(3) // 保持3位小数
   }
 
   // 计算基于代币数量的 SOL 手续费
   const getPiRefundFee = () => {
     const totalSolAmount = calculateTotalPiAmount()
-    if (totalSolAmount === 0) return '0.00'
+    if (totalSolAmount.isZero()) return '0.000'
 
     // 2% 手续费
-    const feeAmount = totalSolAmount * 0.02
-    return feeAmount.toFixed(4)
+    const feeAmount = totalSolAmount.times(0.02)
+    return feeAmount.toFixed(3) // 保持3位小数
   }
 
   // 修改取消铸造 - 基于代币数量
@@ -369,7 +407,14 @@ export default function MintingForm({
       const tokenRefundValue = parseFloat(refundAmount) * 1e6
 
       // 调用合约的退还函数，参数顺序：token地址，退还数量，手续费账户地址
-      const feeAccountAddress = 'AxrMTmKJhBtbPTK4QM1ugTKXShoPJWJ17Dw7cXYjm6DD'
+      const feeAccountAddress = CLMM_PROGRAM_ID
+      console.log(
+        token.address,
+        tokenRefundValue,
+        feeAccountAddress,
+        'token.address, tokenRefundValue, feeAccountAddress'
+      )
+
       await returnToken(token.address, tokenRefundValue, feeAccountAddress)
 
       // 等待交易确认后更新余额
@@ -380,7 +425,7 @@ export default function MintingForm({
         // 更新 SOL 余额
         const pubKey = new PublicKey(publicKey)
         const balance = await conn.getBalance(pubKey)
-        setWalletBalance(balance / 1e9)
+        setWalletBalance(balance)
 
         // 更新代币余额
         const tokenAccountPubkey = new PublicKey(tokenAccount)
@@ -457,17 +502,20 @@ export default function MintingForm({
     }
 
     try {
-      const solAmount = new BN(Math.floor(parseFloat(amount) * 1e9).toString())
-      const supplied = new BN(fairCurveData.supplied)
-      const liquiditySol = new BN(fairCurveData.liquiditySol)
+      // 使用BigNumber处理所有计算
+      const solAmount = new BigNumber(amount).times(1e9)
+      const supplied = new BigNumber(fairCurveData.supplied)
+      const liquiditySol = new BigNumber(fairCurveData.liquiditySol)
 
       if (liquiditySol.isZero()) {
         return '0'
       }
 
       // 计算: (supplied / liquiditySol) * solAmount
-      const result = supplied.mul(solAmount).div(liquiditySol)
-      return (result.toNumber() / 1e9).toFixed(2)
+      const result = supplied.times(solAmount).div(liquiditySol)
+
+      // 转换为代币单位（除以1e6）并保留2位小数
+      return result.div(1e6).toFixed(2, BigNumber.ROUND_DOWN)
     } catch (error) {
       console.error('计算代币数量时出错:', error)
       return '0'
@@ -477,29 +525,28 @@ export default function MintingForm({
   // 计算手续费
   const getFee = () => {
     if (!isAmountValid()) return '0'
-    return (parseFloat(amount) * 0.02).toFixed(4)
+    return new BigNumber(amount).times(0.02).toFixed(4)
   }
 
   // 计算退还手续费
   const getRefundFee = () => {
     if (!isRefundAmountValid()) return '0'
-    return (parseFloat(refundAmount) * 0.02).toFixed(2)
+    return new BigNumber(refundAmount).times(0.02).toFixed(2)
   }
 
   // 计算实际退还金额
   const getActualRefundAmount = () => {
     if (!isRefundAmountValid()) return '0'
-    return (parseFloat(refundAmount) * 0.98).toFixed(2)
+    return new BigNumber(refundAmount).times(0.98).toFixed(2)
   }
 
-  // 快速选择金额
+  // 修改快速选择函数
   const quickSelect = (value: number) => {
-    // 检查选择金额是否超过余额
-    if (value > walletBalance) {
+    if (value > new BigNumber(walletBalance).div(1e9).toNumber()) {
       toast({
         title: t('insufficientBalance'),
         description: t('walletBalanceInsufficient', {
-          balance: walletBalance,
+          balance: getDisplayBalance(walletBalance),
           currency: currencyUnit,
         }),
         status: 'error',
@@ -620,12 +667,7 @@ export default function MintingForm({
               borderTop="1px solid"
               borderColor="gray.100"
             >
-              <Text fontSize={{ base: 'xs', md: 'sm' }} color="gray.500">
-                {t('walletBalance')}:{' '}
-                <Text as="span" fontWeight="bold" color="gray.700">
-                  {walletBalance} {currencyUnit}
-                </Text>
-              </Text>
+              {renderWalletBalance()}
             </Flex>
           </Box>
         </Box>
@@ -1031,6 +1073,18 @@ export default function MintingForm({
           {t('cancelMint')}
         </Button>
       </VStack>
+    )
+  }
+
+  // 修改钱包余额显示
+  const renderWalletBalance = () => {
+    return (
+      <Text fontSize={{ base: 'xs', md: 'sm' }} color="gray.500">
+        {t('walletBalance')}:{' '}
+        <Text as="span" fontWeight="bold" color="gray.700">
+          {getDisplayBalance(walletBalance)} {currencyUnit}
+        </Text>
+      </Text>
     )
   }
 

@@ -35,6 +35,7 @@ import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
 import { formatFairCurveState } from '@/web3/fairMint/utils/format'
 import { PublicKey } from '@solana/web3.js'
 import { getAssociatedTokenAddress } from '@solana/spl-token'
+import { BigNumber } from 'bignumber.js'
 
 export default function TokenMintPage() {
   const { address } = useParams()
@@ -150,7 +151,7 @@ export default function TokenMintPage() {
         )
 
         const account = await conn.getAccountInfo(tokenAccountAddress)
-        
+
         if (account) {
           setTokenAccount(tokenAccountAddress.toString())
           const balance = await conn.getTokenAccountBalance(tokenAccountAddress)
@@ -168,6 +169,21 @@ export default function TokenMintPage() {
 
     checkTokenAccount()
   }, [conn, wallet?.publicKey, selectedToken?.address])
+
+  // 格式化代币数量（除以1e6）
+  const formatTokenAmount = (amount: string) => {
+    return new BigNumber(amount).div(1e6).toFormat(2)
+  }
+
+  // 格式化SOL数量（除以1e9）
+  const formatSolAmount = (amount: string) => {
+    return new BigNumber(amount).div(1e9).toFixed(4)
+  }
+
+  // 格式化费率为百分比 (除以10000)
+  const formatFeeRate = (rate: string) => {
+    return `${new BigNumber(rate).div(10000).toFixed(2)}%`
+  }
 
   if (!conn) {
     return (
@@ -207,7 +223,7 @@ export default function TokenMintPage() {
 
   return (
     <Box>
-      <Container maxW="container.xl" py={12}>
+      <Container maxW="container.xl" py={{ base: 4, md: 8 }}>
         <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={8}>
           <GridItem>
             <VStack spacing={8} align="stretch">
@@ -223,7 +239,8 @@ export default function TokenMintPage() {
                       </Text>
                       {tokenAccount && tokenBalance !== null && (
                         <Text color="gray.500" mt={2}>
-                          {t('yourBalance')}: {tokenBalance} {selectedToken.symbol}
+                          {t('yourBalance')}: {tokenBalance}{' '}
+                          {selectedToken.symbol}
                         </Text>
                       )}
                     </Box>
@@ -241,7 +258,11 @@ export default function TokenMintPage() {
                             <Text>{t('totalSupply')}</Text>
                           </HStack>
                         </StatLabel>
-                        <StatNumber>{formattedData.supply}</StatNumber>
+                        <StatNumber>
+                          {new BigNumber(formattedData.supply)
+                            .div(1e6)
+                            .toFormat(2)}
+                        </StatNumber>
                       </Stat>
 
                       <Stat bg={statBg} p={4} borderRadius="lg">
@@ -305,23 +326,31 @@ export default function TokenMintPage() {
                   <VStack align="stretch" spacing={3}>
                     <HStack justify="space-between">
                       <Text color="gray.500">{t('presaleRate')}:</Text>
-                      <Text fontWeight="bold">{formattedData.feeRate}</Text>
+                      <Text fontWeight="bold">
+                        {formatFeeRate(formattedData.feeRate)}
+                      </Text>
                     </HStack>
                     <Divider />
                     <HStack justify="space-between">
                       <Text color="gray.500">{t('remaining')}:</Text>
-                      <Text fontWeight="bold">{formattedData.remaining}</Text>
+                      <Text fontWeight="bold">
+                        {formatTokenAmount(formattedData.remaining)}{' '}
+                        {selectedToken.symbol}
+                      </Text>
                     </HStack>
                     <Divider />
                     <HStack justify="space-between">
                       <Text color="gray.500">{t('supplied')}:</Text>
-                      <Text fontWeight="bold">{formattedData.supplied}</Text>
+                      <Text fontWeight="bold">
+                        {formatTokenAmount(formattedData.supplied)}{' '}
+                        {selectedToken.symbol}
+                      </Text>
                     </HStack>
                     <Divider />
                     <HStack justify="space-between">
                       <Text color="gray.500">{t('solReceived')}:</Text>
                       <Text fontWeight="bold">
-                        {formattedData.solReceived} SOL
+                        {formatSolAmount(formattedData.solReceived)} SOL
                       </Text>
                     </HStack>
                   </VStack>
