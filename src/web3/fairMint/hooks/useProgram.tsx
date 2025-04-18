@@ -37,7 +37,7 @@ export const useProgram = () => {
   const provider = new AnchorProvider(conn, wallet, {
     commitment: 'confirmed',
   })
-  
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const program = new Program(idl as any, provider)
 
@@ -118,15 +118,18 @@ export const useProgram = () => {
       )
 
       // 找到或创建用户的代币账户
-      const userTokenAccount = await getAssociatedTokenAddress(mintPublicKey, key)
-      
+      const userTokenAccount = await getAssociatedTokenAddress(
+        mintPublicKey,
+        key
+      )
+
       console.log('Minting with params:', {
         solAmount: solAmount.toString(),
         mintPublicKey: mintPublicKey.toString(),
         fairCurvePda: fairCurvePda.toString(),
         tokenVault: tokenVault.toString(),
         userTokenAccount: userTokenAccount.toString(),
-        publicKey: publicKey.toString()
+        publicKey: publicKey.toString(),
       })
 
       const tx = await program.methods

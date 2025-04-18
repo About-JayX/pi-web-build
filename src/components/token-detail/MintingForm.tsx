@@ -70,6 +70,7 @@ interface MintingFormProps {
   isOpen?: boolean
   onClose?: () => void
   isModal?: boolean
+  onBalanceUpdate?: (newBalance: number) => void
 }
 
 export default function MintingForm({
@@ -79,6 +80,7 @@ export default function MintingForm({
   isOpen,
   onClose,
   isModal = false,
+  onBalanceUpdate,
 }: MintingFormProps) {
   const [walletBalance, setWalletBalance] = useState<number>(0) // 初始化为0
   const [amount, setAmount] = useState<string>('')
@@ -90,7 +92,7 @@ export default function MintingForm({
   const [refundAmount, setRefundAmount] = useState<string>('') // 新增：退还金额输入
   const [isMobile, setIsMobile] = useState<boolean>(false)
   const { t } = useTranslation()
-  const { mintToken } = useProgram()
+  const { mintToken, returnToken } = useProgram()
   const { conn, publicKey } = useSolana()
   const isLoggedIn = useAppSelector(state => state.user.isLoggedIn)
   const { data: fairCurveData } = useFairCurve(conn, token.address)
@@ -109,12 +111,25 @@ export default function MintingForm({
       }
 
       try {
+        // 更新 SOL 余额
         const pubKey = new PublicKey(publicKey)
         const balance = await conn.getBalance(pubKey)
-        // 将 lamports 转换为 SOL
         setWalletBalance(balance / 1e9)
+
+        // 更新代币余额（如果有 tokenAccount）
+        if (tokenAccount) {
+          const tokenAccountPubkey = new PublicKey(tokenAccount)
+          const tokenAccountInfo = await conn.getTokenAccountBalance(
+            tokenAccountPubkey
+          )
+          const newBalance = tokenAccountInfo.value.uiAmount || 0
+          // 通过 props 更新父组件的 tokenBalance
+          if (onBalanceUpdate) {
+            onBalanceUpdate(newBalance)
+          }
+        }
       } catch (error) {
-        console.error('获取钱包余额失败:', error)
+        console.error('获取余额失败:', error)
         setWalletBalance(0)
       }
     }
@@ -122,10 +137,10 @@ export default function MintingForm({
     fetchBalance()
 
     // 设置余额轮询
-    const intervalId = setInterval(fetchBalance, 10000) // 每10秒更新一次余额
+    const intervalId = setInterval(fetchBalance, 5000) // 每5秒更新一次余额
 
     return () => clearInterval(intervalId)
-  }, [conn, publicKey])
+  }, [conn, publicKey, tokenAccount, onBalanceUpdate])
 
   // 设置初始移动端状态和监听窗口大小变化
   useEffect(() => {
@@ -172,7 +187,34 @@ export default function MintingForm({
     return parseFloat(refundAmount) <= mintedAmount
   }
 
-  // 处理铸造提交
+  // 获取最新余额的函数
+  const updateBalances = async () => {
+    if (!conn || !publicKey) return
+
+    try {
+      // 更新 SOL 余额
+      const pubKey = new PublicKey(publicKey)
+      const balance = await conn.getBalance(pubKey)
+      setWalletBalance(balance / 1e9)
+
+      // 更新代币余额（如果有 tokenAccount）
+      if (tokenAccount) {
+        const tokenAccountPubkey = new PublicKey(tokenAccount)
+        const tokenAccountInfo = await conn.getTokenAccountBalance(
+          tokenAccountPubkey
+        )
+        const newBalance = tokenAccountInfo.value.uiAmount || 0
+        // 通过 props 更新父组件的 tokenBalance
+        if (onBalanceUpdate) {
+          onBalanceUpdate(newBalance)
+        }
+      }
+    } catch (error) {
+      console.error('更新余额失败:', error)
+    }
+  }
+
+  // 修改铸造提交
   const handleSubmit = async () => {
     try {
       if (!conn || !publicKey) {
@@ -199,23 +241,14 @@ export default function MintingForm({
       // 调用真实的mintToken函数，传入SOL金额（转换为lamports）和token地址
       await mintToken(mintAmount * 1e9, token.address)
 
-      // 获取最新余额
-      const pubKey = new PublicKey(publicKey)
-      const newBalance = await conn.getBalance(pubKey)
-      setWalletBalance(newBalance / 1e9)
+      // 等待一段时间后更新余额，确保交易已经确认
+      setTimeout(async () => {
+        await updateBalances()
+      }, 2000)
 
-      // 更新已铸造金额
-      setMintedAmount(prev => parseFloat((prev + mintAmount).toFixed(2)))
-
-      // 计算获得的代币并累加到现有的代币数量
-      const rate = parseFloat(token.presaleRate?.replace(/[^0-9.]/g, '') || '0')
-      const newTokens = mintAmount / rate
-      const currentTokens = parseFloat(estimatedTokens.replace(/,/g, '')) || 0
-      const totalTokens = currentTokens + newTokens
-
-      setEstimatedTokens(totalTokens.toLocaleString())
-
-      const amountFormatted = Math.floor(newTokens).toLocaleString()
+      const amountFormatted = Math.floor(
+        getEstimatedTokens(mintAmount)
+      ).toLocaleString()
       const descMessage = t('receivedTokens')
         .replace('{amount}', amountFormatted)
         .replace('{symbol}', token.symbol)
@@ -275,90 +308,92 @@ export default function MintingForm({
     setRefundAmount(calculatedAmount)
   }
 
-  // 计算基于代币数量的Pi金额（不含手续费）
+  // 计算基于代币数量的 SOL 金额（不含手续费）
   const calculateTotalPiAmount = () => {
-    if (!isTokenRefundAmountValid()) return 0
+    if (
+      !isTokenRefundAmountValid() ||
+      !fairCurveData?.supplied ||
+      !fairCurveData?.liquiditySol
+    )
+      return 0
     const tokenAmount = parseFloat(refundAmount)
-    return calculatePiFromTokens(tokenAmount)
+
+    // 使用与铸造相反的公式计算 SOL 数量
+    // 铸造公式: tokens = (solAmount * 1e3 * supplied) / liquiditySol
+    // 反向计算: solAmount = (tokens * liquiditySol) / (supplied * 1e3)
+    const supplied = Number(fairCurveData.supplied)
+    const liquiditySol = Number(fairCurveData.liquiditySol)
+
+    return (tokenAmount * liquiditySol) / (supplied * 1e3)
   }
 
-  // 计算基于代币数量的实际Pi退还金额
+  // 计算基于代币数量的实际 SOL 退还金额
   const getActualPiRefundAmount = () => {
-    const totalPiAmount = calculateTotalPiAmount()
-    if (totalPiAmount === 0) return '0.00'
+    const totalSolAmount = calculateTotalPiAmount()
+    if (totalSolAmount === 0) return '0.00'
 
-    // 计算手续费
-    let feeAmount = totalPiAmount * 0.02
-    if (feeAmount < 0.01 && totalPiAmount > 0) {
-      feeAmount = 0.01
-    }
+    // 计算手续费（2%）
+    const feeAmount = totalSolAmount * 0.02
 
     // 实际退还金额应该是总金额减去手续费
-    const actualRefund = totalPiAmount - feeAmount
-    return Math.max(0, actualRefund).toFixed(2)
+    const actualRefund = totalSolAmount - feeAmount
+    return actualRefund.toFixed(4)
   }
 
-  // 计算基于代币数量的Pi手续费
+  // 计算基于代币数量的 SOL 手续费
   const getPiRefundFee = () => {
-    const totalPiAmount = calculateTotalPiAmount()
-    if (totalPiAmount === 0) return '0.00'
+    const totalSolAmount = calculateTotalPiAmount()
+    if (totalSolAmount === 0) return '0.00'
 
-    // 使用四舍五入并保留2位小数
-    const feeAmount = totalPiAmount * 0.02 // 2%手续费
-
-    // 如果手续费太小（小于0.01），仍然显示最小值0.01，避免显示为0
-    if (feeAmount < 0.01 && feeAmount > 0) {
-      return '0.01'
-    }
-
-    return feeAmount.toFixed(2)
+    // 2% 手续费
+    const feeAmount = totalSolAmount * 0.02
+    return feeAmount.toFixed(4)
   }
 
   // 修改取消铸造 - 基于代币数量
-  const handleCancel = () => {
-    if (!isTokenRefundAmountValid()) return
-
-    setCancelling(true)
-    const tokenRefundValue = parseFloat(refundAmount)
-    const maxTokens = parseFloat(estimatedTokens.replace(/,/g, ''))
-
-    // 根据代币计算Pi数量
-    const piRefundValue = calculatePiFromTokens(tokenRefundValue)
-
-    // 计算退还金额（98%）和手续费（2%）
-    // 如果金额太小，确保至少收取0.01的手续费
-    let feeAmount = piRefundValue * 0.02
-    if (feeAmount < 0.01 && piRefundValue > 0) {
-      feeAmount = 0.01
-    }
-
-    const actualRefundAmount = piRefundValue - feeAmount
-
-    // 模拟取消过程
-    setTimeout(() => {
-      // 更新钱包余额
-      setWalletBalance(prev =>
-        parseFloat((prev + actualRefundAmount).toFixed(2))
-      )
-
-      // 计算剩余铸造金额和代币数量
-      const percentRefunded = tokenRefundValue / maxTokens
-      const piRefunded = mintedAmount * percentRefunded
-      const remainingMinted = parseFloat((mintedAmount - piRefunded).toFixed(2))
-      setMintedAmount(remainingMinted)
-
-      // 更新代币数量
-      const remainingTokens = maxTokens - tokenRefundValue
-      setEstimatedTokens(Math.max(0, remainingTokens).toLocaleString())
-
-      // 如果全部退还，切换回铸造页面
-      if (remainingTokens <= 0 || Math.abs(remainingTokens - 0) < 0.01) {
-        setEstimatedTokens('0')
-        setActiveTab(0)
+  const handleCancel = async () => {
+    try {
+      if (!isTokenRefundAmountValid() || !conn || !publicKey || !tokenAccount) {
+        return
       }
 
-      const refundAmountFormatted =
-        Math.floor(tokenRefundValue).toLocaleString()
+      setCancelling(true)
+      // 将代币数量乘以 1e6 以匹配代币精度
+      const tokenRefundValue = parseFloat(refundAmount) * 1e6
+
+      // 调用合约的退还函数，参数顺序：token地址，退还数量，手续费账户地址
+      const feeAccountAddress = 'AxrMTmKJhBtbPTK4QM1ugTKXShoPJWJ17Dw7cXYjm6DD'
+      await returnToken(token.address, tokenRefundValue, feeAccountAddress)
+
+      // 等待交易确认后更新余额
+      try {
+        // 等待一段时间确保交易已确认
+        await new Promise(resolve => setTimeout(resolve, 2000))
+
+        // 更新 SOL 余额
+        const pubKey = new PublicKey(publicKey)
+        const balance = await conn.getBalance(pubKey)
+        setWalletBalance(balance / 1e9)
+
+        // 更新代币余额
+        const tokenAccountPubkey = new PublicKey(tokenAccount)
+        const tokenAccountInfo = await conn.getTokenAccountBalance(
+          tokenAccountPubkey
+        )
+        const newBalance = tokenAccountInfo.value.uiAmount || 0
+
+        // 通过 props 更新父组件的 tokenBalance
+        if (onBalanceUpdate) {
+          onBalanceUpdate(newBalance)
+        }
+      } catch (error) {
+        console.error('更新余额失败:', error)
+      }
+
+      // 显示成功消息
+      const refundAmountFormatted = Math.floor(
+        parseFloat(refundAmount)
+      ).toLocaleString()
       const refundMessage = t('refundedTokens')
         .replace('{amount}', refundAmountFormatted)
         .replace('{symbol}', token.symbol)
@@ -366,15 +401,32 @@ export default function MintingForm({
       toast({
         title: t('cancelMint'),
         description: refundMessage,
-        status: 'info',
+        status: 'success',
         duration: 3000,
         isClosable: true,
         position: 'top',
       })
 
-      setCancelling(false)
+      // 重置输入
       setRefundAmount('')
-    }, 1500)
+
+      // 如果全部退还，切换回铸造页面
+      if (parseFloat(refundAmount) >= (tokenBalance || 0)) {
+        setActiveTab(0)
+      }
+    } catch (error) {
+      console.error('退还失败:', error)
+      toast({
+        title: t('退还失败'),
+        description: error instanceof Error ? error.message : t('未知错误'),
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      })
+    } finally {
+      setCancelling(false)
+    }
   }
 
   // 计算铸造进度
