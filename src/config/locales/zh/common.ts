@@ -40,6 +40,7 @@ export default {
   'search': '搜索',
   'noResults': '没有找到匹配的结果',
   'clearSearch': '清除搜索',
+  'all': '全部',
 
   // Swap Page
   'swapDescription': '以最佳汇率即时交换代币',

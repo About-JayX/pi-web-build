@@ -27,6 +27,7 @@ import {
   Icon,
   Center,
   Avatar,
+  SimpleGrid,
 } from "@chakra-ui/react";
 import {
   FaTwitter,
@@ -810,12 +811,15 @@ export default function PointsPage() {
                   my={6}
                   textAlign="center"
                 >
-                  <Grid
-                    templateColumns="repeat(3, 1fr)"
-                    gap={{ base: 2, sm: 6 }}
-                    alignItems="flex-end"
-                    justifyContent={{ base: "space-between", sm: "center" }}
-                    m={0}
+                  <SimpleGrid 
+                    columns={{ base: 1, md: 2, lg: 3 }} 
+                    spacing={6} 
+                    mt={8}
+                    sx={{
+                      '& > *:last-child': {
+                        gridColumn: { md: '1 / -1', lg: 'auto' }
+                      }
+                    }}
                   >
                     {/* 第二名 */}
                     <GridItem
@@ -931,7 +935,7 @@ export default function PointsPage() {
                         3,850
                       </Text>
                     </GridItem>
-                  </Grid>
+                  </SimpleGrid>
                 </Flex>
                 {/* 排行榜 */}
                 <Box overflowX="auto">

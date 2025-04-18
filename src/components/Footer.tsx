@@ -107,7 +107,7 @@ export default function Footer() {
       <Box
         borderTopWidth={1}
         borderStyle='solid'
-        borderColor={useColorModeValue('brand.footer.secondary', 'gray.700')} >
+        borderColor={useColorModeValue('brand.footer.secondary', 'gray.700')}>
         <Container
           as={Stack}
           maxW='container.xl'
