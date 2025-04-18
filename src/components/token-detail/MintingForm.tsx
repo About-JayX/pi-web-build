@@ -56,6 +56,13 @@ import { useSolana } from '@/contexts/solanaProvider'
 import { PublicKey } from '@solana/web3.js'
 import { useAppSelector } from '@/store/hooks'
 import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
+import { TokenInfo } from '@/api/types'
+import BN from 'bn.js'
+
+interface Token extends TokenInfo {
+  logo: string
+  description?: string
+}
 
 interface MintingFormProps {
   token: {
@@ -247,7 +254,7 @@ export default function MintingForm({
       }, 2000)
 
       const amountFormatted = Math.floor(
-        getEstimatedTokens(mintAmount)
+        parseFloat(getEstimatedTokens(amount))
       ).toLocaleString()
       const descMessage = t('receivedTokens')
         .replace('{amount}', amountFormatted)
@@ -444,28 +451,27 @@ export default function MintingForm({
   }
 
   // 计算预估获取的代币数量
-  const getEstimatedTokens = (solAmount: number) => {
-    if (
-      !solAmount ||
-      !fairCurveData?.supplied ||
-      !fairCurveData?.liquiditySol
-    ) {
-      return 0
+  const getEstimatedTokens = (amount: string): string => {
+    if (!amount || !fairCurveData) {
+      return '0'
     }
 
-    const supplied = Number(fairCurveData.supplied)
-    const liquiditySol = Number(fairCurveData.liquiditySol)
+    try {
+      const solAmount = new BN(Math.floor(parseFloat(amount) * 1e9).toString())
+      const supplied = new BN(fairCurveData.supplied)
+      const liquiditySol = new BN(fairCurveData.liquiditySol)
 
-    if (liquiditySol === 0) {
-      return 0
+      if (liquiditySol.isZero()) {
+        return '0'
+      }
+
+      // 计算: (supplied / liquiditySol) * solAmount
+      const result = supplied.mul(solAmount).div(liquiditySol)
+      return (result.toNumber() / 1e9).toFixed(2)
+    } catch (error) {
+      console.error('计算代币数量时出错:', error)
+      return '0'
     }
-
-    // SOL 精度为 9 位小数 (1e9)
-    // 1. solAmount * 1e9 将 SOL 转换为 lamports
-    // 2. supplied / liquiditySol 得到比率
-    // 3. 最终结果除以 1e9 来得到正确的代币数量
-    const estimatedAmount = (solAmount * 1e3 * supplied) / liquiditySol
-    return Number(estimatedAmount.toFixed(0))
   }
 
   // 计算手续费
@@ -708,7 +714,7 @@ export default function MintingForm({
             <Text>{t('estimatedTokens')}:</Text>
             <HStack>
               <Text fontWeight="semibold" color="brand.primary">
-                {getEstimatedTokens(parseFloat(amount))}
+                {getEstimatedTokens(amount)}
               </Text>
               <Text>{token.symbol}</Text>
             </HStack>

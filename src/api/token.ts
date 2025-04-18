@@ -6,6 +6,13 @@ export interface Token extends TokenInfo {
   description?: string
 }
 
+export interface PlatformMetrics {
+  token_count: number    // 代币总数
+  total_mint: number    // 铸造代币总数
+  mint_accounts: number // 铸造地址总数
+  tvl: number          // 锁仓总价值
+}
+
 /**
  * Token 相关接口
  */
@@ -34,6 +41,14 @@ export const TokenAPI = {
         'Content-Type': 'multipart/form-data',
       },
     })
+  },
+
+  /**
+   * 获取平台数据
+   * @returns Promise<PlatformMetrics> 返回平台统计数据
+   */
+  getPlatformMetrics: (): Promise<PlatformMetrics> => {
+    return request.get('/metrics/platform')
   },
 }
 

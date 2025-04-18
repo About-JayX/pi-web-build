@@ -39,8 +39,6 @@ import {
   FaFileContract,
 } from 'react-icons/fa'
 import {
-  platformStatsPi,
-  platformStatsSol,
   marketTokens,
   mintingTokensPi,
   mintingTokensSol,
@@ -48,6 +46,9 @@ import {
 import { useNetwork } from '@/contexts/NetworkContext'
 import MintingTokenCard from '@/components/MintingTokenCard'
 import { useTranslation } from 'react-i18next'
+import { useState, useEffect } from 'react'
+import { TokenAPI, type PlatformMetrics } from '@/api/token'
+import type { Token } from '@/api/token'
 
 // 功能特点组件
 interface FeatureProps {
@@ -76,23 +77,37 @@ const Feature = ({ text, icon, iconBg }: FeatureProps) => {
 
 // 在文件顶部添加类型定义
 interface TokenShare {
-  id: number
-  name: string
-  symbol: string
+  token: Token
+  share: number
 }
 
 export default function HomePage() {
   const { network } = useNetwork()
   const { t } = useTranslation()
+  const [metrics, setMetrics] = useState<PlatformMetrics | null>(null)
+
+  // 获取平台数据
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const data = await TokenAPI.getPlatformMetrics()
+        setMetrics(data)
+      } catch (error) {
+        console.error('获取平台数据失败:', error)
+      }
+    }
+
+    fetchMetrics()
+    // 每60秒更新一次数据
+    const intervalId = setInterval(fetchMetrics, 60000)
+
+    return () => clearInterval(intervalId)
+  }, [])
 
   // 移动 useColorModeValue 调用到组件顶部
   const iconColor = useColorModeValue('gray.600', 'gray.400')
   const iconHoverColor = useColorModeValue('brand.primary', 'brand.light')
   const hoverBg = useColorModeValue('gray.50', 'gray.700')
-
-  // 根据当前网络选择统计数据
-  const platformStats =
-    network === 'Solana' ? platformStatsSol : platformStatsPi
 
   // 根据当前网络选择铸造数据
   const mintingData = network === 'Solana' ? mintingTokensSol : mintingTokensPi
@@ -102,13 +117,13 @@ export default function HomePage() {
     if (navigator.share) {
       navigator
         .share({
-          title: `${token.name} (${token.symbol})`,
-          text: `${t('share')} ${token.name} ${t('token')}`,
-          url: window.location.origin + `/market/${token.id}`,
+          title: `${token.token.name} (${token.token.symbol})`,
+          text: `${t('share')} ${token.token.name} ${t('token')}`,
+          url: window.location.origin + `/market/${token.token.id}`,
         })
         .catch(error => console.log(`${t('share')} ${t('failed')}:`, error))
     } else {
-      const url = window.location.origin + `/market/${token.id}`
+      const url = window.location.origin + `/market/${token.token.id}`
       navigator.clipboard
         .writeText(url)
         .then(() => alert(`${t('copySuccess')}`))
@@ -365,7 +380,7 @@ export default function HomePage() {
                 textAlign="center"
                 color={useColorModeValue('blue.600', 'blue.300')}
               >
-                {platformStats.tokensCount}
+                {metrics?.token_count || 0}
               </Text>
             </Box>
             <Box
@@ -402,7 +417,7 @@ export default function HomePage() {
                 textAlign="center"
                 mb={1}
               >
-                {t('tradingVolume24h')}
+                {t('铸造代币总数')}
               </Text>
               <Text
                 fontSize={{ base: 'xl', lg: '3xl' }}
@@ -410,7 +425,7 @@ export default function HomePage() {
                 textAlign="center"
                 color={useColorModeValue('green.600', 'green.300')}
               >
-                {platformStats.tradingVolume24h}
+                {metrics?.total_mint.toLocaleString() || 0}
               </Text>
             </Box>
             <Box
@@ -447,7 +462,7 @@ export default function HomePage() {
                 textAlign="center"
                 mb={1}
               >
-                {t('activeUsers')}
+                {t('铸造地址总数')}
               </Text>
               <Text
                 fontSize={{ base: 'xl', lg: '3xl' }}
@@ -455,7 +470,7 @@ export default function HomePage() {
                 textAlign="center"
                 color={useColorModeValue('purple.600', 'purple.300')}
               >
-                {platformStats.activeUsers}
+                {metrics?.mint_accounts.toLocaleString() || 0}
               </Text>
             </Box>
             <Box
@@ -492,7 +507,7 @@ export default function HomePage() {
                 textAlign="center"
                 mb={1}
               >
-                {t('totalLockedValue')}
+                {t('锁仓总价值')}
               </Text>
               <Text
                 fontSize={{ base: 'xl', lg: '3xl' }}
@@ -500,7 +515,7 @@ export default function HomePage() {
                 textAlign="center"
                 color={useColorModeValue('orange.600', 'orange.300')}
               >
-                {platformStats.totalLockedValue}
+                {metrics?.tvl.toLocaleString() || 0} SOL
               </Text>
             </Box>
           </SimpleGrid>
