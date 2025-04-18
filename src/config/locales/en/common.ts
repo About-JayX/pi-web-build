@@ -41,6 +41,7 @@ export default {
   'search': 'Search',
   'noResults': 'No matching results found',
   'clearSearch': 'Clear Search',
+  'all': 'All',
 
   // Swap Page
   'swapDescription': 'Exchange tokens instantly with the best rates',

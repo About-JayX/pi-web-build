@@ -322,7 +322,7 @@ export default function HomePage() {
           <Heading as="h2" size="lg" mb={8} textAlign="center">
             {t('platformData')}
           </Heading>
-          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={{ base: 5, lg: 8 }}>
+          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={{ base: 4, lg: 8 }}>
             <Box
               px={{ base: 4, md: 6 }}
               py={6}
@@ -345,13 +345,22 @@ export default function HomePage() {
               }}
             >
               <Flex mb={4} justify="center">
-                <Icon as={FaLayerGroup} boxSize={12} color="blue.400" />
+                <Icon
+                  as={FaLayerGroup}
+                  boxSize={{ base: 10, md: 12 }}
+                  color="blue.400"
+                />
               </Flex>
-              <Text fontWeight="bold" fontSize="lg" textAlign="center" mb={1}>
+              <Text
+                fontWeight="bold"
+                fontSize={{ base: 'md', md: 'lg' }}
+                textAlign="center"
+                mb={1}
+              >
                 {t('totalMintedTokens')}
               </Text>
               <Text
-                fontSize={{ base: '2xl', lg: '3xl' }}
+                fontSize={{ base: 'xl', lg: '3xl' }}
                 fontWeight="bold"
                 textAlign="center"
                 color={useColorModeValue('blue.600', 'blue.300')}
@@ -381,13 +390,22 @@ export default function HomePage() {
               }}
             >
               <Flex mb={4} justify="center">
-                <Icon as={FaChartLine} boxSize={12} color="green.400" />
+                <Icon
+                  as={FaChartLine}
+                  boxSize={{ base: 10, md: 12 }}
+                  color="green.400"
+                />
               </Flex>
-              <Text fontWeight="bold" fontSize="lg" textAlign="center" mb={1}>
+              <Text
+                fontWeight="bold"
+                fontSize={{ base: 'md', md: 'lg' }}
+                textAlign="center"
+                mb={1}
+              >
                 {t('tradingVolume24h')}
               </Text>
               <Text
-                fontSize={{ base: '2xl', lg: '3xl' }}
+                fontSize={{ base: 'xl', lg: '3xl' }}
                 fontWeight="bold"
                 textAlign="center"
                 color={useColorModeValue('green.600', 'green.300')}
@@ -417,13 +435,22 @@ export default function HomePage() {
               }}
             >
               <Flex mb={4} justify="center">
-                <Icon as={FaUsers} boxSize={12} color="purple.400" />
+                <Icon
+                  as={FaUsers}
+                  boxSize={{ base: 10, md: 12 }}
+                  color="purple.400"
+                />
               </Flex>
-              <Text fontWeight="bold" fontSize="lg" textAlign="center" mb={1}>
+              <Text
+                fontWeight="bold"
+                fontSize={{ base: 'md', md: 'lg' }}
+                textAlign="center"
+                mb={1}
+              >
                 {t('activeUsers')}
               </Text>
               <Text
-                fontSize={{ base: '2xl', lg: '3xl' }}
+                fontSize={{ base: 'xl', lg: '3xl' }}
                 fontWeight="bold"
                 textAlign="center"
                 color={useColorModeValue('purple.600', 'purple.300')}
@@ -453,13 +480,22 @@ export default function HomePage() {
               }}
             >
               <Flex mb={4} justify="center">
-                <Icon as={FaFileContract} boxSize={12} color="orange.400" />
+                <Icon
+                  as={FaFileContract}
+                  boxSize={{ base: 10, md: 12 }}
+                  color="orange.400"
+                />
               </Flex>
-              <Text fontWeight="bold" fontSize="lg" textAlign="center" mb={1}>
+              <Text
+                fontWeight="bold"
+                fontSize={{ base: 'md', md: 'lg' }}
+                textAlign="center"
+                mb={1}
+              >
                 {t('totalLockedValue')}
               </Text>
               <Text
-                fontSize={{ base: '2xl', lg: '3xl' }}
+                fontSize={{ base: 'xl', lg: '3xl' }}
                 fontWeight="bold"
                 textAlign="center"
                 color={useColorModeValue('orange.600', 'orange.300')}

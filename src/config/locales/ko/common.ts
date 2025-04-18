@@ -41,6 +41,7 @@ export default {
   'search': '검색',
   'noResults': '일치하는 결과가 없습니다',
   'clearSearch': '검색 지우기',
+  'all': '모두',
 
   // Swap Page
   'swapDescription': '최상의 비율로 즉시 토큰 교환',

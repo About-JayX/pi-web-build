@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -45,19 +45,44 @@ import {
   useToast,
   Center,
   Select,
-  IconButton
-} from '@chakra-ui/react';
-import { SearchIcon, ChevronDownIcon, ChevronUpIcon, ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons';
-import { FaFire, FaChartLine, FaArrowUp, FaArrowDown, FaSort, FaSearch, FaGlobe, FaTwitter, FaTelegram, FaShareAlt, FaLayerGroup, FaFileContract, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
-import NextLink from 'next/link';
-import { marketTokens, marketOverview } from '@/mock';
-import { useTranslation } from 'react-i18next';
+  IconButton,
+} from "@chakra-ui/react";
+import {
+  SearchIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@chakra-ui/icons";
+import {
+  FaFire,
+  FaChartLine,
+  FaArrowUp,
+  FaArrowDown,
+  FaSort,
+  FaSearch,
+  FaGlobe,
+  FaTwitter,
+  FaTelegram,
+  FaShareAlt,
+  FaLayerGroup,
+  FaFileContract,
+  FaChevronLeft,
+  FaChevronRight,
+} from "react-icons/fa";
+import NextLink from "next/link";
+import { marketTokens, marketOverview } from "@/mock";
+import { useTranslation } from "react-i18next";
 
 // 排序指示器组件
-function SortIndicator({ column, sortColumn, sortDirection }: { 
-  column: string, 
-  sortColumn: string, 
-  sortDirection: 'asc' | 'desc' 
+function SortIndicator({
+  column,
+  sortColumn,
+  sortDirection,
+}: {
+  column: string;
+  sortColumn: string;
+  sortDirection: "asc" | "desc";
 }) {
   if (sortColumn !== column) {
     return (
@@ -68,34 +93,45 @@ function SortIndicator({ column, sortColumn, sortDirection }: {
   }
   return (
     <Box as="span" ml={1} color="brand.primary">
-      <Icon 
-        as={sortDirection === 'asc' ? ChevronUpIcon : ChevronDownIcon} 
-        fontSize="sm" 
+      <Icon
+        as={sortDirection === "asc" ? ChevronUpIcon : ChevronDownIcon}
+        fontSize="sm"
       />
     </Box>
   );
 }
 
 // 列表视图组件
-function TokenListView({ tokens, sortColumn, sortDirection, onSort }: { 
-  tokens: any[], 
-  sortColumn: string, 
-  sortDirection: 'asc' | 'desc',
-  onSort: (column: string) => void 
+function TokenListView({
+  tokens,
+  sortColumn,
+  sortDirection,
+  onSort,
+}: {
+  tokens: any[];
+  sortColumn: string;
+  sortDirection: "asc" | "desc";
+  onSort: (column: string) => void;
 }) {
-  const bg = useColorModeValue('white', 'gray.800');
-  const hoverBg = useColorModeValue('gray.50', 'gray.700');
-  const thBg = useColorModeValue('gray.50', 'gray.700');
-  const thHoverBg = useColorModeValue('gray.100', 'gray.600');
-  const textColor = useColorModeValue('gray.600', 'gray.400');
-  const iconColor = useColorModeValue('gray.600', 'gray.400');
-  const iconHoverColor = useColorModeValue('brand.primary', 'brand.light');
+  const bg = useColorModeValue("white", "gray.800");
+  const hoverBg = useColorModeValue("gray.50", "gray.700");
+  const thBg = useColorModeValue("gray.50", "gray.700");
+  const thHoverBg = useColorModeValue("gray.100", "gray.600");
+  const textColor = useColorModeValue("gray.600", "gray.400");
+  const iconColor = useColorModeValue("gray.600", "gray.400");
+  const iconHoverColor = useColorModeValue("brand.primary", "brand.light");
   const toast = useToast();
   const { t } = useTranslation();
 
-  const ThSortable = ({ column, children }: { column: string, children: React.ReactNode }) => (
-    <Th 
-      onClick={() => onSort(column)} 
+  const ThSortable = ({
+    column,
+    children,
+  }: {
+    column: string;
+    children: React.ReactNode;
+  }) => (
+    <Th
+      onClick={() => onSort(column)}
       cursor="pointer"
       position="relative"
       py={4}
@@ -109,56 +145,67 @@ function TokenListView({ tokens, sortColumn, sortDirection, onSort }: {
     >
       <Flex align="center" justify="flex-end">
         {children}
-        <SortIndicator column={column} sortColumn={sortColumn} sortDirection={sortDirection} />
+        <SortIndicator
+          column={column}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+        />
       </Flex>
     </Th>
   );
 
   // 缩略显示合约地址
   const formatContractAddress = (address: string) => {
-    if (!address) return '';
+    if (!address) return "";
     const start = address.substring(0, 6);
     const end = address.substring(address.length - 4);
     return `${start}...${end}`;
   };
-  
+
   // 复制合约地址
   const copyContractAddress = (address: string) => {
     if (address) {
-      navigator.clipboard.writeText(address)
-        .then(() => toast({
-          title: t('copySuccess'),
-          description: t('copyAddressSuccess'),
-          status: "success",
-          duration: 2000,
-          isClosable: true,
-          position: "top"
-        }))
-        .catch(err => console.error(t('failed'), err));
+      navigator.clipboard
+        .writeText(address)
+        .then(() =>
+          toast({
+            title: t("copySuccess"),
+            description: t("copyAddressSuccess"),
+            status: "success",
+            duration: 2000,
+            isClosable: true,
+            position: "top",
+          })
+        )
+        .catch((err) => console.error(t("failed"), err));
     }
   };
 
   // 分享功能处理
   const handleShare = (token: any) => {
     if (navigator.share) {
-      navigator.share({
-        title: `${token.name} (${token.symbol})`,
-        text: t('viewTokenMarketInfo', { name: token.name }),
-        url: window.location.origin + `/market/${token.id}`
-      })
-      .catch((error) => console.log(t('shareFailed'), error));
+      navigator
+        .share({
+          title: `${token.name} (${token.symbol})`,
+          text: t("viewTokenMarketInfo", { name: token.name }),
+          url: window.location.origin + `/market/${token.id}`,
+        })
+        .catch((error) => console.log(t("shareFailed"), error));
     } else {
       // 如果浏览器不支持，可以复制链接到剪贴板
       const url = window.location.origin + `/market/${token.id}`;
-      navigator.clipboard.writeText(url)
-        .then(() => toast({
-          title: t('linkCopied'),
-          status: "success",
-          duration: 2000,
-          isClosable: true,
-          position: "top"
-        }))
-        .catch((error) => console.log(t('copyFailed'), error));
+      navigator.clipboard
+        .writeText(url)
+        .then(() =>
+          toast({
+            title: t("linkCopied"),
+            status: "success",
+            duration: 2000,
+            isClosable: true,
+            position: "top",
+          })
+        )
+        .catch((error) => console.log(t("copyFailed"), error));
     }
   };
 
@@ -167,24 +214,46 @@ function TokenListView({ tokens, sortColumn, sortDirection, onSort }: {
       <Table variant="simple">
         <Thead>
           <Tr>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">{t('tokenColumn')}</Th>
-            <ThSortable column="price">{t('priceColumn')}</ThSortable>
-            <ThSortable column="change24hValue">{t('change24hColumn')}</ThSortable>
-            <ThSortable column="marketCap">{t('marketCapColumn')}</ThSortable>
-            <ThSortable column="totalSupply">{t('totalSupplyColumn')}</ThSortable>
-            <ThSortable column="volume24h">{t('volumeColumn')}</ThSortable>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" isNumeric textAlign="right">{t('contractAddressColumn')}</Th>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" isNumeric textAlign="right">{t('linksColumn')}</Th>
+            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
+              {t("tokenColumn")}
+            </Th>
+            <ThSortable column="price">{t("priceColumn")}</ThSortable>
+            <ThSortable column="change24hValue">
+              {t("change24hColumn")}
+            </ThSortable>
+            <ThSortable column="marketCap">{t("marketCapColumn")}</ThSortable>
+            <ThSortable column="totalSupply">
+              {t("totalSupplyColumn")}
+            </ThSortable>
+            <ThSortable column="volume24h">{t("volumeColumn")}</ThSortable>
+            <Th
+              bg={thBg}
+              borderBottom="2px"
+              borderColor="brand.primary"
+              isNumeric
+              textAlign="right"
+            >
+              {t("contractAddressColumn")}
+            </Th>
+            <Th
+              bg={thBg}
+              borderBottom="2px"
+              borderColor="brand.primary"
+              isNumeric
+              textAlign="right"
+            >
+              {t("linksColumn")}
+            </Th>
             <Th bg={thBg} borderBottom="2px" borderColor="brand.primary"></Th>
           </Tr>
         </Thead>
         <Tbody>
-          {tokens.map(token => (
+          {tokens.map((token) => (
             <Tr key={token.id} _hover={{ bg: hoverBg }}>
               <Td>
                 <HStack spacing={2} align="center">
-                  <Image 
-                    src={token.image} 
+                  <Image
+                    src={token.image}
                     alt={token.name}
                     boxSize="40px"
                     borderRadius="full"
@@ -193,17 +262,17 @@ function TokenListView({ tokens, sortColumn, sortDirection, onSort }: {
                     borderColor="brand.light"
                   />
                   <Box>
-                    <Text 
-                      fontSize="lg" 
-                      fontWeight="bold" 
+                    <Text
+                      fontSize="lg"
+                      fontWeight="bold"
                       color="brand.primary"
                       lineHeight="1.2"
                     >
                       {token.symbol}
                     </Text>
-                    <Text 
-                      fontSize="xs" 
-                      color="gray.500" 
+                    <Text
+                      fontSize="xs"
+                      color="gray.500"
                       mt={0.5}
                       noOfLines={1}
                       maxW="150px"
@@ -213,14 +282,20 @@ function TokenListView({ tokens, sortColumn, sortDirection, onSort }: {
                   </Box>
                 </HStack>
               </Td>
-              <Td isNumeric fontWeight="bold">$ {token.price}</Td>
+              <Td isNumeric fontWeight="bold">
+                $ {token.price}
+              </Td>
               <Td isNumeric>
                 <Flex justify="flex-end">
-                  <Text 
-                    fontWeight="bold" 
+                  <Text
+                    fontWeight="bold"
                     color={token.change24hValue > 0 ? "green.500" : "red.500"}
                   >
-                    <Icon as={token.change24hValue > 0 ? FaArrowUp : FaArrowDown} boxSize="12px" mr={1} />
+                    <Icon
+                      as={token.change24hValue > 0 ? FaArrowUp : FaArrowDown}
+                      boxSize="12px"
+                      mr={1}
+                    />
                     {Math.abs(token.change24hValue)}%
                   </Text>
                 </Flex>
@@ -249,10 +324,10 @@ function TokenListView({ tokens, sortColumn, sortDirection, onSort }: {
                     ml="auto"
                     _hover={{
                       bg: "gray.100",
-                      borderColor: "brand.primary"
+                      borderColor: "brand.primary",
                     }}
                     transition="all 0.2s"
-                    title={t('clickToCopyFullAddress')}
+                    title={t("clickToCopyFullAddress")}
                   >
                     <Icon as={FaFileContract} mr={1} fontSize="10px" />
                     {formatContractAddress(token.contractAddress)}
@@ -262,10 +337,10 @@ function TokenListView({ tokens, sortColumn, sortDirection, onSort }: {
               <Td isNumeric>
                 <HStack spacing={3} justify="flex-end">
                   {token.website && (
-                    <Box 
-                      as="a" 
-                      href={token.website} 
-                      target="_blank" 
+                    <Box
+                      as="a"
+                      href={token.website}
+                      target="_blank"
                       rel="noopener noreferrer"
                       color={iconColor}
                       _hover={{ color: iconHoverColor }}
@@ -275,10 +350,10 @@ function TokenListView({ tokens, sortColumn, sortDirection, onSort }: {
                     </Box>
                   )}
                   {token.twitter && (
-                    <Box 
-                      as="a" 
-                      href={token.twitter} 
-                      target="_blank" 
+                    <Box
+                      as="a"
+                      href={token.twitter}
+                      target="_blank"
                       rel="noopener noreferrer"
                       color={iconColor}
                       _hover={{ color: iconHoverColor }}
@@ -288,10 +363,10 @@ function TokenListView({ tokens, sortColumn, sortDirection, onSort }: {
                     </Box>
                   )}
                   {token.telegram && (
-                    <Box 
-                      as="a" 
-                      href={token.telegram} 
-                      target="_blank" 
+                    <Box
+                      as="a"
+                      href={token.telegram}
+                      target="_blank"
                       rel="noopener noreferrer"
                       color={iconColor}
                       _hover={{ color: iconHoverColor }}
@@ -300,7 +375,7 @@ function TokenListView({ tokens, sortColumn, sortDirection, onSort }: {
                       <Icon as={FaTelegram} boxSize="16px" />
                     </Box>
                   )}
-                  <Box 
+                  <Box
                     as="button"
                     onClick={() => handleShare(token)}
                     color={iconColor}
@@ -312,15 +387,15 @@ function TokenListView({ tokens, sortColumn, sortDirection, onSort }: {
                 </HStack>
               </Td>
               <Td>
-                <Button 
+                <Button
                   as={NextLink}
                   href={`/market/${token.contractAddress}`}
-                  colorScheme="purple" 
+                  colorScheme="purple"
                   size="sm"
                   bg="brand.primary"
-                  _hover={{ bg: 'brand.light' }}
+                  _hover={{ bg: "brand.light" }}
                 >
-                  {t('detail')}
+                  {t("detail")}
                 </Button>
               </Td>
             </Tr>
@@ -332,64 +407,71 @@ function TokenListView({ tokens, sortColumn, sortDirection, onSort }: {
 }
 
 // 修改分页导航组件，使其与mint页面的设计保持一致
-function PaginationControl({ 
-  currentPage, 
-  totalPages, 
+function PaginationControl({
+  currentPage,
+  totalPages,
   onPageChange,
   pageSize,
-  onPageSizeChange
-}: { 
-  currentPage: number, 
-  totalPages: number, 
-  onPageChange: (page: number) => void,
-  pageSize: number,
-  onPageSizeChange: (size: number) => void
+  onPageSizeChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  pageSize: number;
+  onPageSizeChange: (size: number) => void;
 }) {
   const pageSizeOptions = [10, 20, 30, 50];
   const { t } = useTranslation();
 
   return (
-    <Flex 
-      justifyContent="space-between" 
-      alignItems="center" 
-      w="100%" 
+    <Flex
+      justifyContent="space-between"
+      alignItems="center"
+      w="100%"
       mt={6}
-      flexDir={{ base: 'column', md: 'row' }}
+      flexDir={{ base: "column", md: "row" }}
       gap={4}
     >
       <HStack>
-        <Text fontSize="sm" fontWeight="medium">{t('itemsPerPage')}:</Text>
-        <Select 
-          value={pageSize} 
+        <Text fontSize="sm" fontWeight="medium">
+          {t("itemsPerPage")}:
+        </Text>
+        <Select
+          value={pageSize}
           onChange={(e) => onPageSizeChange(Number(e.target.value))}
           size="sm"
           w="80px"
           borderColor="gray.300"
-          _hover={{ borderColor: 'brand.primary' }}
-          _focus={{ borderColor: 'brand.primary', boxShadow: '0 0 0 1px var(--chakra-colors-brand-primary)' }}
+          _hover={{ borderColor: "brand.primary" }}
+          _focus={{
+            borderColor: "brand.primary",
+            boxShadow: "0 0 0 1px var(--chakra-colors-brand-primary)",
+          }}
         >
-          {pageSizeOptions.map(size => (
+          {pageSizeOptions.map((size) => (
             <option key={size} value={size}>
               {size}
             </option>
           ))}
         </Select>
       </HStack>
-      
+
       <HStack>
         <Text fontSize="sm">
-          {t('pageInfo').replace('{current}', currentPage.toString()).replace('{total}', totalPages.toString())}
+          {t("pageInfo")
+            .replace("{current}", currentPage.toString())
+            .replace("{total}", totalPages.toString())}
         </Text>
         <ButtonGroup isAttached variant="outline" size="sm">
           <IconButton
-            aria-label={t('prevPage')}
+            aria-label={t("prevPage")}
             icon={<FaChevronLeft />}
             onClick={() => onPageChange(currentPage - 1)}
             isDisabled={currentPage <= 1}
             colorScheme="purple"
           />
           <IconButton
-            aria-label={t('nextPage')}
+            aria-label={t("nextPage")}
             icon={<FaChevronRight />}
             onClick={() => onPageChange(currentPage + 1)}
             isDisabled={currentPage >= totalPages}
@@ -402,16 +484,17 @@ function PaginationControl({
 }
 
 export default function MarketPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortColumn, setSortColumn] = useState('marketCap');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortColumn, setSortColumn] = useState("marketCap");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   // 分页相关状态
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const { t } = useTranslation();
 
   const handleSort = (column: string) => {
-    const newDirection = sortColumn === column && sortDirection === 'desc' ? 'asc' : 'desc';
+    const newDirection =
+      sortColumn === column && sortDirection === "desc" ? "asc" : "desc";
     setSortColumn(column);
     setSortDirection(newDirection);
     // 排序时重置到第一页
@@ -421,51 +504,53 @@ export default function MarketPage() {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     // 滚动到页面顶部以便查看新内容
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
-  
+
   // 处理每页显示数量变化
   const handlePageSizeChange = (newSize: number) => {
     // 调整当前页以保持项目连续性
     const firstItemIndex = (currentPage - 1) * pageSize;
     const newCurrentPage = Math.floor(firstItemIndex / newSize) + 1;
-    
+
     setPageSize(newSize);
     setCurrentPage(newCurrentPage);
   };
 
-  const filteredTokens = marketTokens.filter(token => 
-    token.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (token.contractAddress && token.contractAddress.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredTokens = marketTokens.filter(
+    (token) =>
+      token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (token.contractAddress &&
+        token.contractAddress.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const sortedTokens = [...filteredTokens].sort((a, b) => {
-    const aValue = String(a[sortColumn as keyof typeof a])
-    const bValue = String(b[sortColumn as keyof typeof b])
-    
+    const aValue = String(a[sortColumn as keyof typeof a]);
+    const bValue = String(b[sortColumn as keyof typeof b]);
+
     // 处理百分比字符串
-    if (sortColumn === 'change24h') {
-      const aNum = parseFloat(aValue.replace('%', ''))
-      const bNum = parseFloat(bValue.replace('%', ''))
-      return sortDirection === 'asc' ? aNum - bNum : bNum - aNum
+    if (sortColumn === "change24h") {
+      const aNum = parseFloat(aValue.replace("%", ""));
+      const bNum = parseFloat(bValue.replace("%", ""));
+      return sortDirection === "asc" ? aNum - bNum : bNum - aNum;
     }
-    
+
     // 处理带逗号的数字字符串
-    if (['marketCap', 'volume24h'].includes(sortColumn)) {
-      const aNum = parseFloat(aValue.replace(/[^0-9.-]+/g, ''))
-      const bNum = parseFloat(bValue.replace(/[^0-9.-]+/g, ''))
-      return sortDirection === 'asc' ? aNum - bNum : bNum - aNum
+    if (["marketCap", "volume24h"].includes(sortColumn)) {
+      const aNum = parseFloat(aValue.replace(/[^0-9.-]+/g, ""));
+      const bNum = parseFloat(bValue.replace(/[^0-9.-]+/g, ""));
+      return sortDirection === "asc" ? aNum - bNum : bNum - aNum;
     }
-    
-    return sortDirection === 'asc' 
+
+    return sortDirection === "asc"
       ? aValue.localeCompare(bValue)
-      : bValue.localeCompare(aValue)
+      : bValue.localeCompare(aValue);
   });
 
   // 计算总页数
   const totalPages = Math.ceil(sortedTokens.length / pageSize);
-  
+
   // 分页后的代币数据
   const paginatedTokens = sortedTokens.slice(
     (currentPage - 1) * pageSize,
@@ -486,151 +571,246 @@ export default function MarketPage() {
     <Box>
       {/* 页面标题 */}
       <Container maxW="container.xl" py={12}>
-        <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'flex-start', md: 'center' }}>
+        <Stack
+          direction={{ base: "column", md: "row" }}
+          justify="space-between"
+          align={{ base: "flex-start", md: "center" }}
+        >
           <Box>
-            <Heading as="h2" size="lg" mb={2}>{t('marketTitle')}</Heading>
-            <Text color="gray.500">{t('marketDescription')}</Text>
+            <Heading as="h2" size="lg" mb={2}>
+              {t("marketTitle")}
+            </Heading>
+            <Text color="gray.500">{t("marketDescription")}</Text>
           </Box>
         </Stack>
 
         {/* 市场统计 */}
-        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={6} mb={10} mt={10}>
+        <SimpleGrid
+          columns={{ base: 1, md: 2, lg: 3 }}
+          templateColumns={{ md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }}
+          sx={{
+            "& > *:last-child": {
+              gridColumn: { md: "1 / -1", lg: 3 },
+            },
+          }}
+          spacing={{ base: 4, md: 6 }}
+          my={{ base: 6, md: 10 }}
+        >
           <Box
-            px={5}
+            px={{ base: 4, md: 5 }}
             py={4}
+            pb={{ base: 3, md: 4 }}
             position="relative"
             overflow="hidden"
-            shadow={'xl'}
-            borderRadius={'xl'}
+            shadow={"xl"}
+            borderRadius={"xl"}
             bgGradient={useColorModeValue(
-              'linear(to-br, blue.50, purple.50)',
-              'linear(to-br, blue.900, purple.900)'
+              "linear(to-br, blue.50, purple.50)",
+              "linear(to-br, blue.900, purple.900)"
             )}
             transition="transform 0.3s, box-shadow 0.3s"
             _hover={{
-              transform: 'translateY(-5px)',
-              boxShadow: 'xl',
+              transform: "translateY(-5px)",
+              boxShadow: "xl",
             }}
             _before={{
               content: '""',
-              position: 'absolute',
+              position: "absolute",
               top: 0,
               left: 0,
               right: 0,
-              height: '6px',
-              bgGradient: 'linear(to-r, blue.400, purple.400)'
+              height: "6px",
+              bgGradient: "linear(to-r, blue.400, purple.400)",
             }}
+            display={{ base: "flex", md: "block" }}
+            gap={{ base: 2, md: 0 }}
+            justifyContent={{ base: "space-between", md: "center" }}
           >
-            <Flex mb={2} justify="space-between" align="center">
-              <Text fontWeight="bold" fontSize="md" color={useColorModeValue('gray.600', 'gray.300')}>
-                {t('totalTokens')}
+            <Flex
+              mb={{ base: 0, md: 2 }}
+              justify={{ base: "center", md: "space-between" }}
+              align="center"
+              gap={{ base: 2, md: 0 }}
+              flexDir={{ base: "row-reverse", md: "row" }}
+            >
+              <Text
+                fontWeight="bold"
+                fontSize={{ base: "sm", sm: "md" }}
+                color={useColorModeValue("gray.600", "gray.300")}
+              >
+                {t("totalTokens")}
               </Text>
-              <Icon as={FaLayerGroup} boxSize={7} color="blue.400" />
+              <Icon
+                as={FaLayerGroup}
+                boxSize={{ base: 5, md: 7 }}
+                color="blue.400"
+              />
             </Flex>
-            <Text fontSize="3xl" fontWeight="bold" color={useColorModeValue('blue.600', 'blue.300')}>
+            <Text
+              fontSize={{ base: "md", md: "3xl" }}
+              fontWeight="bold"
+              color={useColorModeValue("blue.600", "blue.300")}
+            >
               {marketOverview.totalTokens}
             </Text>
           </Box>
-          
+
           <Box
-            px={5}
+            px={{ base: 4, md: 5 }}
             py={4}
+            pb={{ base: 3, md: 4 }}
             position="relative"
             overflow="hidden"
-            shadow={'xl'}
-            borderRadius={'xl'}
+            shadow={"xl"}
+            borderRadius={"xl"}
             bgGradient={useColorModeValue(
-              'linear(to-br, green.50, teal.50)',
-              'linear(to-br, green.900, teal.900)'
+              "linear(to-br, green.50, teal.50)",
+              "linear(to-br, green.900, teal.900)"
             )}
             transition="transform 0.3s, box-shadow 0.3s"
             _hover={{
-              transform: 'translateY(-5px)',
-              boxShadow: 'xl',
+              transform: "translateY(-5px)",
+              boxShadow: "xl",
             }}
             _before={{
               content: '""',
-              position: 'absolute',
+              position: "absolute",
               top: 0,
               left: 0,
               right: 0,
-              height: '6px',
-              bgGradient: 'linear(to-r, green.400, teal.400)'
+              height: "6px",
+              bgGradient: "linear(to-r, green.400, teal.400)",
             }}
+            display={{ base: "flex", md: "block" }}
+            gap={{ base: 2, md: 0 }}
+            justifyContent={{ base: "space-between", md: "center" }}
           >
-            <Flex mb={2} justify="space-between" align="center">
-              <Text fontWeight="bold" fontSize="md" color={useColorModeValue('gray.600', 'gray.300')}>
-                {t('totalMarketCap')}
+            <Flex
+              mb={{ base: 0, md: 2 }}
+              justify={{ base: "center", md: "space-between" }}
+              align="center"
+              gap={{ base: 2, md: 0 }}
+              flexDir={{ base: "row-reverse", md: "row" }}
+            >
+              <Text
+                fontWeight="bold"
+                fontSize={{ base: "sm", sm: "md" }}
+                color={useColorModeValue("gray.600", "gray.300")}
+              >
+                {t("totalMarketCap")}
               </Text>
-              <Icon as={FaChartLine} boxSize={7} color="green.400" />
+              <Icon
+                as={FaChartLine}
+                boxSize={{ base: 5, md: 7 }}
+                color="green.400"
+              />
             </Flex>
-            <Text fontSize="3xl" fontWeight="bold" color={useColorModeValue('green.600', 'green.300')}>
+            <Text
+              fontSize={{ base: "md", md: "3xl" }}
+              fontWeight="bold"
+              color={useColorModeValue("green.600", "green.300")}
+            >
               $ {marketOverview.totalMarketCap}
             </Text>
           </Box>
-          
+
           <Box
-            px={5}
+            px={{ base: 4, md: 5 }}
             py={4}
+            pb={{ base: 3, md: 4 }}
             position="relative"
             overflow="hidden"
-            shadow={'xl'}
-            borderRadius={'xl'}
+            shadow={"xl"}
+            borderRadius={"xl"}
             bgGradient={useColorModeValue(
-              'linear(to-br, orange.50, red.50)',
-              'linear(to-br, orange.900, red.900)'
+              "linear(to-br, orange.50, red.50)",
+              "linear(to-br, orange.900, red.900)"
             )}
             transition="transform 0.3s, box-shadow 0.3s"
             _hover={{
-              transform: 'translateY(-5px)',
-              boxShadow: 'xl',
+              transform: "translateY(-5px)",
+              boxShadow: "xl",
             }}
             _before={{
               content: '""',
-              position: 'absolute',
+              position: "absolute",
               top: 0,
               left: 0,
               right: 0,
-              height: '6px',
-              bgGradient: 'linear(to-r, orange.400, red.400)'
+              height: "6px",
+              bgGradient: "linear(to-r, orange.400, red.400)",
             }}
+            display={{ base: "flex", md: "block" }}
+            gap={{ base: 2, md: 0 }}
+            justifyContent={{ base: "space-between", md: "center" }}
           >
-            <Flex mb={2} justify="space-between" align="center">
-              <Text fontWeight="bold" fontSize="md" color={useColorModeValue('gray.600', 'gray.300')}>
-                {t('totalVolume24h')}
+            <Flex
+              mb={{ base: 0, md: 2 }}
+              justify={{ base: "center", md: "space-between" }}
+              align="center"
+              gap={{ base: 2, md: 0 }}
+              flexDir={{ base: "row-reverse", md: "row" }}
+            >
+              <Text
+                fontWeight="bold"
+                fontSize={{ base: "sm", sm: "md" }}
+                color={useColorModeValue("gray.600", "gray.300")}
+              >
+                {t("totalVolume24h")}
               </Text>
-              <Icon as={FaFire} boxSize={7} color="orange.400" />
+              <Icon
+                as={FaFire}
+                boxSize={{ base: 5, md: 7 }}
+                color="orange.400"
+              />
             </Flex>
-            <Text fontSize="3xl" fontWeight="bold" color={useColorModeValue('orange.600', 'orange.300')}>
+            <Text
+              fontSize={{ base: "md", md: "3xl" }}
+              fontWeight="bold"
+              color={useColorModeValue("orange.600", "orange.300")}
+            >
               $ {marketOverview.totalVolume24h}
             </Text>
           </Box>
         </SimpleGrid>
-      
-        <Tabs variant="soft-rounded" colorScheme="brand" mb={6} defaultIndex={1}>
-          <Flex 
-            width="100%" 
-            justifyContent="space-between" 
-            alignItems="center" 
+
+        <Tabs
+          variant="soft-rounded"
+          colorScheme="brand"
+          mb={6}
+          defaultIndex={1}
+        >
+          <Flex
+            width="100%"
+            justifyContent="space-between"
+            alignItems="center"
             mb={4}
-            direction={{ base: 'column', md: 'row' }}
-            gap={{ base: 4, md: 0 }}
+            direction={{ base: "column", md: "row" }}
+            gap={{ base: 1, md: 2 }}
           >
-            <TabList 
-              width={{ base: '100%', md: 'auto' }}
-              overflowX={{ base: 'auto', md: 'visible' }}
+            <TabList
+              width={{ base: "100%", md: "auto" }}
+              overflowX="auto"
+              whiteSpace="nowrap"
               py={2}
             >
-              <Tab _selected={{ color: 'white', bg: 'brand.primary' }}><Icon as={FaChartLine} mr={2} /> {t('marketCapRanking')}</Tab>
-              <Tab _selected={{ color: 'white', bg: 'brand.primary' }}><Icon as={FaFire} mr={2} /> {t('hotTokens')}</Tab>
+              <Tab _selected={{ color: "white", bg: "brand.primary" }}>
+                <Icon as={FaChartLine} mr={1} /> {t("marketCapRanking")}
+              </Tab>
+              <Tab _selected={{ color: "white", bg: "brand.primary" }}>
+                <Icon as={FaFire} mr={1} /> {t("hotTokens")}
+              </Tab>
+              <Tab _selected={{ color: "white", bg: "brand.primary" }}>
+                {t("all")}
+              </Tab>
             </TabList>
-            
-            <InputGroup maxW={{ base: '100%', md: '300px' }}>
-              <InputLeftElement pointerEvents='none'>
-                <SearchIcon color='gray.300' />
+
+            <InputGroup maxW={{ base: "100%", md: "300px" }}>
+              <InputLeftElement pointerEvents="none">
+                <SearchIcon color="gray.300" />
               </InputLeftElement>
-              <Input 
-                placeholder={t('searchNameSymbolAddress')}
+              <Input
+                placeholder={t("searchNameSymbolAddress")}
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -640,13 +820,13 @@ export default function MarketPage() {
               />
               {searchTerm && (
                 <InputRightElement>
-                  <Button 
-                    size='sm' 
+                  <Button
+                    size="sm"
                     onClick={() => {
-                      setSearchTerm('');
+                      setSearchTerm("");
                       // 清空搜索时重置到第一页
                       setCurrentPage(1);
-                    }} 
+                    }}
                     variant="ghost"
                   >
                     ×
@@ -655,20 +835,20 @@ export default function MarketPage() {
               )}
             </InputGroup>
           </Flex>
-          
+
           <TabPanels>
             {/* 市值排行 */}
             <TabPanel px={0}>
-              <TokenListView 
-                tokens={paginatedTokens} 
-                sortColumn={sortColumn} 
-                sortDirection={sortDirection} 
-                onSort={handleSort} 
+              <TokenListView
+                tokens={paginatedTokens}
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
               />
-              
+
               {/* 分页控制 */}
               {totalPages > 1 && (
-                <PaginationControl 
+                <PaginationControl
                   currentPage={currentPage}
                   totalPages={totalPages}
                   onPageChange={handlePageChange}
@@ -676,34 +856,49 @@ export default function MarketPage() {
                   onPageSizeChange={handlePageSizeChange}
                 />
               )}
-              
+
               {/* 显示结果信息 */}
               <Center mt={4} mb={4}>
                 <Text fontSize="sm" color="gray.500">
-                  {t('totalResults').replace('{count}', filteredTokens.length.toString())}
+                  {t("totalResults").replace(
+                    "{count}",
+                    filteredTokens.length.toString()
+                  )}
                 </Text>
               </Center>
             </TabPanel>
-            
+
             {/* 热门代币 */}
             <TabPanel px={0}>
-              <TokenListView 
+              <TokenListView
                 tokens={sortedTokens
-                  .filter(token => {
+                  .filter((token) => {
                     // 移除逗号并转为数字，比较市值是否超过50,000
-                    const marketCapValue = parseFloat(token.marketCap.replace(/,/g, ''));
+                    const marketCapValue = parseFloat(
+                      token.marketCap.replace(/,/g, "")
+                    );
                     return marketCapValue > 50000;
                   })
                   .sort((a, b) => {
                     // 根据交易量排序（降序）
-                    const volumeA = parseFloat(a.volume24h.replace(/,/g, ''));
-                    const volumeB = parseFloat(b.volume24h.replace(/,/g, ''));
+                    const volumeA = parseFloat(a.volume24h.replace(/,/g, ""));
+                    const volumeB = parseFloat(b.volume24h.replace(/,/g, ""));
                     return volumeB - volumeA;
                   })
                   .slice(0, 10)}
-                sortColumn={sortColumn} 
-                sortDirection={sortDirection} 
-                onSort={handleSort} 
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+            </TabPanel>
+
+            {/* 全部代币 */}
+            <TabPanel px={0}>
+              <TokenListView
+                tokens={[]}
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
               />
             </TabPanel>
           </TabPanels>
@@ -711,4 +906,4 @@ export default function MarketPage() {
       </Container>
     </Box>
   );
-} 
+}
