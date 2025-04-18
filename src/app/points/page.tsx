@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 import {
   Box,
   Container,
@@ -27,7 +27,7 @@ import {
   Icon,
   Center,
   Avatar,
-} from '@chakra-ui/react'
+} from "@chakra-ui/react";
 import {
   FaTwitter,
   FaTelegram,
@@ -40,207 +40,205 @@ import {
   FaWallet,
   FaTrophy,
   FaCoins,
-} from 'react-icons/fa'
-import { useTranslation } from 'react-i18next'
-import { useAppSelector, useAppDispatch } from '@/store/hooks'
-import { UserAPI } from '@/api'
-import type { RankItem, RankResponse, SignInInfoResponse } from '@/api/types'
-import { setSignInInfo } from '@/store/slices/userSlice'
+} from "react-icons/fa";
+import { useTranslation } from "react-i18next";
+import { useAppSelector, useAppDispatch } from "@/store/hooks";
+import { UserAPI } from "@/api";
+import type { RankItem, RankResponse, SignInInfoResponse } from "@/api/types";
+import { setSignInInfo } from "@/store/slices/userSlice";
 
 // 从模拟数据文件导入
-import { REWARDS } from '@/mock/pointsData'
+import { REWARDS } from "@/mock/pointsData";
 
 export default function PointsPage() {
-  const { t } = useTranslation()
-  const toast = useToast()
-  const dispatch = useAppDispatch()
-  const bgColor = useColorModeValue('white', 'gray.800')
-  const borderColor = useColorModeValue('gray.200', 'gray.700')
-  const accentColor = useColorModeValue('purple.500', 'purple.300')
-  const highlightBg = useColorModeValue('purple.50', 'purple.900')
-  const tableHeadBg = useColorModeValue('gray.50', 'gray.700')
+  const { t } = useTranslation();
+  const toast = useToast();
+  const dispatch = useAppDispatch();
+  const bgColor = useColorModeValue("white", "gray.800");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const accentColor = useColorModeValue("purple.500", "purple.300");
+  const highlightBg = useColorModeValue("purple.50", "purple.900");
+  const tableHeadBg = useColorModeValue("gray.50", "gray.700");
 
   const { userInfo, authToken, signInInfo } = useAppSelector(
     state => state.user
   )
-  // const { authToken, signInInfo } = useAppSelector(
-  //   state => state.user
-  // )
+  // const { authToken, signInInfo } = useAppSelector((state) => state.user);
   // const userInfo = {
-  //   nickname: '张三',
-  //   avatar_url: 'https://example.com/avatar.jpg',
-  //   solana_wallet: '1234567890',
-  //   telegramId: '1234567890',
-  //   twitterId: '1234567890',
-  // }
-  const [rankList, setRankList] = useState<RankItem[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  //   nickname: "张三",
+  //   avatar_url: "https://example.com/avatar.jpg",
+  //   solana_wallet: "1234567890",
+  //   telegramId: "1234567890",
+  //   twitterId: "1234567890",
+  // };
+  const [rankList, setRankList] = useState<RankItem[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // 获取签到信息
   useEffect(() => {
     const fetchSignInInfo = async () => {
       try {
-        const result = (await UserAPI.getSignInInfo()) as SignInInfoResponse
+        const result = (await UserAPI.getSignInInfo()) as SignInInfoResponse;
         if (result.success) {
-          dispatch(setSignInInfo(result.data))
+          dispatch(setSignInInfo(result.data));
         }
       } catch (error) {
-        console.error('获取签到信息失败:', error)
+        console.error("获取签到信息失败:", error);
       }
-    }
+    };
 
     if (userInfo && authToken) {
-      fetchSignInInfo()
+      fetchSignInInfo();
     }
-  }, [userInfo, authToken, dispatch])
+  }, [userInfo, authToken, dispatch]);
 
   // 签到
   const handleCheckin = async () => {
     if (signInInfo?.todaySignedIn) {
       toast({
-        title: t('今日已签到'),
-        description: t('请明天再来'),
-        status: 'info',
+        title: t("今日已签到"),
+        description: t("请明天再来"),
+        status: "info",
         duration: 3000,
         isClosable: true,
-        position: 'top',
-      })
-      return
+        position: "top",
+      });
+      return;
     }
 
     try {
-      const result = (await UserAPI.signin()) as SignInInfoResponse
+      const result = (await UserAPI.signin()) as SignInInfoResponse;
       if (result.success) {
         // 签到成功后重新获取签到信息
         const signInResult =
-          (await UserAPI.getSignInInfo()) as SignInInfoResponse
+          (await UserAPI.getSignInInfo()) as SignInInfoResponse;
         if (signInResult.success) {
-          dispatch(setSignInInfo(signInResult.data))
+          dispatch(setSignInInfo(signInResult.data));
         }
 
         toast({
-          title: t('签到成功'),
+          title: t("签到成功"),
           description: result.msg,
-          status: 'success',
+          status: "success",
           duration: 3000,
           isClosable: true,
-          position: 'top',
-        })
+          position: "top",
+        });
       } else {
         toast({
-          title: t('签到失败'),
+          title: t("签到失败"),
           description: result.msg,
-          status: 'error',
+          status: "error",
           duration: 3000,
           isClosable: true,
-          position: 'top',
-        })
+          position: "top",
+        });
       }
     } catch (error) {
       toast({
-        title: t('签到失败'),
-        description: error instanceof Error ? error.message : '请稍后重试',
-        status: 'error',
+        title: t("签到失败"),
+        description: error instanceof Error ? error.message : "请稍后重试",
+        status: "error",
         duration: 3000,
         isClosable: true,
-        position: 'top',
-      })
+        position: "top",
+      });
     }
-  }
+  };
 
   // 复制邀请链接
   const handleCopyInviteLink = () => {
-    if (!userInfo?.code) return
+    if (!userInfo?.code) return;
     navigator.clipboard.writeText(userInfo.code).then(() => {
       toast({
-        title: t('copySuccess'),
-        status: 'success',
+        title: t("copySuccess"),
+        status: "success",
         duration: 2000,
-      })
-    })
-  }
+      });
+    });
+  };
 
   // 分享到Telegram
   const handleShareToTelegram = () => {
-    if (!userInfo?.code) return
+    if (!userInfo?.code) return;
     const text = encodeURIComponent(
-      `${t('inviteSuccessReward')}\n${userInfo.code}`
-    )
-    window.open(`https://t.me/share/url?url=${text}`, '_blank')
-  }
+      `${t("inviteSuccessReward")}\n${userInfo.code}`
+    );
+    window.open(`https://t.me/share/url?url=${text}`, "_blank");
+  };
 
   // 分享到Twitter/X
   const handleShareToX = () => {
-    if (!userInfo?.code) return
+    if (!userInfo?.code) return;
     const text = encodeURIComponent(
-      `${t('inviteSuccessReward')}\n${userInfo.code}`
-    )
-    window.open(`https://twitter.com/intent/tweet?text=${text}`, '_blank')
-  }
+      `${t("inviteSuccessReward")}\n${userInfo.code}`
+    );
+    window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+  };
 
   // 连接社交账号
-  const handleConnectSocial = (platform: 'telegram' | 'twitter') => {
-    if (!userInfo) return
+  const handleConnectSocial = (platform: "telegram" | "twitter") => {
+    if (!userInfo) return;
     const isConnected =
-      platform === 'telegram' ? userInfo.telegramId : userInfo.twitterId
+      platform === "telegram" ? userInfo.telegramId : userInfo.twitterId;
 
-    if (isConnected) return
+    if (isConnected) return;
 
     toast({
-      title: platform === 'telegram' ? t('socialBound') : t('socialBound'),
-      description: t('connectReward', { points: REWARDS.connectSocial }),
-      status: 'success',
+      title: platform === "telegram" ? t("socialBound") : t("socialBound"),
+      description: t("connectReward", { points: REWARDS.connectSocial }),
+      status: "success",
       duration: 3000,
       isClosable: true,
-      position: 'top',
-    })
-  }
+      position: "top",
+    });
+  };
 
   // 在钱包地址显示部分为SOL格式缩短处理函数
-  const formatSolAddress = (address: string | undefined) => {
-    if (!address) return '-'
+  const formatSolAddress = (address: string | undefined, length = 6) => {
+    if (!address) return "-";
     if (address.length > 12) {
-      return `${address.substring(0, 6)}...${address.substring(
-        address.length - 6
-      )}`
+      return `${address.substring(0, length)}...${address.substring(
+        address.length - length
+      )}`;
     }
-    return address
-  }
+    return address;
+  };
 
   // 获取排行榜数据
   useEffect(() => {
     const fetchRankList = async () => {
-      setIsLoading(true)
-      setError(null)
+      setIsLoading(true);
+      setError(null);
       try {
-        const result = (await UserAPI.getRank()) as { data: RankResponse }
+        const result = (await UserAPI.getRank()) as { data: RankResponse };
         if (result.data) {
-          setRankList(result.data.data || [])
+          setRankList(result.data.data || []);
         } else {
-          setError(t('获取排行榜失败'))
-          setRankList([])
+          setError(t("获取排行榜失败"));
+          setRankList([]);
         }
       } catch (error) {
-        console.error('获取排行榜失败:', error)
-        setError(t('获取排行榜失败'))
-        setRankList([])
+        console.error("获取排行榜失败:", error);
+        setError(t("获取排行榜失败"));
+        setRankList([]);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
     if (userInfo && authToken) {
-      fetchRankList()
+      fetchRankList();
     }
-  }, [userInfo, authToken, t])
+  }, [userInfo, authToken, t]);
 
   return (
     <Container maxW="container.xl" py={8}>
       {!userInfo ? (
         <VStack spacing={4} align="center">
-          <Heading size="lg">{t('请先登录')}</Heading>
-          <Text color="gray.500">{t('登录后查看您的积分信息')}</Text>
+          <Heading size="lg">{t("请先登录")}</Heading>
+          <Text color="gray.500">{t("登录后查看您的积分信息")}</Text>
         </VStack>
       ) : (
         <VStack spacing={8} align="stretch">
@@ -252,20 +250,20 @@ export default function PointsPage() {
             color="white"
           >
             <Grid
-              templateColumns={{ base: '1fr', lg: '2fr 1fr' }}
+              templateColumns={{ base: "1fr", lg: "2fr 1fr" }}
               gap={{ base: 4, md: 6 }}
               height="auto"
             >
               {/* 左侧：用户信息和积分 */}
               <GridItem display="flex" flexDirection="column">
                 <Flex
-                  direction={{ base: 'column', sm: 'row' }}
-                  alignItems={{ base: 'center', sm: 'flex-start' }}
+                  direction={{ base: "column", sm: "row" }}
+                  alignItems={{ base: "center", sm: "flex-start" }}
                   mb={{ base: 3, md: 4 }}
                 >
                   {/* 用户头像和名称 */}
                   <Avatar
-                    size={{ base: 'lg', md: 'xl' }}
+                    size={{ base: "lg", md: "xl" }}
                     name={userInfo.nickname}
                     src={userInfo.avatar_url}
                     bg="white"
@@ -277,16 +275,16 @@ export default function PointsPage() {
                   />
 
                   <VStack
-                    align={{ base: 'center', sm: 'flex-start' }}
+                    align={{ base: "center", sm: "flex-start" }}
                     spacing={0}
                     w="full"
                   >
                     <Text
-                      fontSize={{ base: 'xl', md: '2xl' }}
+                      fontSize={{ base: "xl", md: "2xl" }}
                       fontWeight="bold"
                       color="white"
                       textShadow="0 1px 2px rgba(0,0,0,0.2)"
-                      textAlign={{ base: 'center', sm: 'left' }}
+                      textAlign={{ base: "center", sm: "left" }}
                     >
                       {userInfo.nickname}
                     </Text>
@@ -297,7 +295,7 @@ export default function PointsPage() {
                       direction="row"
                       flexWrap="wrap"
                       gap={{ base: 3, sm: 2, md: 2 }}
-                      justifyContent={{ base: 'center', sm: 'flex-start' }}
+                      justifyContent={{ base: "center", sm: "flex-start" }}
                       alignItems="center"
                       width="100%"
                     >
@@ -322,40 +320,40 @@ export default function PointsPage() {
                       </HStack>
 
                       <Flex
-                        direction={{ base: 'row', md: 'row' }}
+                        direction={{ base: "row", md: "row" }}
                         flexWrap="wrap"
-                        justify={{ base: 'center', sm: 'flex-start' }}
+                        justify={{ base: "center", sm: "flex-start" }}
                         gap={2}
                       >
                         {/* 绑定电报按钮 */}
                         <HStack
                           bg={
-                            userInfo.telegramId ? 'whiteAlpha.400' : 'blue.600'
+                            userInfo.telegramId ? "whiteAlpha.400" : "blue.600"
                           }
                           p={1.5}
                           px={3}
                           borderRadius="full"
                           borderWidth="1px"
                           borderColor={
-                            userInfo.telegramId ? 'whiteAlpha.400' : 'blue.500'
+                            userInfo.telegramId ? "whiteAlpha.400" : "blue.500"
                           }
-                          cursor={userInfo.telegramId ? 'default' : 'pointer'}
+                          cursor={userInfo.telegramId ? "default" : "pointer"}
                           onClick={() =>
                             !userInfo.telegramId &&
-                            handleConnectSocial('telegram')
+                            handleConnectSocial("telegram")
                           }
                           opacity={userInfo.telegramId ? 0.8 : 1}
                           _hover={
                             !userInfo.telegramId
                               ? {
-                                  bg: 'blue.500',
+                                  bg: "blue.500",
                                 }
                               : {}
                           }
                         >
                           <Icon as={FaTelegram} color="white" boxSize={4} />
                           <Text fontSize="sm" fontWeight="medium" color="white">
-                            {userInfo.telegramId ? t('socialBound') : t('bind')}
+                            {userInfo.telegramId ? t("socialBound") : t("bind")}
                           </Text>
                           {userInfo.telegramId && (
                             <Icon
@@ -371,8 +369,8 @@ export default function PointsPage() {
                         <HStack
                           bg={
                             userInfo.twitterId
-                              ? 'whiteAlpha.400'
-                              : 'twitter.600'
+                              ? "whiteAlpha.400"
+                              : "twitter.600"
                           }
                           p={1.5}
                           px={3}
@@ -380,26 +378,26 @@ export default function PointsPage() {
                           borderWidth="1px"
                           borderColor={
                             userInfo.twitterId
-                              ? 'whiteAlpha.400'
-                              : 'twitter.500'
+                              ? "whiteAlpha.400"
+                              : "twitter.500"
                           }
-                          cursor={userInfo.twitterId ? 'default' : 'pointer'}
+                          cursor={userInfo.twitterId ? "default" : "pointer"}
                           onClick={() =>
                             !userInfo.twitterId &&
-                            handleConnectSocial('twitter')
+                            handleConnectSocial("twitter")
                           }
                           opacity={userInfo.twitterId ? 0.8 : 1}
                           _hover={
                             !userInfo.twitterId
                               ? {
-                                  bg: 'twitter.500',
+                                  bg: "twitter.500",
                                 }
                               : {}
                           }
                         >
                           <Icon as={FaTwitter} color="white" boxSize={4} />
                           <Text fontSize="sm" fontWeight="medium" color="white">
-                            {userInfo.twitterId ? t('socialBound') : t('bind')}
+                            {userInfo.twitterId ? t("socialBound") : t("bind")}
                           </Text>
                           {userInfo.twitterId && (
                             <Icon
@@ -426,14 +424,14 @@ export default function PointsPage() {
                   height="auto"
                   flex="1"
                   mt="auto"
-                  minHeight={{ base: '100px', md: '120px' }}
-                  direction={{ base: 'column', sm: 'row' }}
+                  minHeight={{ base: "100px", md: "120px" }}
+                  direction={{ base: "column", sm: "row" }}
                 >
                   <HStack mb={{ base: 3, sm: 0 }}>
                     <Icon as={FaCoins} boxSize={7} color="yellow.300" mr={3} />
                     <Box>
                       <Text fontSize="sm" opacity={0.8} color="white">
-                        {t('totalPoints')}
+                        {t("totalPoints")}
                       </Text>
                       <Text
                         fontSize="3xl"
@@ -447,7 +445,7 @@ export default function PointsPage() {
                     </Box>
                   </HStack>
 
-                  <VStack spacing={2} w={{ base: '100%', sm: 'auto' }}>
+                  <VStack spacing={2} w={{ base: "100%", sm: "auto" }}>
                     {/* 积分历史按钮 */}
                     <Button
                       leftIcon={<Icon as={FaHistory} />}
@@ -459,10 +457,10 @@ export default function PointsPage() {
                       bg="yellow.400"
                       color="black"
                       boxShadow="0px 2px 4px rgba(0,0,0,0.2)"
-                      _hover={{ bg: 'yellow.500' }}
+                      _hover={{ bg: "yellow.500" }}
                       w="full"
                     >
-                      {t('pointsHistory')}
+                      {t("pointsHistory")}
                     </Button>
 
                     {/* 积分用途按钮 */}
@@ -476,10 +474,10 @@ export default function PointsPage() {
                       bg="purple.500"
                       color="white"
                       boxShadow="0px 2px 4px rgba(0,0,0,0.2)"
-                      _hover={{ bg: 'purple.600' }}
+                      _hover={{ bg: "purple.600" }}
                       w="full"
                     >
-                      {t('pointsUsage')}
+                      {t("pointsUsage")}
                     </Button>
                   </VStack>
                 </Flex>
@@ -501,7 +499,7 @@ export default function PointsPage() {
                   <HStack mb={1}>
                     <Icon as={FaGift} boxSize={5} color="yellow.300" />
                     <Text fontWeight="bold" fontSize="lg" color="white">
-                      {t('dailyCheckin')}
+                      {t("dailyCheckin")}
                     </Text>
                     <Badge
                       ml="auto"
@@ -515,8 +513,114 @@ export default function PointsPage() {
                     </Badge>
                   </HStack>
 
-                  <Text fontSize="sm" opacity={0.9} mb={3} color="white"></Text>
-
+                  {/* <Text fontSize="sm" opacity={0.9} mb={3} color="white"></Text> */}
+                  {/* 签到状态周一到周日 */}
+                  <Flex
+                    justifyContent="center"
+                    gap={{ base: 1.5, md: 2.5 }}
+                    flexWrap="wrap"
+                  >
+                    {[
+                      {
+                        day: "周一",
+                        reward: 1,
+                        signedIn: true,
+                      },
+                      {
+                        day: "周二",
+                        reward: 10,
+                        signedIn: false,
+                      },
+                      {
+                        day: "周三",
+                        reward: 15,
+                        signedIn: false,
+                      },
+                      {
+                        day: "周四",
+                        reward: 20,
+                        signedIn: false,
+                      },
+                      {
+                        day: "周五",
+                        reward: 25,
+                        signedIn: false,
+                      },
+                      {
+                        day: "周六",
+                        reward: 30,
+                        signedIn: false,
+                      },
+                      {
+                        day: "周日",
+                        reward: 40,
+                        signedIn: false,
+                      },
+                    ].map((itme, index) => (
+                      <Grid key={index}>
+                        <GridItem
+                          display="grid"
+                          justifyItems="center"
+                          gap={1.5}
+                        >
+                          <HStack
+                            w={{ base: 8, md: 9 }}
+                            h={{ base: 8, md: 9 }}
+                            bg={
+                              itme.signedIn
+                                ? "rgba(230, 179, 37,0.85)"
+                                : "whiteAlpha.400"
+                            }
+                            borderRadius="full"
+                            p={1}
+                          >
+                            <HStack
+                              w="100%"
+                              h="100%"
+                              bg={
+                                itme.signedIn
+                                  ? "rgba(230, 179, 37, 0.7)"
+                                  : "whiteAlpha.400"
+                              }
+                              borderRadius="full"
+                              justifyContent="center"
+                              alignItems="center"
+                            >
+                              <Text
+                                fontSize={9}
+                                fontWeight="bold"
+                                color={itme.signedIn ? "white" : "gray.300"}
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center"
+                              >
+                                {itme.signedIn ? (
+                                  <Icon
+                                    as={FaCheck}
+                                    color="white"
+                                    boxSize={3}
+                                    ml={1}
+                                    m={0}
+                                  />
+                                ) : (
+                                  "+" + itme.reward
+                                )}
+                              </Text>
+                            </HStack>
+                          </HStack>
+                          <Text
+                            fontSize={12}
+                            color="white"
+                            fontWeight="bold"
+                            opacity={itme.signedIn ? 1 : 0.5}
+                          >
+                            {itme.day}
+                          </Text>
+                        </GridItem>
+                      </Grid>
+                    ))}
+                  </Flex>
+                  {/* 签到按钮 */}
                   <Button
                     colorScheme="yellow"
                     onClick={handleCheckin}
@@ -526,10 +630,10 @@ export default function PointsPage() {
                     color="black"
                     fontWeight="bold"
                     size="lg"
-                    _hover={{ bg: 'yellow.500' }}
+                    _hover={{ bg: "yellow.500" }}
                     isDisabled={signInInfo?.todaySignedIn}
                   >
-                    {signInInfo?.todaySignedIn ? t('今日已签到') : t('checkin')}
+                    {signInInfo?.todaySignedIn ? t("今日已签到") : t("checkin")}
                   </Button>
                 </VStack>
               </GridItem>
@@ -548,12 +652,12 @@ export default function PointsPage() {
               <VStack spacing={5} align="stretch">
                 <Flex
                   justifyContent="space-between"
-                  alignItems={{ base: 'flex-start', md: 'center' }}
-                  flexDirection={{ base: 'column', md: 'row' }}
+                  alignItems={{ base: "flex-start", md: "center" }}
+                  flexDirection={{ base: "column", md: "row" }}
                 >
                   <HStack spacing={3} mb={{ base: 3, md: 0 }}>
                     <Icon as={FaUserPlus} color={accentColor} boxSize={5} />
-                    <Heading size="md">{t('inviteFriendsTitle')}</Heading>
+                    <Heading size="md">{t("inviteFriendsTitle")}</Heading>
                     <Badge
                       colorScheme="purple"
                       fontSize="sm"
@@ -567,8 +671,8 @@ export default function PointsPage() {
                   <HStack
                     spacing={2}
                     flexWrap="wrap"
-                    justifyContent={{ base: 'flex-start', md: 'flex-end' }}
-                    w={{ base: '100%', md: 'auto' }}
+                    justifyContent={{ base: "flex-start", md: "flex-end" }}
+                    w={{ base: "100%", md: "auto" }}
                   >
                     {/* 复制链接按钮 */}
                     <HStack
@@ -580,11 +684,11 @@ export default function PointsPage() {
                       borderColor="gray.300"
                       cursor="pointer"
                       onClick={handleCopyInviteLink}
-                      _hover={{ bg: 'gray.300' }}
+                      _hover={{ bg: "gray.300" }}
                       _dark={{
-                        bg: 'gray.700',
-                        borderColor: 'gray.600',
-                        _hover: { bg: 'gray.600' },
+                        bg: "gray.700",
+                        borderColor: "gray.600",
+                        _hover: { bg: "gray.600" },
                       }}
                       mb={{ base: 2, md: 0 }}
                     >
@@ -592,15 +696,15 @@ export default function PointsPage() {
                         as={FaCopy}
                         color="gray.600"
                         boxSize={4}
-                        _dark={{ color: 'gray.300' }}
+                        _dark={{ color: "gray.300" }}
                       />
                       <Text
                         fontSize="sm"
                         fontWeight="bold"
                         color="gray.700"
-                        _dark={{ color: 'white' }}
+                        _dark={{ color: "white" }}
                       >
-                        {t('copyInviteLink')}
+                        {t("copyInviteLink")}
                       </Text>
                     </HStack>
 
@@ -614,12 +718,12 @@ export default function PointsPage() {
                       borderColor="blue.500"
                       cursor="pointer"
                       onClick={handleShareToTelegram}
-                      _hover={{ bg: 'blue.700' }}
+                      _hover={{ bg: "blue.700" }}
                       mb={{ base: 2, md: 0 }}
                     >
                       <Icon as={FaTelegram} color="white" boxSize={4} />
                       <Text fontSize="sm" fontWeight="bold" color="white">
-                        {t('share')}
+                        {t("share")}
                       </Text>
                     </HStack>
 
@@ -633,12 +737,12 @@ export default function PointsPage() {
                       borderColor="#0d8bd9"
                       cursor="pointer"
                       onClick={handleShareToX}
-                      _hover={{ bg: '#0d8bd9' }}
+                      _hover={{ bg: "#0d8bd9" }}
                       mb={{ base: 2, md: 0 }}
                     >
                       <Icon as={FaTwitter} color="white" boxSize={4} />
                       <Text fontSize="sm" fontWeight="bold" color="white">
-                        {t('share')}
+                        {t("share")}
                       </Text>
                     </HStack>
                   </HStack>
@@ -647,9 +751,9 @@ export default function PointsPage() {
                 <Text
                   fontSize="sm"
                   color="gray.600"
-                  _dark={{ color: 'gray.300' }}
+                  _dark={{ color: "gray.300" }}
                 >
-                  {t('inviteSuccessReward')}
+                  {t("inviteSuccessReward")}
                 </Text>
 
                 <Box>
@@ -658,9 +762,9 @@ export default function PointsPage() {
                     mb={2}
                     fontSize="sm"
                     color="gray.600"
-                    _dark={{ color: 'gray.300' }}
+                    _dark={{ color: "gray.300" }}
                   >
-                    {t('yourInviteLink')}
+                    {t("yourInviteLink")}
                   </Text>
                   <Input
                     value={userInfo.code}
@@ -668,7 +772,7 @@ export default function PointsPage() {
                     bg="white"
                     borderColor={borderColor}
                     borderRadius="md"
-                    _dark={{ bg: 'gray.800' }}
+                    _dark={{ bg: "gray.800" }}
                     width="100%"
                   />
                 </Box>
@@ -682,6 +786,7 @@ export default function PointsPage() {
             borderRadius="xl"
             overflow="hidden"
             boxShadow="none"
+            p={{ base: 0, sm: 8 }}
           >
             <Box bg={accentColor} p={4} color="white">
               <HStack>
@@ -690,159 +795,281 @@ export default function PointsPage() {
                   color="white"
                   boxSize={{ base: 5, sm: 6 }}
                 />
-                <Heading size={{ base: 'sm', sm: 'md' }} color="white">
-                  {t('leaderboard')}
+                <Heading size={{ base: "sm", sm: "md" }} color="white">
+                  {t("leaderboard")}
                 </Heading>
               </HStack>
             </Box>
             <CardBody p={0}>
-              <Box overflowX="auto">
-                <Table variant="simple">
-                  <Thead bg={tableHeadBg}>
-                    <Tr>
-                      <Th width="80px">{t('rank')}</Th>
-                      <Th>{t('user')}</Th>
-                      <Th>{t('walletAddress')}</Th>
-                      <Th isNumeric>{t('pointsPoints')}</Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {isLoading ? (
-                      <Tr>
-                        <Td colSpan={4}>
-                          <Flex justify="center" align="center" p={4}>
-                            <Text>{t('加载中...')}</Text>
-                          </Flex>
-                        </Td>
-                      </Tr>
-                    ) : error ? (
-                      <Tr>
-                        <Td colSpan={4}>
-                          <Flex justify="center" align="center" p={4}>
-                            <Text color="red.500">{error}</Text>
-                          </Flex>
-                        </Td>
-                      </Tr>
-                    ) : rankList && rankList.length > 0 ? (
-                      rankList.map(entry => (
-                        <Tr
-                          key={entry.userId}
-                          bg={
-                            entry.userId === userInfo?.userId
-                              ? highlightBg
-                              : undefined
-                          }
-                        >
-                          <Td>
-                            {entry.rank <= 3 ? (
-                              <Center
-                                boxSize="30px"
-                                borderRadius="full"
-                                bg={
-                                  entry.rank === 1
-                                    ? 'yellow.400'
-                                    : entry.rank === 2
-                                    ? 'gray.300'
-                                    : 'orange.300'
-                                }
-                                color="white"
-                                fontWeight="bold"
-                              >
-                                {entry.rank}
-                              </Center>
-                            ) : (
-                              <Text
-                                fontWeight={
-                                  entry.userId === userInfo?.userId
-                                    ? 'bold'
-                                    : 'normal'
-                                }
-                              >
-                                {entry.rank}
-                              </Text>
-                            )}
-                          </Td>
-                          <Td>
-                            <HStack>
-                              <Avatar
-                                size="sm"
-                                name={entry.nickname}
-                                src={entry.avatar_url}
-                              />
-                              <Text
-                                fontWeight={
-                                  entry.userId === userInfo?.userId
-                                    ? 'bold'
-                                    : 'normal'
-                                }
-                              >
-                                {entry.nickname}
-                                {entry.userId === userInfo?.userId && (
-                                  <Text
-                                    as="span"
-                                    fontSize="xs"
-                                    color={accentColor}
-                                  >
-                                    ({t('you')})
-                                  </Text>
-                                )}
-                              </Text>
-                            </HStack>
-                          </Td>
-                          <Td>
-                            <HStack>
-                              <Icon
-                                as={FaWallet}
-                                color="gray.500"
-                                boxSize={3}
-                              />
-                              <Text
-                                fontSize="sm"
-                                fontFamily="mono"
-                                fontWeight="medium"
-                              >
-                                {entry.solana_wallet
-                                  ? formatSolAddress(entry.solana_wallet)
-                                  : '-'}
-                              </Text>
-                            </HStack>
-                          </Td>
-                          <Td isNumeric>
-                            <Text
-                              color={
-                                entry.userId === userInfo?.userId
-                                  ? accentColor
-                                  : 'gray.600'
-                              }
-                              fontWeight="bold"
-                              _dark={{
-                                color:
-                                  entry.userId === userInfo?.userId
-                                    ? 'purple.300'
-                                    : 'gray.300',
-                              }}
+              <Box>
+                {/* 前三名排行榜 */}
+                <Flex
+                  w="100%"
+                  justifyContent="center"
+                  gap={6}
+                  my={6}
+                  textAlign="center"
+                >
+                  <Grid
+                    templateColumns="repeat(3, 1fr)"
+                    gap={{ base: 2, sm: 6 }}
+                    alignItems="flex-end"
+                    justifyContent={{ base: "space-between", sm: "center" }}
+                    m={0}
+                  >
+                    {/* 第二名 */}
+                    <GridItem
+                      display="flex"
+                      flexDirection="column"
+                      alignItems="center"
+                      gap={2}
+                    >
+                      <Avatar
+                        name="A"
+                        src=""
+                        w={{ base: "60px", sm: "90px" }}
+                        h={{ base: "60px", sm: "90px" }}
+                      />
+                      <Center
+                        boxSize={{ base: "26px", sm: "30px" }}
+                        bg="gray.300"
+                        borderRadius="full"
+                        color="white"
+                        fontWeight="bold"
+                        mt={{ base: "-26px", sm: "-30px" }}
+                        zIndex={1}
+                      >
+                        2
+                      </Center>
+                      <Text
+                        fontSize="sm"
+                        fontFamily="mono"
+                        fontWeight="medium"
+                        mt={-1.5}
+                        maxW={{ base: "90px", sm: "100px" }}
+                        className="ellipsis"
+                      >
+                        CryptoKing
+                      </Text>
+                      <Text fontWeight="bold" color="gray.600" mt={-2}>
+                        3,850
+                      </Text>
+                    </GridItem>
+                    {/* 第一名 */}
+                    <GridItem
+                      display="flex"
+                      flexDirection="column"
+                      alignItems="center"
+                      gap={2}
+                    >
+                      <Avatar
+                        name="B"
+                        src=""
+                        w={{ base: "80px", sm: "110px" }}
+                        h={{ base: "80px", sm: "110px" }}
+                      ></Avatar>
+                      <Center
+                        boxSize={{ base: "26px", sm: "30px" }}
+                        bg="yellow.400"
+                        borderRadius="full"
+                        color="white"
+                        fontWeight="bold"
+                        mt={{ base: "-26px", sm: "-30px" }}
+                        zIndex={1}
+                      >
+                        1
+                      </Center>
+                      <Text
+                        fontSize="sm"
+                        fontFamily="mono"
+                        fontWeight="medium"
+                        mt={-1.5}
+                        maxW={{ base: "100px", sm: "120px" }}
+                        className="ellipsis"
+                      >
+                        BlockchainMaster
+                      </Text>
+                      <Text fontWeight="bold" color="gray.600" mt={-2}>
+                        3,850
+                      </Text>
+                    </GridItem>
+                    {/* 第三名 */}
+                    <GridItem
+                      display="flex"
+                      flexDirection="column"
+                      alignItems="center"
+                      gap={2}
+                    >
+                      <Avatar
+                        name="wca"
+                        src=""
+                        w={{ base: "60px", sm: "90px" }}
+                        h={{ base: "60px", sm: "90px" }}
+                      />
+                      <Center
+                        boxSize={{ base: "26px", sm: "30px" }}
+                        bg="orange.300"
+                        borderRadius="full"
+                        color="white"
+                        fontWeight="bold"
+                        mt={{ base: "-26px", sm: "-30px" }}
+                        zIndex={1}
+                      >
+                        3
+                      </Center>
+                      <Text
+                        fontSize="sm"
+                        fontFamily="mono"
+                        fontWeight="medium"
+                        mt={-1.5}
+                        maxW={{ base: "90px", sm: "100px" }}
+                        className="ellipsis"
+                      >
+                        PiLover
+                      </Text>
+                      <Text fontWeight="bold" color="gray.600" mt={-2}>
+                        3,850
+                      </Text>
+                    </GridItem>
+                  </Grid>
+                </Flex>
+                {/* 排行榜 */}
+                <Box overflowX="auto">
+                  {isLoading ? (
+                    <Flex justify="center" align="center" p={4}>
+                      <Text>{t("加载中...")}</Text>
+                    </Flex>
+                  ) : error ? (
+                    <Flex justify="center" align="center" p={4}>
+                      <Text color="red.500">{error}</Text>
+                    </Flex>
+                  ) : rankList && rankList.length > 0 ? (
+                    <Grid p={{ base: 4, sm: 0 }} py={6}>
+                      {rankList.map((entry) => (
+                        <GridItem key={entry.userId} py={2}>
+                          <Card
+                            p={4}
+                            transition="transform 0.3s"
+                            _hover={{ transform: "translateY(-5px)" }}
+                          >
+                            <CardBody
+                              display="flex"
+                              alignItems="center"
+                              p={0}
+                              gap={2}
                             >
-                              {Number(entry.token).toLocaleString()}
-                            </Text>
-                          </Td>
-                        </Tr>
-                      ))
-                    ) : (
-                      <Tr>
-                        <Td colSpan={4}>
-                          <Flex justify="center" align="center" p={4}>
-                            <Text>{t('暂无排行数据')}</Text>
-                          </Flex>
-                        </Td>
-                      </Tr>
-                    )}
-                  </Tbody>
-                </Table>
+                              <Text
+                                w={4}
+                                fontSize={{ base: "sm", sm: "md" }}
+                                fontWeight={
+                                  entry.userId === userInfo?.userId
+                                    ? "bold"
+                                    : "normal"
+                                }
+                              >
+                                {entry.rank}
+                              </Text>
+                              <HStack w={{ base: "auto", md: 160 }}>
+                                <Avatar
+                                  size="sm"
+                                  name={entry.nickname}
+                                  src={entry.avatar_url}
+                                />
+                                <Grid gap={0}>
+                                  <GridItem>
+                                    <Text
+                                      fontWeight={
+                                        entry.userId === userInfo?.userId
+                                          ? "bold"
+                                          : "normal"
+                                      }
+                                    >
+                                      {entry.nickname}
+                                      {entry.userId === userInfo?.userId && (
+                                        <Text
+                                          as="span"
+                                          fontSize="xs"
+                                          color={accentColor}
+                                        >
+                                          ({t("you")})
+                                        </Text>
+                                      )}
+                                    </Text>
+                                  </GridItem>
+                                  <GridItem
+                                    display={{ base: "flex", md: "none" }}
+                                  >
+                                    <HStack>
+                                      <Icon
+                                        as={FaWallet}
+                                        color="gray.500"
+                                        boxSize={3}
+                                      />
+                                      <Text
+                                        fontSize="sm"
+                                        fontFamily="mono"
+                                        fontWeight="medium"
+                                      >
+                                        {entry.solana_wallet
+                                          ? formatSolAddress(
+                                              entry.solana_wallet,
+                                              4
+                                            )
+                                          : "-"}
+                                      </Text>
+                                    </HStack>
+                                  </GridItem>
+                                </Grid>
+                              </HStack>
+                              <HStack display={{ base: "none", md: "flex" }}>
+                                <Icon
+                                  as={FaWallet}
+                                  color="gray.500"
+                                  boxSize={3}
+                                />
+                                <Text
+                                  fontSize="sm"
+                                  fontFamily="mono"
+                                  fontWeight="medium"
+                                >
+                                  {entry.solana_wallet
+                                    ? formatSolAddress(entry.solana_wallet, 4)
+                                    : "-"}
+                                </Text>
+                              </HStack>
+                              <HStack flex={1} />
+                              <Text
+                                color={
+                                  entry.userId === userInfo?.userId
+                                    ? accentColor
+                                    : "gray.600"
+                                }
+                                fontWeight="bold"
+                                _dark={{
+                                  color:
+                                    entry.userId === userInfo?.userId
+                                      ? "purple.300"
+                                      : "gray.300",
+                                }}
+                              >
+                                {Number(entry.token).toLocaleString()}
+                              </Text>
+                            </CardBody>
+                          </Card>
+                        </GridItem>
+                      ))}
+                    </Grid>
+                  ) : (
+                    <Flex justify="center" align="center" p={4}>
+                      <Text>{t("暂无排行数据")}</Text>
+                    </Flex>
+                  )}
+                </Box>
               </Box>
             </CardBody>
           </Card>
         </VStack>
       )}
     </Container>
-  )
+  );
 }
