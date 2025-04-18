@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import {
   Box,
   Container,
@@ -33,12 +33,14 @@ import MintingForm from '@/components/token-detail/MintingForm'
 import { useSolana } from '@/contexts/solanaProvider'
 import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
 import { formatFairCurveState } from '@/web3/fairMint/utils/format'
+import { PublicKey } from '@solana/web3.js'
+import { getAssociatedTokenAddress } from '@solana/spl-token'
 
 export default function TokenMintPage() {
   const { address } = useParams()
   const dispatch = useAppDispatch()
   const { t } = useTranslation()
-  const { conn } = useSolana()
+  const { conn, wallet } = useSolana()
 
   const {
     token: selectedToken,
@@ -64,6 +66,10 @@ export default function TokenMintPage() {
   const currencyUnit = 'SOL'
   // 使用Solana网络
   const network = 'Solana'
+
+  // 添加状态
+  const [tokenAccount, setTokenAccount] = useState<string | null>(null)
+  const [tokenBalance, setTokenBalance] = useState<number | null>(null)
 
   useEffect(() => {
     // 如果 tokenList 为空，则获取列表
@@ -131,6 +137,38 @@ export default function TokenMintPage() {
     }
   }, [formattedData])
 
+  // 添加代币账户查询逻辑
+  useEffect(() => {
+    const checkTokenAccount = async () => {
+      if (!conn || !wallet?.publicKey || !selectedToken?.address) return
+
+      try {
+        const tokenMint = new PublicKey(selectedToken.address)
+        const tokenAccountAddress = await getAssociatedTokenAddress(
+          tokenMint,
+          wallet.publicKey
+        )
+
+        const account = await conn.getAccountInfo(tokenAccountAddress)
+        
+        if (account) {
+          setTokenAccount(tokenAccountAddress.toString())
+          const balance = await conn.getTokenAccountBalance(tokenAccountAddress)
+          setTokenBalance(Number(balance.value.uiAmount))
+        } else {
+          setTokenAccount(null)
+          setTokenBalance(null)
+        }
+      } catch (error) {
+        console.error('查询代币账户失败:', error)
+        setTokenAccount(null)
+        setTokenBalance(null)
+      }
+    }
+
+    checkTokenAccount()
+  }, [conn, wallet?.publicKey, selectedToken?.address])
+
   if (!conn) {
     return (
       <Center minH="60vh">
@@ -183,6 +221,11 @@ export default function TokenMintPage() {
                       <Text color="gray.500">
                         {t('tokenAddress')}: {selectedToken.address}
                       </Text>
+                      {tokenAccount && tokenBalance !== null && (
+                        <Text color="gray.500" mt={2}>
+                          {t('yourBalance')}: {tokenBalance} {selectedToken.symbol}
+                        </Text>
+                      )}
                     </Box>
 
                     <Divider />
@@ -245,6 +288,8 @@ export default function TokenMintPage() {
                         currencyUnit,
                         address: selectedToken.address,
                       }}
+                      tokenAccount={tokenAccount}
+                      tokenBalance={tokenBalance}
                     />
                   </Stack>
                 </CardBody>

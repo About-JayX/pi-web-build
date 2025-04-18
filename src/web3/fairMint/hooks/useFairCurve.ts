@@ -283,7 +283,6 @@ export function useFairCurve(
           fee: decodedData.fee,
         }
 
-      
         console.log('转换后的状态:', fairCurveState)
 
         // 格式化数据

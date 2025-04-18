@@ -65,6 +65,8 @@ interface MintingFormProps {
     currencyUnit?: string
     address: string
   }
+  tokenAccount?: string | null
+  tokenBalance?: number | null
   isOpen?: boolean
   onClose?: () => void
   isModal?: boolean
@@ -72,6 +74,8 @@ interface MintingFormProps {
 
 export default function MintingForm({
   token,
+  tokenAccount,
+  tokenBalance,
   isOpen,
   onClose,
   isModal = false,
@@ -260,15 +264,14 @@ export default function MintingForm({
     ) {
       return false
     }
-    // 检查退还代币数量是否小于等于已铸造的代币数量
-    const maxTokens = parseFloat(estimatedTokens.replace(/,/g, ''))
-    return parseFloat(refundAmount) <= maxTokens
+    // 检查退还代币数量是否小于等于实际代币余额
+    return parseFloat(refundAmount) <= (tokenBalance || 0)
   }
 
   // 快速选择退还代币百分比
   const quickSelectTokenRefundPercent = (percent: number) => {
-    const maxTokens = parseFloat(estimatedTokens.replace(/,/g, ''))
-    const calculatedAmount = (maxTokens * percent).toFixed(0)
+    if (!tokenBalance) return
+    const calculatedAmount = (tokenBalance * percent).toFixed(0)
     setRefundAmount(calculatedAmount)
   }
 
@@ -405,9 +408,12 @@ export default function MintingForm({
       return 0
     }
 
-    // 使用公式: (supplied / liquiditySol) * (solAmount * 1e9)
-    const estimatedAmount = (supplied / liquiditySol) * (solAmount * 1e9)
-    return Number(estimatedAmount.toFixed(2))
+    // SOL 精度为 9 位小数 (1e9)
+    // 1. solAmount * 1e9 将 SOL 转换为 lamports
+    // 2. supplied / liquiditySol 得到比率
+    // 3. 最终结果除以 1e9 来得到正确的代币数量
+    const estimatedAmount = (solAmount * 1e3 * supplied) / liquiditySol
+    return Number(estimatedAmount.toFixed(0))
   }
 
   // 计算手续费
@@ -685,7 +691,8 @@ export default function MintingForm({
 
   // 渲染退还标签页内容
   const renderRefundTab = () => {
-    if (mintedAmount <= 0) {
+    // 检查是否有代币余额
+    if (!tokenAccount || !tokenBalance || tokenBalance <= 0) {
       return (
         <Flex
           direction="column"
@@ -745,8 +752,8 @@ export default function MintingForm({
       )
     }
 
-    // 计算当前代币总数
-    const totalTokens = parseFloat(estimatedTokens.replace(/,/g, ''))
+    // 使用实际的代币余额
+    const totalTokens = tokenBalance
 
     return (
       <VStack
@@ -829,7 +836,7 @@ export default function MintingForm({
               <Text fontSize={{ base: 'xs', md: 'sm' }} color="gray.500">
                 {t('availableBalance')}:{' '}
                 <Text as="span" fontWeight="bold" color="gray.700">
-                  {estimatedTokens} {token.symbol}
+                  {tokenBalance} {token.symbol}
                 </Text>
               </Text>
             </Flex>
