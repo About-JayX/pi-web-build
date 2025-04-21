@@ -38,17 +38,14 @@ import {
   FaArrowDown,
   FaFileContract,
 } from 'react-icons/fa'
-import {
-  marketTokens,
-  mintingTokensPi,
-  mintingTokensSol,
-} from '@/mock'
+import { marketTokens, mintingTokensPi, mintingTokensSol } from '@/mock'
 import { useNetwork } from '@/contexts/NetworkContext'
 import MintingTokenCard from '@/components/MintingTokenCard'
 import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
 import { TokenAPI, type PlatformMetrics } from '@/api/token'
 import type { Token } from '@/api/token'
+import { BigNumber } from 'bignumber.js'
 
 // 功能特点组件
 interface FeatureProps {
@@ -425,7 +422,10 @@ export default function HomePage() {
                 textAlign="center"
                 color={useColorModeValue('green.600', 'green.300')}
               >
-                {metrics?.total_mint.toLocaleString() || 0}
+                {metrics?.total_mint
+                  ? new BigNumber(metrics.total_mint).div(1e9).toFormat(3) +
+                    ' SOL'
+                  : '0.000 SOL'}
               </Text>
             </Box>
             <Box
@@ -585,7 +585,10 @@ export default function HomePage() {
             </Text>
           </VStack>
 
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={{base:16,md:8}}>
+          <SimpleGrid
+            columns={{ base: 1, md: 3 }}
+            spacing={{ base: 16, md: 8 }}
+          >
             <Box
               bg={useColorModeValue('white', 'gray.800')}
               borderRadius="xl"
