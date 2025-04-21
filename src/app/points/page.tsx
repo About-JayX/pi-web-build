@@ -70,6 +70,7 @@ export default function PointsPage() {
   //   solana_wallet: "1234567890",
   //   telegramId: "1234567890",
   //   twitterId: "1234567890",
+  //   userId: 5,
   // };
   const [rankList, setRankList] = useState<RankItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -233,6 +234,69 @@ export default function PointsPage() {
     }
   }, [userInfo, authToken, t]);
 
+  // 渲染排行榜
+  const RenderRankList = ({
+    rank = 0,
+    nickname,
+    token,
+    avatar_url,
+  }: RankItem) => {
+    return (
+      <GridItem
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        gap={2}
+      >
+        <Avatar
+          name={nickname}
+          src={avatar_url}
+          w={
+            rank === 1
+              ? { base: "80px", sm: "110px" }
+              : { base: "60px", sm: "90px" }
+          }
+          h={
+            rank === 1
+              ? { base: "80px", sm: "110px" }
+              : { base: "60px", sm: "90px" }
+          }
+        />
+        <Center
+          boxSize={{ base: "26px", sm: "30px" }}
+          bg={
+            rank === 1
+              ? "yellow.400"
+              : rank === 2
+              ? "gray.300"
+              : rank === 3
+              ? "orange.300"
+              : "gray.300"
+          }
+          borderRadius="full"
+          color="white"
+          fontWeight="bold"
+          mt={{ base: "-26px", sm: "-30px" }}
+          zIndex={1}
+        >
+          {rank}
+        </Center>
+        <Text
+          fontSize="sm"
+          fontFamily="mono"
+          fontWeight="medium"
+          mt={-1.5}
+          maxW={{ base: "90px", sm: "100px" }}
+          className="ellipsis"
+        >
+          {nickname || <span style={{ opacity: 0 }}>-</span>}
+        </Text>
+        <Text fontWeight="bold" color="gray.600" mt={-2}>
+          {token ? Number(token).toLocaleString() : <span style={{ opacity: 0 }}>-</span>}
+        </Text>
+      </GridItem>
+    );
+  };
   return (
     <Container maxW="container.xl" py={8}>
       {!userInfo ? (
@@ -818,252 +882,131 @@ export default function PointsPage() {
                     m={0}
                   >
                     {/* 第二名 */}
-                    <GridItem
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="center"
-                      gap={2}
-                    >
-                      <Avatar
-                        name="A"
-                        src=""
-                        w={{ base: "60px", sm: "90px" }}
-                        h={{ base: "60px", sm: "90px" }}
-                      />
-                      <Center
-                        boxSize={{ base: "26px", sm: "30px" }}
-                        bg="gray.300"
-                        borderRadius="full"
-                        color="white"
-                        fontWeight="bold"
-                        mt={{ base: "-26px", sm: "-30px" }}
-                        zIndex={1}
-                      >
-                        2
-                      </Center>
-                      <Text
-                        fontSize="sm"
-                        fontFamily="mono"
-                        fontWeight="medium"
-                        mt={-1.5}
-                        maxW={{ base: "90px", sm: "100px" }}
-                        className="ellipsis"
-                      >
-                        CryptoKing
-                      </Text>
-                      <Text fontWeight="bold" color="gray.600" mt={-2}>
-                        3,850
-                      </Text>
-                    </GridItem>
+                    <RenderRankList
+                      {...rankList.filter((item) => item.rank === 2)[0]}
+                      rank={2}
+                    />
                     {/* 第一名 */}
-                    <GridItem
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="center"
-                      gap={2}
-                    >
-                      <Avatar
-                        name="B"
-                        src=""
-                        w={{ base: "80px", sm: "110px" }}
-                        h={{ base: "80px", sm: "110px" }}
-                      ></Avatar>
-                      <Center
-                        boxSize={{ base: "26px", sm: "30px" }}
-                        bg="yellow.400"
-                        borderRadius="full"
-                        color="white"
-                        fontWeight="bold"
-                        mt={{ base: "-26px", sm: "-30px" }}
-                        zIndex={1}
-                      >
-                        1
-                      </Center>
-                      <Text
-                        fontSize="sm"
-                        fontFamily="mono"
-                        fontWeight="medium"
-                        mt={-1.5}
-                        maxW={{ base: "100px", sm: "120px" }}
-                        className="ellipsis"
-                      >
-                        BlockchainMaster
-                      </Text>
-                      <Text fontWeight="bold" color="gray.600" mt={-2}>
-                        3,850
-                      </Text>
-                    </GridItem>
+                    <RenderRankList
+                      {...rankList.filter((item) => item.rank === 1)[0]}
+                      rank={1}
+                    />
                     {/* 第三名 */}
-                    <GridItem
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="center"
-                      gap={2}
-                    >
-                      <Avatar
-                        name="wca"
-                        src=""
-                        w={{ base: "60px", sm: "90px" }}
-                        h={{ base: "60px", sm: "90px" }}
-                      />
-                      <Center
-                        boxSize={{ base: "26px", sm: "30px" }}
-                        bg="orange.300"
-                        borderRadius="full"
-                        color="white"
-                        fontWeight="bold"
-                        mt={{ base: "-26px", sm: "-30px" }}
-                        zIndex={1}
-                      >
-                        3
-                      </Center>
-                      <Text
-                        fontSize="sm"
-                        fontFamily="mono"
-                        fontWeight="medium"
-                        mt={-1.5}
-                        maxW={{ base: "90px", sm: "100px" }}
-                        className="ellipsis"
-                      >
-                        PiLover
-                      </Text>
-                      <Text fontWeight="bold" color="gray.600" mt={-2}>
-                        3,850
-                      </Text>
-                    </GridItem>
+                    <RenderRankList
+                      {...rankList.filter((item) => item.rank === 3)[0]}
+                      rank={3}
+                    />
                   </Grid>
                 </Flex>
                 {/* 排行榜 */}
                 <Box overflowX="auto">
-                  {isLoading ? (
-                    <Flex justify="center" align="center" p={4}>
-                      <Text>{t("加载中...")}</Text>
-                    </Flex>
-                  ) : error ? (
-                    <Flex justify="center" align="center" p={4}>
-                      <Text color="red.500">{error}</Text>
-                    </Flex>
-                  ) : rankList && rankList.length > 0 ? (
-                    <Grid p={{ base: 4, sm: 0 }} py={6}>
-                      {rankList.map((entry) => (
-                        <GridItem key={entry.userId} py={2}>
-                          <Card
-                            p={4}
-                            transition="transform 0.3s"
-                            _hover={{ transform: "translateY(-5px)" }}
+                  <Grid p={{ base: 4, sm: 0 }} py={6}>
+                    {rankList.slice(2, rankList.length).map((entry) => (
+                      <GridItem key={entry.userId} py={2}>
+                        <Card
+                          p={4}
+                          transition="transform 0.3s"
+                          _hover={{ transform: "translateY(-5px)" }}
+                        >
+                          <CardBody
+                            display="flex"
+                            alignItems="center"
+                            p={0}
+                            gap={{ base: 1, md: 2 }}
                           >
-                            <CardBody
-                              display="flex"
-                              alignItems="center"
-                              p={0}
-                              gap={2}
-                            >
-                              <Text
-                                w={4}
-                                fontSize={{ base: "sm", sm: "md" }}
-                                fontWeight={
-                                  entry.userId === userInfo?.userId
-                                    ? "bold"
-                                    : "normal"
-                                }
-                              >
-                                {entry.rank}
-                              </Text>
-                              <HStack w={{ base: "auto", md: 160 }}>
-                                <Avatar
-                                  size="sm"
-                                  name={entry.nickname}
-                                  src={entry.avatar_url}
-                                />
-                                <Grid gap={0}>
-                                  <GridItem>
-                                    <Text
-                                      fontWeight={
-                                        entry.userId === userInfo?.userId
-                                          ? "bold"
-                                          : "normal"
-                                      }
-                                    >
-                                      {entry.nickname}
-                                      {entry.userId === userInfo?.userId && (
-                                        <Text
-                                          as="span"
-                                          fontSize="xs"
-                                          color={accentColor}
-                                        >
-                                          ({t("you")})
-                                        </Text>
-                                      )}
-                                    </Text>
-                                  </GridItem>
-                                  <GridItem
-                                    display={{ base: "flex", md: "none" }}
+                            <Text w={4} fontSize={{ base: "sm", sm: "md" }}>
+                              {entry.rank}
+                            </Text>
+                            <HStack w={{ base: "auto", md: 160 }}>
+                              <Avatar
+                                size="sm"
+                                name={entry.nickname}
+                                src={entry.avatar_url}
+                              />
+                              <Grid gap={0}>
+                                <GridItem>
+                                  <Text
+                                    fontWeight={
+                                      entry.userId === userInfo?.userId
+                                        ? "bold"
+                                        : "normal"
+                                    }
                                   >
-                                    <HStack>
-                                      <Icon
-                                        as={FaWallet}
-                                        color="gray.500"
-                                        boxSize={3}
-                                      />
+                                    {entry.nickname}
+                                    {entry.userId === userInfo?.userId && (
                                       <Text
-                                        fontSize="sm"
-                                        fontFamily="mono"
-                                        fontWeight="medium"
+                                        as="span"
+                                        fontSize="xs"
+                                        color={accentColor}
                                       >
-                                        {entry.solana_wallet
-                                          ? formatSolAddress(
-                                              entry.solana_wallet,
-                                              4
-                                            )
-                                          : "-"}
+                                        ({t("you")})
                                       </Text>
-                                    </HStack>
-                                  </GridItem>
-                                </Grid>
-                              </HStack>
-                              <HStack display={{ base: "none", md: "flex" }}>
-                                <Icon
-                                  as={FaWallet}
-                                  color="gray.500"
-                                  boxSize={3}
-                                />
-                                <Text
-                                  fontSize="sm"
-                                  fontFamily="mono"
-                                  fontWeight="medium"
+                                    )}
+                                  </Text>
+                                </GridItem>
+                                <GridItem
+                                  display={{ base: "flex", md: "none" }}
                                 >
-                                  {entry.solana_wallet
-                                    ? formatSolAddress(entry.solana_wallet, 4)
-                                    : "-"}
-                                </Text>
-                              </HStack>
-                              <HStack flex={1} />
+                                  <HStack>
+                                    <Icon
+                                      as={FaWallet}
+                                      color="gray.500"
+                                      boxSize={3}
+                                    />
+                                    <Text
+                                      fontSize="sm"
+                                      fontFamily="mono"
+                                      fontWeight="medium"
+                                    >
+                                      {entry.solana_wallet
+                                        ? formatSolAddress(
+                                            entry.solana_wallet,
+                                            3
+                                          )
+                                        : "-"}
+                                    </Text>
+                                  </HStack>
+                                </GridItem>
+                              </Grid>
+                            </HStack>
+                            <HStack display={{ base: "none", md: "flex" }}>
+                              <Icon
+                                as={FaWallet}
+                                color="gray.500"
+                                boxSize={3}
+                              />
                               <Text
-                                color={
-                                  entry.userId === userInfo?.userId
-                                    ? accentColor
-                                    : "gray.600"
-                                }
-                                fontWeight="bold"
-                                _dark={{
-                                  color:
-                                    entry.userId === userInfo?.userId
-                                      ? "purple.300"
-                                      : "gray.300",
-                                }}
+                                fontSize="sm"
+                                fontFamily="mono"
+                                fontWeight="medium"
                               >
-                                {Number(entry.token).toLocaleString()}
+                                {entry.solana_wallet
+                                  ? formatSolAddress(entry.solana_wallet, 4)
+                                  : "-"}
                               </Text>
-                            </CardBody>
-                          </Card>
-                        </GridItem>
-                      ))}
-                    </Grid>
-                  ) : (
-                    <Flex justify="center" align="center" p={4}>
-                      <Text>{t("暂无排行数据")}</Text>
-                    </Flex>
-                  )}
+                            </HStack>
+                            <HStack flex={1} />
+                            <Text
+                              color={
+                                entry.userId === userInfo?.userId
+                                  ? accentColor
+                                  : "gray.600"
+                              }
+                              fontWeight="bold"
+                              _dark={{
+                                color:
+                                  entry.userId === userInfo?.userId
+                                    ? "purple.300"
+                                    : "gray.300",
+                              }}
+                            >
+                              {Number(entry.token).toLocaleString()}
+                            </Text>
+                          </CardBody>
+                        </Card>
+                      </GridItem>
+                    ))}
+                  </Grid>
                 </Box>
               </Box>
             </CardBody>
