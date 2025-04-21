@@ -901,7 +901,7 @@ export default function PointsPage() {
                 {/* 排行榜 */}
                 <Box overflowX="auto">
                   <Grid p={{ base: 4, sm: 0 }} py={6}>
-                    {rankList.slice(2, rankList.length).map((entry) => (
+                    {rankList.slice(3, rankList.length).map((entry) => (
                       <GridItem key={entry.userId} py={2}>
                         <Card
                           p={4}
