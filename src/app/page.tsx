@@ -585,7 +585,7 @@ export default function HomePage() {
             </Text>
           </VStack>
 
-          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8}>
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={{base:16,md:8}}>
             <Box
               bg={useColorModeValue('white', 'gray.800')}
               borderRadius="xl"
