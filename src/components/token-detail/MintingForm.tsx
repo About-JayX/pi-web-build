@@ -199,7 +199,10 @@ export default function MintingForm({
 
   // 获取最新余额的函数
   const updateBalances = async () => {
-    if (!conn || !publicKey) return
+    if (!conn || !publicKey) {
+      console.error('Connection or public key not available')
+      return
+    }
 
     try {
       // 更新 SOL 余额
@@ -207,13 +210,12 @@ export default function MintingForm({
       const balance = await conn.getBalance(pubKey)
       setWalletBalance(balance)
 
-      // 更新代币余额（如果有 tokenAccount）
+      // 更新代币余额
       if (tokenAccount) {
         const tokenAccountPubkey = new PublicKey(tokenAccount)
-        const tokenAccountInfo = await conn.getTokenAccountBalance(
-          tokenAccountPubkey
-        )
+        const tokenAccountInfo = await conn.getTokenAccountBalance(tokenAccountPubkey)
         const newBalance = tokenAccountInfo.value.uiAmount || 0
+        
         // 通过 props 更新父组件的 tokenBalance
         if (onBalanceUpdate) {
           onBalanceUpdate(newBalance)
@@ -226,6 +228,10 @@ export default function MintingForm({
 
   // 修改铸造提交
   const handleSubmit = async () => {
+    if (!isAmountValid || !amount || !fairCurveData) {
+      return
+    }
+
     try {
       if (!conn || !publicKey) {
         toast({
@@ -251,14 +257,13 @@ export default function MintingForm({
       // 调用真实的mintToken函数，传入SOL金额（转换为lamports）和token地址
       await mintToken(mintAmount * 1e9, token.address)
 
-      // 等待一段时间后更新余额，确保交易已经确认
+      // 等待交易确认后更新余额
       setTimeout(async () => {
         await updateBalances()
       }, 2000)
 
-      const amountFormatted = Math.floor(
-        parseFloat(getEstimatedTokens(amount))
-      ).toLocaleString()
+      // 显示成功提示
+      const amountFormatted = Math.floor(parseFloat(getEstimatedTokens(amount))).toLocaleString()
       const descMessage = t('receivedTokens')
         .replace('{amount}', amountFormatted)
         .replace('{symbol}', token.symbol)
@@ -272,6 +277,7 @@ export default function MintingForm({
         position: 'top',
       })
 
+      // 重置输入金额
       setAmount('')
     } catch (error) {
       console.error('铸造失败:', error)
@@ -418,29 +424,9 @@ export default function MintingForm({
       await returnToken(token.address, tokenRefundValue, feeAccountAddress)
 
       // 等待交易确认后更新余额
-      try {
-        // 等待一段时间确保交易已确认
-        await new Promise(resolve => setTimeout(resolve, 2000))
-
-        // 更新 SOL 余额
-        const pubKey = new PublicKey(publicKey)
-        const balance = await conn.getBalance(pubKey)
-        setWalletBalance(balance)
-
-        // 更新代币余额
-        const tokenAccountPubkey = new PublicKey(tokenAccount)
-        const tokenAccountInfo = await conn.getTokenAccountBalance(
-          tokenAccountPubkey
-        )
-        const newBalance = tokenAccountInfo.value.uiAmount || 0
-
-        // 通过 props 更新父组件的 tokenBalance
-        if (onBalanceUpdate) {
-          onBalanceUpdate(newBalance)
-        }
-      } catch (error) {
-        console.error('更新余额失败:', error)
-      }
+      setTimeout(async () => {
+        await updateBalances()
+      }, 2000)
 
       // 显示成功消息
       const refundAmountFormatted = Math.floor(

@@ -71,6 +71,7 @@ interface MintToken {
   presaleRate: string
   created_at: string
   deployedAt?: number
+  logo?: string
 }
 
 // 排序指示器组件
@@ -712,8 +713,14 @@ export default function MintPage() {
       )
     }
 
+    // 处理token列表
+    const processedTokens = tokens.map(token => ({
+      ...token,
+      image: token.logo || '/token-logo.png', // 使用token中的logo，如果没有则使用默认图片
+    }))
+
     // 先过滤搜索结果
-    const filteredTokens = filterTokensBySearch(tokens)
+    const filteredTokens = filterTokensBySearch(processedTokens)
 
     // 显示空结果状态
     if (filteredTokens.length === 0) {
