@@ -46,13 +46,16 @@ import {
   FaChevronRight,
 } from 'react-icons/fa'
 import NextLink from 'next/link'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import { useRouter } from 'next/navigation'
 import { useNetwork } from '@/contexts/NetworkContext'
 import MintingTokenCard from '@/components/MintingTokenCard'
 import { useTranslation } from 'react-i18next'
 import { useAppSelector } from '@/store/hooks'
+import axios from '@/config/axios'
+import { store } from '@/store'
+import { fetchTokenList } from '@/store/slices/tokenSlice'
 
 interface MintToken {
   id: number
@@ -540,31 +543,83 @@ function PaginationControl({
 }
 
 export default function MintPage() {
-  const { tokenList } = useAppSelector(state => state.token)
+  const { tokenList, loading } = useAppSelector(state => state.token)
   const { network } = useNetwork()
   const { t } = useTranslation()
 
-  const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
-    if (typeof window !== 'undefined') {
-      return (
-        (localStorage.getItem('mint_view_mode') as 'card' | 'list') || 'card'
-      )
-    }
-    return 'card'
-  })
-
-  const [tabIndex, setTabIndex] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return parseInt(localStorage.getItem('mint_tab_index') || '0', 10)
-    }
-    return 0
-  })
-
-  const [sortColumn, setSortColumn] = useState('created_at')
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
-  const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(12)
+  const [tabIndex, setTabIndex] = useState(0)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card')
+  const [sortColumn, setSortColumn] = useState('created_at')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+
+  // 获取token列表
+  const getTokenList = async () => {
+    try {
+      const sortField =
+        tabIndex === 0 ? 'progress' : tabIndex === 1 ? 'token_id' : 'created_at'
+      await store.dispatch(
+        fetchTokenList({
+          page: currentPage,
+          limit: pageSize,
+          sort: sortField,
+        })
+      )
+    } catch (error) {
+      console.error('获取代币列表失败:', error)
+    }
+  }
+
+  // 处理页码变化
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage)
+    getTokenList()
+    // 滚动到页面顶部以便看到新内容
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // 处理每页显示数量变化
+  const handlePageSizeChange = (newSize: number) => {
+    // 调整当前页以保持项目连续性
+    const firstItemIndex = (currentPage - 1) * pageSize
+    const newCurrentPage = Math.floor(firstItemIndex / newSize) + 1
+
+    setPageSize(newSize)
+    setCurrentPage(newCurrentPage)
+    getTokenList()
+  }
+
+  // 切换tab时重置页码并获取数据
+  useEffect(() => {
+    setCurrentPage(1)
+    const sortField =
+      tabIndex === 0 ? 'progress' : tabIndex === 1 ? 'token_id' : 'created_at'
+    store.dispatch(
+      fetchTokenList({
+        page: 1,
+        limit: pageSize,
+        sort: sortField,
+      })
+    )
+  }, [tabIndex, pageSize])
+
+  // 监听页码变化获取数据
+  useEffect(() => {
+    if (currentPage !== 1) {
+      // 避免和tab切换时的重置冲突
+      const sortField =
+        tabIndex === 0 ? 'progress' : tabIndex === 1 ? 'token_id' : 'created_at'
+      store.dispatch(
+        fetchTokenList({
+          page: currentPage,
+          limit: pageSize,
+          sort: sortField,
+        })
+      )
+    }
+  }, [currentPage, pageSize, tabIndex])
 
   // 设置当前网络的计价单位
   const currencyUnit = useMemo(() => {
@@ -640,38 +695,28 @@ export default function MintPage() {
     return tokens.slice(startIndex, startIndex + pageSize)
   }
 
-  // 处理页码变化
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage)
-    // 滚动到页面顶部以便看到新内容
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  // 处理每页显示数量变化
-  const handlePageSizeChange = (newSize: number) => {
-    // 调整当前页以保持项目连续性
-    const firstItemIndex = (currentPage - 1) * pageSize
-    const newCurrentPage = Math.floor(firstItemIndex / newSize) + 1
-
-    setPageSize(newSize)
-    setCurrentPage(newCurrentPage)
-  }
-
   // 当筛选或排序条件变化时，重置为第一页
   useEffect(() => {
     setCurrentPage(1)
   }, [sortColumn, sortDirection, searchQuery])
 
   const renderTabContent = (tokens: MintToken[]) => {
-    // 先过滤搜索结果，再排序
-    const filteredTokens = filterTokensBySearch(tokens)
-    const sortedTokens = getSortedTokens(filteredTokens)
+    // 显示加载状态
+    if (loading) {
+      return (
+        <Box py={10} textAlign="center">
+          <Text color="gray.500" fontSize="lg">
+            {t('loading')}
+          </Text>
+        </Box>
+      )
+    }
 
-    // 计算总页数
-    const totalPages = Math.ceil(sortedTokens.length / pageSize)
+    // 先过滤搜索结果
+    const filteredTokens = filterTokensBySearch(tokens)
 
     // 显示空结果状态
-    if (sortedTokens.length === 0) {
+    if (filteredTokens.length === 0) {
       return (
         <Box py={10} textAlign="center">
           <Text color="gray.500" fontSize="lg">
@@ -691,9 +736,6 @@ export default function MintPage() {
       )
     }
 
-    // 根据当前页码和每页显示数量来分页
-    const paginatedTokens = paginateTokens(sortedTokens)
-
     return (
       <>
         {viewMode === 'card' ? (
@@ -701,7 +743,7 @@ export default function MintPage() {
             columns={{ base: 1, md: 2, lg: 4, xl: 4 }}
             spacing={{ base: 6, md: 5, lg: 4 }}
           >
-            {paginatedTokens.map(token => (
+            {filteredTokens.map(token => (
               <MintingTokenCard
                 key={token.id}
                 token={token}
@@ -711,23 +753,20 @@ export default function MintPage() {
           </SimpleGrid>
         ) : (
           <TokenListView
-            tokens={paginatedTokens}
+            tokens={filteredTokens}
             sortColumn={sortColumn}
             sortDirection={sortDirection}
             onSort={handleSort}
           />
         )}
 
-        {/* 分页控制器 */}
-        {totalPages > 1 && (
-          <PaginationControl
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            pageSize={pageSize}
-            onPageSizeChange={handlePageSizeChange}
-          />
-        )}
+        <PaginationControl
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredTokens.length / pageSize)}
+          onPageChange={handlePageChange}
+          pageSize={pageSize}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </>
     )
   }

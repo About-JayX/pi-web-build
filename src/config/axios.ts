@@ -3,7 +3,7 @@ import { store } from '@/store'
 
 // 创建主实例 (fair mint)
 const fairMintInstance = axios.create({
-  baseURL: '/api', //  https://fairmint.piweb3.xyz/api
+  baseURL: 'https://fairmint.piweb3.xyz/api', //  https://fairmint.piweb3.xyz/api
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
