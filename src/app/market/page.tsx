@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   Container,
@@ -21,7 +21,6 @@ import {
   Td,
   TableContainer,
   useColorModeValue,
-  Badge,
   Image,
   Flex,
   Icon,
@@ -30,37 +29,20 @@ import {
   TabPanels,
   Tab,
   TabPanel,
-  StatArrow,
-  Divider,
-  Card,
-  CardBody,
   Stack,
   ButtonGroup,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  Avatar,
-  VStack,
   useToast,
   Center,
   Select,
   IconButton,
 } from "@chakra-ui/react";
-import {
-  SearchIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "@chakra-ui/icons";
+import { SearchIcon, ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import {
   FaFire,
   FaChartLine,
   FaArrowUp,
   FaArrowDown,
   FaSort,
-  FaSearch,
   FaGlobe,
   FaTwitter,
   FaTelegram,
@@ -71,8 +53,12 @@ import {
   FaChevronRight,
 } from "react-icons/fa";
 import NextLink from "next/link";
-import { marketTokens, marketOverview } from "@/mock";
+// import { marketTokens } from "@/mock";
 import { useTranslation } from "react-i18next";
+import { MarketAPI } from "@/api";
+import { formatNumberWithUnit } from "@/utils";
+import { MarketDetailType } from "./[address]/page";
+import Link from "next/link";
 
 // 排序指示器组件
 function SortIndicator({
@@ -163,23 +149,51 @@ function TokenListView({
   };
 
   // 复制合约地址
-  const copyContractAddress = (address: string) => {
-    if (address) {
+  function copyContractAddress(address: string) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard
         .writeText(address)
-        .then(() =>
+        .then(() => {
           toast({
             title: t("copySuccess"),
-            description: t("copyAddressSuccess"),
             status: "success",
             duration: 2000,
-            isClosable: true,
-            position: "top",
-          })
-        )
-        .catch((err) => console.error(t("failed"), err));
+          });
+        })
+        .catch((error) => {
+          console.error("复制失败:", error);
+          toast({
+            title: t("copyFailed"),
+            description: t("pleaseTryAgain"),
+            status: "error",
+            duration: 2000,
+          });
+        });
+    } else {
+      // 回退方案：使用旧的 document.execCommand('copy') 方法
+      const textarea = document.createElement("textarea");
+      textarea.value = address;
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand("copy");
+        toast({
+          title: t("copySuccess"),
+          status: "success",
+          duration: 2000,
+        });
+      } catch (error) {
+        console.error("复制失败:", error);
+        toast({
+          title: t("copyFailed"),
+          description: t("pleaseTryAgain"),
+          status: "error",
+          duration: 2000,
+        });
+      }
+      document.body.removeChild(textarea);
     }
-  };
+  }
 
   // 分享功能处理
   const handleShare = (token: any) => {
@@ -253,8 +267,8 @@ function TokenListView({
               <Td>
                 <HStack spacing={2} align="center">
                   <Image
-                    src={token.image}
-                    alt={token.name}
+                    src={token.Logo}
+                    alt={token.Name}
                     boxSize="40px"
                     borderRadius="full"
                     objectFit="cover"
@@ -268,7 +282,7 @@ function TokenListView({
                       color="brand.primary"
                       lineHeight="1.2"
                     >
-                      {token.symbol}
+                      {token.Ticker}
                     </Text>
                     <Text
                       fontSize="xs"
@@ -277,37 +291,51 @@ function TokenListView({
                       noOfLines={1}
                       maxW="150px"
                     >
-                      {token.name}
+                      {token.Name}
                     </Text>
                   </Box>
                 </HStack>
               </Td>
               <Td isNumeric fontWeight="bold">
-                $ {token.price}
+                $ {token.Price}
               </Td>
               <Td isNumeric>
                 <Flex justify="flex-end">
                   <Text
                     fontWeight="bold"
-                    color={token.change24hValue > 0 ? "green.500" : "red.500"}
+                    color={
+                      Number(token.PriceChange_24 || 0) > 0
+                        ? "green.500"
+                        : "red.500"
+                    }
                   >
                     <Icon
-                      as={token.change24hValue > 0 ? FaArrowUp : FaArrowDown}
+                      as={
+                        Number(token.PriceChange_24 || 0) > 0
+                          ? FaArrowUp
+                          : FaArrowDown
+                      }
                       boxSize="12px"
                       mr={1}
                     />
-                    {Math.abs(token.change24hValue)}%
+                    {Math.abs(Number(token.PriceChange_24 || 0))}%
                   </Text>
                 </Flex>
               </Td>
-              <Td isNumeric>$ {token.marketCap}</Td>
-              <Td isNumeric>{token.totalSupply}</Td>
-              <Td isNumeric>$ {token.volume24h}</Td>
               <Td isNumeric>
-                {token.contractAddress && (
+                $ {Number(token.MarketCap || 0).toLocaleString()}
+              </Td>
+              <Td isNumeric>
+                {formatNumberWithUnit(Number(token.TotalSupply || 0))}
+              </Td>
+              <Td isNumeric>
+                $ {Number(token.Volume_24 || 0).toLocaleString()}
+              </Td>
+              <Td isNumeric>
+                {token.Address && (
                   <Box
                     as="button"
-                    onClick={() => copyContractAddress(token.contractAddress)}
+                    onClick={() => copyContractAddress(token.Address)}
                     display="flex"
                     alignItems="center"
                     justifyContent="flex-end"
@@ -330,16 +358,16 @@ function TokenListView({
                     title={t("clickToCopyFullAddress")}
                   >
                     <Icon as={FaFileContract} mr={1} fontSize="10px" />
-                    {formatContractAddress(token.contractAddress)}
+                    {formatContractAddress(token.Address)}
                   </Box>
                 )}
               </Td>
               <Td isNumeric>
                 <HStack spacing={3} justify="flex-end">
-                  {token.website && (
+                  {token.WebSite && (
                     <Box
                       as="a"
-                      href={token.website}
+                      href={token.WebSite}
                       target="_blank"
                       rel="noopener noreferrer"
                       color={iconColor}
@@ -349,10 +377,10 @@ function TokenListView({
                       <Icon as={FaGlobe} boxSize="16px" />
                     </Box>
                   )}
-                  {token.twitter && (
+                  {token.Twitter && (
                     <Box
                       as="a"
-                      href={token.twitter}
+                      href={token.Twitter}
                       target="_blank"
                       rel="noopener noreferrer"
                       color={iconColor}
@@ -362,10 +390,10 @@ function TokenListView({
                       <Icon as={FaTwitter} boxSize="16px" />
                     </Box>
                   )}
-                  {token.telegram && (
+                  {token.Telegram && (
                     <Box
                       as="a"
-                      href={token.telegram}
+                      href={token.Telegram}
                       target="_blank"
                       rel="noopener noreferrer"
                       color={iconColor}
@@ -387,16 +415,26 @@ function TokenListView({
                 </HStack>
               </Td>
               <Td>
-                <Button
-                  as={NextLink}
-                  href={`/market/${token.contractAddress}`}
-                  colorScheme="purple"
-                  size="sm"
-                  bg="brand.primary"
-                  _hover={{ bg: "brand.light" }}
+                <Link
+                  href={{
+                    pathname: `/market/${token.Address}`,
+                  }}
+                  onClick={() => {
+                    localStorage.removeItem("MarketDetail");
+                    localStorage.setItem("MarketDetail", JSON.stringify(token));
+                  }}
                 >
-                  {t("detail")}
-                </Button>
+                  <Button
+                    // as={NextLink}
+                    // href={`/market/${token.Address}`}
+                    colorScheme="purple"
+                    size="sm"
+                    bg="brand.primary"
+                    _hover={{ bg: "brand.light" }}
+                  >
+                    {t("detail")}
+                  </Button>
+                </Link>
               </Td>
             </Tr>
           ))}
@@ -483,22 +521,28 @@ function PaginationControl({
   );
 }
 
-export default function MarketPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+export const MarketTokenList = ({
+  type = "Volume_24",
+  searchTerm = "",
+}: {
+  type: "Volume_24" | "Deployed" | "all";
+  searchTerm?: string;
+}) => {
+  const { t } = useTranslation();
+  const { getMarketList } = MarketAPI;
+  const [tokens, setTokens] = useState<[]>([]);
+  const [totalPages, setTotalPages] = useState(0);
   const [sortColumn, setSortColumn] = useState("marketCap");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   // 分页相关状态
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const { t } = useTranslation();
 
   const handleSort = (column: string) => {
     const newDirection =
       sortColumn === column && sortDirection === "desc" ? "asc" : "desc";
     setSortColumn(column);
     setSortDirection(newDirection);
-    // 排序时重置到第一页
-    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
@@ -517,55 +561,101 @@ export default function MarketPage() {
     setCurrentPage(newCurrentPage);
   };
 
-  const filteredTokens = marketTokens.filter(
-    (token) =>
-      token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (token.contractAddress &&
-        token.contractAddress.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const getMarketListData = async () => {
+    const res = await getMarketList({
+      orderBy: type,
+      page: currentPage,
+      pageSize,
+      search: searchTerm,
+    });
 
-  const sortedTokens = [...filteredTokens].sort((a, b) => {
-    const aValue = String(a[sortColumn as keyof typeof a]);
-    const bValue = String(b[sortColumn as keyof typeof b]);
+    setTokens(res.data.data);
+    setTotalPages(res.data.total);
+  };
 
-    // 处理百分比字符串
-    if (sortColumn === "change24h") {
-      const aNum = parseFloat(aValue.replace("%", ""));
-      const bNum = parseFloat(bValue.replace("%", ""));
-      return sortDirection === "asc" ? aNum - bNum : bNum - aNum;
-    }
-
-    // 处理带逗号的数字字符串
-    if (["marketCap", "volume24h"].includes(sortColumn)) {
-      const aNum = parseFloat(aValue.replace(/[^0-9.-]+/g, ""));
-      const bNum = parseFloat(bValue.replace(/[^0-9.-]+/g, ""));
-      return sortDirection === "asc" ? aNum - bNum : bNum - aNum;
-    }
-
-    return sortDirection === "asc"
-      ? aValue.localeCompare(bValue)
-      : bValue.localeCompare(aValue);
-  });
-
-  // 计算总页数
-  const totalPages = Math.ceil(sortedTokens.length / pageSize);
-
-  // 分页后的代币数据
-  const paginatedTokens = sortedTokens.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
-
-  // 当搜索结果改变时，如果当前页已经超出了总页数，则回到第一页
-  if (currentPage > totalPages && totalPages > 0) {
-    setCurrentPage(1);
-  }
+  useEffect(() => {
+    getMarketListData();
+  }, [searchTerm, currentPage, pageSize]);
 
   // 搜索、排序条件变化时重置为第一页
   useEffect(() => {
     setCurrentPage(1);
   }, [sortColumn, sortDirection, searchTerm]);
+
+  const sortedTokens = useMemo(() => {
+    const fieldMap: { [key: string]: string } = {
+      price: "Price",
+      change24hValue: "PriceChange_24",
+      marketCap: "MarketCap",
+      totalSupply: "TotalSupply",
+      volume24h: "Volume_24",
+    };
+
+    return [...tokens].sort((a, b) => {
+      const field = fieldMap[sortColumn] || sortColumn;
+      const aValue = Number(a[field] || 0);
+      const bValue = Number(b[field] || 0);
+      return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+    });
+  }, [tokens, sortColumn, sortDirection]);
+
+  return (
+    <TabPanel key={type} p={0}>
+      <TokenListView
+        tokens={sortedTokens}
+        sortColumn={sortColumn}
+        sortDirection={sortDirection}
+        onSort={handleSort}
+      />
+      {/* 分页控制 */}
+      {totalPages > 1 && (
+        <PaginationControl
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          pageSize={pageSize}
+          onPageSizeChange={handlePageSizeChange}
+        />
+      )}
+      {/* 显示结果信息 */}
+      <Center mt={4} mb={4}>
+        <Text fontSize="sm" color="gray.500">
+          {t("totalResults").replace("{count}", totalPages.toString() || "0")}
+        </Text>
+      </Center>
+    </TabPanel>
+  );
+};
+
+export default function MarketPage() {
+  const { getTokenData } = MarketAPI;
+
+  // 市场概览数据
+  const [marketOverview, setMarketOverview] = useState<{
+    total: number;
+    totalMarketCap: number;
+    totalVolume24: number;
+  }>({
+    total: 0,
+    totalMarketCap: 0,
+    totalVolume24: 0,
+  });
+
+  // 搜索相关状态
+  const [searchTerm, setSearchTerm] = useState("");
+  // 分页相关状态
+  const { t } = useTranslation();
+
+  // 获取市场概览数据
+  const getMarketOverview = async () => {
+    const res = await getTokenData();
+    setMarketOverview(res.data);
+  };
+
+  // 初始化获取市场概览数据
+  useEffect(() => {
+    getMarketOverview();
+  }, []);
 
   return (
     <Box>
@@ -651,7 +741,7 @@ export default function MarketPage() {
               fontWeight="bold"
               color={useColorModeValue("blue.600", "blue.300")}
             >
-              {marketOverview.totalTokens}
+              {formatNumberWithUnit(Number(marketOverview.total || 0))}
             </Text>
           </Box>
 
@@ -710,7 +800,8 @@ export default function MarketPage() {
               fontWeight="bold"
               color={useColorModeValue("green.600", "green.300")}
             >
-              $ {marketOverview.totalMarketCap}
+              ${" "}
+              {formatNumberWithUnit(Number(marketOverview.totalMarketCap || 0))}
             </Text>
           </Box>
 
@@ -769,7 +860,8 @@ export default function MarketPage() {
               fontWeight="bold"
               color={useColorModeValue("orange.600", "orange.300")}
             >
-              $ {marketOverview.totalVolume24h}
+              ${" "}
+              {formatNumberWithUnit(Number(marketOverview.totalVolume24 || 0))}
             </Text>
           </Box>
         </SimpleGrid>
@@ -815,7 +907,7 @@ export default function MarketPage() {
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
                   // 在搜索时重置到第一页
-                  setCurrentPage(1);
+                  // setCurrentPage(1);
                 }}
               />
               {searchTerm && (
@@ -825,7 +917,7 @@ export default function MarketPage() {
                     onClick={() => {
                       setSearchTerm("");
                       // 清空搜索时重置到第一页
-                      setCurrentPage(1);
+                      // setCurrentPage(1);
                     }}
                     variant="ghost"
                   >
@@ -837,70 +929,9 @@ export default function MarketPage() {
           </Flex>
 
           <TabPanels>
-            {/* 市值排行 */}
-            <TabPanel px={0}>
-              <TokenListView
-                tokens={paginatedTokens}
-                sortColumn={sortColumn}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-
-              {/* 分页控制 */}
-              {totalPages > 1 && (
-                <PaginationControl
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                  pageSize={pageSize}
-                  onPageSizeChange={handlePageSizeChange}
-                />
-              )}
-
-              {/* 显示结果信息 */}
-              <Center mt={4} mb={4}>
-                <Text fontSize="sm" color="gray.500">
-                  {t("totalResults").replace(
-                    "{count}",
-                    filteredTokens.length.toString()
-                  )}
-                </Text>
-              </Center>
-            </TabPanel>
-
-            {/* 热门代币 */}
-            <TabPanel px={0}>
-              <TokenListView
-                tokens={sortedTokens
-                  .filter((token) => {
-                    // 移除逗号并转为数字，比较市值是否超过50,000
-                    const marketCapValue = parseFloat(
-                      token.marketCap.replace(/,/g, "")
-                    );
-                    return marketCapValue > 50000;
-                  })
-                  .sort((a, b) => {
-                    // 根据交易量排序（降序）
-                    const volumeA = parseFloat(a.volume24h.replace(/,/g, ""));
-                    const volumeB = parseFloat(b.volume24h.replace(/,/g, ""));
-                    return volumeB - volumeA;
-                  })
-                  .slice(0, 10)}
-                sortColumn={sortColumn}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-            </TabPanel>
-
-            {/* 全部代币 */}
-            <TabPanel px={0}>
-              <TokenListView
-                tokens={[]}
-                sortColumn={sortColumn}
-                sortDirection={sortDirection}
-                onSort={handleSort}
-              />
-            </TabPanel>
+            <MarketTokenList type="Volume_24" searchTerm={searchTerm} />
+            <MarketTokenList type="Deployed" searchTerm={searchTerm} />
+            <MarketTokenList type="all" searchTerm={searchTerm} />
           </TabPanels>
         </Tabs>
       </Container>

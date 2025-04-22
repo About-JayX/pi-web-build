@@ -13,11 +13,6 @@ import {
   Text,
   useToast,
   useColorModeValue,
-  Table,
-  TableContainer,
-  Tbody,
-  Tr,
-  Td,
   useMediaQuery,
   Tabs,
   TabList,
@@ -25,9 +20,40 @@ import {
   TabPanel,
   TabPanels,
 } from "@chakra-ui/react";
-import { FaFileContract, FaTelegram, FaTwitter } from "react-icons/fa";
+import { FaFileContract, FaGlobe, FaTelegram, FaTwitter } from "react-icons/fa";
 import { IoIosArrowBack } from "react-icons/io";
 import { useTranslation } from "react-i18next";
+import { useParams,useSearchParams } from "next/navigation";
+import { MarketAPI } from "@/api";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+// import { useNetwork } from "@/contexts/NetworkContext";
+import { formatNumberWithUnit, getRelativeTime } from "@/utils";
+// import { MarketAPI } from "@/mock/market";
+
+
+export interface MarketDetailType {
+  Address: string;
+  Deployed: number;
+  LaunchTime: number;
+  Logo: string;
+  MarketCap: string;
+  MintAmount: string;
+  Name: string;
+  NowAmount: string;
+  PairAddress: string;
+  Price: string;
+  PriceChange_24: string;
+  Rate: string;
+  Telegram: string;
+  Ticker: string;
+  TotalSupply: string;
+  Twitter: string;
+  UpTime: number;
+  Volume_24: string;
+  WebSite: string;
+  id: number;
+}
 
 // 缩略显示合约地址
 const formatContractAddress = (address: string) => {
@@ -37,19 +63,53 @@ const formatContractAddress = (address: string) => {
   return `${start}...${end}`;
 };
 
+const getDexScreenerUrl = (
+  address: string,
+  type: "chart" | "info" = "chart"
+) => {
+  return `https://dexscreener.com/solana/${address}${
+    type === "chart" ? "?embed=1&loadChartSettings=0&info=0" : ""
+  }`;
+};
+
 // 左边 第三方库K线图
-const Left = () => {
+const Left = ({ data }: { data: MarketDetailType }) => {
   return (
     <iframe
       width="100%"
       height={900}
-      src="https://dexscreener.com/bsc/0x3bec07d83c4cde1f3c7eceaf7e0c8fdfb034cc7f?embed=1&loadChartSettings=0&info=0"
+      src={getDexScreenerUrl(data.Address || "")}
     />
   );
 };
 
 // 右边 代币信息、代币数据、持有人地址
-const Right = () => {
+const Right = ({
+  data = {
+    Address: "",
+    Deployed: 0,
+    LaunchTime: 0,
+    Logo: "",
+    MarketCap: "",
+    MintAmount: "",
+    Name: "",
+    NowAmount: "",
+    PairAddress: "",
+    Price: "",
+    PriceChange_24: "",
+    Rate: "",
+    Telegram: "",
+    Ticker: "",
+    TotalSupply: "",
+    Twitter: "",
+    UpTime: 0,
+    Volume_24: "",
+    WebSite: "",
+    id: 0,
+  },
+}: {
+  data: MarketDetailType;
+}) => {
   // 代币信息
   const MarketTokenInfo = () => {
     const iconColor = useColorModeValue("gray.600", "gray.400");
@@ -66,7 +126,7 @@ const Right = () => {
       >
         {/* 代币图片 */}
         <Image
-          src="https://static.four.meme/market/ae520667-2104-428d-819a-9925c0f4f47512605684158218836129.png"
+          src={data.Logo}
           alt="token-image"
           boxSize="132px"
           borderRadius="full"
@@ -77,38 +137,63 @@ const Right = () => {
         />
         {/* 代币名称 */}
         <Text fontSize="2xl" fontWeight="bold">
-          Token Name
+          {data.Name}
         </Text>
         {/* 社交媒体链接 */}
         <HStack gap={4}>
           {/* 推特 */}
-          <Box
-            as="a"
-            href="https://twitter.com/FourMeme"
-            target="_blank"
-            rel="noopener noreferrer"
-            color={iconColor}
-            _hover={{ color: iconHoverColor }}
-            transition="color 0.2s"
-          >
-            <Icon as={FaTwitter} boxSize="22px" />
-          </Box>
+          {data.Twitter && (
+            <Box
+              as="a"
+              href={data.Twitter}
+              target="_blank"
+              rel="noopener noreferrer"
+              color={iconColor}
+              _hover={{ color: iconHoverColor }}
+              transition="color 0.2s"
+            >
+              <Icon as={FaTwitter} boxSize="22px" />
+            </Box>
+          )}
           {/* 电报 */}
-          <Box
-            as="a"
-            href="https://t.me/FourMeme"
-            target="_blank"
-            rel="noopener noreferrer"
-            color={iconColor}
-            _hover={{ color: iconHoverColor }}
-            transition="color 0.2s"
-          >
-            <Icon as={FaTelegram} boxSize="22px" />
-          </Box>
+          {data.Telegram && (
+            <Box
+              as="a"
+              href={data.Telegram}
+              target="_blank"
+              rel="noopener noreferrer"
+              color={iconColor}
+              _hover={{ color: iconHoverColor }}
+              transition="color 0.2s"
+            >
+              <Icon as={FaTelegram} boxSize="22px" />
+            </Box>
+          )}
+          {/* 网站 */}
+          {data.Telegram && (
+            <Box
+              as="a"
+              href={data.WebSite}
+              target="_blank"
+              rel="noopener noreferrer"
+              color={iconColor}
+              _hover={{ color: iconHoverColor }}
+              transition="color 0.2s"
+            >
+              <Icon as={FaGlobe} boxSize="22px" />
+            </Box>
+          )}
         </HStack>
-        <Button variant="primary" w="100%">
-          Buy
-        </Button>
+        <a
+          style={{ width: "100%" }}
+          href={getDexScreenerUrl(data.Address, "info")}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button variant="primary" w="100%">
+            Buy
+          </Button>
+        </a>
       </Card>
     );
   };
@@ -116,7 +201,6 @@ const Right = () => {
   // 代币数据
   const MarketTokenData = () => {
     const { t } = useTranslation();
-
     const toast = useToast();
 
     // 复制合约地址
@@ -142,68 +226,69 @@ const Right = () => {
         <Flex gap={2}>
           <Card flex={1} p={3} gap={1}>
             <Text fontSize="xs" fontWeight="500" opacity={0.5}>
-              Price USD
+              {t("price")}
             </Text>
             <Text fontSize="md" fontWeight="bold">
-              $0.0005493
+              {data.Price} {data.Ticker}
             </Text>
           </Card>
           <Card flex={1} p={3} gap={1}>
             <Text fontSize="xs" fontWeight="500" opacity={0.5}>
-              Price
+              {t("change24h")}
             </Text>
-            <Text fontSize="md" fontWeight="bold">
-              0.069835 WBNB
+            <Text
+              fontSize="md"
+              fontWeight="bold"
+              color={
+                Number(data.PriceChange_24 || 0) > 0 ? "green.500" : "red.500"
+              }
+            >
+              {data.PriceChange_24}%
             </Text>
           </Card>
         </Flex>
         <Flex gap={2}>
           <Card flex={1} p={3} gap={1}>
             <Text fontSize="xs" fontWeight="500" opacity={0.5}>
-              Liquidity
+              {t("marketCap")}
             </Text>
             <Text fontSize="md" fontWeight="bold">
-              $530K
+              {/* $528K */}
+              {formatNumberWithUnit(Number(data.MarketCap || 0))}
             </Text>
           </Card>
           <Card flex={1} p={3} gap={1}>
             <Text fontSize="xs" fontWeight="500" opacity={0.5}>
-              FDV
+              {t("volume")}
             </Text>
             <Text fontSize="md" fontWeight="bold">
-              $528K
+              {/* $530K */}
+              {formatNumberWithUnit(Number(data.Volume_24 || 0))}
             </Text>
           </Card>
           <Card flex={1} p={3} gap={1}>
             <Text fontSize="xs" fontWeight="500" opacity={0.5}>
-              Mkt Cap
+              {t("totalSupply")}
             </Text>
             <Text fontSize="md" fontWeight="bold">
-              $528K
+              {formatNumberWithUnit(Number(data.TotalSupply || 0))}
             </Text>
           </Card>
         </Flex>
         <Card fontSize="xs" fontWeight="500">
           <Grid gap={3}>
             <Flex justifyContent="space-between" alignItems="center" gap={2}>
-              <Text>Pair created</Text>
-              <Text fontWeight="bold">21d 23h ago</Text>
-            </Flex>
-            <Divider />
-            <Flex justifyContent="space-between" alignItems="center" gap={2}>
-              <Text>Pooled FAIR</Text>
-              <Text fontWeight="bold">688,195,299 $378K</Text>
+              <Text>Create Time</Text>
+              <Text fontWeight="bold">
+                {getRelativeTime(data.LaunchTime * 1000)}
+              </Text>
             </Flex>
             <Divider />
             <Flex justifyContent="space-between" alignItems="center" gap={2}>
               <Text>Pair</Text>
               <Box
                 as="button"
-                onClick={() =>
-                  copyContractAddress(
-                    "0x3bec07d83c4cde1f3c7eceaf7e0c8fdfb034cc7f"
-                  )
-                }
+                onClick={() => copyContractAddress(data.PairAddress)}
                 display="flex"
                 alignItems="center"
                 fontSize="xs"
@@ -224,9 +309,7 @@ const Right = () => {
                 title={t("copyAddressSuccess")}
               >
                 <Icon as={FaFileContract} mr={1} fontSize="10px" />
-                {formatContractAddress(
-                  "0x3bec07d83c4cde1f3c7eceaf7e0c8fdfb034cc7f"
-                )}
+                {formatContractAddress(data.PairAddress)}
               </Box>
             </Flex>
             <Divider />
@@ -234,11 +317,7 @@ const Right = () => {
               <Text>CA</Text>
               <Box
                 as="button"
-                onClick={() =>
-                  copyContractAddress(
-                    "0x3bec07d83c4cde1f3c7eceaf7e0c8fdfb034cc7f"
-                  )
-                }
+                onClick={() => copyContractAddress(data.Address)}
                 display="flex"
                 alignItems="center"
                 fontSize="xs"
@@ -259,9 +338,7 @@ const Right = () => {
                 title={t("copyAddressSuccess")}
               >
                 <Icon as={FaFileContract} mr={1} fontSize="10px" />
-                {formatContractAddress(
-                  "0x3bec07d83c4cde1f3c7eceaf7e0c8fdfb034cc7f"
-                )}
+                {formatContractAddress(data.Address)}
               </Box>
             </Flex>
           </Grid>
@@ -271,53 +348,53 @@ const Right = () => {
   };
 
   // 持有人地址
-  const MarketTokenHolders = () => {
-    const hoverBg = useColorModeValue("gray.50", "gray.700");
-    return (
-      <Card gap={2}>
-        <Text fontWeight="bold">Holders</Text>
-        <TableContainer>
-          <Table variant="simple">
-            <Tbody fontWeight="600">
-              <Tr _hover={{ bg: hoverBg }} transition="background-color 0.2s">
-                <Td p={2}>1</Td>
-                <Td p={2} w="100%">
-                  {formatContractAddress(
-                    "0x1234567890123456789012345678901234567890"
-                  )}
-                </Td>
-                <Td p={2} opacity={0.65} textAlign="right">
-                  100%
-                </Td>
-              </Tr>
-              <Tr _hover={{ bg: hoverBg }} transition="background-color 0.2s">
-                <Td p={2}>2</Td>
-                <Td p={2} flex={1} w="100%">
-                  {formatContractAddress(
-                    "0x1234567890123456789012345678901234567890"
-                  )}
-                </Td>
-                <Td p={2} opacity={0.65} textAlign="right">
-                  50%
-                </Td>
-              </Tr>
-              <Tr _hover={{ bg: hoverBg }} transition="background-color 0.2s">
-                <Td p={2}>2</Td>
-                <Td p={2} flex={1} w="100%">
-                  {formatContractAddress(
-                    "0x1234567890123456789012345678901234567890"
-                  )}
-                </Td>
-                <Td p={2} opacity={0.65} textAlign="right">
-                  0.16%
-                </Td>
-              </Tr>
-            </Tbody>
-          </Table>
-        </TableContainer>
-      </Card>
-    );
-  };
+  // const MarketTokenHolders = () => {
+  //   const hoverBg = useColorModeValue("gray.50", "gray.700");
+  //   return (
+  //     <Card gap={2}>
+  //       <Text fontWeight="bold">Holders</Text>
+  //       <TableContainer>
+  //         <Table variant="simple">
+  //           <Tbody fontWeight="600">
+  //             <Tr _hover={{ bg: hoverBg }} transition="background-color 0.2s">
+  //               <Td p={2}>1</Td>
+  //               <Td p={2} w="100%">
+  //                 {formatContractAddress(
+  //                   "0x1234567890123456789012345678901234567890"
+  //                 )}
+  //               </Td>
+  //               <Td p={2} opacity={0.65} textAlign="right">
+  //                 100%
+  //               </Td>
+  //             </Tr>
+  //             <Tr _hover={{ bg: hoverBg }} transition="background-color 0.2s">
+  //               <Td p={2}>2</Td>
+  //               <Td p={2} flex={1} w="100%">
+  //                 {formatContractAddress(
+  //                   "0x1234567890123456789012345678901234567890"
+  //                 )}
+  //               </Td>
+  //               <Td p={2} opacity={0.65} textAlign="right">
+  //                 50%
+  //               </Td>
+  //             </Tr>
+  //             <Tr _hover={{ bg: hoverBg }} transition="background-color 0.2s">
+  //               <Td p={2}>2</Td>
+  //               <Td p={2} flex={1} w="100%">
+  //                 {formatContractAddress(
+  //                   "0x1234567890123456789012345678901234567890"
+  //                 )}
+  //               </Td>
+  //               <Td p={2} opacity={0.65} textAlign="right">
+  //                 0.16%
+  //               </Td>
+  //             </Tr>
+  //           </Tbody>
+  //         </Table>
+  //       </TableContainer>
+  //     </Card>
+  //   );
+  // };
 
   return (
     <>
@@ -331,12 +408,53 @@ const Right = () => {
         <MarketTokenData />
       </Grid>
       {/* 持有人地址 */}
-      <MarketTokenHolders />
+      {/* <MarketTokenHolders /> */}
     </>
   );
 };
 
 export default function MarketDetailPage() {
+  // const { address } = useParams();
+  // const data = useSearchParams().get("data");
+  // const token = data ? JSON.parse(data) : null;
+  // const { getMarketList } = MarketAPI;
+  const [marketDetail, setMarketDetail] = useState<MarketDetailType>({
+    Address: "",
+    Deployed: 0,
+    LaunchTime: 0,
+    Logo: "",
+    MarketCap: "",
+    MintAmount: "",
+    Name: "",
+    NowAmount: "",
+    PairAddress: "",
+    Price: "",
+    PriceChange_24: "",
+    Rate: "",
+    Telegram: "",
+    Ticker: "",
+    TotalSupply: "",
+    Twitter: "",
+    UpTime: 0,
+    Volume_24: "",
+    WebSite: "",
+    id: 0,
+  });
+
+  const getMarketDetail = async () => {
+    // const res = await getMarketList({
+    //   search: address as string,
+    //   // search: address as string,
+    // });
+    // setMarketDetail(res.data.data[0]);
+    const token = localStorage.getItem("MarketDetail");
+    setMarketDetail(JSON.parse(token || "{}"));
+  };
+
+  useEffect(() => {
+    getMarketDetail();
+  }, []);
+
   // 动态检测是否为移动端
   const isMobile = useMediaQuery("(max-width: 992px)")[0];
 
@@ -345,13 +463,16 @@ export default function MarketDetailPage() {
       <Container maxW="container.xl" py={{ base: 4, md: 12 }}>
         {/* 返回按钮 */}
         <Box gap={2} mb={6} fontWeight="500" columnGap={1} w="fit-content">
-          <a
+          <Link
             href="/market"
             style={{ display: "flex", alignItems: "center", gap: 2 }}
+            onClick={() => {
+              localStorage.removeItem("MarketDetail");
+            }}
           >
             <Icon as={IoIosArrowBack} boxSize="24px" />
             <Text fontSize="xl">Back</Text>
-          </a>
+          </Link>
         </Box>
         {/* 检测是否为移动端 */}
         {isMobile ? (
@@ -404,10 +525,10 @@ export default function MarketDetailPage() {
             </TabList>
             <TabPanels>
               <TabPanel p={0} display="grid" gap={4}>
-                <Right />
+                <Right data={marketDetail} />
               </TabPanel>
               <TabPanel p={0}>
-                <Left />
+                <Left data={marketDetail} />
               </TabPanel>
             </TabPanels>
           </Tabs>
@@ -415,11 +536,11 @@ export default function MarketDetailPage() {
           <Flex gap={6}>
             {/* 左侧 */}
             <Card flex={1} gap={6} h="fit-content">
-              <Left />
+              <Left data={marketDetail} />
             </Card>
             {/* 右侧代币信息、代币数据、持有人地址 */}
             <Grid gap={4} h="fit-content">
-              <Right />
+              <Right data={marketDetail} />
             </Grid>
           </Flex>
         )}
