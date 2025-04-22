@@ -7,6 +7,7 @@ export default {
   'news': '公告',
   'tutorials': '教程',
   'points': '积分',
+  'deploy': '部署',
   
   // 导航栏（带前缀，避免冲突）
   'nav.home': '首页',
@@ -16,6 +17,7 @@ export default {
   'nav.news': '公告',
   'nav.tutorials': '教程',
   'nav.points': '积分',
+  'nav.deploy': '部署',
   
   'connectWallet': '连接',
   'selectNetwork': '选择网络',

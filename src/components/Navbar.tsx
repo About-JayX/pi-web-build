@@ -232,7 +232,7 @@ export default function Navbar() {
             alignItems="center"
             justify={{ base: 'space-between', xl: 'start' }}
           >
-            <NextLink href="/" passHref>
+            <NextLink href="/mint" passHref>
               <Flex
                 align="center"
                 cursor="pointer"
@@ -735,17 +735,26 @@ interface NavItem {
 }
 
 const NAV_ITEMS: Array<NavItem> = [
-  {
+  /* {
     label: 'nav.home',
+    href: '/',
+  }, */
+  {
+    label: 'nav.mint',
     href: '/',
   },
   {
-    label: 'nav.mint',
-    href: '/mint',
+    label: 'nav.deploy',
+    href: '/deploy',
   },
+    /* 暂时隐藏入口
   {
     label: 'nav.market',
     href: '/market',
+  },
+  {
+    label: 'nav.home',
+    href: '/home',
   },
   {
     label: 'nav.swap',
@@ -763,4 +772,5 @@ const NAV_ITEMS: Array<NavItem> = [
     label: 'nav.points',
     href: '/points',
   },
+    */
 ]

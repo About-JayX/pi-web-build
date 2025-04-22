@@ -1,1176 +1,924 @@
 'use client'
 
 import {
-  Container,
-  Stack,
-  Flex,
   Box,
+  Container,
   Heading,
   Text,
-  Button,
-  Image,
-  Icon,
-  useColorModeValue,
   SimpleGrid,
-  VStack,
+  Stack,
   HStack,
-  StackDivider,
-  TableContainer,
+  VStack,
+  Progress,
+  Button,
+  useColorModeValue,
+  Flex,
+  Icon,
+  Image,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+  ButtonGroup,
   Table,
   Thead,
+  Tbody,
   Tr,
   Th,
-  Tbody,
   Td,
-  Circle,
+  TableContainer,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  useToast,
+  Select,
+  IconButton,
 } from '@chakra-ui/react'
-import NextLink from 'next/link'
 import {
-  FaRocket,
-  FaChartLine,
-  FaLayerGroup,
-  FaGlobe,
-  FaTwitter,
-  FaTelegram,
+  FaThLarge,
+  FaList,
+  FaSort,
+  FaSearch,
   FaShareAlt,
-  FaUsers,
-  FaArrowUp,
-  FaArrowDown,
   FaFileContract,
+  FaChevronLeft,
+  FaChevronRight,
 } from 'react-icons/fa'
-import { marketTokens, mintingTokensPi, mintingTokensSol } from '@/mock'
+import NextLink from 'next/link'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons'
+import { useRouter } from 'next/navigation'
 import { useNetwork } from '@/contexts/NetworkContext'
 import MintingTokenCard from '@/components/MintingTokenCard'
 import { useTranslation } from 'react-i18next'
-import { useState, useEffect } from 'react'
-import { TokenAPI, type PlatformMetrics } from '@/api/token'
-import type { Token } from '@/api/token'
-import BigNumber from 'bignumber.js'
+import { useAppSelector } from '@/store/hooks'
+import axios from '@/config/axios'
+import { store } from '@/store'
+import { fetchTokenList } from '@/store/slices/tokenSlice'
 
-// 功能特点组件
-interface FeatureProps {
-  text: string
-  iconBg: string
-  icon?: React.ReactElement
+interface MintToken {
+  id: number
+  name: string
+  symbol: string
+  address: string
+  totalSupply: string
+  participants: number
+  progress: number
+  image: string
+  target: string
+  raised: string
+  presaleRate: string
+  created_at: string
+  deployedAt?: number
+  logo?: string
+  minterCounts: number
 }
 
-const Feature = ({ text, icon, iconBg }: FeatureProps) => {
+// 排序指示器组件
+function SortIndicator({
+  column,
+  sortColumn,
+  sortDirection,
+}: {
+  column: string
+  sortColumn: string
+  sortDirection: 'asc' | 'desc'
+}) {
+  if (sortColumn !== column) {
+    return (
+      <Box as="span" ml={1} color="gray.400" opacity={0.6}>
+        <Icon as={FaSort} fontSize="xs" />
+      </Box>
+    )
+  }
   return (
-    <Stack direction={'row'} align={'center'}>
-      <Flex
-        w={8}
-        h={8}
-        align={'center'}
-        justify={'center'}
-        rounded={'full'}
-        bg={iconBg}
-      >
-        {icon}
-      </Flex>
-      <Text fontWeight={600}>{text}</Text>
-    </Stack>
+    <Box as="span" ml={1} color="brand.primary">
+      <Icon
+        as={sortDirection === 'asc' ? ChevronUpIcon : ChevronDownIcon}
+        fontSize="sm"
+      />
+    </Box>
   )
 }
 
-// 在文件顶部添加类型定义
-interface TokenShare {
-  token: Token
-  share: number
-}
-
-export default function HomePage() {
-  const { network } = useNetwork()
-  const { t } = useTranslation()
-  const [metrics, setMetrics] = useState<PlatformMetrics | null>(null)
-
-  // 获取平台数据
-  useEffect(() => {
-    const fetchMetrics = async () => {
-      try {
-        const data = await TokenAPI.getPlatformMetrics()
-        setMetrics(data)
-      } catch (error) {
-        console.error('获取平台数据失败:', error)
-      }
-    }
-
-    fetchMetrics()
-    // 每60秒更新一次数据
-    const intervalId = setInterval(fetchMetrics, 60000)
-
-    return () => clearInterval(intervalId)
-  }, [])
-
-  // 移动 useColorModeValue 调用到组件顶部
+// 列表视图组件
+function TokenListView({
+  tokens,
+  sortColumn,
+  sortDirection,
+  onSort,
+}: {
+  tokens: MintToken[]
+  sortColumn: string
+  sortDirection: 'asc' | 'desc'
+  onSort: (column: string) => void
+}) {
+  const router = useRouter()
+  const bg = useColorModeValue('white', 'gray.800')
+  const hoverBg = useColorModeValue('gray.50', 'gray.700')
+  const thBg = useColorModeValue('gray.50', 'gray.700')
+  const thHoverBg = useColorModeValue('gray.100', 'gray.600')
   const iconColor = useColorModeValue('gray.600', 'gray.400')
   const iconHoverColor = useColorModeValue('brand.primary', 'brand.light')
-  const hoverBg = useColorModeValue('gray.50', 'gray.700')
+  const toast = useToast()
+  const { t } = useTranslation()
 
-  // 根据当前网络选择铸造数据
-  const mintingData = network === 'Solana' ? mintingTokensSol : mintingTokensPi
+  // 跳转到代币铸造页面
+  const navigateToMintPage = (contractAddress: string) => {
+    router.push(`/${contractAddress}`)
+  }
 
-  // 修改handleShare的类型
-  const handleShare = (token: TokenShare) => {
+  // 缩略显示合约地址
+  const formatContractAddress = (address: string) => {
+    if (!address) return ''
+    const start = address.substring(0, 6)
+    const end = address.substring(address.length - 4)
+    return `${start}...${end}`
+  }
+
+  // 分享功能处理
+  const handleShare = (token: MintToken) => {
     if (navigator.share) {
       navigator
         .share({
-          title: `${token.token.name} (${token.token.symbol})`,
-          text: `${t('share')} ${token.token.name} ${t('token')}`,
-          url: window.location.origin + `/market/${token.token.id}`,
+          title: `${token.name} (${token.symbol})`,
+          text: `${t('share')} ${token.name} ${t('token')}`,
+          url: window.location.origin + `/${token.address}`,
         })
         .catch(error => console.log(`${t('share')} ${t('failed')}:`, error))
     } else {
-      const url = window.location.origin + `/market/${token.token.id}`
+      // 如果浏览器不支持，可以复制链接到剪贴板
+      const url = window.location.origin + `/${token.address}`
       navigator.clipboard
         .writeText(url)
-        .then(() => alert(`${t('copySuccess')}`))
+        .then(() =>
+          toast({
+            title: t('copySuccess'),
+            description: t('copyLinkSuccess'),
+            status: 'success',
+            duration: 2000,
+            isClosable: true,
+            position: 'top',
+          })
+        )
         .catch(error => console.log(`${t('copy')} ${t('failed')}:`, error))
     }
   }
 
+  // 复制合约地址
+  const copyContractAddress = (address: string) => {
+    if (address) {
+      navigator.clipboard
+        .writeText(address)
+        .then(() =>
+          toast({
+            title: t('copySuccess'),
+            description: t('copyAddressSuccess'),
+            status: 'success',
+            duration: 2000,
+            isClosable: true,
+            position: 'top',
+          })
+        )
+        .catch(err => console.error(`${t('copy')} ${t('failed')}:`, err))
+    }
+  }
+
+  const ThSortable = ({
+    column,
+    children,
+  }: {
+    column: string
+    children: React.ReactNode
+  }) => (
+    <Th
+      onClick={() => onSort(column)}
+      cursor="pointer"
+      position="relative"
+      py={4}
+      bg={thBg}
+      borderBottom="2px"
+      borderColor="brand.primary"
+      _hover={{ bg: thHoverBg }}
+      transition="all 0.2s"
+      textAlign="center"
+    >
+      <Flex align="center" justify="center">
+        {children}
+        <SortIndicator
+          column={column}
+          sortColumn={sortColumn}
+          sortDirection={sortDirection}
+        />
+      </Flex>
+    </Th>
+  )
+
+  return (
+    <TableContainer bg={bg} borderRadius="lg" boxShadow="md">
+      <Table variant="simple">
+        <Thead>
+          <Tr>
+            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
+              {t('tokenColumn')}
+            </Th>
+            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
+              {t('contractAddressColumn')}
+            </Th>
+            <ThSortable column="totalSupply">
+              {t('totalSupplyColumn')}
+            </ThSortable>
+            <ThSortable column="raised">{t('amountColumn')}</ThSortable>
+            <ThSortable column="progress">{t('progressColumn')}</ThSortable>
+            <ThSortable column="participants">
+              {t('participantsColumn')}
+            </ThSortable>
+            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
+              {t('priceColumn')}
+            </Th>
+            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
+              {t('linksColumn')}
+            </Th>
+            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary"></Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {tokens.map(token => (
+            <Tr
+              key={token.id}
+              _hover={{ bg: hoverBg, cursor: 'pointer' }}
+              onClick={e => {
+                if (
+                  (e.target as HTMLElement).tagName !== 'A' &&
+                  !(e.target as HTMLElement).closest('a') &&
+                  !(e.target as HTMLElement).closest('button')
+                ) {
+                  navigateToMintPage(token.address)
+                }
+              }}
+              sx={{
+                transition: 'all 0.2s',
+              }}
+            >
+              <Td>
+                <HStack spacing={3}>
+                  <Image
+                    src={token.image}
+                    alt={token.name}
+                    boxSize="40px"
+                    borderRadius="full"
+                    border="2px solid"
+                    borderColor="brand.light"
+                  />
+                  <Box>
+                    <Text
+                      fontSize="md"
+                      fontWeight="bold"
+                      color="brand.primary"
+                      lineHeight="1.2"
+                    >
+                      {token.symbol}
+                    </Text>
+                    <Text
+                      fontSize="xs"
+                      color="gray.500"
+                      noOfLines={1}
+                      maxW="180px"
+                    >
+                      {token.name}
+                    </Text>
+                  </Box>
+                </HStack>
+              </Td>
+              <Td>
+                {token.address && (
+                  <Box
+                    as="button"
+                    px={2}
+                    py={1}
+                    borderRadius="md"
+                    fontSize="xs"
+                    fontFamily="mono"
+                    color="brand.primary"
+                    bg="gray.50"
+                    border="1px solid"
+                    borderColor="gray.200"
+                    title={token.address}
+                    cursor="pointer"
+                    width="fit-content"
+                    onClick={() => copyContractAddress(token.address)}
+                    _hover={{
+                      bg: 'gray.100',
+                      borderColor: 'brand.primary',
+                    }}
+                    transition="all 0.2s"
+                  >
+                    <Icon as={FaFileContract} mr={1} fontSize="10px" />
+                    {formatContractAddress(token.address)}
+                  </Box>
+                )}
+              </Td>
+              <Td textAlign="center">{token.totalSupply}</Td>
+              <Td>
+                <VStack spacing={1} align="center">
+                  <Text fontSize="xs" color="gray.500">
+                    {t('target')}: {token.target}
+                  </Text>
+                  <Text fontWeight="bold" color="brand.primary" fontSize="sm">
+                    {t('raised')}: {token.raised}
+                  </Text>
+                </VStack>
+              </Td>
+              <Td>
+                <HStack width="120px" justifyContent="center">
+                  <Progress
+                    value={token.progress}
+                    colorScheme="purple"
+                    borderRadius="full"
+                    size="sm"
+                    width="80px"
+                  />
+                  <Text fontSize="sm">{token.progress}%</Text>
+                </HStack>
+              </Td>
+              <Td textAlign="center">{token.participants}</Td>
+              <Td textAlign="center">
+                {token.presaleRate && (
+                  <Text fontWeight="medium" textAlign="center">
+                    {token.presaleRate}
+                  </Text>
+                )}
+              </Td>
+              <Td>
+                <HStack spacing={3} justify="center">
+                  <Box
+                    as="button"
+                    onClick={() => handleShare(token)}
+                    color={iconColor}
+                    _hover={{ color: iconHoverColor }}
+                    transition="color 0.2s"
+                  >
+                    <Icon as={FaShareAlt} boxSize="16px" />
+                  </Box>
+                </HStack>
+              </Td>
+              <Td>
+                <Button
+                  as={NextLink}
+                  href={`/${token.address}`}
+                  colorScheme="purple"
+                  size="sm"
+                  bg="brand.primary"
+                  _hover={{ bg: 'brand.light' }}
+                >
+                  {t('joinMinting')}
+                </Button>
+              </Td>
+            </Tr>
+          ))}
+        </Tbody>
+      </Table>
+    </TableContainer>
+  )
+}
+
+// 搜索和排序面板组件
+function FilterPanel({
+  sortColumn,
+  sortDirection,
+  onSort,
+  searchQuery,
+  onSearchChange,
+}: {
+  sortColumn: string
+  sortDirection: 'asc' | 'desc'
+  onSort: (column: string) => void
+  searchQuery: string
+  onSearchChange: (value: string) => void
+}) {
+  const buttonBg = useColorModeValue('white', 'gray.700')
+  const activeBg = useColorModeValue('gray.100', 'gray.600')
+  const inputBg = useColorModeValue('white', 'gray.800')
+  const { t } = useTranslation()
+
+  const sortOptions = [
+    { label: t('participantsSort'), column: 'participants' },
+    { label: t('progressSort'), column: 'progress' },
+    { label: t('raisedSort'), column: 'raised' },
+    { label: t('targetSort'), column: 'target' },
+  ]
+
+  return (
+    <Flex
+      align="center"
+      mb={4}
+      gap={4}
+      flexWrap="wrap"
+      justifyContent="space-between"
+    >
+      <InputGroup maxW={{ base: '100%', md: '300px' }} mb={{ base: 2, md: 0 }}>
+        <InputLeftElement pointerEvents="none" flexShrink={1}>
+          <Icon as={FaSearch} color="gray.400" />
+        </InputLeftElement>
+        <Input
+          placeholder={t('searchPlaceholder')}
+          value={searchQuery}
+          onChange={e => onSearchChange(e.target.value)}
+          bg={inputBg}
+          borderColor="gray.300"
+          _hover={{ borderColor: 'brand.primary' }}
+          _focus={{
+            borderColor: 'brand.primary',
+            boxShadow: '0 0 0 1px var(--chakra-colors-brand-primary)',
+          }}
+        />
+      </InputGroup>
+
+      {/* <Flex align="center" gap={2} flexWrap="wrap">
+        <Text fontWeight="medium" fontSize="sm" whiteSpace="nowrap">
+          {t('sortBy')}
+        </Text>
+        {sortOptions.map(option => (
+          <Button
+            key={option.column}
+            size="sm"
+            variant="outline"
+            rightIcon={
+              sortColumn === option.column ? (
+                <Icon
+                  as={sortDirection === 'asc' ? ChevronUpIcon : ChevronDownIcon}
+                />
+              ) : undefined
+            }
+            onClick={() => onSort(option.column)}
+            bg={sortColumn === option.column ? activeBg : buttonBg}
+            borderColor={
+              sortColumn === option.column ? 'brand.primary' : 'gray.200'
+            }
+            color={sortColumn === option.column ? 'brand.primary' : 'gray.600'}
+            _hover={{ borderColor: 'brand.primary', color: 'brand.primary' }}
+          >
+            {option.label}
+          </Button>
+        ))}
+      </Flex> */}
+    </Flex>
+  )
+}
+
+// 添加一个新的分页控制组件
+function PaginationControl({
+  currentPage,
+  totalPages,
+  onPageChange,
+  pageSize,
+  onPageSizeChange,
+}: {
+  currentPage: number
+  totalPages: number
+  onPageChange: (page: number) => void
+  pageSize: number
+  onPageSizeChange: (size: number) => void
+}) {
+  const pageSizeOptions = [12, 24, 36, 48, 96]
+  const { t } = useTranslation()
+
+  return (
+    <Flex
+      justifyContent="space-between"
+      alignItems="center"
+      w="100%"
+      mt={6}
+      flexDir={{ base: 'column', md: 'row' }}
+      gap={4}
+    >
+      <HStack>
+        <Text fontSize="sm" fontWeight="medium">
+          {t('itemsPerPage')}:
+        </Text>
+        <Select
+          value={pageSize}
+          onChange={e => onPageSizeChange(Number(e.target.value))}
+          size="sm"
+          w="80px"
+          borderColor="gray.300"
+          _hover={{ borderColor: 'brand.primary' }}
+          _focus={{
+            borderColor: 'brand.primary',
+            boxShadow: '0 0 0 1px var(--chakra-colors-brand-primary)',
+          }}
+        >
+          {pageSizeOptions.map(size => (
+            <option key={size} value={size}>
+              {size}
+            </option>
+          ))}
+        </Select>
+      </HStack>
+
+      <HStack>
+        <Text fontSize="sm">
+          {t('pageInfo')
+            .replace('{current}', currentPage.toString())
+            .replace('{total}', totalPages.toString())}
+        </Text>
+        <ButtonGroup isAttached variant="outline" size="sm">
+          <IconButton
+            aria-label={t('prevPage')}
+            icon={<FaChevronLeft />}
+            onClick={() => onPageChange(currentPage - 1)}
+            isDisabled={currentPage <= 1}
+            colorScheme="purple"
+          />
+          <IconButton
+            aria-label={t('nextPage')}
+            icon={<FaChevronRight />}
+            onClick={() => onPageChange(currentPage + 1)}
+            isDisabled={currentPage >= totalPages}
+            colorScheme="purple"
+          />
+        </ButtonGroup>
+      </HStack>
+    </Flex>
+  )
+}
+
+export default function MintPage() {
+  const { tokenList, loading } = useAppSelector(state => state.token)
+  const { network } = useNetwork()
+  const { t } = useTranslation()
+
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(12)
+  const [tabIndex, setTabIndex] = useState(0)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card')
+  const [sortColumn, setSortColumn] = useState('created_at')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+
+  // 获取token列表
+  const getTokenList = async () => {
+    try {
+      const sortField =
+        tabIndex === 0 ? 'progress' : tabIndex === 1 ? 'token_id' : 'created_at'
+      await store.dispatch(
+        fetchTokenList({
+          page: currentPage,
+          limit: pageSize,
+          sort: sortField,
+        })
+      )
+    } catch (error) {
+      console.error('获取代币列表失败:', error)
+    }
+  }
+
+  // 处理页码变化
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage)
+    getTokenList()
+    // 滚动到页面顶部以便看到新内容
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // 处理每页显示数量变化
+  const handlePageSizeChange = (newSize: number) => {
+    // 调整当前页以保持项目连续性
+    const firstItemIndex = (currentPage - 1) * pageSize
+    const newCurrentPage = Math.floor(firstItemIndex / newSize) + 1
+
+    setPageSize(newSize)
+    setCurrentPage(newCurrentPage)
+    getTokenList()
+  }
+
+  // 切换tab时重置页码并获取数据
+  useEffect(() => {
+    setCurrentPage(1)
+    const sortField =
+      tabIndex === 0 ? 'progress' : tabIndex === 1 ? 'token_id' : 'created_at'
+    store.dispatch(
+      fetchTokenList({
+        page: 1,
+        limit: pageSize,
+        sort: sortField,
+      })
+    )
+  }, [tabIndex, pageSize])
+
+  // 监听页码变化获取数据
+  useEffect(() => {
+    if (currentPage !== 1) {
+      // 避免和tab切换时的重置冲突
+      const sortField =
+        tabIndex === 0 ? 'progress' : tabIndex === 1 ? 'token_id' : 'created_at'
+      store.dispatch(
+        fetchTokenList({
+          page: currentPage,
+          limit: pageSize,
+          sort: sortField,
+        })
+      )
+    }
+  }, [currentPage, pageSize, tabIndex])
+
+  // 设置当前网络的计价单位
+  const currencyUnit = useMemo(() => {
+    return network === 'Solana' ? 'SOL' : 'Pi'
+  }, [network])
+
+  // 保存视图模式到本地存储
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mint_view_mode', viewMode)
+    }
+  }, [viewMode])
+
+  // 保存标签页选择到本地存储
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mint_tab_index', String(tabIndex))
+    }
+  }, [tabIndex])
+
+  // 共享排序逻辑
+  const handleSort = (column: string) => {
+    const newDirection =
+      sortColumn === column && sortDirection === 'desc' ? 'asc' : 'desc'
+    setSortColumn(column)
+    setSortDirection(newDirection)
+  }
+
+  // 搜索过滤逻辑
+  const filterTokensBySearch = (tokens: MintToken[]) => {
+    if (!searchQuery.trim()) return tokens
+
+    const query = searchQuery.toLowerCase().trim()
+    return tokens.filter(
+      token =>
+        token.name.toLowerCase().includes(query) ||
+        token.symbol.toLowerCase().includes(query) ||
+        (token.address && token.address.toLowerCase().includes(query))
+    )
+  }
+
+  // 对数据进行排序
+  const getSortedTokens = (tokens: MintToken[]) => {
+    return [...tokens].sort((a, b) => {
+      switch (sortColumn) {
+        case 'totalSupply':
+          const aSupply = parseFloat(a.totalSupply)
+          const bSupply = parseFloat(b.totalSupply)
+          return sortDirection === 'asc' ? aSupply - bSupply : bSupply - aSupply
+        case 'progress':
+          return sortDirection === 'asc'
+            ? a.progress - b.progress
+            : b.progress - a.progress
+        case 'participants':
+          return sortDirection === 'asc'
+            ? a.participants - b.participants
+            : b.participants - a.participants
+        case 'created_at':
+          return sortDirection === 'asc'
+            ? new Date(a.created_at).getTime() -
+                new Date(b.created_at).getTime()
+            : new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime()
+        default:
+          return 0
+      }
+    })
+  }
+
+  // 处理分页逻辑
+  const paginateTokens = (tokens: MintToken[]) => {
+    const startIndex = (currentPage - 1) * pageSize
+    return tokens.slice(startIndex, startIndex + pageSize)
+  }
+
+  // 当筛选或排序条件变化时，重置为第一页
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [sortColumn, sortDirection, searchQuery])
+
+  const renderTabContent = (tokens: MintToken[]) => {
+    // 显示加载状态
+    if (loading) {
+      return (
+        <Box py={10} textAlign="center">
+          <Text color="gray.500" fontSize="lg">
+            {t('loading')}
+          </Text>
+        </Box>
+      )
+    }
+
+    // 处理token列表
+    const processedTokens = tokens.map(token => ({
+      ...token,
+      image: token.logo || '/token-logo.png', // 使用token中的logo，如果没有则使用默认图片
+    }))
+
+    // 先过滤搜索结果
+    const filteredTokens = filterTokensBySearch(processedTokens)
+
+    // 显示空结果状态
+    if (filteredTokens.length === 0) {
+      return (
+        <Box py={10} textAlign="center">
+          <Text color="gray.500" fontSize="lg">
+            {t('noResults')}
+          </Text>
+          {searchQuery && (
+            <Button
+              mt={4}
+              variant="outline"
+              colorScheme="purple"
+              onClick={() => setSearchQuery('')}
+            >
+              {t('clearSearch')}
+            </Button>
+          )}
+        </Box>
+      )
+    }
+
+    return (
+      <>
+        {viewMode === 'card' ? (
+          <SimpleGrid
+            columns={{ base: 1, md: 2, lg: 4, xl: 4 }}
+            spacing={{ base: 6, md: 5, lg: 4 }}
+          >
+            {filteredTokens.map(token => (
+              <MintingTokenCard
+                key={token.id}
+                token={token}
+                currencyUnit={currencyUnit}
+              />
+            ))}
+          </SimpleGrid>
+        ) : (
+          <TokenListView
+            tokens={filteredTokens}
+            sortColumn={sortColumn}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+          />
+        )}
+
+        <PaginationControl
+          currentPage={currentPage}
+          totalPages={Math.ceil(filteredTokens.length / pageSize)}
+          onPageChange={handlePageChange}
+          pageSize={pageSize}
+          onPageSizeChange={handlePageSizeChange}
+        />
+      </>
+    )
+  }
+
   return (
     <Box>
-      {/* Hero区域 */}
-      <Container maxW={'container.xl'}>
-        <Stack
-          align={'center'}
-          spacing={{ base: 8, md: 10 }}
-          py={{ base: 20, md: 28 }}
-          pt={{ base: 10, md: 20 }}
-          direction={{ base: 'column', lg: 'row' }}
-        >
-          <Stack flex={1} spacing={{ base: 5, md: 5, xl: 6 }}>
-            <Heading
-              lineHeight={1.16}
-              fontWeight={600}
-              fontSize={{ base: '3xl', sm: '4xl', lg: '5xl', xl: '6xl' }}
-            >
-              <Text
-                as={'span'}
-                position={'relative'}
-                display="block"
-                color={'brand.primary'}
-                bgGradient="linear(to-r, purple.600, brand.primary, purple.400)"
-                bgClip="text"
-                fontWeight="900"
-                letterSpacing="wide"
-              >
-                {t('heroTitlePart1')}
-              </Text>
-              <Text
-                as={'span'}
-                position={'relative'}
-                display="block"
-                color={'brand.secondary'}
-                bgGradient="linear(to-r, gold.400, brand.secondary, gold.500)"
-                bgClip="text"
-                fontWeight="900"
-                letterSpacing="wide"
-                whiteSpace="nowrap"
-              >
-                {t('heroTitlePiNetwork')}
-                {t('heroTitlePart2')}
-              </Text>
-              <Text
-                as={'span'}
-                position={'relative'}
-                display="block"
-                color={'brand.primary'}
-                bgGradient="linear(to-r, purple.600, brand.primary, purple.400)"
-                bgClip="text"
-                fontWeight="900"
-                letterSpacing="wide"
-              >
-                {t('heroTitlePart3')}
-              </Text>
-            </Heading>
-            <Text
-              color={'gray.500'}
-              fontSize={{ base: 'md', md: 'md', xl: 'lg' }}
-            >
-              {t('heroDescription')}
-            </Text>
-            <Stack
-              spacing={{ base: 4, sm: 6 }}
-              direction={{ base: 'column', sm: 'row' }}
-            >
-              <Button
-                as={NextLink}
-                href="/deploy"
-                rounded={'full'}
-                size={'lg'}
-                fontWeight={'normal'}
-                px={6}
-                colorScheme={'purple'}
-                bg={'brand.primary'}
-                _hover={{ bg: 'brand.light' }}
-              >
-                {t('startDeploy')}
-              </Button>
-              <Button
-                as={NextLink}
-                href="/market"
-                rounded={'full'}
-                size={'lg'}
-                fontWeight={'normal'}
-                px={6}
-                leftIcon={<FaChartLine />}
-              >
-                {t('tokenMarket')}
-              </Button>
-            </Stack>
-          </Stack>
-          <Flex
-            flex={1}
-            justify={'center'}
-            align={'center'}
-            position={'relative'}
-            w={'full'}
-          >
-            <Box
-              position={'relative'}
-              height={'300px'}
-              rounded={'2xl'}
-              boxShadow={'2xl'}
-              width={'full'}
-              overflow={'hidden'}
-              as={NextLink}
-              href="/mint"
-              cursor="pointer"
-              transition="transform 0.3s ease-in-out"
-              _hover={{
-                transform: 'scale(1.02)',
-                boxShadow: '3xl',
-              }}
-              bg="brand.primary"
-              backgroundImage="linear-gradient(135deg, #7B2CBF 0%, #5A189A 100%)"
-            >
-              {/* 装饰性元素 */}
-              <Box
-                position="absolute"
-                top="20px"
-                right="20px"
-                width="120px"
-                height="120px"
-                borderRadius="full"
-                bg="rgba(230, 179, 37, 0.2)"
-              />
-              <Box
-                position="absolute"
-                bottom="-30px"
-                left="10%"
-                width="80px"
-                height="80px"
-                borderRadius="full"
-                bg="rgba(230, 179, 37, 0.15)"
-              />
-
-              {/* 主要内容 */}
-              <Flex
-                position="relative"
-                direction="column"
-                justify="center"
-                align="center"
-                height="100%"
-                px={8}
-                zIndex={2}
-              >
-                <Text
-                  lineHeight={1.6}
-                  fontSize={{ base: '2xl', md: '4xl', xl: '5xl' }}
-                  fontWeight="900"
-                  letterSpacing="wider"
-                  textAlign="center"
-                  mb={4}
-                  bgGradient="linear(to-r, brand.secondary, yellow.300, brand.secondary)"
-                  bgClip="text"
-                  textShadow="0 2px 4px rgba(0,0,0,0.1)"
-                >
-                  {t('mintMemeTokens')}
-                </Text>
-                <Text
-                  fontSize={{ base: 'md', md: 'xl' }}
-                  fontWeight="medium"
-                  color="white"
-                  textAlign="center"
-                  maxW="container.md"
-                  mb={8}
-                  textShadow="0 1px 2px rgba(0,0,0,0.2)"
-                >
-                  {t('mintDescription')}
-                </Text>
-
-                <HStack spacing={{ base: 2, md: 4 }} mt={{ base: 1, md: 6 }}>
-                  <Icon as={FaRocket} color="brand.secondary" w={6} h={6} />
-                  <Text
-                    color="whiteAlpha.900"
-                    fontWeight="bold"
-                    fontSize={{ base: 'md', md: 'lg' }}
-                    textAlign="center"
-                  >
-                    {t('viewMintingTokens')}
-                  </Text>
-                  <Icon as={FaRocket} color="brand.secondary" w={6} h={6} />
-                </HStack>
-              </Flex>
-
-              {/* 底部装饰 */}
-              <Box
-                position="absolute"
-                bottom="0"
-                left="0"
-                right="0"
-                height="6px"
-                bg="brand.secondary"
-              />
-            </Box>
-          </Flex>
-        </Stack>
-      </Container>
-
-      {/* 平台统计 */}
-      <Box bg={useColorModeValue('brand.50', 'gray.700')} py={10}>
-        <Container maxW={'container.xl'}>
-          <Heading as="h2" size="lg" mb={8} textAlign="center">
-            {t('platformData')}
-          </Heading>
-          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={{ base: 4, lg: 8 }}>
-            <Box
-              px={{ base: 4, md: 6 }}
-              py={6}
-              shadow={'xl'}
-              borderRadius={'xl'}
-              bgGradient={useColorModeValue(
-                'linear(to-br, white, blue.50)',
-                'linear(to-br, gray.800, blue.900)'
-              )}
-              position="relative"
-              overflow="hidden"
-              _before={{
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '8px',
-                bgGradient: 'linear(to-r, blue.400, teal.400)',
-              }}
-            >
-              <Flex mb={4} justify="center">
-                <Icon
-                  as={FaLayerGroup}
-                  boxSize={{ base: 10, md: 12 }}
-                  color="blue.400"
-                />
-              </Flex>
-              <Text
-                fontWeight="bold"
-                fontSize={{ base: 'md', md: 'lg' }}
-                textAlign="center"
-                mb={1}
-              >
-                {t('totalMintedTokens')}
-              </Text>
-              <Text
-                fontSize={{ base: 'xl', lg: '3xl' }}
-                fontWeight="bold"
-                textAlign="center"
-                color={useColorModeValue('blue.600', 'blue.300')}
-              >
-                {metrics?.token_count || 0}
-              </Text>
-            </Box>
-            <Box
-              px={{ base: 4, md: 6 }}
-              py={6}
-              shadow={'xl'}
-              borderRadius={'xl'}
-              bgGradient={useColorModeValue(
-                'linear(to-br, white, green.50)',
-                'linear(to-br, gray.800, green.900)'
-              )}
-              position="relative"
-              overflow="hidden"
-              _before={{
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '8px',
-                bgGradient: 'linear(to-r, green.400, teal.400)',
-              }}
-            >
-              <Flex mb={4} justify="center">
-                <Icon
-                  as={FaChartLine}
-                  boxSize={{ base: 10, md: 12 }}
-                  color="green.400"
-                />
-              </Flex>
-              <Text
-                fontWeight="bold"
-                fontSize={{ base: 'md', md: 'lg' }}
-                textAlign="center"
-                mb={1}
-              >
-                {t('铸造代币总数')}
-              </Text>
-              <Text
-                fontSize={{ base: 'xl', lg: '3xl' }}
-                fontWeight="bold"
-                textAlign="center"
-                color={useColorModeValue('green.600', 'green.300')}
-              >
-                {metrics?.total_mint
-                  ? new BigNumber(metrics.total_mint).div(1e9).toFormat(3) +
-                    ' SOL'
-                  : '0.000 SOL'}
-              </Text>
-            </Box>
-            <Box
-              px={{ base: 4, md: 6 }}
-              py={6}
-              shadow={'xl'}
-              borderRadius={'xl'}
-              bgGradient={useColorModeValue(
-                'linear(to-br, white, purple.50)',
-                'linear(to-br, gray.800, purple.900)'
-              )}
-              position="relative"
-              overflow="hidden"
-              _before={{
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '8px',
-                bgGradient: 'linear(to-r, purple.400, pink.400)',
-              }}
-            >
-              <Flex mb={4} justify="center">
-                <Icon
-                  as={FaUsers}
-                  boxSize={{ base: 10, md: 12 }}
-                  color="purple.400"
-                />
-              </Flex>
-              <Text
-                fontWeight="bold"
-                fontSize={{ base: 'md', md: 'lg' }}
-                textAlign="center"
-                mb={1}
-              >
-                {t('铸造地址总数')}
-              </Text>
-              <Text
-                fontSize={{ base: 'xl', lg: '3xl' }}
-                fontWeight="bold"
-                textAlign="center"
-                color={useColorModeValue('purple.600', 'purple.300')}
-              >
-                {metrics?.mint_accounts.toLocaleString() || 0}
-              </Text>
-            </Box>
-            <Box
-              px={{ base: 4, md: 6 }}
-              py={6}
-              shadow={'xl'}
-              borderRadius={'xl'}
-              bgGradient={useColorModeValue(
-                'linear(to-br, white, orange.50)',
-                'linear(to-br, gray.800, orange.900)'
-              )}
-              position="relative"
-              overflow="hidden"
-              _before={{
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                height: '8px',
-                bgGradient: 'linear(to-r, orange.400, red.400)',
-              }}
-            >
-              <Flex mb={4} justify="center">
-                <Icon
-                  as={FaFileContract}
-                  boxSize={{ base: 10, md: 12 }}
-                  color="orange.400"
-                />
-              </Flex>
-              <Text
-                fontWeight="bold"
-                fontSize={{ base: 'md', md: 'lg' }}
-                textAlign="center"
-                mb={1}
-              >
-                {t('锁仓总价值')}
-              </Text>
-              <Text
-                fontSize={{ base: 'xl', lg: '3xl' }}
-                fontWeight="bold"
-                textAlign="center"
-                color={useColorModeValue('orange.600', 'orange.300')}
-              >
-                {metrics?.tvl.toLocaleString() || 0} SOL
-              </Text>
-            </Box>
-          </SimpleGrid>
-        </Container>
-      </Box>
-
-      {/* 热门铸造 */}
-      <Container maxW={'container.xl'} py={10}>
-        <Heading as="h2" size="lg" mb={2}>
-          {t('hotMinting')}
-        </Heading>
-        <Text color={'gray.500'} mb={8}>
-          {t('discoverHotProjects')}
-        </Text>
-
-        <SimpleGrid
-          columns={{ base: 1, md: 2, lg: 4 }}
-          spacing={{ base: 6, md: 5, lg: 4 }}
-        >
-          {mintingData
-            .filter(token => token.progress < 100)
-            .filter(token => token.participants > 200 && token.progress > 60)
-            .sort((a, b) => b.progress - a.progress)
-            .slice(0, 4)
-            .map(token => {
-              return (
-                <MintingTokenCard
-                  key={token.id}
-                  token={token}
-                  currencyUnit={network === 'Solana' ? 'SOL' : 'Pi'}
-                />
-              )
-            })}
-        </SimpleGrid>
-
-        <Box textAlign="center" mt={10}>
-          <Button
-            as={NextLink}
-            href="/mint"
-            size="lg"
-            variant="outline"
-            colorScheme="brand"
-          >
-            {t('moreMintingProjects')}
-          </Button>
-        </Box>
-      </Container>
-
-      {/* 功能特点 */}
-      <Box
-        py={10}
-        bg={useColorModeValue('gray.50', 'gray.700')}
-        position="relative"
-      >
-        <Container maxW={'container.xl'} position="relative">
-          <VStack spacing={4} mb={10}>
-            <Heading as="h2" size="xl" textAlign="center" color="brand.primary">
-              {t('platformFeatures')}
-            </Heading>
-            <Text
-              color={useColorModeValue('gray.600', 'gray.400')}
-              maxW="container.md"
-              textAlign="center"
-              fontSize="lg"
-            >
-              {t('platformFeaturesDesc')}
-            </Text>
-          </VStack>
-
-          <SimpleGrid
-            columns={{ base: 1, md: 3 }}
-            spacing={{ base: 16, md: 8 }}
-          >
-            <Box
-              bg={useColorModeValue('white', 'gray.800')}
-              borderRadius="xl"
-              boxShadow="none"
-              overflow="visible"
-              position="relative"
-              pt="38px"
-              pb={6}
-              px={6}
-            >
-              {/* 卡片顶部装饰 */}
-              <Box
-                w="full"
-                h="8px"
-                bg="brand.primary"
-                position="absolute"
-                top="0"
-                left="0"
-                borderTopLeftRadius="xl"
-                borderTopRightRadius="xl"
-              />
-
-              {/* 圆形图标 */}
-              <Circle
-                size="76px"
-                bg="brand.primary"
-                position="absolute"
-                top="-38px"
-                left="50%"
-                transform="translateX(-50%)"
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                boxShadow="0 4px 10px rgba(0,0,0,0.1)"
-                border="4px solid white"
-                _dark={{
-                  border: '4px solid gray.800',
-                }}
-              >
-                <Icon as={FaRocket} color="white" boxSize={6} />
-              </Circle>
-
-              {/* 内容部分 */}
-              <VStack spacing={3} align="center">
-                <Heading
-                  fontSize={{ base: 'lg', lg: 'xl' }}
-                  fontWeight="bold"
-                  color="brand.primary"
-                >
-                  {t('easyMinting')}
-                </Heading>
-                <Text
-                  color={useColorModeValue('gray.600', 'gray.300')}
-                  fontSize="md"
-                  textAlign="center"
-                >
-                  {t('easyMintingDesc')}
-                </Text>
-              </VStack>
-            </Box>
-
-            <Box
-              bg={useColorModeValue('white', 'gray.800')}
-              borderRadius="xl"
-              boxShadow="none"
-              overflow="visible"
-              position="relative"
-              pt="38px"
-              pb={6}
-              px={6}
-            >
-              {/* 卡片顶部装饰 */}
-              <Box
-                w="full"
-                h="8px"
-                bg="teal.500"
-                position="absolute"
-                top="0"
-                left="0"
-                borderTopLeftRadius="xl"
-                borderTopRightRadius="xl"
-              />
-
-              {/* 圆形图标 */}
-              <Circle
-                size="76px"
-                bg="teal.500"
-                position="absolute"
-                top="-38px"
-                left="50%"
-                transform="translateX(-50%)"
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                boxShadow="0 4px 10px rgba(0,0,0,0.1)"
-                border="4px solid white"
-                _dark={{
-                  border: '4px solid gray.800',
-                }}
-              >
-                <Icon as={FaChartLine} color="white" boxSize={6} />
-              </Circle>
-
-              {/* 内容部分 */}
-              <VStack spacing={3} align="center">
-                <Heading
-                  fontSize={{ base: 'lg', lg: 'xl' }}
-                  fontWeight="bold"
-                  color="teal.500"
-                >
-                  {t('safeTransparent')}
-                </Heading>
-                <Text
-                  color={useColorModeValue('gray.600', 'gray.300')}
-                  fontSize="md"
-                  textAlign="center"
-                >
-                  {t('safeTransparentDesc')}
-                </Text>
-              </VStack>
-            </Box>
-
-            <Box
-              bg={useColorModeValue('white', 'gray.800')}
-              borderRadius="xl"
-              boxShadow="none"
-              overflow="visible"
-              position="relative"
-              pt="38px"
-              pb={6}
-              px={6}
-            >
-              {/* 卡片顶部装饰 */}
-              <Box
-                w="full"
-                h="8px"
-                bg="orange.500"
-                position="absolute"
-                top="0"
-                left="0"
-                borderTopLeftRadius="xl"
-                borderTopRightRadius="xl"
-              />
-
-              {/* 圆形图标 */}
-              <Circle
-                size="76px"
-                bg="orange.500"
-                position="absolute"
-                top="-38px"
-                left="50%"
-                transform="translateX(-50%)"
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                boxShadow="0 4px 10px rgba(0,0,0,0.1)"
-                border="4px solid white"
-                _dark={{
-                  border: '4px solid gray.800',
-                }}
-              >
-                <Icon as={FaLayerGroup} color="white" boxSize={6} />
-              </Circle>
-
-              {/* 内容部分 */}
-              <VStack spacing={3} align="center">
-                <Heading
-                  fontSize={{ base: 'lg', lg: 'xl' }}
-                  fontWeight="bold"
-                  color="orange.500"
-                >
-                  {t('tokenMarketplace')}
-                </Heading>
-                <Text
-                  color={useColorModeValue('gray.600', 'gray.300')}
-                  fontSize="md"
-                  textAlign="center"
-                >
-                  {t('tokenMarketplaceDesc')}
-                </Text>
-              </VStack>
-            </Box>
-          </SimpleGrid>
-        </Container>
-      </Box>
-
-      {/* 功能特点部分 */}
-      <Box bg={useColorModeValue('brand.background', 'gray.700')}>
-        <Container maxW={'container.xl'} py={12}>
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
-            <Stack spacing={4}>
-              <Heading color={'brand.primary'}>{t('startMemeProject')}</Heading>
-              <Text color={'gray.500'} fontSize={'lg'}>
-                {t('startMemeProjectDesc')}
-              </Text>
-              <Stack
-                spacing={4}
-                divider={
-                  <StackDivider
-                    borderColor={useColorModeValue('gray.100', 'gray.700')}
-                  />
-                }
-              >
-                <Feature
-                  icon={<Icon as={FaRocket} color={'yellow.500'} w={4} h={4} />}
-                  iconBg={useColorModeValue('yellow.100', 'yellow.900')}
-                  text={t('quickDeploy')}
-                />
-                <Feature
-                  icon={
-                    <Icon as={FaLayerGroup} color={'green.500'} w={5} h={5} />
-                  }
-                  iconBg={useColorModeValue('green.100', 'green.900')}
-                  text={t('easySettings')}
-                />
-                <Feature
-                  icon={
-                    <Icon as={FaChartLine} color={'purple.500'} w={5} h={5} />
-                  }
-                  iconBg={useColorModeValue('purple.100', 'purple.900')}
-                  text={t('instantTrade')}
-                />
-              </Stack>
-            </Stack>
-            <Flex>
-              <Box
-                rounded={'md'}
-                overflow="hidden"
-                position="relative"
-                boxShadow="xl"
-                width="100%"
-                height="100%"
-                minHeight="300px"
-                bg="brand.primary"
-                backgroundImage="linear-gradient(135deg, #7B2CBF 0%, #5A189A 100%)"
-              >
-                {/* 装饰性元素 */}
-                <Box
-                  position="absolute"
-                  top="10%"
-                  right="10%"
-                  width="100px"
-                  height="100px"
-                  borderRadius="full"
-                  bg="rgba(230, 179, 37, 0.2)"
-                />
-                <Box
-                  position="absolute"
-                  bottom="10%"
-                  left="10%"
-                  width="70px"
-                  height="70px"
-                  borderRadius="full"
-                  bg="rgba(230, 179, 37, 0.15)"
-                />
-
-                {/* 中心Logo */}
-                <Flex
-                  height="100%"
-                  alignItems="center"
-                  justifyContent="center"
-                  direction="column"
-                  p={6}
-                >
-                  <Heading
-                    fontSize="6xl"
-                    fontWeight="900"
-                    bgGradient="linear(to-r, brand.secondary, yellow.300, brand.secondary)"
-                    bgClip="text"
-                    textShadow="0 2px 4px rgba(0,0,0,0.1)"
-                    mb={4}
-                  >
-                    Pi.Sale
-                  </Heading>
-                  <Text
-                    color="white"
-                    fontSize="xl"
-                    fontWeight="medium"
-                    textAlign="center"
-                  >
-                    {t('unleashCreativity')}
-                  </Text>
-                </Flex>
-
-                {/* 底部装饰 */}
-                <Box
-                  position="absolute"
-                  bottom="0"
-                  left="0"
-                  right="0"
-                  height="6px"
-                  bg="brand.secondary"
-                />
-              </Box>
-            </Flex>
-          </SimpleGrid>
-        </Container>
-      </Box>
-
-      {/* 市场热门 */}
-      <Container maxW={'container.xl'} py={12}>
-        <VStack spacing={2} textAlign="center" mb={10}>
-          <Heading as="h2" size="xl" color={'brand.primary'}>
-            {t('marketHot')}
-          </Heading>
-          <Text color={'gray.500'}>{t('marketHotDesc')}</Text>
-        </VStack>
-
-        <Box
-          boxShadow="none"
-          borderRadius="lg"
-          overflow="hidden"
-          bg={useColorModeValue('white', 'gray.800')}
-          mb={6}
-        >
-          <TableContainer>
-            <Table variant="simple">
-              <Thead>
-                <Tr>
-                  <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
-                    borderBottom="2px"
-                    borderColor="brand.primary"
-                  >
-                    {t('tokenColumn')}
-                  </Th>
-                  <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
-                    borderBottom="2px"
-                    borderColor="brand.primary"
-                    isNumeric
-                    textAlign="right"
-                  >
-                    {t('priceColumn')}
-                  </Th>
-                  <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
-                    borderBottom="2px"
-                    borderColor="brand.primary"
-                    isNumeric
-                    textAlign="right"
-                  >
-                    {t('change24hColumn')}
-                  </Th>
-                  <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
-                    borderBottom="2px"
-                    borderColor="brand.primary"
-                    isNumeric
-                    textAlign="right"
-                  >
-                    {t('marketCapColumn')}
-                  </Th>
-                  <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
-                    borderBottom="2px"
-                    borderColor="brand.primary"
-                    isNumeric
-                    textAlign="right"
-                  >
-                    {t('totalSupplyColumn')}
-                  </Th>
-                  <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
-                    borderBottom="2px"
-                    borderColor="brand.primary"
-                    isNumeric
-                    textAlign="right"
-                  >
-                    {t('volumeColumn')}
-                  </Th>
-                  <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
-                    borderBottom="2px"
-                    borderColor="brand.primary"
-                    isNumeric
-                    textAlign="right"
-                  >
-                    {t('linksColumn')}
-                  </Th>
-                  <Th
-                    bg={useColorModeValue('gray.50', 'gray.700')}
-                    borderBottom="2px"
-                    borderColor="brand.primary"
-                  ></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {marketTokens
-                  .filter(token => {
-                    const marketCapValue = parseFloat(
-                      token.marketCap.replace(/,/g, '')
-                    )
-                    return marketCapValue > 50000
-                  })
-                  .sort((a, b) => {
-                    const volumeA = parseFloat(a.volume24h.replace(/,/g, ''))
-                    const volumeB = parseFloat(b.volume24h.replace(/,/g, ''))
-                    return volumeB - volumeA
-                  })
-                  .slice(0, 5)
-                  .map(token => {
-                    const isPositiveChange = token.change24hValue > 0
-
-                    return (
-                      <Tr
-                        key={token.id}
-                        _hover={{ bg: hoverBg }}
-                        transition="background-color 0.2s"
-                      >
-                        <Td>
-                          <HStack spacing={2} align="center">
-                            <Image
-                              src={token.image}
-                              alt={token.name}
-                              boxSize="40px"
-                              borderRadius="full"
-                              objectFit="cover"
-                              border="2px solid"
-                              borderColor="brand.light"
-                            />
-                            <Box>
-                              <Text
-                                fontSize="lg"
-                                fontWeight="bold"
-                                color="brand.primary"
-                                lineHeight="1.2"
-                              >
-                                {token.symbol}
-                              </Text>
-                              <Text
-                                fontSize="xs"
-                                color="gray.500"
-                                mt={0.5}
-                                noOfLines={1}
-                                maxW="150px"
-                              >
-                                {token.name}
-                              </Text>
-                            </Box>
-                          </HStack>
-                        </Td>
-                        <Td isNumeric fontWeight="bold">
-                          $ {token.price}
-                        </Td>
-                        <Td isNumeric>
-                          <Flex justify="flex-end">
-                            <Text
-                              fontWeight="bold"
-                              color={isPositiveChange ? 'green.500' : 'red.500'}
-                            >
-                              <Icon
-                                as={isPositiveChange ? FaArrowUp : FaArrowDown}
-                                boxSize="12px"
-                                mr={1}
-                              />
-                              {Math.abs(token.change24hValue)}%
-                            </Text>
-                          </Flex>
-                        </Td>
-                        <Td isNumeric>$ {token.marketCap}</Td>
-                        <Td isNumeric>{token.totalSupply}</Td>
-                        <Td isNumeric>$ {token.volume24h}</Td>
-                        <Td isNumeric>
-                          <HStack spacing={3} justify="flex-end">
-                            {token.website && (
-                              <Box
-                                as="a"
-                                href={token.website}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                color={iconColor}
-                                _hover={{ color: iconHoverColor }}
-                                transition="color 0.2s"
-                              >
-                                <Icon as={FaGlobe} boxSize="16px" />
-                              </Box>
-                            )}
-                            {token.twitter && (
-                              <Box
-                                as="a"
-                                href={token.twitter}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                color={iconColor}
-                                _hover={{ color: iconHoverColor }}
-                                transition="color 0.2s"
-                              >
-                                <Icon as={FaTwitter} boxSize="16px" />
-                              </Box>
-                            )}
-                            {token.telegram && (
-                              <Box
-                                as="a"
-                                href={token.telegram}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                color={iconColor}
-                                _hover={{ color: iconHoverColor }}
-                                transition="color 0.2s"
-                              >
-                                <Icon as={FaTelegram} boxSize="16px" />
-                              </Box>
-                            )}
-                            <Box
-                              as="button"
-                              onClick={() => handleShare(token)}
-                              color={iconColor}
-                              _hover={{ color: iconHoverColor }}
-                              transition="color 0.2s"
-                            >
-                              <Icon as={FaShareAlt} boxSize="16px" />
-                            </Box>
-                          </HStack>
-                        </Td>
-                        <Td>
-                          <Button
-                            as={NextLink}
-                            href={`/market/${token.id}`}
-                            colorScheme="purple"
-                            size="sm"
-                            bg="brand.primary"
-                            _hover={{ bg: 'brand.light' }}
-                          >
-                            {t('detail')}
-                          </Button>
-                        </Td>
-                      </Tr>
-                    )
-                  })}
-              </Tbody>
-            </Table>
-          </TableContainer>
-        </Box>
-
-        <Box textAlign="center" mt={8}>
-          <Button
-            as={NextLink}
-            href="/market"
-            rounded={'full'}
-            size={'lg'}
-            fontWeight={'normal'}
-            colorScheme={'purple'}
-            bg={'brand.primary'}
-            _hover={{ bg: 'brand.light' }}
-            px={6}
-          >
-            {t('tokenMarket')}
-          </Button>
-        </Box>
-      </Container>
-
-      {/* 行动召唤部分 */}
-      <Box bg={useColorModeValue('brand.primaryGradient', 'gray.900')}>
-        <Container maxW={'container.xl'} py={16}>
-          <Flex
+      <Container maxW="container.xl" py={12}>
+        <VStack spacing={10} align="stretch">
+          <Stack
             direction={{ base: 'column', md: 'row' }}
-            align={'center'}
-            justify={'space-between'}
+            justify="space-between"
+            align={{ base: 'flex-start', md: 'center' }}
           >
-            <Stack spacing={4} mb={{ base: 8, md: 0 }} maxW={{ md: '50%' }}>
-              <Heading color={'white'} size={'lg'}>
-                {t('readyToDeployQuestion')}
+            <Box>
+              <Heading as="h2" size="lg" mb={2}>
+                {t('mintingTokens')}
               </Heading>
-              <Text color={'whiteAlpha.800'}>{t('readyToDeployDesc')}</Text>
-            </Stack>
-            <Button
-              as={NextLink}
-              href="/deploy"
-              rounded={'full'}
-              size={'lg'}
-              bg={'brand.secondary'}
-              color={'white'}
-              px={8}
-              _hover={{ bg: 'yellow.400' }}
-              rightIcon={<Icon as={FaRocket} />}
+              <Text color="gray.500">{t('viewAllTokens')}</Text>
+            </Box>
+            <ButtonGroup isAttached variant="outline" colorScheme="purple">
+              <Button
+                leftIcon={<FaThLarge />}
+                variant={viewMode === 'card' ? 'solid' : 'outline'}
+                bg={viewMode === 'card' ? 'brand.primary' : undefined}
+                color={viewMode === 'card' ? 'white' : 'brand.primary'}
+                onClick={() => setViewMode('card')}
+              >
+                {t('cardView')}
+              </Button>
+              <Button
+                leftIcon={<FaList />}
+                variant={viewMode === 'list' ? 'solid' : 'outline'}
+                bg={viewMode === 'list' ? 'brand.primary' : undefined}
+                color={viewMode === 'list' ? 'white' : 'brand.primary'}
+                onClick={() => setViewMode('list')}
+              >
+                {t('listView')}
+              </Button>
+            </ButtonGroup>
+          </Stack>
+
+          <Tabs
+            colorScheme="purple"
+            variant="enclosed"
+            index={tabIndex}
+            onChange={setTabIndex}
+          >
+            <TabList
+              borderBottom="2px"
+              borderColor="brand.primary"
+              mb={4}
+              overflow="hidden"
+              overflowX="auto"
             >
-              {t('startDeploy')}
-            </Button>
-          </Flex>
-        </Container>
-      </Box>
+              <Tab
+                fontWeight="medium"
+                _selected={{
+                  color: 'brand.primary',
+                  borderColor: 'brand.primary',
+                  borderBottom: '3px solid',
+                  fontWeight: 'bold',
+                  bg: 'gray.50',
+                }}
+                _hover={{
+                  color: 'brand.primary',
+                  borderColor: 'brand.light',
+                }}
+                transition="all 0.2s"
+              >
+                {t('hotTokens')}
+              </Tab>
+              <Tab
+                fontWeight="medium"
+                _selected={{
+                  color: 'brand.primary',
+                  borderColor: 'brand.primary',
+                  borderBottom: '3px solid',
+                  fontWeight: 'bold',
+                  bg: 'gray.50',
+                }}
+                _hover={{
+                  color: 'brand.primary',
+                  borderColor: 'brand.light',
+                }}
+                transition="all 0.2s"
+              >
+                {t('allMinting')}
+              </Tab>
+              <Tab
+                fontWeight="medium"
+                _selected={{
+                  color: 'brand.primary',
+                  borderColor: 'brand.primary',
+                  borderBottom: '3px solid',
+                  fontWeight: 'bold',
+                  bg: 'gray.50',
+                }}
+                _hover={{
+                  color: 'brand.primary',
+                  borderColor: 'brand.light',
+                }}
+                transition="all 0.2s"
+              >
+                {t('latestDeployed')}
+              </Tab>
+            </TabList>
+
+            <TabPanels>
+              <TabPanel px={0}>
+                <FilterPanel
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                />
+                {renderTabContent(tokenList)}
+              </TabPanel>
+
+              <TabPanel px={0}>
+                <FilterPanel
+                  sortColumn={sortColumn}
+                  sortDirection={sortDirection}
+                  onSort={handleSort}
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                />
+                {renderTabContent(tokenList)}
+              </TabPanel>
+
+              <TabPanel px={0}>
+                <FilterPanel
+                  sortColumn={'deployedAt'}
+                  sortDirection={'desc'}
+                  onSort={() => {}} // 禁用排序功能
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                />
+                {renderTabContent(tokenList)}
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
+        </VStack>
+      </Container>
     </Box>
   )
 }

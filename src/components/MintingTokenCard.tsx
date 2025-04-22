@@ -78,12 +78,12 @@ export default function MintingTokenCard({
         .share({
           title: `${token.name} (${token.symbol})`,
           text: `${t('share')} ${token.name} ${t('token')}`,
-          url: window.location.origin + `/mint/${token.address}`,
+          url: window.location.origin + `/${token.address}`,
         })
         .catch(error => console.log(`${t('share')} ${t('failed')}:`, error))
     } else {
       // 如果浏览器不支持，可以复制链接到剪贴板
-      const url = window.location.origin + `/mint/${token.address}`
+      const url = window.location.origin + `/${token.address}`
       navigator.clipboard
         .writeText(url)
         .then(() =>
@@ -267,7 +267,7 @@ export default function MintingTokenCard({
 
           <Button
             as={NextLink}
-            href={`/mint/${token.address}`}
+            href={`/${token.address}`}
             colorScheme="purple"
             bg="brand.primary"
             _hover={{ bg: 'brand.light' }}

@@ -7,6 +7,7 @@ export default {
   'news': 'News',
   'tutorials': 'Tutorials',
   'points': 'Points',
+  'deploy': 'Deploy',
   
   // Navigation with prefix (to avoid conflicts)
   'nav.home': 'Home',
@@ -16,6 +17,7 @@ export default {
   'nav.news': 'News',
   'nav.tutorials': 'Tutorials',
   'nav.points': 'Points',
+  'nav.deploy': 'Deploy',
   
   'connectWallet': 'Connect',
   'selectNetwork': 'Select Network',

@@ -18,33 +18,26 @@ export const useNetwork = () => useContext(NetworkContext);
 export const NetworkProvider = ({ children }: { children: ReactNode }) => {
   const [network, setNetwork] = useState<string>('Pi Network');
   const pathname = usePathname();
+  const initialNetwork = 'Pi Network';
   
-  // 从localStorage初始化网络设置
+  // 根据当前路径检测网络
   useEffect(() => {
-    // 尝试从localStorage获取保存的网络设置
-    const savedNetwork = localStorage.getItem('selectedNetwork');
-    
-    // 首先检查URL路径是否包含网络信息
-    if (pathname) {
-      const isSOLPath = pathname.includes('/mint/sol/');
-      const isPiPath = pathname.includes('/mint/pi/');
-      
-      if (isSOLPath) {
-        setNetwork('Solana');
-        localStorage.setItem('selectedNetwork', 'Solana');
-        return;
-      } else if (isPiPath) {
-        setNetwork('Pi Network');
-        localStorage.setItem('selectedNetwork', 'Pi Network');
-        return;
-      }
+    // 检查URL中是否包含特定网络的路径
+    const isSOLPath = pathname.includes('/sol/');
+    const isPiPath = pathname.includes('/pi/');
+
+    if (isSOLPath) {
+      setNetwork('Solana');
+    } else if (isPiPath) {
+      setNetwork('Pi Network');
+    } else if (network === initialNetwork) {
+      // 如果当前网络与初始值相同，不需要重新设置
+      return;
+    } else if (localStorage && localStorage.getItem('preferred_network')) {
+      // 使用本地存储的首选网络
+      setNetwork(localStorage.getItem('preferred_network') || initialNetwork);
     }
-    
-    // 如果URL中没有网络信息，则使用localStorage中保存的设置
-    if (savedNetwork) {
-      setNetwork(savedNetwork);
-    }
-  }, [pathname]);
+  }, [pathname, network, initialNetwork]);
 
   const handleNetworkChange = (newNetwork: string) => {
     setNetwork(newNetwork);

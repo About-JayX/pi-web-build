@@ -7,6 +7,7 @@ export default {
   'news': '뉴스',
   'tutorials': '튜토리얼',
   'points': '포인트',
+  'deploy': '배포',
   
   // Navigation with prefix (to avoid conflicts)
   'nav.home': '홈',
@@ -16,6 +17,7 @@ export default {
   'nav.news': '뉴스',
   'nav.tutorials': '튜토리얼',
   'nav.points': '포인트',
+  'nav.deploy': '배포',
   
   'connectWallet': '연결',
   'selectNetwork': '네트워크 선택',
