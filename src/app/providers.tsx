@@ -16,6 +16,7 @@ import { I18nProvider } from "@/contexts/I18nProvider";
 import { Provider } from "react-redux";
 import { store } from "../store";
 import { fetchTokenList } from "@/store/slices/tokenSlice";
+import { WssProvider } from "@/contexts/WssContext";
 
 // 动态导入Navbar，避免SSR
 const Navbar = dynamic(() => import("@/components/Navbar"), { ssr: false });
@@ -46,38 +47,40 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // 在应用启动时获取代币列表
-    store.dispatch(fetchTokenList({ page: 1, limit: 10, sort: 'created_at' }));
+    store.dispatch(fetchTokenList({ page: 1, limit: 10, sort: "created_at" }));
   }, []);
 
   return (
     <Provider store={store}>
-      {/* ColorModeScript 应该在 ClientOnly 之外，以便在服务器端渲染 */}
-      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+      <WssProvider>
+        {/* ColorModeScript 应该在 ClientOnly 之外，以便在服务器端渲染 */}
+        <ColorModeScript initialColorMode={theme.config.initialColorMode} />
 
-      {/* 使用 CacheProvider 在客户端和服务器端之间共享样式 */}
-      <CacheProvider>
-        {/* 使用 ClientOnly 确保 ChakraProvider 仅在客户端渲染 */}
-        <ClientOnly>
-          <ChakraProvider
-            theme={theme}
-            resetCSS
-            colorModeManager={localStorageManager}
-          >
-            <NetworkProvider>
-              <SolanaProvider>
-                <I18nProvider>
-                  <Navbar />
-                  <main style={{ minHeight: "calc(100vh - 60px)" }}>
-                    {children}
-                  </main>
-                  <Footer />
-                  <Announcement />
-                </I18nProvider>
-              </SolanaProvider>
-            </NetworkProvider>
-          </ChakraProvider>
-        </ClientOnly>
-      </CacheProvider>
+        {/* 使用 CacheProvider 在客户端和服务器端之间共享样式 */}
+        <CacheProvider>
+          {/* 使用 ClientOnly 确保 ChakraProvider 仅在客户端渲染 */}
+          <ClientOnly>
+            <ChakraProvider
+              theme={theme}
+              resetCSS
+              colorModeManager={localStorageManager}
+            >
+              <NetworkProvider>
+                <SolanaProvider>
+                  <I18nProvider>
+                    <Navbar />
+                    <main style={{ minHeight: "calc(100vh - 60px)" }}>
+                      {children}
+                    </main>
+                    <Footer />
+                    <Announcement />
+                  </I18nProvider>
+                </SolanaProvider>
+              </NetworkProvider>
+            </ChakraProvider>
+          </ClientOnly>
+        </CacheProvider>
+      </WssProvider>
     </Provider>
   );
 }
