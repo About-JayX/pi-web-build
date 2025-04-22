@@ -22,8 +22,12 @@ export default {
   // 铸造页面 - 分页
   'itemsPerPage': '每页显示',
   'pageInfo': '第{current}页/共{total}页',
+  'currentPage': '第{current}页',
   'prevPage': '上一页',
   'nextPage': '下一页',
+  'firstPage': '第一页',
+  'lastPage': '最后一页',
+  'goToPage': '跳转到',
   
   // 铸造页面 - 列表视图
   'tokenColumn': '代币',
@@ -116,8 +120,6 @@ export default {
   'totalItems': '共 {total} 条',
   'address': '地址',
   'holdingRatio': '持有比例',
-  'firstPage': '第一页',
-  'lastPage': '最后一页',
   
   // 代币详情页 - MintingInstructions组件
   'mintingInstructions': '铸造说明',

@@ -61,6 +61,9 @@ import { store } from '@/store'
 import { fetchTokenList } from '@/store/slices/tokenSlice'
 import { formatTokenAmount } from '@/utils'
 import { useMintingCalculations } from '@/hooks/useMintingCalculations'
+import PaginationControl from '@/components/PaginationControl'
+import TokenListView from '@/components/TokenListView'
+import FilterPanel from '@/components/FilterPanel'
 
 interface MintToken {
   id: number
@@ -78,493 +81,6 @@ interface MintToken {
   deployedAt?: number
   logo?: string
   minterCounts: number
-}
-
-// 排序指示器组件
-function SortIndicator({
-  column,
-  sortColumn,
-  sortDirection,
-}: {
-  column: string
-  sortColumn: string
-  sortDirection: 'asc' | 'desc'
-}) {
-  if (sortColumn !== column) {
-    return (
-      <Box as="span" ml={1} color="gray.400" opacity={0.6}>
-        <Icon as={FaSort} fontSize="xs" />
-      </Box>
-    )
-  }
-  return (
-    <Box as="span" ml={1} color="brand.primary">
-      <Icon
-        as={sortDirection === 'asc' ? ChevronUpIcon : ChevronDownIcon}
-        fontSize="sm"
-      />
-    </Box>
-  )
-}
-
-// 列表视图组件
-function TokenListView({
-  tokens,
-  sortColumn,
-  sortDirection,
-  onSort,
-}: {
-  tokens: MintToken[]
-  sortColumn: string
-  sortDirection: 'asc' | 'desc'
-  onSort: (column: string) => void
-}) {
-  const router = useRouter()
-  const bg = useColorModeValue('white', 'gray.800')
-  const hoverBg = useColorModeValue('gray.50', 'gray.700')
-  const thBg = useColorModeValue('gray.50', 'gray.700')
-  const thHoverBg = useColorModeValue('gray.100', 'gray.600')
-  const iconColor = useColorModeValue('gray.600', 'gray.400')
-  const iconHoverColor = useColorModeValue('brand.primary', 'brand.light')
-  const toast = useToast()
-  const { network } = useNetwork()
-  const { t } = useTranslation()
-  
-  // 设置当前网络的计价单位
-  const currencyUnit = useMemo(() => {
-    return network === 'SOL' ? 'SOL' : 'PI'
-  }, [network])
-  
-  // 将hook移到组件顶层，只初始化一次
-  const { getFormattedMintRate } = useMintingCalculations({
-    totalSupply: "",  // 这里不提供具体值，只是初始化hook
-    target: "",
-    currencyUnit,
-    tokenDecimals: 6
-  });
-
-  // 修改格式化铸造价格函数，不在内部调用Hook
-  const formatMintRateForToken = useCallback((token: MintToken) => {
-    // 使用已初始化的getFormattedMintRate函数
-    // 注意这里只是使用函数，不再创建新的Hook实例
-    const rate = token.mintRate || getFormattedMintRate({
-      totalSupply: token.totalSupply,
-      target: token.target,
-      currencyUnit,
-      tokenDecimals: 6
-    });
-    
-    // 移除数字中的千分号（逗号）
-    return rate ? rate.replace(/,/g, '') : rate;
-  }, [getFormattedMintRate, currencyUnit]);
-
-  // 跳转到代币铸造页面
-  const navigateToMintPage = (contractAddress: string) => {
-    router.push(`/${contractAddress}`)
-  }
-
-  // 缩略显示合约地址
-  const formatContractAddress = (address: string) => {
-    if (!address) return ''
-    const start = address.substring(0, 6)
-    const end = address.substring(address.length - 4)
-    return `${start}...${end}`
-  }
-
-  // 分享功能处理
-  const handleShare = (token: MintToken) => {
-    if (navigator.share) {
-      navigator
-        .share({
-          title: `${token.name} (${token.symbol})`,
-          text: `${t('share')} ${token.name} ${t('token')}`,
-          url: window.location.origin + `/${token.address}`,
-        })
-        .catch(error => console.log(`${t('share')} ${t('failed')}:`, error))
-    } else {
-      // 如果浏览器不支持，可以复制链接到剪贴板
-      const url = window.location.origin + `/${token.address}`
-      navigator.clipboard
-        .writeText(url)
-        .then(() =>
-          toast({
-            title: t('copySuccess'),
-            description: t('copyLinkSuccess'),
-            status: 'success',
-            duration: 2000,
-            isClosable: true,
-            position: 'top',
-          })
-        )
-        .catch(error => console.log(`${t('copy')} ${t('failed')}:`, error))
-    }
-  }
-
-  // 复制合约地址
-  const copyContractAddress = (address: string) => {
-    if (address) {
-      navigator.clipboard
-        .writeText(address)
-        .then(() =>
-          toast({
-            title: t('copySuccess'),
-            description: t('copyAddressSuccess'),
-            status: 'success',
-            duration: 2000,
-            isClosable: true,
-            position: 'top',
-          })
-        )
-        .catch(err => console.error(`${t('copy')} ${t('failed')}:`, err))
-    }
-  }
-
-  const ThSortable = ({
-    column,
-    children,
-  }: {
-    column: string
-    children: React.ReactNode
-  }) => (
-    <Th
-      onClick={() => onSort(column)}
-      cursor="pointer"
-      position="relative"
-      py={4}
-      bg={thBg}
-      borderBottom="2px"
-      borderColor="brand.primary"
-      _hover={{ bg: thHoverBg }}
-      transition="all 0.2s"
-      textAlign="center"
-    >
-      <Flex align="center" justify="center">
-        {children}
-        <SortIndicator
-          column={column}
-          sortColumn={sortColumn}
-          sortDirection={sortDirection}
-        />
-      </Flex>
-    </Th>
-  )
-
-  return (
-    <TableContainer bg={bg} borderRadius="lg" boxShadow="md">
-      <Table variant="simple">
-        <Thead>
-          <Tr>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
-              {t('tokenColumn')}
-            </Th>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
-              {t('contractAddressColumn')}
-            </Th>
-            <ThSortable column="totalSupply">
-              {t('totalSupplyColumn')}
-            </ThSortable>
-            <ThSortable column="raised">
-              {t('progressColumn')}
-            </ThSortable>
-            <ThSortable column="participants">
-              {t('participantsColumn')}
-            </ThSortable>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" textAlign="center">
-              {t('mintingPrice')}
-            </Th>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
-              {t('linksColumn')}
-            </Th>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary"></Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {tokens.map(token => (
-            <Tr
-              key={token.id}
-              _hover={{ bg: hoverBg, cursor: 'pointer' }}
-              onClick={e => {
-                if (
-                  (e.target as HTMLElement).tagName !== 'A' &&
-                  !(e.target as HTMLElement).closest('a') &&
-                  !(e.target as HTMLElement).closest('button')
-                ) {
-                  navigateToMintPage(token.address)
-                }
-              }}
-              sx={{
-                transition: 'all 0.2s',
-              }}
-            >
-              <Td>
-                <HStack spacing={3}>
-                  <Image
-                    src={token.image}
-                    alt={token.name}
-                    boxSize="40px"
-                    borderRadius="full"
-                    border="2px solid"
-                    borderColor="brand.light"
-                  />
-                  <Box>
-                    <Text
-                      fontSize="md"
-                      fontWeight="bold"
-                      color="brand.primary"
-                      lineHeight="1.2"
-                    >
-                      {token.symbol}
-                    </Text>
-                    <Text
-                      fontSize="xs"
-                      color="gray.500"
-                      noOfLines={1}
-                      maxW="180px"
-                    >
-                      {token.name}
-                    </Text>
-                  </Box>
-                </HStack>
-              </Td>
-              <Td>
-                {token.address && (
-                  <Box
-                    as="button"
-                    px={2}
-                    py={1}
-                    borderRadius="md"
-                    fontSize="xs"
-                    fontFamily="mono"
-                    color="brand.primary"
-                    bg="gray.50"
-                    border="1px solid"
-                    borderColor="gray.200"
-                    title={token.address}
-                    cursor="pointer"
-                    width="fit-content"
-                    onClick={() => copyContractAddress(token.address)}
-                    _hover={{
-                      bg: 'gray.100',
-                      borderColor: 'brand.primary',
-                    }}
-                    transition="all 0.2s"
-                  >
-                    <Icon as={FaFileContract} mr={1} fontSize="10px" />
-                    {formatContractAddress(token.address)}
-                  </Box>
-                )}
-              </Td>
-              <Td textAlign="center">{formatTokenAmount(token.totalSupply, { abbreviate: true })}</Td>
-              <Td>
-                <Box py={1} width="100%">
-                  <HStack justify="space-between" mb={1}>
-                    <Text fontWeight="bold" fontSize="sm" color="brand.primary">
-                      {token.raised}
-                    </Text>
-                    <Text fontWeight="bold" fontSize="sm">
-                      {token.target}
-                    </Text>
-                  </HStack>
-                  <HStack spacing={2} align="center">
-                    <Progress
-                      value={token.progress}
-                      colorScheme="purple"
-                      borderRadius="full"
-                      size="sm"
-                      flex="1"
-                    />
-                    <Text fontSize="xs" fontWeight="bold" whiteSpace="nowrap">
-                      {token.progress.toFixed(2)}%
-                    </Text>
-                  </HStack>
-                </Box>
-              </Td>
-              <Td textAlign="center">{token.participants}</Td>
-              <Td textAlign="center">
-                <Text fontWeight="medium" textAlign="center" width="100%" display="block">
-                  {formatMintRateForToken(token)}
-                </Text>
-              </Td>
-              <Td>
-                <HStack spacing={3} justify="center">
-                  <Box
-                    as="button"
-                    onClick={() => handleShare(token)}
-                    color={iconColor}
-                    _hover={{ color: iconHoverColor }}
-                    transition="color 0.2s"
-                  >
-                    <Icon as={FaShareAlt} boxSize="16px" />
-                  </Box>
-                </HStack>
-              </Td>
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
-    </TableContainer>
-  )
-}
-
-// 搜索和排序面板组件
-function FilterPanel({
-  sortColumn,
-  sortDirection,
-  onSort,
-  searchQuery,
-  onSearchChange,
-}: {
-  sortColumn: string
-  sortDirection: 'asc' | 'desc'
-  onSort: (column: string) => void
-  searchQuery: string
-  onSearchChange: (value: string) => void
-}) {
-  const buttonBg = useColorModeValue('white', 'gray.700')
-  const activeBg = useColorModeValue('gray.100', 'gray.600')
-  const inputBg = useColorModeValue('white', 'gray.800')
-  const { t } = useTranslation()
-
-  const sortOptions = [
-    { label: t('participantsSort'), column: 'participants' },
-    { label: t('progressSort'), column: 'progress' },
-    { label: t('raisedSort'), column: 'raised' },
-    { label: t('targetSort'), column: 'target' },
-  ]
-
-  return (
-    <Flex
-      align="center"
-      mb={4}
-      gap={4}
-      flexWrap="wrap"
-      justifyContent="space-between"
-    >
-      <InputGroup maxW={{ base: '100%', md: '300px' }} mb={{ base: 2, md: 0 }}>
-        <InputLeftElement pointerEvents="none" flexShrink={1}>
-          <Icon as={FaSearch} color="gray.400" />
-        </InputLeftElement>
-        <Input
-          placeholder={t('searchPlaceholder')}
-          value={searchQuery}
-          onChange={e => onSearchChange(e.target.value)}
-          bg={inputBg}
-          borderColor="gray.300"
-          _hover={{ borderColor: 'brand.primary' }}
-          _focus={{
-            borderColor: 'brand.primary',
-            boxShadow: '0 0 0 1px var(--chakra-colors-brand-primary)',
-          }}
-        />
-      </InputGroup>
-
-      {/* <Flex align="center" gap={2} flexWrap="wrap">
-        <Text fontWeight="medium" fontSize="sm" whiteSpace="nowrap">
-          {t('sortBy')}
-        </Text>
-        {sortOptions.map(option => (
-          <Button
-            key={option.column}
-            size="sm"
-            variant="outline"
-            rightIcon={
-              sortColumn === option.column ? (
-                <Icon
-                  as={sortDirection === 'asc' ? ChevronUpIcon : ChevronDownIcon}
-                />
-              ) : undefined
-            }
-            onClick={() => onSort(option.column)}
-            bg={sortColumn === option.column ? activeBg : buttonBg}
-            borderColor={
-              sortColumn === option.column ? 'brand.primary' : 'gray.200'
-            }
-            color={sortColumn === option.column ? 'brand.primary' : 'gray.600'}
-            _hover={{ borderColor: 'brand.primary', color: 'brand.primary' }}
-          >
-            {option.label}
-          </Button>
-        ))}
-      </Flex> */}
-    </Flex>
-  )
-}
-
-// 添加一个新的分页控制组件
-function PaginationControl({
-  currentPage,
-  totalPages,
-  onPageChange,
-  pageSize,
-  onPageSizeChange,
-}: {
-  currentPage: number
-  totalPages: number
-  onPageChange: (page: number) => void
-  pageSize: number
-  onPageSizeChange: (size: number) => void
-}) {
-  const pageSizeOptions = [12, 24, 36, 48, 96]
-  const { t } = useTranslation()
-
-  return (
-    <Flex
-      justifyContent="space-between"
-      alignItems="center"
-      w="100%"
-      mt={6}
-      flexDir={{ base: 'column', md: 'row' }}
-      gap={4}
-    >
-      <HStack>
-        <Text fontSize="sm" fontWeight="medium">
-          {t('itemsPerPage')}:
-        </Text>
-        <Select
-          value={pageSize}
-          onChange={e => onPageSizeChange(Number(e.target.value))}
-          size="sm"
-          w="80px"
-          borderColor="gray.300"
-          _hover={{ borderColor: 'brand.primary' }}
-          _focus={{
-            borderColor: 'brand.primary',
-            boxShadow: '0 0 0 1px var(--chakra-colors-brand-primary)',
-          }}
-        >
-          {pageSizeOptions.map(size => (
-            <option key={size} value={size}>
-              {size}
-            </option>
-          ))}
-        </Select>
-      </HStack>
-
-      <HStack>
-        <Text fontSize="sm">
-          {t('pageInfo')
-            .replace('{current}', currentPage.toString())
-            .replace('{total}', totalPages.toString())}
-        </Text>
-        <ButtonGroup isAttached variant="outline" size="sm">
-          <IconButton
-            aria-label={t('prevPage')}
-            icon={<FaChevronLeft />}
-            onClick={() => onPageChange(currentPage - 1)}
-            isDisabled={currentPage <= 1}
-            colorScheme="purple"
-          />
-          <IconButton
-            aria-label={t('nextPage')}
-            icon={<FaChevronRight />}
-            onClick={() => onPageChange(currentPage + 1)}
-            isDisabled={currentPage >= totalPages}
-            colorScheme="purple"
-          />
-        </ButtonGroup>
-      </HStack>
-    </Flex>
-  )
 }
 
 export default function MintPage() {
@@ -609,6 +125,8 @@ export default function MintPage() {
   })
   const [sortColumn, setSortColumn] = useState('created_at')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [totalTokenCount, setTotalTokenCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   // 获取token列表
   const getTokenList = async () => {
@@ -632,12 +150,25 @@ export default function MintPage() {
           sortField = 'progress';
       }
       
+      // 构建请求参数，添加搜索关键词
+      const params: any = {
+        page: currentPage,
+        limit: pageSize,
+        sort: sortField,
+      };
+      
+      // 如果有搜索关键词，添加到请求参数中
+      if (searchQuery.trim()) {
+        params.search = searchQuery.trim();
+      }
+      
+      // 如果是铸造结束标签页，添加进度100%的过滤条件
+      if (tabIndex === 3) {
+        params.finished = true;
+      }
+      
       await store.dispatch(
-        fetchTokenList({
-          page: currentPage,
-          limit: pageSize,
-          sort: sortField,
-        })
+        fetchTokenList(params)
       )
     } catch (error) {
       console.error('获取代币列表失败:', error)
@@ -647,9 +178,6 @@ export default function MintPage() {
   // 处理页码变化
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
-    getTokenList()
-    // 滚动到页面顶部以便看到新内容
-    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   // 处理每页显示数量变化
@@ -660,8 +188,33 @@ export default function MintPage() {
 
     setPageSize(newSize)
     setCurrentPage(newCurrentPage)
-    getTokenList()
   }
+
+  // 计算总页数
+  useEffect(() => {
+    if (tokenList && tokenList.length > 0) {
+      // 如果返回的数据条数等于pageSize，说明可能还有下一页
+      const hasMorePages = tokenList.length >= pageSize;
+      // 如果当前页是第1页，并且有足够多的数据，则至少有2页
+      // 否则，我们认为当前页就是最后一页
+      const calculatedTotalPages = (currentPage === 1 && hasMorePages) 
+        ? Math.max(2, currentPage + 1) 
+        : (hasMorePages ? currentPage + 1 : currentPage);
+      
+      setTotalPages(calculatedTotalPages);
+      setTotalTokenCount(tokenList.length + (calculatedTotalPages - currentPage) * pageSize);
+    } else {
+      setTotalPages(1);
+      setTotalTokenCount(0);
+    }
+  }, [tokenList, currentPage, pageSize]);
+
+  // 监听页码或每页数量变化，获取对应页的数据
+  useEffect(() => {
+    getTokenList()
+    // 滚动到页面顶部以便看到新内容
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [currentPage, pageSize])
 
   // 切换tab时重置页码并获取数据
   useEffect(() => {
@@ -780,58 +333,12 @@ export default function MintPage() {
     setSortDirection(newDirection)
   }
 
-  // 搜索过滤逻辑
-  const filterTokensBySearch = (tokens: MintToken[]) => {
-    if (!searchQuery.trim()) return tokens
-
-    const query = searchQuery.toLowerCase().trim()
-    return tokens.filter(
-      token =>
-        token.name.toLowerCase().includes(query) ||
-        token.symbol.toLowerCase().includes(query) ||
-        (token.address && token.address.toLowerCase().includes(query))
-    )
-  }
-
-  // 对数据进行排序
-  const getSortedTokens = (tokens: MintToken[]) => {
-    return [...tokens].sort((a, b) => {
-      switch (sortColumn) {
-        case 'totalSupply':
-          const aSupply = parseFloat(a.totalSupply)
-          const bSupply = parseFloat(b.totalSupply)
-          return sortDirection === 'asc' ? aSupply - bSupply : bSupply - aSupply
-        case 'progress':
-          return sortDirection === 'asc'
-            ? a.progress - b.progress
-            : b.progress - a.progress
-        case 'participants':
-          return sortDirection === 'asc'
-            ? a.participants - b.participants
-            : b.participants - a.participants
-        case 'created_at':
-          return sortDirection === 'asc'
-            ? new Date(a.created_at).getTime() -
-                new Date(b.created_at).getTime()
-            : new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime()
-        default:
-          return 0
-      }
-    })
-  }
-
-  // 处理分页逻辑
-  const paginateTokens = (tokens: MintToken[]) => {
-    const startIndex = (currentPage - 1) * pageSize
-    return tokens.slice(startIndex, startIndex + pageSize)
-  }
-
-  // 当筛选或排序条件变化时，重置为第一页
+  // 当搜索条件、排序条件变化时，重置为第一页并重新请求数据
   useEffect(() => {
-    setCurrentPage(1)
-  }, [sortColumn, sortDirection, searchQuery])
-
+    setCurrentPage(1);
+    // 通过监听currentPage变化会自动触发getTokenList
+  }, [searchQuery, sortColumn, sortDirection]);
+  
   const renderTabContent = (tokens: MintToken[]) => {
     // 显示加载状态
     if (loading) {
@@ -877,13 +384,10 @@ export default function MintPage() {
     const processedTokens = tokens.map(token => ({
       ...token,
       image: token.logo || '/token-logo.png', // 使用token中的logo，如果没有则使用默认图片
-    }))
-
-    // 先过滤搜索结果
-    const filteredTokens = filterTokensBySearch(processedTokens)
+    }));
 
     // 显示空结果状态
-    if (filteredTokens.length === 0) {
+    if (processedTokens.length === 0) {
       return (
         <Box py={10} textAlign="center">
           <Text color="gray.500" fontSize="lg">
@@ -910,7 +414,7 @@ export default function MintPage() {
             columns={{ base: 1, md: 2, lg: 4, xl: 4 }}
             spacing={{ base: 6, md: 5, lg: 4 }}
           >
-            {filteredTokens.map(token => (
+            {processedTokens.map(token => (
               <MintingTokenCard
                 key={token.id}
                 token={token}
@@ -920,16 +424,17 @@ export default function MintPage() {
           </SimpleGrid>
         ) : (
           <TokenListView
-            tokens={filteredTokens}
+            tokens={processedTokens}
             sortColumn={sortColumn}
             sortDirection={sortDirection}
             onSort={handleSort}
+            currencyUnit={currencyUnit}
           />
         )}
 
         <PaginationControl
           currentPage={currentPage}
-          totalPages={Math.ceil(filteredTokens.length / pageSize)}
+          totalPages={totalPages}
           onPageChange={handlePageChange}
           pageSize={pageSize}
           onPageSizeChange={handlePageSizeChange}
@@ -1151,7 +656,7 @@ export default function MintPage() {
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
                 />
-                {renderTabContent(tokenList.filter(token => token.progress >= 100))}
+                {renderTabContent(tokenList)}
               </TabPanel>
             </TabPanels>
           </Tabs>

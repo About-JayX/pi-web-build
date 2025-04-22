@@ -23,8 +23,12 @@ export default {
   // Mint Page - Pagination
   'itemsPerPage': 'Items per page',
   'pageInfo': 'Page {current} of {total}',
+  'currentPage': 'Page {current}',
   'prevPage': 'Previous',
   'nextPage': 'Next',
+  'firstPage': 'First Page',
+  'lastPage': 'Last Page',
+  'goToPage': 'Go to',
   
   // Mint Page - List View
   'tokenColumn': 'Token',
@@ -100,8 +104,6 @@ export default {
   'totalItems': 'Total {total} items',
   'address': 'Address',
   'holdingRatio': 'Holding Ratio',
-  'firstPage': 'First Page',
-  'lastPage': 'Last Page',
   
   // Token Detail Page - MintingInstructions Component
   'mintingInstructions': 'Minting Instructions',
