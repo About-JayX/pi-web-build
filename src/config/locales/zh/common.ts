@@ -23,6 +23,14 @@ export default {
   'selectNetwork': '选择网络',
   'language': '语言',
   
+  // 错误和提示信息
+  'error': '错误',
+  'installPhantomWallet': '请先安装 Phantom 钱包插件',
+  'loginSuccess': '登录成功',
+  'welcomeBack': '欢迎回来，{{username}}',
+  'operationFailed': '操作失败:',
+  'operationFailedTryAgain': '操作失败，请重试',
+  
   // 语言
   'chinese': '中文',
   'english': 'English',

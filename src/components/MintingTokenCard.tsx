@@ -25,6 +25,9 @@ import {
 } from 'react-icons/fa'
 import NextLink from 'next/link'
 import { useTranslation } from 'react-i18next'
+import { formatTokenAmount } from '@/utils'
+import { useMemo } from 'react'
+import { useMintingCalculations } from '@/hooks/useMintingCalculations'
 
 interface MintingTokenCardProps {
   token: {
@@ -39,6 +42,7 @@ interface MintingTokenCardProps {
     totalSupply: string
     minterCounts: number
     presaleRate?: string
+    tokenDecimal?: number
     address?: string
     website?: string
     twitter?: string
@@ -49,7 +53,7 @@ interface MintingTokenCardProps {
 
 export default function MintingTokenCard({
   token,
-  currencyUnit = 'Pi',
+  currencyUnit = 'SOL',
 }: MintingTokenCardProps) {
   const cardBg = useColorModeValue('white', 'gray.800')
   const textColor = useColorModeValue('gray.600', 'gray.400')
@@ -57,6 +61,15 @@ export default function MintingTokenCard({
   const iconHoverColor = useColorModeValue('brand.primary', 'brand.light')
   const toast = useToast()
   const { t } = useTranslation()
+
+  // 使用自定义Hook处理铸造计算
+  const { getFormattedExchangeRate } = useMintingCalculations({
+    totalSupply: token.totalSupply,
+    target: token.target,
+    presaleRate: token.presaleRate,
+    currencyUnit,
+    tokenDecimals: token.tokenDecimal || 6  // 从token对象获取小数位，默认为6
+  });
 
   // 缩略显示合约地址
   const formatContractAddress = (address: string) => {
@@ -68,7 +81,20 @@ export default function MintingTokenCard({
 
   // 格式化总供应量，以便在有限空间显示
   const formatSupply = (supply: string) => {
-    return supply
+    // 第一性原理：总供应量在tokenSlice中已经被除以10^tokenDecimal，这里仅进行格式化
+    // 适当缩写大数字，如显示为：314M，1B等
+    return formatTokenAmount(supply, { 
+      abbreviate: true, 
+      decimals: 2
+    })
+  }
+
+  // 获取铸造金额，确保只有在target存在时才返回值
+  const getMintAmount = () => {
+    if (!token.target) return 0;
+    const targetMatch = token.target.match(/[0-9.]+/);
+    if (!targetMatch) return 0;
+    return parseFloat(targetMatch[0]);
   }
 
   // 分享功能处理
@@ -220,16 +246,15 @@ export default function MintingTokenCard({
               </Text>
             </HStack>
 
-            {token.presaleRate && (
-              <HStack justify="space-between">
-                <Text fontSize="xs" color={textColor}>
-                  {t('mintingPrice')}
-                </Text>
-                <Text fontWeight="bold" fontSize="sm">
-                  {token.presaleRate}
-                </Text>
-              </HStack>
-            )}
+            {/* 铸造价格显示 */}
+            <HStack justify="space-between">
+              <Text fontSize="xs" color={textColor}>
+                {t('mintingPrice')}
+              </Text>
+              <Text fontWeight="bold" fontSize="sm">
+                {token.presaleRate || getFormattedExchangeRate()}
+              </Text>
+            </HStack>
 
             {token.address && (
               <HStack justify="space-between">

@@ -38,7 +38,6 @@ import {
   FaArrowDown,
   FaFileContract,
 } from 'react-icons/fa'
-import { marketTokens, mintingTokensPi, mintingTokensSol } from '@/mock'
 import { useNetwork } from '@/contexts/NetworkContext'
 import MintingTokenCard from '@/components/MintingTokenCard'
 import { useTranslation } from 'react-i18next'
@@ -106,6 +105,25 @@ export default function HomePage() {
   const iconColor = useColorModeValue('gray.600', 'gray.400')
   const iconHoverColor = useColorModeValue('brand.primary', 'brand.light')
   const hoverBg = useColorModeValue('gray.50', 'gray.700')
+
+  // 铸造中的代币数据
+  const [mintingData, setMintingData] = useState<any[]>([])
+  
+  // 获取铸造中的代币数据
+  useEffect(() => {
+    const fetchMintingData = async () => {
+      try {
+        // 替换为实际API调用
+        const data = await TokenAPI.getMintingTokens(network)
+        setMintingData(data || [])
+      } catch (error) {
+        console.error('获取铸造代币数据失败:', error)
+        setMintingData([])
+      }
+    }
+    
+    fetchMintingData()
+  }, [network])
 
   // 根据当前网络选择铸造数据
   const mintingData = network === 'SOL' ? mintingTokensSol : mintingTokensPi

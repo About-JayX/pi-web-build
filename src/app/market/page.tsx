@@ -57,6 +57,7 @@ import NextLink from "next/link";
 import { useTranslation } from "react-i18next";
 import { MarketAPI } from "@/api";
 import { formatNumberWithUnit } from "@/utils";
+import { formatTokenAmount } from "@/utils";
 import { MarketDetailType } from "./[address]/page";
 import Link from "next/link";
 
@@ -326,7 +327,7 @@ function TokenListView({
                 $ {Number(token.MarketCap || 0).toLocaleString()}
               </Td>
               <Td isNumeric>
-                {formatNumberWithUnit(Number(token.TotalSupply || 0))}
+                {formatTokenAmount(token.TotalSupply || 0, { abbreviate: true })}
               </Td>
               <Td isNumeric>
                 $ {Number(token.Volume_24 || 0).toLocaleString()}

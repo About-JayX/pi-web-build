@@ -44,6 +44,7 @@ import {
   FaFileContract,
   FaChevronLeft,
   FaChevronRight,
+  FaSync,
 } from 'react-icons/fa'
 import NextLink from 'next/link'
 import { useState, useEffect, useMemo, useCallback } from 'react'
@@ -56,6 +57,7 @@ import { useAppSelector } from '@/store/hooks'
 import axios from '@/config/axios'
 import { store } from '@/store'
 import { fetchTokenList } from '@/store/slices/tokenSlice'
+import { formatTokenAmount } from '@/utils'
 
 interface MintToken {
   id: number
@@ -318,14 +320,14 @@ function TokenListView({
                   </Box>
                 )}
               </Td>
-              <Td textAlign="center">{token.totalSupply}</Td>
+              <Td textAlign="center">{formatTokenAmount(token.totalSupply, { abbreviate: true })}</Td>
               <Td>
                 <VStack spacing={1} align="center">
                   <Text fontSize="xs" color="gray.500">
                     {t('target')}: {token.target}
                   </Text>
                   <Text fontWeight="bold" color="brand.primary" fontSize="sm">
-                    {t('raised')}: {token.raised}
+                    {t('raised')}: {formatTokenAmount(token.raised, { abbreviate: true })}
                   </Text>
                 </VStack>
               </Td>
@@ -544,7 +546,7 @@ function PaginationControl({
 }
 
 export default function MintPage() {
-  const { tokenList, loading } = useAppSelector(state => state.token)
+  const { tokenList, loading, error } = useAppSelector(state => state.token)
   const { network } = useNetwork()
   const { t } = useTranslation()
 
@@ -709,6 +711,26 @@ export default function MintPage() {
           <Text color="gray.500" fontSize="lg">
             {t('loading')}
           </Text>
+        </Box>
+      )
+    }
+
+    // 显示API错误
+    if (error) {
+      return (
+        <Box py={10} textAlign="center">
+          <Text color="red.500" fontSize="lg" mb={4}>
+            {error}
+          </Text>
+          <VStack spacing={4}>
+            <Button 
+              colorScheme="purple" 
+              onClick={getTokenList} 
+              leftIcon={<Icon as={FaSync} />}
+            >
+              {t('tryAgain')}
+            </Button>
+          </VStack>
         </Box>
       )
     }

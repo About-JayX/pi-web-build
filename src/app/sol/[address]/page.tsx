@@ -29,7 +29,7 @@ import { useParams } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { selectTokenByAddress, fetchTokenList } from '@/store/slices/tokenSlice'
 import { useTranslation } from 'react-i18next'
-import { FaCoins, FaUsers, FaChartPie } from 'react-icons/fa'
+import { FaCoins, FaUsers, FaChartPie, FaSync } from 'react-icons/fa'
 import MintingForm from '@/components/token-detail/MintingForm'
 import { useSolana } from '@/contexts/solanaProvider'
 import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
@@ -56,11 +56,9 @@ export default function TokenMintPage() {
     data: fairCurveData,
     loading: fairCurveLoading,
     error: fairCurveError,
-  } = useFairCurve(conn, selectedToken?.address || '')
+  } = useFairCurve(conn, selectedToken?.address && selectedToken.address.trim() !== '' ? selectedToken.address : undefined)
 
   const formattedData = fairCurveData
-    ? formatFairCurveState(fairCurveData)
-    : null
 
   const cardBg = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.700')
@@ -109,7 +107,9 @@ export default function TokenMintPage() {
 
   // 格式化代币数量（除以1e6）
   const formatTokenAmount = (amount: string) => {
-    return new BigNumber(amount).div(1e6).toFormat(2)
+    // 获取代币的小数位，默认为6
+    const decimal = selectedToken?.tokenDecimal || 6
+    return new BigNumber(amount).div(10 ** decimal).toFormat(2)
   }
 
   // 格式化SOL数量（除以1e9）
@@ -145,6 +145,11 @@ export default function TokenMintPage() {
       <Center minH="60vh">
         <VStack spacing={4}>
           <Text color="red.500">{tokenError || fairCurveError}</Text>
+          <Link href="/" passHref>
+            <Button variant="outline" leftIcon={<ChevronLeftIcon />} colorScheme="purple">
+              {t('backToMintingHome')}
+            </Button>
+          </Link>
         </VStack>
       </Center>
     )
@@ -241,6 +246,7 @@ export default function TokenMintPage() {
                         network,
                         currencyUnit,
                         address: selectedToken.address,
+                        tokenDecimal: selectedToken.tokenDecimal,
                       }}
                       tokenAccount={tokenAccount}
                       tokenBalance={tokenBalance}

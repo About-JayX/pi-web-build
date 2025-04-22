@@ -33,9 +33,14 @@ export const NetworkProvider = ({ children }: { children: ReactNode }) => {
     } else if (network === initialNetwork) {
       // 如果当前网络与初始值相同，不需要重新设置
       return;
-    } else if (localStorage && localStorage.getItem('preferred_network')) {
-      // 使用本地存储的首选网络
-      setNetwork(localStorage.getItem('preferred_network') || initialNetwork);
+    } else if (localStorage && localStorage.getItem('selectedNetwork')) {
+      // 使用本地存储的首选网络，但总是优先使用SOL
+      const savedNetwork = localStorage.getItem('selectedNetwork');
+      // 如果保存的网络不是SOL，检查我们是否想要使用保存的网络，这里我们设置为总是使用SOL
+      setNetwork(initialNetwork);
+    } else {
+      // 确保默认使用SOL网络
+      setNetwork(initialNetwork);
     }
   }, [pathname, network, initialNetwork]);
 

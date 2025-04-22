@@ -17,6 +17,7 @@ import { Provider } from "react-redux";
 import { store } from "../store";
 import { fetchTokenList } from "@/store/slices/tokenSlice";
 import { WssProvider } from "@/contexts/WssContext";
+import AuthRestorer from "@/contexts/AuthRestorer";
 
 // 动态导入Navbar，避免SSR
 const Navbar = dynamic(() => import("@/components/Navbar"), { ssr: false });
@@ -68,6 +69,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
               <NetworkProvider>
                 <SolanaProvider>
                   <I18nProvider>
+                    <AuthRestorer />
                     <Navbar />
                     <main style={{ minHeight: "calc(100vh - 60px)" }}>
                       {children}

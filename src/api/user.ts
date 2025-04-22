@@ -20,9 +20,13 @@ export const UserAPI = {
   },
 
   /**
-   * 获取用户信息
+   * 获取用户信息 - 在登录后尝试使用token获取用户信息
+   * 注意：某些API可能未实现或有变化，请检查控制台错误
    */
   getUserInfo: (): Promise<UserInfo> => {
+    console.log('正在调用getUserInfo API，如果返回404错误可能是API未实现')
+    
+    // 验证API是否可用：可以修改为一个已知有效的API端点
     return userApi.get('/web/user/info')
   },
 

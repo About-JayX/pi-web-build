@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo, useRef, useMemo } from 'react'
 import {
   Box,
   Button,
@@ -49,6 +49,7 @@ import {
   FaChevronRight,
   FaTimes,
   FaPercent,
+  FaRocket,
 } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
 import { useProgram } from '@/web3/fairMint/hooks/useProgram'
@@ -60,6 +61,8 @@ import { TokenInfo } from '@/api/types'
 import BN from 'bn.js'
 import { CLMM_PROGRAM_ID } from '@/config'
 import BigNumber from 'bignumber.js'
+import { formatTokenAmount } from '@/utils'
+import useMintingCalculations from '@/hooks/useMintingCalculations'
 
 interface Token extends TokenInfo {
   logo: string
@@ -69,20 +72,22 @@ interface Token extends TokenInfo {
 interface MintingFormProps {
   token: {
     symbol: string
+    address?: string
+    tokenDecimal?: number
     presaleRate?: string
-    network?: string
     currencyUnit?: string
-    address: string
+    totalSupply?: string
+    target?: string
   }
   tokenAccount?: string | null
   tokenBalance?: number | null
   isOpen?: boolean
   onClose?: () => void
   isModal?: boolean
-  onBalanceUpdate?: (newBalance: number) => void
+  onBalanceUpdate?: () => void
 }
 
-export default function MintingForm({
+const MintingForm: React.FC<MintingFormProps> = memo(({
   token,
   tokenAccount,
   tokenBalance,
@@ -90,7 +95,7 @@ export default function MintingForm({
   onClose,
   isModal = false,
   onBalanceUpdate,
-}: MintingFormProps) {
+}) => {
   const [walletBalance, setWalletBalance] = useState<number>(0) // 初始化为0
   const [amount, setAmount] = useState<string>('')
   const [submitting, setSubmitting] = useState(false)
@@ -100,16 +105,42 @@ export default function MintingForm({
   const [activeTab, setActiveTab] = useState<number>(0)
   const [refundAmount, setRefundAmount] = useState<string>('') // 新增：退还金额输入
   const [isMobile, setIsMobile] = useState<boolean>(false)
+  const [isAdding, setIsAdding] = useState(false)
+  const [isCancelling, setIsCancelling] = useState(false)
+  const [tokenRefundAmount, setTokenRefundAmount] = useState<string>('')
   const { t } = useTranslation()
   const { mintToken, returnToken } = useProgram()
   const { conn, publicKey } = useSolana()
   const isLoggedIn = useAppSelector(state => state.user.isLoggedIn)
-  const { data: fairCurveData } = useFairCurve(conn, token.address)
+  const { data: fairCurveData } = useFairCurve(conn, token.address && token.address.trim() !== '' ? token.address : undefined)
+  const { isOpen: disclosureIsOpen, onOpen, onClose: disclosureOnClose } = useDisclosure()
 
-  const currencyUnit = token.currencyUnit || 'Pi'
+  const currencyUnit = token.currencyUnit || 'SOL'
   const cardBg = useColorModeValue('white', 'gray.800')
   const inputBg = useColorModeValue('white', 'gray.700')
   const toast = useToast()
+
+  // 使用自定义Hook处理铸造计算
+  const { 
+    mintingPrice,
+    mintingRatio,
+    parseMintingPrice,
+    calculateMintedAmount,
+    getFormattedExchangeRate,
+    calculateTokensFromCurrency,
+    calculateCurrencyFromTokens,
+  } = useMintingCalculations({
+    totalSupply: token.totalSupply,
+    target: token.target,
+    presaleRate: token.presaleRate,
+    currencyUnit: token.currencyUnit || 'SOL',
+    tokenDecimals: token.tokenDecimal || 0
+  });
+
+  // 在组件顶部添加 inputFocus 状态
+  const [inputFocus, setInputFocus] = useState<'payAmount' | 'tokenAmount'>('payAmount');
+  const [payAmount, setPayAmount] = useState<number | null>(null);
+  const [tokenAmount, setTokenAmount] = useState<number | null>(null);
 
   // 获取钱包余额的显示值
   const getDisplayBalance = (balance: number) => {
@@ -138,7 +169,7 @@ export default function MintingForm({
           )
           const newBalance = tokenAccountInfo.value.uiAmount || 0
           if (onBalanceUpdate) {
-            onBalanceUpdate(newBalance)
+            onBalanceUpdate()
           }
         }
       } catch (error) {
@@ -218,7 +249,7 @@ export default function MintingForm({
         
         // 通过 props 更新父组件的 tokenBalance
         if (onBalanceUpdate) {
-          onBalanceUpdate(newBalance)
+          onBalanceUpdate()
         }
       }
     } catch (error) {
@@ -250,11 +281,21 @@ export default function MintingForm({
       }
 
       if (!isAmountValid()) return
+      
+      // 确保token.address存在
+      if (!token.address) {
+        toast({
+          title: t('代币地址无效'),
+          description: t('无法执行铸造操作'),
+          status: 'error',
+        })
+        return
+      }
 
       setSubmitting(true)
       const mintAmount = parseFloat(amount)
 
-      // 调用真实的mintToken函数，传入SOL金额（转换为lamports）和token地址
+      // 调用真实的mintToken函数，传入货币金额（转换为最小单位）和token地址
       await mintToken(mintAmount * 1e9, token.address)
 
       // 等待交易确认后更新余额
@@ -294,14 +335,13 @@ export default function MintingForm({
     }
   }
 
-  // 退还部分修改 - 根据代币数量计算Pi数量
-  const calculatePiFromTokens = (tokenAmount: number) => {
-    if (!token.presaleRate) return 0
-    // 从presaleRate提取数值部分
-    const rate = parseFloat(token.presaleRate.replace(/[^0-9.]/g, '') || '0')
-    if (rate <= 0) return 0
-    // presaleRate是每个代币的Pi价格（如0.000001 Pi），所以直接相乘
-    return tokenAmount * rate
+  // 获取铸造价格 - 优先使用presaleRate，否则计算
+  const getMintingPrice = (displayMode: 'price' | 'ratio' = 'price') => {
+    if (displayMode === 'ratio') {
+      return mintingRatio;
+    } else {
+      return mintingPrice;
+    }
   }
 
   // 检查代币退还数量是否有效
@@ -329,27 +369,27 @@ export default function MintingForm({
     // 计算初始的token数量
     const initialTokenAmount = new BigNumber(tokenBalance).times(percent)
 
-    // 计算对应的SOL数量
+    // 计算对应的货币数量
     const tokenAmountInSmallestUnit = initialTokenAmount.times(1e6) // 转换为原始单位
     const supplied = new BigNumber(fairCurveData.supplied)
-    const liquiditySol = new BigNumber(fairCurveData.liquiditySol)
+    const liquidityCurrency = new BigNumber(fairCurveData.liquiditySol)
 
-    // 计算SOL数量
-    const rawSolAmount = tokenAmountInSmallestUnit
-      .times(liquiditySol)
+    // 计算货币数量
+    const rawCurrencyAmount = tokenAmountInSmallestUnit
+      .times(liquidityCurrency)
       .div(supplied)
       .div(1e9)
 
     // 向下取整到最接近的0.001
-    const roundedSolAmount = new BigNumber(
-      Math.floor(rawSolAmount.times(1000).toNumber()) / 1000
+    const roundedCurrencyAmount = new BigNumber(
+      Math.floor(rawCurrencyAmount.times(1000).toNumber()) / 1000
     )
 
     // 反向计算实际可退还的代币数量
-    const actualTokenAmount = roundedSolAmount
-      .times(1e9) // 转回lamports
+    const actualTokenAmount = roundedCurrencyAmount
+      .times(1e9) // 转回最小单位
       .times(supplied)
-      .div(liquiditySol)
+      .div(liquidityCurrency)
       .div(1e6) // 转换为代币单位
       .integerValue(BigNumber.ROUND_FLOOR) // 向下取整到整数
 
@@ -357,8 +397,8 @@ export default function MintingForm({
     setRefundAmount(actualTokenAmount.toString())
   }
 
-  // 计算基于代币数量的 SOL 金额（不含手续费）
-  const calculateTotalPiAmount = () => {
+  // 计算基于代币数量的货币金额（不含手续费）
+  const calculateTotalCurrencyAmount = () => {
     if (
       !isTokenRefundAmountValid() ||
       !fairCurveData?.supplied ||
@@ -371,33 +411,33 @@ export default function MintingForm({
     const supplied = new BigNumber(fairCurveData.supplied)
     const liquiditySol = new BigNumber(fairCurveData.liquiditySol)
 
-    // 计算结果后转换为SOL单位
+    // 计算结果后转换为货币单位
     const rawAmount = tokenAmount.times(liquiditySol).div(supplied).div(1e9)
 
     // 向下取整到最接近的0.001
     return new BigNumber(Math.floor(rawAmount.times(1000).toNumber()) / 1000)
   }
 
-  // 计算基于代币数量的实际 SOL 退还金额
-  const getActualPiRefundAmount = () => {
-    const totalSolAmount = calculateTotalPiAmount()
-    if (totalSolAmount.isZero()) return '0.000'
+  // 计算基于代币数量的实际货币退还金额
+  const getActualCurrencyRefundAmount = () => {
+    const totalCurrencyAmount = calculateTotalCurrencyAmount()
+    if (totalCurrencyAmount.isZero()) return '0.000'
 
     // 计算手续费（2%）
-    const feeAmount = totalSolAmount.times(0.02)
+    const feeAmount = totalCurrencyAmount.times(0.02)
 
     // 实际退还金额应该是总金额减去手续费
-    const actualRefund = totalSolAmount.minus(feeAmount)
+    const actualRefund = totalCurrencyAmount.minus(feeAmount)
     return actualRefund.toFixed(3) // 保持3位小数
   }
 
-  // 计算基于代币数量的 SOL 手续费
-  const getPiRefundFee = () => {
-    const totalSolAmount = calculateTotalPiAmount()
-    if (totalSolAmount.isZero()) return '0.000'
+  // 计算基于代币数量的货币手续费
+  const getCurrencyRefundFee = () => {
+    const totalCurrencyAmount = calculateTotalCurrencyAmount()
+    if (totalCurrencyAmount.isZero()) return '0.000'
 
     // 2% 手续费
-    const feeAmount = totalSolAmount.times(0.02)
+    const feeAmount = totalCurrencyAmount.times(0.02)
     return feeAmount.toFixed(3) // 保持3位小数
   }
 
@@ -405,6 +445,16 @@ export default function MintingForm({
   const handleCancel = async () => {
     try {
       if (!isTokenRefundAmountValid() || !conn || !publicKey || !tokenAccount) {
+        return
+      }
+      
+      // 确保token.address存在
+      if (!token.address) {
+        toast({
+          title: t('代币地址无效'),
+          description: t('无法执行退还操作'),
+          status: 'error',
+        })
         return
       }
 
@@ -483,28 +533,17 @@ export default function MintingForm({
 
   // 计算预估获取的代币数量
   const getEstimatedTokens = (amount: string): string => {
-    if (!amount || !fairCurveData) {
-      return '0'
+    if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+      return '0';
     }
 
     try {
-      // 使用BigNumber处理所有计算
-      const solAmount = new BigNumber(amount).times(1e9)
-      const supplied = new BigNumber(fairCurveData.supplied)
-      const liquiditySol = new BigNumber(fairCurveData.liquiditySol)
-
-      if (liquiditySol.isZero()) {
-        return '0'
-      }
-
-      // 计算: (supplied / liquiditySol) * solAmount
-      const result = supplied.times(solAmount).div(liquiditySol)
-
-      // 转换为代币单位（除以1e6）并保留2位小数
-      return result.div(1e6).toFixed(2, BigNumber.ROUND_DOWN)
+      // 使用 Hook 提供的计算函数
+      const tokens = calculateTokensFromCurrency(parseFloat(amount));
+      return tokens.toString();
     } catch (error) {
-      console.error('计算代币数量时出错:', error)
-      return '0'
+      console.error('计算代币数量时出错:', error);
+      return '0';
     }
   }
 
@@ -555,6 +594,51 @@ export default function MintingForm({
     setRefundAmount('')
   }
 
+  // 监听 amount 变化，更新估算代币数量
+  useEffect(() => {
+    if (amount) {
+      const estimatedAmount = calculateTokensFromCurrency(parseFloat(amount));
+      setEstimatedTokens(estimatedAmount.toString());
+    } else {
+      setEstimatedTokens('0');
+    }
+  }, [amount, calculateTokensFromCurrency]);
+
+  // 添加双向绑定处理
+  // 监听payAmount变化，自动计算tokenAmount
+  useEffect(() => {
+    if (inputFocus === 'payAmount' && payAmount !== null) {
+      // 使用Hook提供的计算函数
+      const calculatedTokenAmount = calculateTokensFromCurrency(payAmount);
+      setTokenAmount(calculatedTokenAmount);
+      setEstimatedTokens(calculatedTokenAmount.toString());
+    }
+  }, [payAmount, inputFocus, calculateTokensFromCurrency]);
+
+  // 监听tokenAmount变化，自动计算payAmount
+  useEffect(() => {
+    if (inputFocus === 'tokenAmount' && tokenAmount !== null) {
+      // 使用Hook提供的计算函数
+      const calculatedPayAmount = calculateCurrencyFromTokens(tokenAmount);
+      setPayAmount(calculatedPayAmount);
+      setAmount(calculatedPayAmount.toString());
+    }
+  }, [tokenAmount, inputFocus, calculateCurrencyFromTokens]);
+
+  // 输入框处理函数
+  const handlePayAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setInputFocus('payAmount');
+    setAmount(value);
+    setPayAmount(value ? parseFloat(value) : null);
+  };
+
+  const handleTokenAmountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setInputFocus('tokenAmount');
+    setTokenAmount(value ? parseFloat(value) : null);
+  };
+
   // 渲染铸造标签页内容
   const renderMintingTab = () => {
     return (
@@ -588,7 +672,7 @@ export default function MintingForm({
                 <Input
                   type="number"
                   value={amount}
-                  onChange={e => setAmount(e.target.value)}
+                  onChange={handlePayAmountChange}
                   variant="unstyled"
                   fontSize={{ base: '2xl', md: '4xl' }}
                   fontWeight="bold"
@@ -602,7 +686,7 @@ export default function MintingForm({
                 />
               </Box>
 
-              {/* Pi 单位 */}
+              {/* SOL 单位 */}
               <Box
                 flexShrink={0}
                 bg="purple.50"
@@ -1016,7 +1100,7 @@ export default function MintingForm({
                 {t('feePercent')}:
               </Text>
               <Text fontSize={{ base: 'sm', md: 'md' }} color="gray.600">
-                {getPiRefundFee()} {currencyUnit}
+                {getCurrencyRefundFee()} {currencyUnit}
               </Text>
             </HStack>
             <HStack justify="space-between">
@@ -1028,7 +1112,7 @@ export default function MintingForm({
                 color="green.500"
                 fontSize={{ base: 'md', md: 'lg' }}
               >
-                {getActualPiRefundAmount()} {currencyUnit}
+                {getActualCurrencyRefundAmount()} {currencyUnit}
               </Text>
             </HStack>
           </Box>
@@ -1192,4 +1276,6 @@ export default function MintingForm({
 
   // 不是弹窗模式，直接返回内容
   return renderContent()
-}
+})
+
+export default MintingForm

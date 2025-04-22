@@ -173,7 +173,7 @@ export function useFairCurve(
         throw new Error('未连接到 Solana 网络')
       }
 
-      if (!mintAddress) {
+      if (!mintAddress || mintAddress.trim() === '') {
         throw new Error('未提供 mint 地址')
       }
 

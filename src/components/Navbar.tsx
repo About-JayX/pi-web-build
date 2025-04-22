@@ -37,7 +37,7 @@ import { FaGlobeAsia } from 'react-icons/fa'
 import { useSolana } from '@/contexts/solanaProvider'
 import { UserAPI } from '@/api'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { setUser } from '@/store/slices/userSlice'
+import { setUser, clearUser } from '@/store/slices/userSlice'
 
 // 动态导入LogoText组件，禁用服务器端渲染
 const LogoText = dynamic(() => import('./LogoText'), { ssr: false })
@@ -53,12 +53,18 @@ const ClientSideOnly = ({ children }: { children: React.ReactNode }) => {
   return isClient ? <>{children}</> : null
 }
 
+// 格式化钱包地址，显示前4位和后4位
+const formatWalletAddress = (address: string) => {
+  if (!address) return ''
+  return `${address.slice(0, 4)}...${address.slice(-4)}`
+}
+
 export default function Navbar() {
   const { isOpen, onToggle } = useDisclosure()
   const bgColor = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.700')
   const { network, handleNetworkChange } = useNetwork()
-  const { publicKey, setPublicKey } = useSolana()
+  const { publicKey, setPublicKey, disconnectWallet, isConnecting, reconnectWallet, autoConnected } = useSolana()
   const { t } = useTranslation()
   const { language, changeLanguage } = useI18n()
   const pathname = usePathname()
@@ -66,23 +72,88 @@ export default function Navbar() {
   const dispatch = useAppDispatch()
   const { isLoggedIn, userInfo } = useAppSelector(state => state.user)
 
+  // 自动登录功能已移除
+  // 仅在用户主动点击"连接"按钮时进行登录
+
+  // 监听钱包状态变化，如果钱包断开连接，清除登录状态
+  useEffect(() => {
+    if (!publicKey && isLoggedIn) {
+      dispatch(clearUser())
+    }
+  }, [publicKey, isLoggedIn, dispatch])
+
+  const handleDisconnect = async () => {
+    try {
+      await disconnectWallet()
+      dispatch(clearUser())
+      
+      // 清除用户信息
+      localStorage.removeItem('userId')
+      localStorage.removeItem('nickname')
+      localStorage.removeItem('avatar_url')
+      
+      toast({
+        title: '已断开连接',
+        description: '钱包已成功断开连接',
+        status: 'info',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      })
+    } catch (error) {
+      console.error('断开连接失败:', error)
+      toast({
+        title: '错误',
+        description: '断开连接失败，请重试',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      })
+    }
+  }
+
+  const handleReconnect = async () => {
+    try {
+      await reconnectWallet()
+      toast({
+        title: '已重新连接',
+        description: '钱包已成功重新连接',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      })
+    } catch (error) {
+      console.error('重新连接失败:', error)
+      toast({
+        title: '错误',
+        description: '重新连接失败，请重试',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      })
+    }
+  }
+
   const connectwallet = async () => {
     console.log(window.solana, 'window_______solana')
     console.log(window.solana, 'window_______solana')
-    if (network === 'SOL') {
-      if (!window.solana) {
-        toast({
-          title: '错误',
-          description: '请先安装 Phantom 钱包插件',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-          position: 'top',
-        })
-        return
-      }
+    if (!window.solana) {
+      toast({
+        title: '错误',
+        description: '请先安装 Phantom 钱包插件',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      })
+      return
+    }
 
-      try {
+    try {
+      if (network === 'SOL') {
         // 如果未连接钱包，先连接钱包并立即进行登录
         if (!publicKey) {
           const result = await window.solana.connect()
@@ -103,6 +174,11 @@ export default function Navbar() {
           })
 
           if (loginResult.data) {
+            // 保存用户基本信息到localStorage，便于恢复登录状态
+            localStorage.setItem('userId', loginResult.data.user.userId.toString())
+            localStorage.setItem('nickname', loginResult.data.user.nickname || '用户')
+            localStorage.setItem('avatar_url', loginResult.data.user.avatar_url || '')
+            
             dispatch(
               setUser({
                 user: loginResult.data.user,
@@ -151,6 +227,11 @@ export default function Navbar() {
         })
 
         if (result.data) {
+          // 保存用户基本信息到localStorage，便于恢复登录状态
+          localStorage.setItem('userId', result.data.user.userId.toString())
+          localStorage.setItem('nickname', result.data.user.nickname || '用户')
+          localStorage.setItem('avatar_url', result.data.user.avatar_url || '')
+          
           dispatch(
             setUser({
               user: result.data.user,
@@ -167,30 +248,31 @@ export default function Navbar() {
             position: 'top',
           })
         }
-      } catch (error) {
-        console.error('操作失败:', error)
+      } else {
+        // Pi Network 的连接逻辑
         toast({
-          title: '错误',
-          description:
-            error instanceof Error ? error.message : '操作失败，请重试',
-          status: 'error',
+          title: '提示',
+          description: '即将支持 Pi 钱包连接',
+          status: 'info',
           duration: 3000,
           isClosable: true,
           position: 'top',
         })
       }
-    } else {
-      // Pi Network 的连接逻辑
+    } catch (error) {
+      console.error('操作失败:', error)
       toast({
-        title: '提示',
-        description: '即将支持 Pi 钱包连接',
-        status: 'info',
+        title: '错误',
+        description:
+          error instanceof Error ? error.message : '操作失败，请重试',
+        status: 'error',
         duration: 3000,
         isClosable: true,
         position: 'top',
       })
     }
   }
+  
   // 组件加载时检查路径，确保网络选择器已同步
   useEffect(() => {
     // 逻辑已移至NetworkContext中处理
@@ -330,85 +412,108 @@ export default function Navbar() {
             </Menu>
 
             {/* 网络选择 */}
-            <Menu>
-              <MenuButton
-                as={Button}
-                variant="outline"
-                colorScheme="purple"
-                size={{ base: 'sm', md: 'md' }}
-                rightIcon={<ChevronDownIcon />}
-                fontWeight={600}
-                borderWidth="2px"
-                h={{ base: '36px', md: '40px' }}
-                minW={{ base: '80px', md: '100px' }}
-                width="auto"
-              >
-                {network}
-              </MenuButton>
-              <MenuList minW="120px">
-                <MenuItem
-                  icon={
-                    <Image
-                      src="/sol.png"
-                      alt="SOL"
-                      boxSize="18px"
-                      borderRadius="full"
-                    />
-                  }
-                  fontWeight="500"
-                  onClick={() => handleNetworkChange('SOL')}
-                  bg={network === 'SOL' ? 'purple.50' : undefined}
-                  _dark={{
-                    bg: network === 'SOL' ? 'purple.900' : undefined,
-                  }}
+            <Box display="none">
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  variant="outline"
+                  colorScheme="purple"
+                  size={{ base: 'sm', md: 'md' }}
+                  rightIcon={<ChevronDownIcon />}
+                  fontWeight={600}
+                  borderWidth="2px"
+                  h={{ base: '36px', md: '40px' }}
+                  minW={{ base: '80px', md: '100px' }}
+                  width="auto"
                 >
-                  SOL
-                </MenuItem>
-                <MenuItem
-                  icon={
-                    <Image
-                      src="/pi.png"
-                      alt="PI"
-                      boxSize="18px"
-                      borderRadius="full"
-                    />
-                  }
-                  fontWeight="500"
-                  onClick={() => handleNetworkChange('PI')}
-                  bg={network === 'PI' ? 'purple.50' : undefined}
-                  _dark={{
-                    bg: network === 'PI' ? 'purple.900' : undefined,
-                  }}
-                >
-                  PI
-                </MenuItem>
-              </MenuList>
-            </Menu>
+                  {network}
+                </MenuButton>
+                <MenuList minW="120px">
+                  <MenuItem
+                    icon={
+                      <Image
+                        src="/sol.png"
+                        alt="SOL"
+                        boxSize="18px"
+                        borderRadius="full"
+                      />
+                    }
+                    fontWeight="500"
+                    onClick={() => handleNetworkChange('SOL')}
+                    bg={network === 'SOL' ? 'purple.50' : undefined}
+                    _dark={{
+                      bg: network === 'SOL' ? 'purple.900' : undefined,
+                    }}
+                  >
+                    SOL
+                  </MenuItem>
+                  <MenuItem
+                    icon={
+                      <Image
+                        src="/pi.png"
+                        alt="PI"
+                        boxSize="18px"
+                        borderRadius="full"
+                      />
+                    }
+                    fontWeight="500"
+                    onClick={() => handleNetworkChange('PI')}
+                    bg={network === 'PI' ? 'purple.50' : undefined}
+                    _dark={{
+                      bg: network === 'PI' ? 'purple.900' : undefined,
+                    }}
+                  >
+                    PI
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            </Box>
 
-            <Button
-              onClick={connectwallet}
-              as="a"
-              fontSize={{ base: 'xs', md: 'sm' }}
-              fontWeight={600}
-              variant="solid"
-              bg="brand.primary"
-              color="white"
-              _hover={{ bg: 'brand.light' }}
-              href="#"
-              h={{ base: '36px', md: '40px' }}
-              px={{ base: 3, md: 4 }}
-              size={{ base: 'sm', md: 'md' }}
-            >
-              {network === 'SOL'
-                ? isLoggedIn
-                  ? userInfo?.nickname || userInfo?.userId
-                  : '连接并登录'
-                : '连接Pi钱包'}
-            </Button>
+            {/* 连接钱包按钮 或 已连接钱包的下拉菜单 */}
+            {network === 'SOL' && isLoggedIn && publicKey ? (
+              <Menu>
+                <MenuButton
+                  as={Button}
+                  fontSize={{ base: 'xs', md: 'sm' }}
+                  fontWeight={600}
+                  variant="solid"
+                  bg="brand.primary"
+                  color="white"
+                  _hover={{ bg: 'brand.light' }}
+                  h={{ base: '36px', md: '40px' }}
+                  px={{ base: 3, md: 4 }}
+                  size={{ base: 'sm', md: 'md' }}
+                  rightIcon={<ChevronDownIcon />}
+                >
+                  {formatWalletAddress(publicKey)}
+                </MenuButton>
+                <MenuList minW="120px">
+                  <MenuItem onClick={handleDisconnect} fontWeight="500">
+                    断开连接
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+            ) : (
+              <Button
+                onClick={connectwallet}
+                fontSize={{ base: 'xs', md: 'sm' }}
+                fontWeight={600}
+                variant="solid"
+                bg="brand.primary"
+                color="white"
+                _hover={{ bg: 'brand.light' }}
+                h={{ base: '36px', md: '40px' }}
+                px={{ base: 3, md: 4 }}
+                size={{ base: 'sm', md: 'md' }}
+                isLoading={isConnecting}
+              >
+                连接
+              </Button>
+            )}
           </Stack>
         </Flex>
 
-        <Box>{isOpen && <MobileNav onClose={onToggle} />}</Box>
+        <Box>{isOpen && <MobileNav onClose={onToggle} connectWallet={connectwallet} />}</Box>
       </Container>
     </Box>
   )
@@ -502,11 +607,41 @@ const DesktopNav = () => {
   )
 }
 
-const MobileNav = ({ onClose }: { onClose: () => void }) => {
+const MobileNav = ({ onClose, connectWallet }: { onClose: () => void; connectWallet: () => Promise<void> }) => {
   const pathname = usePathname()
   const { network, handleNetworkChange } = useNetwork()
+  const { publicKey, disconnectWallet, isConnecting } = useSolana()
   const { t } = useTranslation()
   const { language, changeLanguage } = useI18n()
+  const toast = useToast()
+  const dispatch = useAppDispatch()
+  const { isLoggedIn } = useAppSelector(state => state.user)
+
+  const handleDisconnect = async () => {
+    try {
+      await disconnectWallet()
+      dispatch(clearUser())
+      toast({
+        title: '已断开连接',
+        description: '钱包已成功断开连接',
+        status: 'info',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      })
+      onClose() // 关闭移动菜单
+    } catch (error) {
+      console.error('断开连接失败:', error)
+      toast({
+        title: '错误',
+        description: '断开连接失败，请重试',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
+      })
+    }
+  }
 
   return (
     <Stack
@@ -563,60 +698,47 @@ const MobileNav = ({ onClose }: { onClose: () => void }) => {
       </Box>
 
       {/* 移动端网络选择 */}
-      <Box pt={4} pb={2}>
-        <Text fontWeight="600" mb={2} color="gray.500" fontSize="sm">
-          {t('selectNetwork')}
-        </Text>
-        <Stack spacing={2}>
-          <Button
-            size="sm"
-            colorScheme={network === 'SOL' ? 'purple' : 'gray'}
-            variant={network === 'SOL' ? 'solid' : 'outline'}
-            justifyContent="flex-start"
-            leftIcon={
-              <Image
-                src="/sol.png"
-                alt="SOL"
-                boxSize="18px"
-                borderRadius="full"
-              />
-            }
-            onClick={() => handleNetworkChange('SOL')}
-            h="36px"
-          >
-            SOL
-          </Button>
-          <Button
-            size="sm"
-            colorScheme="purple"
-            variant={network === 'PI' ? 'solid' : 'outline'}
-            justifyContent="flex-start"
-            leftIcon={
-              <Image
-                src="/pis.png"
-                alt="PI"
-                boxSize="18px"
-                borderRadius="full"
-              />
-            }
-            onClick={() => handleNetworkChange('PI')}
-            h="36px"
-          >
-            PI
-          </Button>
-        </Stack>
+      <Box pt={4} pb={2} display="none">
       </Box>
 
+      {/* 钱包连接/断开 */}
       <Box pt={4}>
-        <Button
-          w="full"
-          bg="brand.primary"
-          color="white"
-          _hover={{ bg: 'brand.light' }}
-          size="md"
-        >
-          {t('connectWallet')}
-        </Button>
+        {network === 'SOL' && isLoggedIn && publicKey ? (
+          <Stack spacing={2}>
+            <Button
+              w="full"
+              bg="brand.background"
+              color="brand.primary"
+              borderWidth="1px"
+              borderColor="brand.primary"
+              _hover={{ bg: 'brand.background' }}
+              size="md"
+            >
+              {formatWalletAddress(publicKey)}
+            </Button>
+            <Button
+              w="full"
+              variant="outline"
+              colorScheme="red"
+              onClick={handleDisconnect}
+              size="md"
+            >
+              断开连接
+            </Button>
+          </Stack>
+        ) : (
+          <Button
+            w="full"
+            bg="brand.primary"
+            color="white"
+            _hover={{ bg: 'brand.light' }}
+            size="md"
+            onClick={connectWallet}
+            isLoading={isConnecting}
+          >
+            连接
+          </Button>
+        )}
       </Box>
     </Stack>
   )

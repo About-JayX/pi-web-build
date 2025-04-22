@@ -20,6 +20,7 @@ import {
 } from '@chakra-ui/react';
 import { FaInfoCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
+import { useMintingCalculations } from '@/hooks/useMintingCalculations';
 
 interface MintingInstructionsProps {
   token: {
@@ -27,6 +28,8 @@ interface MintingInstructionsProps {
     presaleRate?: string;
     currencyUnit?: string;
     network?: string;
+    totalSupply?: string;
+    target?: string;
   };
   isModal?: boolean;
   isOpen?: boolean;
@@ -40,8 +43,30 @@ export default function MintingInstructions({ token, isModal = false, isOpen, on
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const { t } = useTranslation();
   
-  // 设置货币单位，默认为Pi
-  const currencyUnit = token.currencyUnit || 'Pi';
+  // 设置货币单位，默认使用通用货币单位
+  const currencyUnit = token.currencyUnit || 'SOL';
+  
+  // 使用自定义Hook处理铸造计算
+  const { 
+    mintingRatio, 
+    mintingPrice,
+    parseMintingPrice 
+  } = useMintingCalculations({
+    totalSupply: token.totalSupply,
+    target: token.target,
+    presaleRate: token.presaleRate,
+    currencyUnit,
+    tokenDecimals: 6
+  });
+  
+  // 获取铸造价格 - 使用计算结果
+  const getMintingPrice = (displayMode: 'price' | 'ratio' = 'price') => {
+    if (displayMode === 'ratio') {
+      return mintingRatio;
+    } else {
+      return mintingPrice;
+    }
+  };
   
   // 设置初始移动端状态和监听窗口大小变化
   useEffect(() => {

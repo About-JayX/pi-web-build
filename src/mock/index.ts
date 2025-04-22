@@ -1,18 +1,16 @@
-// 导出所有类型
-export * from './types';
+// 空的模拟数据替代 - 在删除模拟数据后提供兼容性
 
-// 导出代币数据
-export * from './tokens';
+// 基础类型定义
+export type TokenHolder = {
+  address: string;
+  amount: string;
+  percentage: number;
+};
 
-// 导出市场数据
-export * from './market';
+// 空的代币列表
+export const mintingTokensPi: any[] = [];
+export const mintingTokensSol: any[] = [];
+export const marketTokens: any[] = [];
 
-// 导出铸造数据
-export * from './minting_pi';
-export * from './minting_sol';
-
-// 导出统计数据
-export * from './stats';
-
-// 导出持有人数据
-export * from './holders'; 
+// 空的持有人查询函数
+export const getTokenHolders = (address: string): TokenHolder[] => []; 

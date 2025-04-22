@@ -49,10 +49,20 @@ import {
 } from 'react-icons/fa'
 import { ExternalLinkIcon } from '@chakra-ui/icons'
 import NextLink from 'next/link'
-import { formatAddress } from '@/lib/utils'
+// import { formatAddress } from '@/lib/utils'
 import MintingForm from './MintingForm'
 import MintingInstructions from './MintingInstructions'
 import { useTranslation } from 'react-i18next'
+import { formatTokenAmount } from '@/utils'
+import { useMintingCalculations } from '@/hooks/useMintingCalculations'
+
+// 添加本地formatAddress函数
+const formatAddress = (address: string): string => {
+  if (!address) return '';
+  const start = address.substring(0, 6);
+  const end = address.substring(address.length - 4);
+  return `${start}...${end}`;
+};
 
 interface TokenInfoProps {
   token: {
@@ -81,7 +91,7 @@ interface TokenInfoProps {
 export default function TokenInfo({
   token,
   mintRef,
-  currencyUnit = 'Pi',
+  currencyUnit = 'SOL',
 }: TokenInfoProps) {
   const [isMintingOpen, setIsMintingOpen] = useState(false)
   const {
@@ -96,6 +106,20 @@ export default function TokenInfo({
   const tertiaryText = useColorModeValue('gray.500', 'gray.500')
   const toast = useToast()
   const { t } = useTranslation()
+
+  // 使用自定义Hook处理铸造计算
+  const { 
+    mintingPrice,
+    mintingRatio,
+    getFormattedExchangeRate,
+    calculateMintedAmount
+  } = useMintingCalculations({
+    totalSupply: token.totalSupply,
+    target: token.target,
+    presaleRate: token.presaleRate,
+    currencyUnit,
+    tokenDecimals: 6
+  });
 
   // 打开铸造弹窗
   const openMinting = () => {
@@ -140,39 +164,29 @@ export default function TokenInfo({
 
   // 计算剩余金额
   const getRemainingAmount = () => {
+    // 从target和raised中提取数值部分
     const targetNum = parseFloat(token.target.replace(/[^0-9.]/g, ''))
     const raisedNum = parseFloat(token.raised.replace(/[^0-9.]/g, ''))
+    // 返回格式化的剩余金额，使用动态的货币单位
     return (targetNum - raisedNum).toFixed(2) + ` ${currencyUnit}`
   }
 
-  // 计算兑换比例
+  // 获取兑换比率 (X代币:1货币单位)
   const getExchangeRate = () => {
-    if (token.presaleRate) {
-      // 从presaleRate提取数值部分
-      const rate = parseFloat(token.presaleRate.replace(/[^0-9.]/g, ''))
-      if (rate > 0) {
-        // 计算1 Pi可以兑换多少代币
-        const exchangeRate = Math.round(1 / rate).toLocaleString()
-        return `1 ${currencyUnit} = ${exchangeRate} ${token.symbol}`
-      }
-    }
-    return t('notSet')
+    // 优先使用token.exchangeRate
+    if (token.exchangeRate) return token.exchangeRate;
+    
+    // 否则使用Hook提供的格式化方法
+    return getFormattedExchangeRate();
   }
 
   // 计算已铸造代币数量
   const getMintedAmount = () => {
-    if (token.presaleRate && token.raised) {
-      // 从presaleRate提取数值部分
-      const rate = parseFloat(token.presaleRate.replace(/[^0-9.]/g, ''))
-      // 从raised提取数值部分
-      const raised = parseFloat(token.raised.replace(/[^0-9.]/g, ''))
-      if (rate > 0) {
-        // 已铸造代币数量 = 已铸额度的Pi / 铸造价格
-        const mintedAmount = Math.round(raised / rate).toLocaleString()
-        return `${mintedAmount} ${token.symbol}`
-      }
-    }
-    return '0'
+    // 优先使用token.mintedAmount
+    if (token.mintedAmount) return token.mintedAmount;
+    
+    // 否则使用Hook提供的计算方法
+    return calculateMintedAmount(token.raised, token.symbol);
   }
 
   // 分享功能处理
@@ -801,67 +815,64 @@ export default function TokenInfo({
                       align="center"
                       justify="flex-end"
                     >
-                      <Text fontWeight="bold">{token.totalSupply}</Text>
+                      <Text fontWeight="bold">{formatTokenAmount(token.totalSupply, { abbreviate: true })}</Text>
                     </Flex>
                   </GridItem>
 
-                  {token.presaleRate && (
-                    <>
-                      <GridItem>
-                        <HStack bg={softBg} p={2} borderRadius="md" h="full">
-                          <Icon
-                            as={FaWallet}
-                            color="brand.primary"
-                            boxSize="12px"
-                          />
-                          <Text color={secondaryText}>{t('priceColumn')}</Text>
-                        </HStack>
-                      </GridItem>
-                      <GridItem>
-                        <Flex
-                          bg={softBg}
-                          p={2}
-                          borderRadius="md"
-                          h="full"
-                          align="center"
-                          justify="flex-end"
-                        >
-                          <Text fontWeight="bold">{token.presaleRate}</Text>
-                        </Flex>
-                      </GridItem>
-                    </>
-                  )}
+                  {/* 价格栏显示，无论有没有presaleRate都显示 */}
+                  <GridItem>
+                    <HStack bg={softBg} p={2} borderRadius="md" h="full">
+                      <Icon
+                        as={FaWallet}
+                        color="brand.primary"
+                        boxSize="12px"
+                      />
+                      <Text color={secondaryText}>{t('priceColumn')}</Text>
+                    </HStack>
+                  </GridItem>
+                  <GridItem>
+                    <Flex
+                      bg={softBg}
+                      p={2}
+                      borderRadius="md"
+                      h="full"
+                      align="center"
+                      justify="flex-end"
+                    >
+                      <Text fontWeight="bold" fontSize="sm">
+                        {token.presaleRate || mintingPrice}
+                      </Text>
+                    </Flex>
+                  </GridItem>
 
-                  {token.presaleRate && (
-                    <>
-                      <GridItem>
-                        <HStack bg={softBg} p={2} borderRadius="md" h="full">
-                          <Icon
-                            as={FaExchangeAlt}
-                            color="brand.primary"
-                            boxSize="12px"
-                          />
-                          <Text color={secondaryText}>
-                            {t('mintExchangeRate')}
-                          </Text>
-                        </HStack>
-                      </GridItem>
-                      <GridItem>
-                        <Flex
-                          bg={softBg}
-                          p={2}
-                          borderRadius="md"
-                          h="full"
-                          align="center"
-                          justify="flex-end"
-                        >
-                          <Text fontWeight="bold">{getExchangeRate()}</Text>
-                        </Flex>
-                      </GridItem>
-                    </>
-                  )}
+                  {/* 兑换比例栏，无论有没有presaleRate都显示 */}
+                  <GridItem>
+                    <HStack bg={softBg} p={2} borderRadius="md" h="full">
+                      <Icon
+                        as={FaExchangeAlt}
+                        color="brand.primary"
+                        boxSize="12px"
+                      />
+                      <Text color={secondaryText}>
+                        {t('mintExchangeRate')}
+                      </Text>
+                    </HStack>
+                  </GridItem>
+                  <GridItem>
+                    <Flex
+                      bg={softBg}
+                      p={2}
+                      borderRadius="md"
+                      h="full"
+                      align="center"
+                      justify="flex-end"
+                    >
+                      <Text fontWeight="bold">{getExchangeRate()}</Text>
+                    </Flex>
+                  </GridItem>
 
-                  {token.presaleRate && token.raised && (
+                  {/* 已铸造代币数量栏，只要有raised数据就显示 */}
+                  {token.raised && (
                     <>
                       <GridItem>
                         <HStack bg={softBg} p={2} borderRadius="md" h="full">
@@ -913,57 +924,56 @@ export default function TokenInfo({
                     </Text>
                   </HStack>
                   <Text fontWeight="bold" fontSize="sm">
-                    {token.totalSupply}
+                    {formatTokenAmount(token.totalSupply, { abbreviate: true })}
                   </Text>
                 </HStack>
 
-                {token.presaleRate && (
-                  <HStack
-                    justify="space-between"
-                    p={3}
-                    bg={softBg}
-                    borderRadius="md"
-                  >
-                    <HStack spacing={1}>
-                      <Icon
-                        as={FaWallet}
-                        color="brand.primary"
-                        boxSize="14px"
-                      />
-                      <Text color={secondaryText} fontSize="sm">
-                        {t('priceColumn')}
-                      </Text>
-                    </HStack>
-                    <Text fontWeight="bold" fontSize="sm">
-                      {token.presaleRate}
+                {/* 价格栏显示，无论有没有presaleRate都显示 */}
+                <HStack
+                  justify="space-between"
+                  p={3}
+                  bg={softBg}
+                  borderRadius="md"
+                >
+                  <HStack spacing={1}>
+                    <Icon
+                      as={FaWallet}
+                      color="brand.primary"
+                      boxSize="14px"
+                    />
+                    <Text color={secondaryText} fontSize="sm">
+                      {t('priceColumn')}
                     </Text>
                   </HStack>
-                )}
+                  <Text fontWeight="bold" fontSize="sm">
+                    {token.presaleRate || mintingPrice}
+                  </Text>
+                </HStack>
 
-                {token.presaleRate && (
-                  <HStack
-                    justify="space-between"
-                    p={3}
-                    bg={softBg}
-                    borderRadius="md"
-                  >
-                    <HStack spacing={1}>
-                      <Icon
-                        as={FaExchangeAlt}
-                        color="brand.primary"
-                        boxSize="14px"
-                      />
-                      <Text color={secondaryText} fontSize="sm">
-                        {t('mintExchangeRate')}
-                      </Text>
-                    </HStack>
-                    <Text fontWeight="bold" fontSize="sm">
-                      {getExchangeRate()}
+                {/* 兑换比例栏，无论有没有presaleRate都显示 */}
+                <HStack
+                  justify="space-between"
+                  p={3}
+                  bg={softBg}
+                  borderRadius="md"
+                >
+                  <HStack spacing={1}>
+                    <Icon
+                      as={FaExchangeAlt}
+                      color="brand.primary"
+                      boxSize="14px"
+                    />
+                    <Text color={secondaryText} fontSize="sm">
+                      {t('mintExchangeRate')}
                     </Text>
                   </HStack>
-                )}
+                  <Text fontWeight="bold" fontSize="sm">
+                    {getExchangeRate()}
+                  </Text>
+                </HStack>
 
-                {token.presaleRate && token.raised && (
+                {/* 已铸造代币数量栏，只要有raised数据就显示 */}
+                {token.raised && (
                   <HStack
                     justify="space-between"
                     p={3}
@@ -991,6 +1001,7 @@ export default function TokenInfo({
                   symbol: token.symbol,
                   presaleRate: token.presaleRate,
                   currencyUnit: currencyUnit,
+                  totalSupply: token.totalSupply,
                 }}
               />
             </Box>
@@ -1019,6 +1030,7 @@ export default function TokenInfo({
           symbol: token.symbol,
           presaleRate: token.presaleRate || '0.000001', // 提供默认值避免类型错误
           currencyUnit: currencyUnit,
+          totalSupply: token.totalSupply,
         }}
         isModal={true}
         isOpen={isMintingOpen}
@@ -1031,6 +1043,7 @@ export default function TokenInfo({
           symbol: token.symbol,
           presaleRate: token.presaleRate,
           currencyUnit: currencyUnit,
+          totalSupply: token.totalSupply,
         }}
         isModal={true}
         isOpen={isInstructionsOpen}
