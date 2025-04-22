@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import {
@@ -66,12 +67,6 @@ export default function MintingTokenCard({
 
   // 格式化总供应量，以便在有限空间显示
   const formatSupply = (supply: string) => {
-    const num = parseFloat((supply && supply.replace(/,/g, '')) || '0')
-    if (num >= 1000000000) {
-      return (num / 1000000).toFixed(1) + 'M'
-    } else if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M'
-    }
     return supply
   }
 
@@ -193,11 +188,11 @@ export default function MintingTokenCard({
                   {t('progress')}
                 </Text>
                 <Text fontSize="xs" fontWeight="bold">
-                  {token.progress}%
+                  {token.progress || 0}%
                 </Text>
               </HStack>
               <Progress
-                value={token.progress}
+                value={token.progress || 0}
                 colorScheme="purple"
                 borderRadius="full"
                 size="sm"

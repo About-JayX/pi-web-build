@@ -5,7 +5,6 @@ import { struct, u8, u16, seq } from '@solana/buffer-layout'
 import { u64 } from '@solana/buffer-layout-utils'
 import { publicKey as publicKeyLayout } from '@solana/buffer-layout-utils'
 import { useSolana } from '@/contexts/solanaProvider'
-import { useAppSelector } from '@/store/hooks'
 
 export interface FormattedFairCurveState {
   liquidityAdded: boolean
@@ -291,9 +290,13 @@ export function useFairCurve(
 
         setData(formattedState)
         setError(null)
-      } catch (decodeError) {
+      } catch (decodeError: unknown) {
         console.error('解码错误:', decodeError)
-        throw new Error(`解码失败: ${decodeError.message}`)
+        throw new Error(
+          `解码失败: ${
+            decodeError instanceof Error ? decodeError.message : '未知错误'
+          }`
+        )
       }
     } catch (err) {
       console.error('获取 FairCurve 状态失败:', err)

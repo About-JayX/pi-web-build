@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from '@/config/axios'
 import { TokenList } from '@/api/types'
 import { RootState } from '@/store'
+import { BigNumber } from 'bignumber.js'
 
 interface TokenResponse {
   token_id: number
@@ -11,6 +12,8 @@ interface TokenResponse {
   total_supply: number
   total_transactions: number
   mint_percent: number
+  net_volume: number
+  progress: number
   created_at: string
 }
 
@@ -22,6 +25,7 @@ interface MintToken {
   totalSupply: string
   participants: number
   progress: number
+  net_volume: number
   image: string
   target: string
   raised: string
@@ -53,12 +57,13 @@ export const fetchTokenList = createAsyncThunk(
       name: token.token_name,
       symbol: token.token_symbol,
       address: token.token_address,
-      totalSupply: token.total_supply.toString(),
+      totalSupply: new BigNumber(token.total_supply).div(1e6).toFixed(2),
       participants: token.total_transactions,
-      progress: token.mint_percent,
+      progress: Number(token.progress.toFixed(2)),
+      net_volume: token.net_volume,
       image: '/token-logo.png',
       target: '100%',
-      raised: `${token.mint_percent}%`,
+      raised: `${(token.net_volume / 1e6).toFixed(2)}`,
       presaleRate: '1:1',
       created_at: token.created_at,
     }))

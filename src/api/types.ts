@@ -13,6 +13,7 @@ export interface TokenInfo {
   token_symbol: string
   token_address: string
   token_decimal: number
+  logo: string
   total_supply: number
   total_buy_amount: number
   buy_transactions: number
@@ -20,12 +21,11 @@ export interface TokenInfo {
   sell_transactions: number
   net_volume: number
   total_transactions: number
-  last_trade_time: string | null
-  first_trade_time: string | null
+  minter_counts: number
+  last_trade_time: string
+  first_trade_time: string
   created_at: string
-  mint_percent: number
-  buy_percent: number
-  trading_activity: number
+  progress: number
 }
 
 export type TokenList = TokenInfo[]

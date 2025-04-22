@@ -595,6 +595,7 @@ export default function MintPage() {
 
   // 搜索过滤逻辑
   const filterTokensBySearch = (tokens: MintToken[]) => {
+
     if (!searchQuery.trim()) return tokens
 
     const query = searchQuery.toLowerCase().trim()
