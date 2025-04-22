@@ -3,123 +3,63 @@
 import {
   Box,
   Container,
-  Stack,
-  SimpleGrid,
-  Text,
+  Flex,
   Link,
-  VisuallyHidden,
-  chakra,
+  Text,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { FaTwitter, FaTelegram, FaGithub, FaMedium } from 'react-icons/fa';
 import NextLink from 'next/link';
 import { useTranslation } from 'react-i18next';
 
-const ListHeader = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Text fontWeight='600' fontSize='lg' mb={{base:1,md:2}} color={useColorModeValue('brand.footer.text', 'gray.200')}>
-      {children}
-    </Text>
-  );
-};
-
-const SocialButton = ({
-  children,
-  label,
-  href,
-}: {
-  children: React.ReactNode;
-  label: string;
-  href: string;
-}) => {
-  return (
-    <chakra.button
-      bg={useColorModeValue('blackAlpha.100', 'whiteAlpha.100')}
-      rounded='full'
-      w={8}
-      h={8}
-      cursor='pointer'
-      as='a'
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      display='inline-flex'
-      alignItems='center'
-      justifyContent='center'
-      transition='background 0.3s ease'
-      _hover={{
-        bg: useColorModeValue('blackAlpha.200', 'whiteAlpha.200'),
-      }}>
-      <VisuallyHidden>{label}</VisuallyHidden>
-      {children}
-    </chakra.button>
-  );
-};
-
 export default function Footer() {
   const { t } = useTranslation();
+  const linkColor = useColorModeValue('gray.500', 'gray.400');
+  const hoverColor = useColorModeValue('gray.700', 'gray.300');
   
   return (
     <Box
-      bg={useColorModeValue('brand.footer.primary', 'gray.900')}
-      color={useColorModeValue('brand.footer.text', 'gray.200')}>
-      <Container as={Stack} maxW='container.xl' py={10}>
-        <SimpleGrid columns={{ base: 1, sm: 2, md: 4 }} gap={8}>
-          <Stack align='flex-start' spacing={{base:1,md:2}}>
-            <ListHeader>{t('product')}</ListHeader>
-            <Link as={NextLink} href='/'>{t('mint')}</Link>
-            <Link as={NextLink} href='/market'>{t('market')}</Link>
-            <Link as={NextLink} href='/deploy'>{t('deploy')}</Link>
-          </Stack>
-
-          <Stack align='flex-start' spacing={{base:1,md:2}}>
-            <ListHeader>{t('platform')}</ListHeader>
-            <Link href='https://x.com/X_Pi_S' target="_blank" rel="noopener noreferrer">{t('about')}</Link>
-            <Link href='https://x.com/X_Pi_S' target="_blank" rel="noopener noreferrer">{t('team')}</Link>
-            <Link href='https://x.com/X_Pi_S' target="_blank" rel="noopener noreferrer">{t('contact')}</Link>
-          </Stack>
-
-          <Stack align='flex-start' spacing={{base:1,md:2}}>
-            <ListHeader>{t('support')}</ListHeader>
-            <Link as={NextLink} href='/docs/api'>{t('apiDocs')}</Link>
-            <Link as={NextLink} href='/docs/tutorials'>{t('tutorials')}</Link>
-            <Link as={NextLink} href='/docs/disclaimer'>{t('disclaimer')}</Link>
-            <Link as={NextLink} href='/docs/privacy'>{t('privacy')}</Link>
-          </Stack>
-
-          <Stack align='flex-start'>
-            <ListHeader>{t('followUs')}</ListHeader>
-            <Stack direction='row' gap={6}>
-              <SocialButton label={t('twitter')} href='https://x.com/X_Pi_S'>
-                <FaTwitter />
-              </SocialButton>
-              <SocialButton label={t('telegram')} href='https://t.me/XPi_S'>
-                <FaTelegram />
-              </SocialButton>
-              <SocialButton label={t('github')} href='https://x.com/X_Pi_S'>
-                <FaGithub />
-              </SocialButton>
-            </Stack>
-          </Stack>
-        </SimpleGrid>
-      </Container>
-
-      <Box
-        borderTopWidth={1}
-        borderStyle='solid'
-        borderColor={useColorModeValue('brand.footer.secondary', 'gray.700')}>
-        <Container
-          as={Stack}
-          maxW='container.xl'
-          py={4}
+      bg={useColorModeValue('black', 'gray.900')}
+      color={useColorModeValue('gray.400', 'gray.400')}
+      py={4}>
+      <Container maxW='container.xl'>
+        <Flex
           direction={{ base: 'column', md: 'row' }}
-          gap={2}
-          justify={{base: 'center', md: 'space-between' }}
-          align={{base: 'center', md: 'center' }} >
-          <Text color={useColorModeValue('brand.footer.text', 'gray.200')}>{t('copyright')}</Text>
-          <Text color={useColorModeValue('brand.footer.text', 'gray.200')}>{t('builtBy')}</Text>
-        </Container>
-      </Box>
+          justify="space-between"
+          align={{ base: 'center', md: 'center' }}
+          gap={{ base: 4, md: 0 }}>
+          <Text>{t('copyright')}</Text>
+          <Flex gap={4} flexWrap="wrap" justify={{ base: 'center', md: 'flex-end' }}>
+            <Link 
+              as={NextLink} 
+              href='/docs/api'
+              color={linkColor}
+              _hover={{ color: hoverColor, textDecoration: 'none' }}>
+              {t('apiDocs')}
+            </Link>
+            <Link 
+              as={NextLink} 
+              href='/docs/tutorials'
+              color={linkColor}
+              _hover={{ color: hoverColor, textDecoration: 'none' }}>
+              {t('tutorials')}
+            </Link>
+            <Link 
+              as={NextLink} 
+              href='/docs/disclaimer'
+              color={linkColor}
+              _hover={{ color: hoverColor, textDecoration: 'none' }}>
+              {t('disclaimer')}
+            </Link>
+            <Link 
+              as={NextLink} 
+              href='/docs/privacy'
+              color={linkColor}
+              _hover={{ color: hoverColor, textDecoration: 'none' }}>
+              {t('privacy')}
+            </Link>
+          </Flex>
+        </Flex>
+      </Container>
     </Box>
   );
 } 
