@@ -45,7 +45,7 @@ import { useTranslation } from 'react-i18next'
 import { useState, useEffect } from 'react'
 import { TokenAPI, type PlatformMetrics } from '@/api/token'
 import type { Token } from '@/api/token'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 
 // 功能特点组件
 interface FeatureProps {

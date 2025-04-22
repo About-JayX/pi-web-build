@@ -7,23 +7,16 @@ export interface Token extends TokenInfo {
 }
 
 export interface PlatformMetrics {
-  token_count: number    // 代币总数
-  total_mint: number    // 铸造代币总数
+  token_count: number // 代币总数
+  total_mint: number // 铸造代币总数
   mint_accounts: number // 铸造地址总数
-  tvl: number          // 锁仓总价值
+  tvl: number // 锁仓总价值
 }
 
 /**
  * Token 相关接口
  */
 export const TokenAPI = {
-  /**
-   * 获取 token 列表
-   */
-  getTokenList: (): Promise<Token[]> => {
-    return request.get('/token/list')
-  },
-
   /**
    * 创建新的 token
    * @param data token 创建参数

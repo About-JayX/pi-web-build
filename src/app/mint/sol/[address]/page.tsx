@@ -35,7 +35,7 @@ import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
 import { formatFairCurveState } from '@/web3/fairMint/utils/format'
 import { PublicKey } from '@solana/web3.js'
 import { getAssociatedTokenAddress } from '@solana/spl-token'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 
 export default function TokenMintPage() {
   const { address } = useParams()
@@ -71,72 +71,6 @@ export default function TokenMintPage() {
   // 添加状态
   const [tokenAccount, setTokenAccount] = useState<string | null>(null)
   const [tokenBalance, setTokenBalance] = useState<number | null>(null)
-
-  useEffect(() => {
-    // 如果 tokenList 为空，则获取列表
-    dispatch(fetchTokenList())
-  }, [dispatch])
-
-  // 添加数据监听和日志输出
-  useEffect(() => {
-    if (address) {
-      console.log('当前地址:', address)
-    }
-  }, [address])
-
-  useEffect(() => {
-    console.log('Solana 连接状态:', {
-      hasConnection: !!conn,
-      connectionUrl: conn?.rpcEndpoint,
-      selectedToken: selectedToken?.address,
-    })
-  }, [conn, selectedToken])
-
-  useEffect(() => {
-    if (selectedToken) {
-      console.log('Token 数据:', {
-        name: selectedToken.name,
-        symbol: selectedToken.symbol,
-        address: selectedToken.address,
-        totalSupply: selectedToken.totalSupply,
-        participants: selectedToken.participants,
-      })
-    }
-  }, [selectedToken])
-
-  useEffect(() => {
-    if (fairCurveData) {
-      console.log('合约状态:', {
-        liquidityAdded: fairCurveData.liquidityAdded,
-        feeRate: fairCurveData.feeRate,
-        tokenDecimal: fairCurveData.tokenDecimal,
-        solDecimal: fairCurveData.solDecimal,
-        mint: fairCurveData.mint,
-        remaining: fairCurveData.remaining.toString(),
-        supply: fairCurveData.supply.toString(),
-        supplied: fairCurveData.supplied.toString(),
-        solReceived: fairCurveData.solReceived.toString(),
-        liquiditySol: fairCurveData.liquiditySol.toString(),
-        liquidityToken: fairCurveData.liquidityToken.toString(),
-        liquiditySolFee: fairCurveData.liquiditySolFee.toString(),
-        liquidityTokenFee: fairCurveData.liquidityTokenFee.toString(),
-        fee: fairCurveData.fee.toString(),
-      })
-    }
-  }, [fairCurveData])
-
-  useEffect(() => {
-    if (formattedData) {
-      console.log('格式化数据:', {
-        supply: formattedData.supply,
-        remaining: formattedData.remaining,
-        supplied: formattedData.supplied,
-        solReceived: formattedData.solReceived,
-        progress: formattedData.progress,
-        feeRate: formattedData.feeRate,
-      })
-    }
-  }, [formattedData])
 
   // 添加代币账户查询逻辑
   useEffect(() => {

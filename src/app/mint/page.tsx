@@ -430,7 +430,7 @@ function FilterPanel({
         />
       </InputGroup>
 
-      <Flex align="center" gap={2} flexWrap="wrap">
+      {/* <Flex align="center" gap={2} flexWrap="wrap">
         <Text fontWeight="medium" fontSize="sm" whiteSpace="nowrap">
           {t('sortBy')}
         </Text>
@@ -457,7 +457,7 @@ function FilterPanel({
             {option.label}
           </Button>
         ))}
-      </Flex>
+      </Flex> */}
     </Flex>
   )
 }
@@ -595,7 +595,6 @@ export default function MintPage() {
 
   // 搜索过滤逻辑
   const filterTokensBySearch = (tokens: MintToken[]) => {
-
     if (!searchQuery.trim()) return tokens
 
     const query = searchQuery.toLowerCase().trim()

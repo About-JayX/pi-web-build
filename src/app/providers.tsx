@@ -46,7 +46,7 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // 在应用启动时获取代币列表
-    store.dispatch(fetchTokenList());
+    store.dispatch(fetchTokenList({ page: 1, limit: 10, sort: 'created_at' }));
   }, []);
 
   return (

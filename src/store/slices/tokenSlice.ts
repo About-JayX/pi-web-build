@@ -2,19 +2,12 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from '@/config/axios'
 import { TokenList } from '@/api/types'
 import { RootState } from '@/store'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 
-interface TokenResponse {
-  token_id: number
-  token_name: string
-  token_symbol: string
-  token_address: string
-  total_supply: number
-  total_transactions: number
-  mint_percent: number
-  net_volume: number
-  progress: number
-  created_at: string
+interface TokenParams {
+  page: number
+  limit: number
+  sort: string
 }
 
 interface MintToken {
@@ -49,8 +42,8 @@ const initialState: TokenState = {
 
 export const fetchTokenList = createAsyncThunk(
   'token/fetchTokenList',
-  async () => {
-    const data: TokenList = await axios.get('/token/list')
+  async (params: TokenParams) => {
+    const data: TokenList = await axios.get('/token/list', { params })
 
     return data.map(token => ({
       id: token.token_id,

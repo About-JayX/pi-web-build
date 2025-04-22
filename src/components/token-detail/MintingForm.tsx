@@ -59,7 +59,7 @@ import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
 import { TokenInfo } from '@/api/types'
 import BN from 'bn.js'
 import { CLMM_PROGRAM_ID } from '@/config'
-import { BigNumber } from 'bignumber.js'
+import BigNumber from 'bignumber.js'
 
 interface Token extends TokenInfo {
   logo: string
