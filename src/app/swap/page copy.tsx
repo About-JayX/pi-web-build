@@ -42,8 +42,8 @@ import { useTranslation } from 'react-i18next';
 
 // 模拟令牌数据
 const tokens = [
-  { id: 1, symbol: 'PI', name: 'Pi Network', logo: '/pi.png', balance: '1,245.32', value: 1243.21 },
-  { id: 2, symbol: 'SOL', name: 'Solana', logo: '/sol.png', balance: '3.128', value: 984.00 }
+  { id: 1, symbol: 'PI', name: 'PI', logo: '/pi.png', balance: '1,245.32', value: 1243.21 },
+  { id: 2, symbol: 'SOL', name: 'SOL', logo: '/sol.png', balance: '3.128', value: 984.00 }
 ];
 
 export default function SwapPage() {

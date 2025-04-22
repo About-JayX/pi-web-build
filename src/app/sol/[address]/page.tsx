@@ -69,7 +69,7 @@ export default function TokenMintPage() {
   // 使用SOL作为货币单位
   const currencyUnit = 'SOL'
   // 使用Solana网络
-  const network = 'Solana'
+  const network = 'SOL'
 
   // 添加状态
   const [tokenAccount, setTokenAccount] = useState<string | null>(null)

@@ -624,7 +624,7 @@ export default function MintPage() {
 
   // 设置当前网络的计价单位
   const currencyUnit = useMemo(() => {
-    return network === 'Solana' ? 'SOL' : 'Pi'
+    return network === 'SOL' ? 'SOL' : 'PI'
   }, [network])
 
   // 保存视图模式到本地存储

@@ -69,7 +69,7 @@ export default function Navbar() {
   const connectwallet = async () => {
     console.log(window.solana, 'window_______solana')
     console.log(window.solana, 'window_______solana')
-    if (network === 'Solana') {
+    if (network === 'SOL') {
       if (!window.solana) {
         toast({
           title: '错误',
@@ -340,46 +340,47 @@ export default function Navbar() {
                 fontWeight={600}
                 borderWidth="2px"
                 h={{ base: '36px', md: '40px' }}
-                minW={{ base: 'auto', md: 'initial' }}
+                minW={{ base: '80px', md: '100px' }}
+                width="auto"
               >
                 {network}
               </MenuButton>
-              <MenuList>
-                <MenuItem
-                  icon={
-                    <Image
-                      src="/pi.png"
-                      alt="Pi Network"
-                      boxSize="18px"
-                      borderRadius="full"
-                    />
-                  }
-                  fontWeight="500"
-                  onClick={() => handleNetworkChange('Pi Network')}
-                  bg={network === 'Pi Network' ? 'purple.50' : undefined}
-                  _dark={{
-                    bg: network === 'Pi Network' ? 'purple.900' : undefined,
-                  }}
-                >
-                  Pi Network
-                </MenuItem>
+              <MenuList minW="120px">
                 <MenuItem
                   icon={
                     <Image
                       src="/sol.png"
-                      alt="Solana"
+                      alt="SOL"
                       boxSize="18px"
                       borderRadius="full"
                     />
                   }
                   fontWeight="500"
-                  onClick={() => handleNetworkChange('Solana')}
-                  bg={network === 'Solana' ? 'purple.50' : undefined}
+                  onClick={() => handleNetworkChange('SOL')}
+                  bg={network === 'SOL' ? 'purple.50' : undefined}
                   _dark={{
-                    bg: network === 'Solana' ? 'purple.900' : undefined,
+                    bg: network === 'SOL' ? 'purple.900' : undefined,
                   }}
                 >
-                  Solana
+                  SOL
+                </MenuItem>
+                <MenuItem
+                  icon={
+                    <Image
+                      src="/pi.png"
+                      alt="PI"
+                      boxSize="18px"
+                      borderRadius="full"
+                    />
+                  }
+                  fontWeight="500"
+                  onClick={() => handleNetworkChange('PI')}
+                  bg={network === 'PI' ? 'purple.50' : undefined}
+                  _dark={{
+                    bg: network === 'PI' ? 'purple.900' : undefined,
+                  }}
+                >
+                  PI
                 </MenuItem>
               </MenuList>
             </Menu>
@@ -398,7 +399,7 @@ export default function Navbar() {
               px={{ base: 3, md: 4 }}
               size={{ base: 'sm', md: 'md' }}
             >
-              {network === 'Solana'
+              {network === 'SOL'
                 ? isLoggedIn
                   ? userInfo?.nickname || userInfo?.userId
                   : '连接并登录'
@@ -569,39 +570,39 @@ const MobileNav = ({ onClose }: { onClose: () => void }) => {
         <Stack spacing={2}>
           <Button
             size="sm"
-            colorScheme="purple"
-            variant={network === 'Pi Network' ? 'solid' : 'outline'}
-            justifyContent="flex-start"
-            leftIcon={
-              <Image
-                src="/pis.png"
-                alt="Pi Network"
-                boxSize="18px"
-                borderRadius="full"
-              />
-            }
-            onClick={() => handleNetworkChange('Pi Network')}
-            h="36px"
-          >
-            Pi Network
-          </Button>
-          <Button
-            size="sm"
-            colorScheme={network === 'Solana' ? 'purple' : 'gray'}
-            variant={network === 'Solana' ? 'solid' : 'outline'}
+            colorScheme={network === 'SOL' ? 'purple' : 'gray'}
+            variant={network === 'SOL' ? 'solid' : 'outline'}
             justifyContent="flex-start"
             leftIcon={
               <Image
                 src="/sol.png"
-                alt="Solana"
+                alt="SOL"
                 boxSize="18px"
                 borderRadius="full"
               />
             }
-            onClick={() => handleNetworkChange('Solana')}
+            onClick={() => handleNetworkChange('SOL')}
             h="36px"
           >
-            Solana
+            SOL
+          </Button>
+          <Button
+            size="sm"
+            colorScheme="purple"
+            variant={network === 'PI' ? 'solid' : 'outline'}
+            justifyContent="flex-start"
+            leftIcon={
+              <Image
+                src="/pis.png"
+                alt="PI"
+                boxSize="18px"
+                borderRadius="full"
+              />
+            }
+            onClick={() => handleNetworkChange('PI')}
+            h="36px"
+          >
+            PI
           </Button>
         </Stack>
       </Box>

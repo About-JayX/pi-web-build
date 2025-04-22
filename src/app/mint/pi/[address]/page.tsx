@@ -54,7 +54,7 @@ export default function PiTokenDetailPage() {
   // 使用Pi作为货币单位
   const currencyUnit = 'Pi';
   // 使用Pi网络
-  const network = 'Pi Network';
+  const network = 'PI';
   
   useEffect(() => {
     // 模拟从API获取数据
@@ -155,7 +155,7 @@ export default function PiTokenDetailPage() {
             <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'flex-start', md: 'center' }}>
               <Box>
                 <Heading as="h2" size="lg" mb={2}>
-                  {t('tokenInfoNetwork').replace('{network}', 'Pi Network')}
+                  {t('tokenInfoNetwork').replace('{network}', 'PI')}
                 </Heading>
                 <Text color="gray.500">{t('mintTokenCancel')}</Text>
               </Box>
@@ -188,7 +188,7 @@ export default function PiTokenDetailPage() {
           <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'flex-start', md: 'center' }}>
             <Box>
               <Heading as="h2" size="lg" mb={2}>
-                {t('tokenInfoNetwork').replace('{network}', 'Pi Network')}
+                {t('tokenInfoNetwork').replace('{network}', 'PI')}
               </Heading>
               <Text color="gray.500">{t('mintTokenCancel')}</Text>
             </Box>

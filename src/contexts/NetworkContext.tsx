@@ -9,16 +9,16 @@ interface NetworkContextType {
 }
 
 export const NetworkContext = createContext<NetworkContextType>({
-  network: 'Pi Network',
+  network: 'SOL',
   handleNetworkChange: () => {},
 });
 
 export const useNetwork = () => useContext(NetworkContext);
 
 export const NetworkProvider = ({ children }: { children: ReactNode }) => {
-  const [network, setNetwork] = useState<string>('Pi Network');
+  const [network, setNetwork] = useState<string>('SOL');
   const pathname = usePathname();
-  const initialNetwork = 'Pi Network';
+  const initialNetwork = 'SOL';
   
   // 根据当前路径检测网络
   useEffect(() => {
@@ -27,9 +27,9 @@ export const NetworkProvider = ({ children }: { children: ReactNode }) => {
     const isPiPath = pathname.includes('/pi/');
 
     if (isSOLPath) {
-      setNetwork('Solana');
+      setNetwork('SOL');
     } else if (isPiPath) {
-      setNetwork('Pi Network');
+      setNetwork('PI');
     } else if (network === initialNetwork) {
       // 如果当前网络与初始值相同，不需要重新设置
       return;

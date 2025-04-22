@@ -108,7 +108,7 @@ export default function HomePage() {
   const hoverBg = useColorModeValue('gray.50', 'gray.700')
 
   // 根据当前网络选择铸造数据
-  const mintingData = network === 'Solana' ? mintingTokensSol : mintingTokensPi
+  const mintingData = network === 'SOL' ? mintingTokensSol : mintingTokensPi
 
   // 修改handleShare的类型
   const handleShare = (token: TokenShare) => {
@@ -546,7 +546,7 @@ export default function HomePage() {
                 <MintingTokenCard
                   key={token.id}
                   token={token}
-                  currencyUnit={network === 'Solana' ? 'SOL' : 'Pi'}
+                  currencyUnit={network === 'SOL' ? 'SOL' : 'PI'}
                 />
               )
             })}

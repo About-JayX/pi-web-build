@@ -542,7 +542,7 @@ export default function DeployPage() {
 
   // 定义当前网络的计价单位
   const currencyUnit = useMemo(() => {
-    return network === 'Solana' ? 'SOL' : 'Pi'
+    return network === 'SOL' ? 'SOL' : 'PI'
   }, [network])
 
   // 定义代币发行总量选项

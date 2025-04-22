@@ -15,7 +15,7 @@ export default function TokenDetailRedirectPage() {
 
   useEffect(() => {
     // 根据当前网络自动重定向到对应网络的详情页
-    if (network === 'Solana') {
+    if (network === 'SOL') {
       router.push(`/sol/${address}`)
     } else {
       router.push(`/pi/${address}`)
