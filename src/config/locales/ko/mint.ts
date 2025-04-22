@@ -65,7 +65,7 @@ export default {
   'mintingLastUpdated': '마지막 업데이트: ',
   'deployed': '배포됨',
   'remainingAmount': '남은 금액',
-  'mintExchangeRate': '비율',
+  'mintRate': '비율',
   'notSet': '설정되지 않음',
   'mintedTokens': '민팅됨',
   'share': '공유',

@@ -258,20 +258,20 @@ export function parseMintingPrice(priceStr: string): number {
  * 获取格式化的兑换比率 (X代币:1货币单位)
  * @param totalSupply 总供应量
  * @param mintAmount 铸造总额
- * @param presaleRate 预设汇率
+ * @param mintRate 预设汇率
  * @param tokenDecimals 代币小数位
  * @returns 格式化的兑换比率
  */
-export function getFormattedExchangeRate(
+export function getFormattedMintRate(
   totalSupply: string | number,
   mintAmount: number,
-  presaleRate?: string,
+  mintRate?: string,
   tokenDecimals: number = 6
 ): string {
-  // 如果有presaleRate，将其转换为兑换比率
-  if (presaleRate) {
-    // 使用parsePresaleRate获取兑换比例
-    const ratio = parsePresaleRate(presaleRate);
+  // 如果有mintRate，将其转换为兑换比率
+  if (mintRate) {
+    // 使用parsemintRate获取兑换比例
+    const ratio = parsemintRate(mintRate);
     if (ratio > 0) {
       if (ratio >= 1000000) {
         // 对于特别大的数值，使用千分位分隔符显示完整数字，不使用科学计数法或单位缩写
@@ -289,7 +289,7 @@ export function getFormattedExchangeRate(
     }
   }
   
-  // 如果没有presaleRate或解析失败，则使用总供应量和铸造总额计算
+  // 如果没有mintRate或解析失败，则使用总供应量和铸造总额计算
   if (!totalSupply || mintAmount === 0) return '1:0';
   
   // 使用getSimpleMintingRatio计算
@@ -301,7 +301,7 @@ export function getFormattedExchangeRate(
  * @param totalSupply 总供应量
  * @param raised 已融资金额
  * @param mintAmount 铸造总额
- * @param presaleRate 预设汇率
+ * @param mintRate 预设汇率
  * @param tokenDecimals 代币小数位
  * @param symbol 代币符号
  * @returns 格式化的已铸造代币数量
@@ -310,7 +310,7 @@ export function calculateMintedAmount(
   totalSupply: string | number,
   raised: string,
   mintAmount: number,
-  presaleRate?: string,
+  mintRate?: string,
   tokenDecimals: number = 6,
   symbol?: string
 ): string {
@@ -328,10 +328,10 @@ export function calculateMintedAmount(
   }
   
   // 铸造比例: 1单位货币可兑换的代币数量
-  // 使用parsePresaleRate获取兑换比例(非价格)
-  let exchangeRate = parsePresaleRate(presaleRate);
+  // 使用parsemintRate获取兑换比例(非价格)
+  let exchangeRate = parsemintRate(mintRate);
   
-  // 如果没有presaleRate或解析失败，使用总供应量和铸造总额直接计算
+  // 如果没有mintRate或解析失败，使用总供应量和铸造总额直接计算
   if (exchangeRate <= 0) {
     // 注意：parsedTotalSupply是原始值，需要除以10^tokenDecimals
     exchangeRate = (parsedTotalSupply / Math.pow(10, tokenDecimals)) / mintAmount / 2;
@@ -349,7 +349,7 @@ export function calculateMintedAmount(
  * @param totalSupply 总供应量
  * @param currencyAmount 货币金额
  * @param mintAmount 铸造总额
- * @param presaleRate 预设汇率
+ * @param mintRate 预设汇率
  * @param tokenDecimals 代币小数位
  * @returns 可获得的代币数量
  */
@@ -357,7 +357,7 @@ export function calculateTokensFromCurrency(
   totalSupply: string | number,
   currencyAmount: number,
   mintAmount: number,
-  presaleRate?: string,
+  mintRate?: string,
   tokenDecimals: number = 6
 ): number {
   if (!currencyAmount || currencyAmount <= 0 || !totalSupply || mintAmount === 0) {
@@ -367,10 +367,10 @@ export function calculateTokensFromCurrency(
   // 使用parseTotalSupply解析总供应量
   const parsedTotalSupply = parseTotalSupply(totalSupply, tokenDecimals, true);
 
-  // 获取铸造比率 (使用parsePresaleRate获取兑换比例，非价格)
-  let exchangeRate = parsePresaleRate(presaleRate);
+  // 获取铸造比率 (使用parsemintRate获取兑换比例，非价格)
+  let exchangeRate = parsemintRate(mintRate);
   
-  // 如果没有presaleRate或解析失败，使用总供应量和铸造总额计算
+  // 如果没有mintRate或解析失败，使用总供应量和铸造总额计算
   if (exchangeRate <= 0) {
     // parsedTotalSupply是原始值，需要除以10^tokenDecimals
     exchangeRate = (parsedTotalSupply / Math.pow(10, tokenDecimals)) / mintAmount / 2;
@@ -385,7 +385,7 @@ export function calculateTokensFromCurrency(
  * @param totalSupply 总供应量
  * @param tokenAmount 代币数量
  * @param mintAmount 铸造总额
- * @param presaleRate 预设汇率
+ * @param mintRate 预设汇率
  * @param tokenDecimals 代币小数位
  * @returns 需要的货币金额
  */
@@ -393,7 +393,7 @@ export function calculateCurrencyFromTokens(
   totalSupply: string | number,
   tokenAmount: number,
   mintAmount: number,
-  presaleRate?: string,
+  mintRate?: string,
   tokenDecimals: number = 6
 ): number {
   if (!tokenAmount || tokenAmount <= 0 || !totalSupply || mintAmount === 0) {
@@ -403,10 +403,10 @@ export function calculateCurrencyFromTokens(
   // 使用parseTotalSupply解析总供应量
   const parsedTotalSupply = parseTotalSupply(totalSupply, tokenDecimals, true);
 
-  // 获取铸造价格率 (使用parsePresaleRate获取价格，非兑换比例)
-  let exchangeRate = parsePresaleRate(presaleRate, true);
+  // 获取铸造价格率 (使用parsemintRate获取价格，非兑换比例)
+  let exchangeRate = parsemintRate(mintRate, true);
   
-  // 如果没有presaleRate或解析失败，使用总供应量和铸造总额计算
+  // 如果没有mintRate或解析失败，使用总供应量和铸造总额计算
   if (exchangeRate <= 0) {
     // parsedTotalSupply是原始值，需要除以10^tokenDecimals
     exchangeRate = 2 * mintAmount / (parsedTotalSupply / Math.pow(10, tokenDecimals));
@@ -451,17 +451,17 @@ export function parseTotalSupply(
 
 /**
  * 解析预设汇率，返回有效的汇率值
- * @param presaleRate 预设汇率字符串
+ * @param mintRate 预设汇率字符串
  * @param asPrice 是否将结果作为价格而非兑换比例返回 (默认false)
  * @returns 解析后的汇率数值，无效时返回0
  */
-export function parsePresaleRate(
-  presaleRate?: string,
+export function parsemintRate(
+  mintRate?: string,
   asPrice: boolean = false
 ): number {
-  if (!presaleRate) return 0;
+  if (!mintRate) return 0;
   
-  const rate = parseFloat(presaleRate.replace(/[^0-9.e+-]/g, ''));
+  const rate = parseFloat(mintRate.replace(/[^0-9.e+-]/g, ''));
   if (rate <= 0) return 0;
   
   // 根据需要返回价格或兑换比例
@@ -474,7 +474,7 @@ export function parsePresaleRate(
  * @param totalSupply 总供应量
  * @param currencyAmount 任意货币金额(Pi/SOL等)
  * @param mintAmount 铸造总额
- * @param presaleRate 预设汇率
+ * @param mintRate 预设汇率
  * @param tokenDecimals 代币小数位
  * @returns 可获得的代币数量
  */
@@ -482,10 +482,10 @@ export function calculateTokensFromPi(
   totalSupply: string | number,
   currencyAmount: number,
   mintAmount: number,
-  presaleRate?: string,
+  mintRate?: string,
   tokenDecimals: number = 6
 ): number {
-  return calculateTokensFromCurrency(totalSupply, currencyAmount, mintAmount, presaleRate, tokenDecimals);
+  return calculateTokensFromCurrency(totalSupply, currencyAmount, mintAmount, mintRate, tokenDecimals);
 }
 
 /**
@@ -494,7 +494,7 @@ export function calculateTokensFromPi(
  * @param totalSupply 总供应量
  * @param tokenAmount 代币数量
  * @param mintAmount 铸造总额
- * @param presaleRate 预设汇率
+ * @param mintRate 预设汇率
  * @param tokenDecimals 代币小数位
  * @returns 需要的任意货币金额(Pi/SOL等)
  */
@@ -502,8 +502,8 @@ export function calculatePiFromTokens(
   totalSupply: string | number,
   tokenAmount: number,
   mintAmount: number,
-  presaleRate?: string,
+  mintRate?: string,
   tokenDecimals: number = 6
 ): number {
-  return calculateCurrencyFromTokens(totalSupply, tokenAmount, mintAmount, presaleRate, tokenDecimals);
+  return calculateCurrencyFromTokens(totalSupply, tokenAmount, mintAmount, mintRate, tokenDecimals);
 }

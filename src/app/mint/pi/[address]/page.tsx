@@ -209,7 +209,7 @@ export default function PiTokenDetailPage() {
               <MintingForm 
                 token={{
                   symbol: token.symbol,
-                  presaleRate: token.presaleRate || '0.000001',
+                  mintRate: token.mintRate || '0.000001',
                   network: network,
                   currencyUnit: currencyUnit
                 }}

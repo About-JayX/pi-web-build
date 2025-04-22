@@ -65,7 +65,7 @@ export default {
   'mintingLastUpdated': '最后更新：',
   'deployed': '部署时间',
   'remainingAmount': '剩余金额',
-  'mintExchangeRate': '兑换比例',
+  'mintRate': '兑换比例',
   'notSet': '未设置',
   'mintedTokens': '已铸造代币',
   'share': '分享',

@@ -46,7 +46,7 @@ interface MintToken {
   image: string
   target: string
   raised: string
-  presaleRate: string
+  mintRate: string
   created_at: string
   minterCounts: number
   buyTransactions: number

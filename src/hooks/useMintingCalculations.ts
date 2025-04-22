@@ -4,7 +4,7 @@ import {
   getSimpleMintingRatio, 
   calculateMintingPrice,
   parseMintingPrice,
-  getFormattedExchangeRate as formatExchangeRate,
+  getFormattedMintRate as formatMintRate,
   calculateMintedAmount as calcMintedAmount,
   calculateTokensFromCurrency as calcTokensFromCurrency,
   calculateCurrencyFromTokens as calcCurrencyFromTokens
@@ -13,7 +13,7 @@ import {
 interface MintingCalculationParams {
   totalSupply?: string;
   target?: string;
-  presaleRate?: string;
+  mintRate?: string;
   currencyUnit?: string;
   tokenDecimals?: number;
 }
@@ -27,7 +27,7 @@ interface MintingCalculationParams {
 export function useMintingCalculations({
   totalSupply,
   target,
-  presaleRate,
+  mintRate,
   currencyUnit = 'SOL',
   tokenDecimals = 6
 }: MintingCalculationParams) {
@@ -49,7 +49,7 @@ export function useMintingCalculations({
   // 计算和格式化铸造比率 (1:X 格式)
   const mintingRatio = useMemo(() => {
     // 如果有预设汇率，优先使用
-    if (presaleRate) return presaleRate;
+    if (mintRate) return mintRate;
     
     // 如果关键参数缺失，返回空字符串
     if (!totalSupply || mintAmount === 0) return '';
@@ -61,12 +61,12 @@ export function useMintingCalculations({
       tokenDecimals,
       mintAmount
     );
-  }, [totalSupply, mintAmount, presaleRate, currencyUnit, tokenDecimals]);
+  }, [totalSupply, mintAmount, mintRate, currencyUnit, tokenDecimals]);
 
   // 计算铸造价格
   const mintingPrice = useMemo(() => {
     // 如果有预设汇率，优先使用
-    if (presaleRate) return presaleRate;
+    if (mintRate) return mintRate;
     
     // 如果关键参数缺失，返回默认值
     if (!totalSupply || mintAmount === 0) {
@@ -80,15 +80,15 @@ export function useMintingCalculations({
       tokenDecimals,
       mintAmount
     );
-  }, [totalSupply, mintAmount, presaleRate, currencyUnit, tokenDecimals]);
+  }, [totalSupply, mintAmount, mintRate, currencyUnit, tokenDecimals]);
 
   // 获取兑换比率
-  const getFormattedExchangeRate = () => {
+  const getFormattedMintRate = () => {
     // 直接调用utils中的函数
-    return formatExchangeRate(
+    return formatMintRate(
       totalSupply || '',
       mintAmount,
-      presaleRate,
+      mintRate,
       tokenDecimals
     );
   };
@@ -100,7 +100,7 @@ export function useMintingCalculations({
       totalSupply || '',
       raised || '',
       mintAmount,
-      presaleRate,
+      mintRate,
       tokenDecimals,
       symbol
     );
@@ -115,7 +115,7 @@ export function useMintingCalculations({
       totalSupply || '',
       currencyAmount,
       mintAmount,
-      presaleRate,
+      mintRate,
       tokenDecimals
     );
   };
@@ -129,7 +129,7 @@ export function useMintingCalculations({
       totalSupply || '',
       tokenAmount,
       mintAmount,
-      presaleRate,
+      mintRate,
       tokenDecimals
     );
   };
@@ -141,7 +141,7 @@ export function useMintingCalculations({
     mintingPrice,
     parseMintingPrice,
     calculateMintedAmount,
-    getFormattedExchangeRate,
+    getFormattedMintRate,
     calculateTokensFromCurrency,
     calculateCurrencyFromTokens,
     // 为保持向后兼容，仍然导出旧函数名，但引用新函数

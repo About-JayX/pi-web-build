@@ -242,7 +242,7 @@ export default function TokenMintPage() {
                     <MintingForm
                       token={{
                         symbol: selectedToken.symbol,
-                        presaleRate: formattedData.feeRate,
+                        mintRate: formattedData.feeRate,
                         network,
                         currencyUnit,
                         address: selectedToken.address,
@@ -264,7 +264,7 @@ export default function TokenMintPage() {
                   <Heading size="md">{t('tokenInfo')}</Heading>
                   <VStack align="stretch" spacing={3}>
                     <HStack justify="space-between">
-                      <Text color="gray.500">{t('presaleRate')}:</Text>
+                      <Text color="gray.500">{t('mintRate')}:</Text>
                       <Text fontWeight="bold">
                         {formatFeeRate(formattedData.feeRate)}
                       </Text>

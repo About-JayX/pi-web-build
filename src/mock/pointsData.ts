@@ -3,8 +3,8 @@
 export const REWARDS = [
   {
     id: 1,
-    title: '奖励1',
-    description: '暂无数据',
+    title: 'Rewards 1',
+    description: 'No data',
     points: 0,
     image: '',
   },

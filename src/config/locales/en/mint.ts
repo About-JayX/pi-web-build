@@ -65,7 +65,7 @@ export default {
   'mintingLastUpdated': 'Last Updated: ',
   'deployed': 'Deployed',
   'remainingAmount': 'Remaining Amount',
-  'mintExchangeRate': 'Rate',
+  'mintRate': 'Rate',
   'notSet': 'Not Set',
   'mintedTokens': 'Minted',
   'share': 'Share',

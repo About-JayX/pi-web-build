@@ -70,7 +70,7 @@ interface MintToken {
   image: string
   target: string
   raised: string
-  presaleRate: string
+  mintRate: string
   created_at: string
   deployedAt?: number
   logo?: string
@@ -346,9 +346,9 @@ function TokenListView({
               </Td>
               <Td textAlign="center">{token.participants}</Td>
               <Td textAlign="center">
-                {token.presaleRate && (
+                {token.mintRate && (
                   <Text fontWeight="medium" textAlign="center">
-                    {token.presaleRate}
+                    {token.mintRate}
                   </Text>
                 )}
               </Td>

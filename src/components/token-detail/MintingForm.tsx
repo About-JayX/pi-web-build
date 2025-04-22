@@ -74,7 +74,7 @@ interface MintingFormProps {
     symbol: string
     address?: string
     tokenDecimal?: number
-    presaleRate?: string
+    mintRate?: string
     currencyUnit?: string
     totalSupply?: string
     target?: string
@@ -126,13 +126,13 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
     mintingRatio,
     parseMintingPrice,
     calculateMintedAmount,
-    getFormattedExchangeRate,
+    getFormattedMintRate,
     calculateTokensFromCurrency,
     calculateCurrencyFromTokens,
   } = useMintingCalculations({
     totalSupply: token.totalSupply,
     target: token.target,
-    presaleRate: token.presaleRate,
+    mintRate: token.mintRate,
     currencyUnit: token.currencyUnit || 'SOL',
     tokenDecimals: token.tokenDecimal || 0
   });
@@ -335,7 +335,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
     }
   }
 
-  // 获取铸造价格 - 优先使用presaleRate，否则计算
+  // 获取铸造价格 - 优先使用mintRate，否则计算
   const getMintingPrice = (displayMode: 'price' | 'ratio' = 'price') => {
     if (displayMode === 'ratio') {
       return mintingRatio;

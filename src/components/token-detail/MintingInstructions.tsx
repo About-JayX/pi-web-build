@@ -25,7 +25,7 @@ import { useMintingCalculations } from '@/hooks/useMintingCalculations';
 interface MintingInstructionsProps {
   token: {
     symbol: string;
-    presaleRate?: string;
+    mintRate?: string;
     currencyUnit?: string;
     network?: string;
     totalSupply?: string;
@@ -54,7 +54,7 @@ export default function MintingInstructions({ token, isModal = false, isOpen, on
   } = useMintingCalculations({
     totalSupply: token.totalSupply,
     target: token.target,
-    presaleRate: token.presaleRate,
+    mintRate: token.mintRate,
     currencyUnit,
     tokenDecimals: 6
   });

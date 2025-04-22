@@ -74,7 +74,7 @@ interface TokenInfoProps {
     raised: string
     participants: number
     progress: number
-    presaleRate?: string
+    mintRate?: string
     contractAddress?: string
     deployedAt?: number
     lastUpdatedAt?: number
@@ -111,12 +111,12 @@ export default function TokenInfo({
   const { 
     mintingPrice,
     mintingRatio,
-    getFormattedExchangeRate,
+    getFormattedMintRate,
     calculateMintedAmount
   } = useMintingCalculations({
     totalSupply: token.totalSupply,
     target: token.target,
-    presaleRate: token.presaleRate,
+    mintRate: token.mintRate,
     currencyUnit,
     tokenDecimals: 6
   });
@@ -177,7 +177,7 @@ export default function TokenInfo({
     if (token.exchangeRate) return token.exchangeRate;
     
     // 否则使用Hook提供的格式化方法
-    return getFormattedExchangeRate();
+    return getFormattedMintRate();
   }
 
   // 计算已铸造代币数量
@@ -819,7 +819,7 @@ export default function TokenInfo({
                     </Flex>
                   </GridItem>
 
-                  {/* 价格栏显示，无论有没有presaleRate都显示 */}
+                  {/* 价格栏显示，无论有没有mintRate都显示 */}
                   <GridItem>
                     <HStack bg={softBg} p={2} borderRadius="md" h="full">
                       <Icon
@@ -840,12 +840,12 @@ export default function TokenInfo({
                       justify="flex-end"
                     >
                       <Text fontWeight="bold" fontSize="sm">
-                        {token.presaleRate || mintingPrice}
+                        {token.mintRate || mintingPrice}
                       </Text>
                     </Flex>
                   </GridItem>
 
-                  {/* 兑换比例栏，无论有没有presaleRate都显示 */}
+                  {/* 兑换比例栏，无论有没有mintRate都显示 */}
                   <GridItem>
                     <HStack bg={softBg} p={2} borderRadius="md" h="full">
                       <Icon
@@ -854,7 +854,7 @@ export default function TokenInfo({
                         boxSize="12px"
                       />
                       <Text color={secondaryText}>
-                        {t('mintExchangeRate')}
+                        {t('mintRate')}
                       </Text>
                     </HStack>
                   </GridItem>
@@ -928,7 +928,7 @@ export default function TokenInfo({
                   </Text>
                 </HStack>
 
-                {/* 价格栏显示，无论有没有presaleRate都显示 */}
+                {/* 价格栏显示，无论有没有mintRate都显示 */}
                 <HStack
                   justify="space-between"
                   p={3}
@@ -946,11 +946,11 @@ export default function TokenInfo({
                     </Text>
                   </HStack>
                   <Text fontWeight="bold" fontSize="sm">
-                    {token.presaleRate || mintingPrice}
+                    {token.mintRate || mintingPrice}
                   </Text>
                 </HStack>
 
-                {/* 兑换比例栏，无论有没有presaleRate都显示 */}
+                {/* 兑换比例栏，无论有没有mintRate都显示 */}
                 <HStack
                   justify="space-between"
                   p={3}
@@ -964,7 +964,7 @@ export default function TokenInfo({
                       boxSize="14px"
                     />
                     <Text color={secondaryText} fontSize="sm">
-                      {t('mintExchangeRate')}
+                      {t('mintRate')}
                     </Text>
                   </HStack>
                   <Text fontWeight="bold" fontSize="sm">
@@ -999,7 +999,7 @@ export default function TokenInfo({
               <MintingInstructions
                 token={{
                   symbol: token.symbol,
-                  presaleRate: token.presaleRate,
+                  mintRate: token.mintRate,
                   currencyUnit: currencyUnit,
                   totalSupply: token.totalSupply,
                 }}
@@ -1028,7 +1028,7 @@ export default function TokenInfo({
       <MintingForm
         token={{
           symbol: token.symbol,
-          presaleRate: token.presaleRate || '0.000001', // 提供默认值避免类型错误
+          mintRate: token.mintRate || '0.000001', // 提供默认值避免类型错误
           currencyUnit: currencyUnit,
           totalSupply: token.totalSupply,
         }}
@@ -1041,7 +1041,7 @@ export default function TokenInfo({
       <MintingInstructions
         token={{
           symbol: token.symbol,
-          presaleRate: token.presaleRate,
+          mintRate: token.mintRate,
           currencyUnit: currencyUnit,
           totalSupply: token.totalSupply,
         }}

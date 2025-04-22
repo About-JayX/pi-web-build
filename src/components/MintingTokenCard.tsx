@@ -41,7 +41,7 @@ interface MintingTokenCardProps {
     participants: number
     totalSupply: string
     minterCounts: number
-    presaleRate?: string
+    mintRate?: string
     tokenDecimal?: number
     address?: string
     website?: string
@@ -63,10 +63,10 @@ export default function MintingTokenCard({
   const { t } = useTranslation()
 
   // 使用自定义Hook处理铸造计算
-  const { getFormattedExchangeRate } = useMintingCalculations({
+  const { getFormattedMintRate } = useMintingCalculations({
     totalSupply: token.totalSupply,
     target: token.target,
-    presaleRate: token.presaleRate,
+    mintRate: token.mintRate,
     currencyUnit,
     tokenDecimals: token.tokenDecimal || 6  // 从token对象获取小数位，默认为6
   });
@@ -252,7 +252,7 @@ export default function MintingTokenCard({
                 {t('mintingPrice')}
               </Text>
               <Text fontWeight="bold" fontSize="sm">
-                {token.presaleRate || getFormattedExchangeRate()}
+                {token.mintRate || getFormattedMintRate()}
               </Text>
             </HStack>
 
