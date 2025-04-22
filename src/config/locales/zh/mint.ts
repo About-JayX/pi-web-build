@@ -1,19 +1,18 @@
 export default {
   // 铸造页面 - 通用
-  'mintingTokens': '铸造中的代币',
-  'viewAllTokens': '探索全部铸造中的MEME代币 · 发现潜力新星',
+  'mintingTokens': '铸造代币',
   'cardView': '卡片',
   'listView': '列表',
   
   // 铸造页面 - 标签页
-  'hotTokens': '热门代币',
-  'allMinting': '所有铸造',
+  'hotTokens': '热门铸造',
+  'allMinting': '所有代币',
   'latestDeployed': '最新部署',
   
   // 铸造页面 - 排序和筛选
   'sortBy': '排序方式:',
-  'participantsSort': '持有地址',
-  'progressSort': '进度',
+  'participantsSort': '铸造人数',
+  'progressSort': '铸造进度',
   'raisedSort': '已铸额度',
   'targetSort': '铸造总额',
   'searchPlaceholder': '搜索代币名称、符号或合约地址',
@@ -29,8 +28,8 @@ export default {
   'contractAddressColumn': '合约地址',
   'totalSupplyColumn': '总供应量',
   'amountColumn': '总额 / 已铸',
-  'progressColumn': '进度',
-  'participantsColumn': '持有地址',
+  'progressColumn': '铸造进度',
+  'participantsColumn': '铸造人数',
   'priceColumn': '铸造价格',
   'linksColumn': '链接',
   'joinMinting': '参与铸造',

@@ -23,13 +23,13 @@ export default {
   'discoverHotProjects': '发现热门铸造中的MEME代币',
   'mintingAmount': '铸造总额',
   'raisedAmount': '已铸额度',
-  'progress': '进度',
-  'participants': '持有地址',
+  'progress': '铸造进度',
+  'participants': '铸造人数',
   'totalSupply': '总供应量',
   'mintingPrice': '铸造价格',
   'contractAddress': '合约地址',
   'joinMinting': '参与铸造',
-  'moreMintingProjects': '更多铸造中的代币',
+  'moreMintingProjects': '更多铸造代币',
 
   // 首页 - 平台特点
   'platformFeatures': 'Pi.Sale 平台特点',

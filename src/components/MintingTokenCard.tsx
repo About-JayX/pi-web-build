@@ -22,6 +22,8 @@ import {
   FaTelegram,
   FaShareAlt,
   FaFileContract,
+  FaHammer,
+  FaUsers,
 } from 'react-icons/fa'
 import NextLink from 'next/link'
 import { useTranslation } from 'react-i18next'
@@ -145,8 +147,17 @@ export default function MintingTokenCard({
     }
   }
 
+  // 格式化铸造价格，移除千分号
+  const formatMintRate = () => {
+    const rate = token.mintRate || getFormattedMintRate();
+    // 移除数字中的千分号（逗号）
+    return rate ? rate.replace(/,/g, '') : rate;
+  }
+
   return (
     <Card
+      as={NextLink}
+      href={`/${token.address}`}
       bg={cardBg}
       boxShadow="none"
       borderRadius="lg"
@@ -155,9 +166,37 @@ export default function MintingTokenCard({
       _hover={{
         transform: 'translateY(-5px)',
         boxShadow: 'lg',
+        textDecoration: 'none',
       }}
       position="relative"
     >
+      {/* 右上角的铸造LOGO */}
+      <Box
+        position="absolute"
+        top={3}
+        right={3}
+        zIndex={1}
+        bg="brand.primary"
+        borderRadius="full"
+        width="32px"
+        height="32px"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        boxShadow="md"
+        transform="rotate(25deg)"
+        _hover={{
+          transform: "rotate(0deg)",
+          transition: "transform 0.3s"
+        }}
+        transition="transform 0.3s"
+      >
+        <Icon 
+          as={FaHammer} 
+          color="white" 
+          boxSize="16px" 
+        />
+      </Box>
       <CardBody p={{ base: 1, md: 0, xl: 4 }}>
         <Stack spacing={3}>
           <HStack spacing={2} align="center">
@@ -192,30 +231,13 @@ export default function MintingTokenCard({
           </HStack>
 
           <Stack spacing={{ base: 1.5, xl: 2 }}>
-            <HStack justify="space-between">
-              <Text fontSize="xs" color={textColor}>
-                {t('mintingAmount')}
-              </Text>
-              <Text fontWeight="bold" fontSize="sm">
-                {token.target}
-              </Text>
-            </HStack>
-            <HStack justify="space-between">
-              <Text fontSize="xs" color={textColor}>
-                {t('raisedAmount')}
-              </Text>
-              <Text fontWeight="bold" fontSize="sm" color="brand.primary">
-                {token.raised}
-              </Text>
-            </HStack>
-
             <Box py={1}>
               <HStack justify="space-between" mb={1}>
-                <Text fontSize="xs" color={textColor}>
-                  {t('progress')}
+                <Text fontWeight="bold" fontSize="sm" color="brand.primary">
+                  {token.raised}
                 </Text>
-                <Text fontSize="xs" fontWeight="bold">
-                  {token.progress || 0}%
+                <Text fontWeight="bold" fontSize="sm">
+                  {token.target}
                 </Text>
               </HStack>
               <Progress
@@ -223,16 +245,34 @@ export default function MintingTokenCard({
                 colorScheme="purple"
                 borderRadius="full"
                 size="sm"
+                mb={1}
               />
+              <HStack justify="space-between">
+                <Text fontSize="xs" color={textColor}>
+                  {t('progress')}
+                </Text>
+                <Text fontSize="xs" fontWeight="bold">
+                  {token.progress || 0}%
+                </Text>
+              </HStack>
             </Box>
 
             <Divider />
 
-            <HStack justify="space-between">
-              <Text fontSize="xs" color={textColor}>
-                {t('participants')}
-              </Text>
-              <Text fontWeight="bold" fontSize="sm">
+            {/* 铸造人数 - 突出显示 */}
+            <HStack 
+              justify="space-between" 
+              bg="rgba(128, 90, 213, 0.06)" 
+              p={2} 
+              borderRadius="md"
+            >
+              <HStack>
+                <Icon as={FaUsers} color="brand.primary" boxSize="12px" />
+                <Text fontSize="xs" color={textColor} fontWeight="medium">
+                  {t('participants')}
+                </Text>
+              </HStack>
+              <Text fontWeight="bold" fontSize="md" color="brand.primary">
                 {token.minterCounts}
               </Text>
             </HStack>
@@ -252,110 +292,10 @@ export default function MintingTokenCard({
                 {t('mintingPrice')}
               </Text>
               <Text fontWeight="bold" fontSize="sm">
-                {token.mintRate || getFormattedMintRate()}
+                {formatMintRate()}
               </Text>
             </HStack>
-
-            {token.address && (
-              <HStack justify="space-between">
-                <Text fontSize="xs" color={textColor}>
-                  {t('contractAddress')}
-                </Text>
-                <Box
-                  as="button"
-                  onClick={copyContractAddress}
-                  display="flex"
-                  alignItems="center"
-                  fontSize="xs"
-                  fontWeight="medium"
-                  fontFamily="mono"
-                  color="brand.primary"
-                  bg="gray.50"
-                  border="1px solid"
-                  borderColor="gray.200"
-                  borderRadius="md"
-                  px={2}
-                  py={0.5}
-                  _hover={{
-                    bg: 'gray.100',
-                    borderColor: 'brand.primary',
-                  }}
-                  transition="all 0.2s"
-                  title={t('copyAddressSuccess')}
-                >
-                  <Icon as={FaFileContract} mr={1} fontSize="10px" />
-                  {formatContractAddress(token.address)}
-                </Box>
-              </HStack>
-            )}
           </Stack>
-
-          <Button
-            as={NextLink}
-            href={`/${token.address}`}
-            colorScheme="purple"
-            bg="brand.primary"
-            _hover={{ bg: 'brand.light' }}
-            size="sm"
-            borderRadius="md"
-            mt={1}
-          >
-            {t('joinMinting')}
-          </Button>
-
-          {/* 社交媒体链接和分享按钮 */}
-          <HStack justify="space-between" mt={1}>
-            <HStack spacing={3}>
-              {token.website && (
-                <Box
-                  as="a"
-                  href={token.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  color={iconColor}
-                  _hover={{ color: iconHoverColor }}
-                  transition="color 0.2s"
-                >
-                  <Icon as={FaGlobe} boxSize="16px" />
-                </Box>
-              )}
-              {token.twitter && (
-                <Box
-                  as="a"
-                  href={token.twitter}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  color={iconColor}
-                  _hover={{ color: iconHoverColor }}
-                  transition="color 0.2s"
-                >
-                  <Icon as={FaTwitter} boxSize="16px" />
-                </Box>
-              )}
-              {token.telegram && (
-                <Box
-                  as="a"
-                  href={token.telegram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  color={iconColor}
-                  _hover={{ color: iconHoverColor }}
-                  transition="color 0.2s"
-                >
-                  <Icon as={FaTelegram} boxSize="16px" />
-                </Box>
-              )}
-            </HStack>
-            <Box
-              as="button"
-              onClick={handleShare}
-              color={iconColor}
-              _hover={{ color: iconHoverColor }}
-              transition="color 0.2s"
-            >
-              <Icon as={FaShareAlt} boxSize="16px" />
-            </Box>
-          </HStack>
         </Stack>
       </CardBody>
     </Card>

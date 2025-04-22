@@ -32,7 +32,7 @@ export default {
   'utilityTokens': '实用代币',
   'searchPlaceholder': '搜索代币名称、符号或合约地址',
   'marketCapRanking': '市值排行',
-  'hotTokens': '热门代币',
+  'hotTokens': '热门铸造',
   'totalResults': '共{count}条结果',
   'searchNameSymbolAddress': '搜索名称、符号或合约地址',
   'clickToCopyFullAddress': '点击复制',

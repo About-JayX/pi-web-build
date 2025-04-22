@@ -83,13 +83,24 @@ export function useMintingCalculations({
   }, [totalSupply, mintAmount, mintRate, currencyUnit, tokenDecimals]);
 
   // 获取兑换比率
-  const getFormattedMintRate = () => {
+  const getFormattedMintRate = (overrideParams?: MintingCalculationParams) => {
+    // 使用传入的参数覆盖默认参数
+    const finalTotalSupply = overrideParams?.totalSupply || totalSupply || '';
+    const finalMintAmount = overrideParams?.target ? 
+      (() => {
+        const targetMatch = overrideParams.target.match(/[0-9.]+/);
+        return targetMatch ? parseFloat(targetMatch[0]) : mintAmount;
+      })() : 
+      mintAmount;
+    const finalMintRate = overrideParams?.mintRate || mintRate;
+    const finalTokenDecimals = overrideParams?.tokenDecimals || tokenDecimals;
+    
     // 直接调用utils中的函数
     return formatMintRate(
-      totalSupply || '',
-      mintAmount,
-      mintRate,
-      tokenDecimals
+      finalTotalSupply,
+      finalMintAmount,
+      finalMintRate,
+      finalTokenDecimals
     );
   };
 

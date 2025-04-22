@@ -314,7 +314,7 @@ export default function Navbar() {
             alignItems="center"
             justify={{ base: 'space-between', xl: 'start' }}
           >
-            <NextLink href="/mint" passHref>
+            <NextLink href="/" passHref>
               <Flex
                 align="center"
                 cursor="pointer"

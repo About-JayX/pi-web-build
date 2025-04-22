@@ -58,6 +58,7 @@ import axios from '@/config/axios'
 import { store } from '@/store'
 import { fetchTokenList } from '@/store/slices/tokenSlice'
 import { formatTokenAmount } from '@/utils'
+import { useMintingCalculations } from '@/hooks/useMintingCalculations'
 
 interface MintToken {
   id: number
@@ -124,7 +125,36 @@ function TokenListView({
   const iconColor = useColorModeValue('gray.600', 'gray.400')
   const iconHoverColor = useColorModeValue('brand.primary', 'brand.light')
   const toast = useToast()
+  const { network } = useNetwork()
   const { t } = useTranslation()
+  
+  // 设置当前网络的计价单位
+  const currencyUnit = useMemo(() => {
+    return network === 'SOL' ? 'SOL' : 'PI'
+  }, [network])
+  
+  // 将hook移到组件顶层，只初始化一次
+  const { getFormattedMintRate } = useMintingCalculations({
+    totalSupply: "",  // 这里不提供具体值，只是初始化hook
+    target: "",
+    currencyUnit,
+    tokenDecimals: 6
+  });
+
+  // 修改格式化铸造价格函数，不在内部调用Hook
+  const formatMintRateForToken = useCallback((token: MintToken) => {
+    // 使用已初始化的getFormattedMintRate函数
+    // 注意这里只是使用函数，不再创建新的Hook实例
+    const rate = token.mintRate || getFormattedMintRate({
+      totalSupply: token.totalSupply,
+      target: token.target,
+      currencyUnit,
+      tokenDecimals: 6
+    });
+    
+    // 移除数字中的千分号（逗号）
+    return rate ? rate.replace(/,/g, '') : rate;
+  }, [getFormattedMintRate, currencyUnit]);
 
   // 跳转到代币铸造页面
   const navigateToMintPage = (contractAddress: string) => {
@@ -231,12 +261,13 @@ function TokenListView({
             <ThSortable column="totalSupply">
               {t('totalSupplyColumn')}
             </ThSortable>
-            <ThSortable column="raised">{t('amountColumn')}</ThSortable>
-            <ThSortable column="progress">{t('progressColumn')}</ThSortable>
+            <ThSortable column="raised">
+              {t('progressColumn')}
+            </ThSortable>
             <ThSortable column="participants">
               {t('participantsColumn')}
             </ThSortable>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
+            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" textAlign="center">
               {t('priceColumn')}
             </Th>
             <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
@@ -323,34 +354,34 @@ function TokenListView({
               </Td>
               <Td textAlign="center">{formatTokenAmount(token.totalSupply, { abbreviate: true })}</Td>
               <Td>
-                <VStack spacing={1} align="center">
-                  <Text fontSize="xs" color="gray.500">
-                    {t('target')}: {token.target}
-                  </Text>
-                  <Text fontWeight="bold" color="brand.primary" fontSize="sm">
-                    {t('raised')}: {formatTokenAmount(token.raised, { abbreviate: true })}
-                  </Text>
-                </VStack>
-              </Td>
-              <Td>
-                <HStack width="120px" justifyContent="center">
-                  <Progress
-                    value={token.progress}
-                    colorScheme="purple"
-                    borderRadius="full"
-                    size="sm"
-                    width="80px"
-                  />
-                  <Text fontSize="sm">{token.progress}%</Text>
-                </HStack>
+                <Box py={1} width="100%">
+                  <HStack justify="space-between" mb={1}>
+                    <Text fontWeight="bold" fontSize="sm" color="brand.primary">
+                      {token.raised}
+                    </Text>
+                    <Text fontWeight="bold" fontSize="sm">
+                      {token.target}
+                    </Text>
+                  </HStack>
+                  <HStack spacing={2} align="center">
+                    <Progress
+                      value={token.progress}
+                      colorScheme="purple"
+                      borderRadius="full"
+                      size="sm"
+                      flex="1"
+                    />
+                    <Text fontSize="xs" fontWeight="bold" whiteSpace="nowrap">
+                      {token.progress.toFixed(2)}%
+                    </Text>
+                  </HStack>
+                </Box>
               </Td>
               <Td textAlign="center">{token.participants}</Td>
               <Td textAlign="center">
-                {token.mintRate && (
-                  <Text fontWeight="medium" textAlign="center">
-                    {token.mintRate}
-                  </Text>
-                )}
+                <Text fontWeight="medium" textAlign="center" width="100%" display="block">
+                  {formatMintRateForToken(token)}
+                </Text>
               </Td>
               <Td>
                 <HStack spacing={3} justify="center">
@@ -364,18 +395,6 @@ function TokenListView({
                     <Icon as={FaShareAlt} boxSize="16px" />
                   </Box>
                 </HStack>
-              </Td>
-              <Td>
-                <Button
-                  as={NextLink}
-                  href={`/${token.address}`}
-                  colorScheme="purple"
-                  size="sm"
-                  bg="brand.primary"
-                  _hover={{ bg: 'brand.light' }}
-                >
-                  {t('joinMinting')}
-                </Button>
               </Td>
             </Tr>
           ))}
@@ -552,10 +571,40 @@ export default function MintPage() {
   const { t } = useTranslation()
 
   const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(12)
-  const [tabIndex, setTabIndex] = useState(0)
+  const [pageSize, setPageSize] = useState(() => {
+    // 仅在客户端执行
+    if (typeof window !== 'undefined') {
+      // 从localStorage中读取保存的每页显示数量
+      const savedPageSize = localStorage.getItem('mint_page_size')
+      // 如果存在有效值则使用它，否则默认为12
+      return savedPageSize ? Number(savedPageSize) || 12 : 12
+    }
+    // 服务器端渲染时默认使用12
+    return 12
+  })
+  const [tabIndex, setTabIndex] = useState(() => {
+    // 仅在客户端执行
+    if (typeof window !== 'undefined') {
+      // 从localStorage中读取保存的标签页索引
+      const savedTabIndex = localStorage.getItem('mint_tab_index')
+      // 如果存在有效值则使用它，否则默认为0
+      return savedTabIndex ? Number(savedTabIndex) || 0 : 0
+    }
+    // 服务器端渲染时默认使用第一个标签页
+    return 0
+  })
   const [searchQuery, setSearchQuery] = useState('')
-  const [viewMode, setViewMode] = useState<'card' | 'list'>('card')
+  const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
+    // 仅在客户端执行
+    if (typeof window !== 'undefined') {
+      // 从localStorage中读取保存的视图模式
+      const savedViewMode = localStorage.getItem('mint_view_mode')
+      // 如果存在有效值则使用它，否则默认为'card'
+      return (savedViewMode === 'card' || savedViewMode === 'list') ? savedViewMode : 'card'
+    }
+    // 服务器端渲染时默认使用卡片视图
+    return 'card'
+  })
   const [sortColumn, setSortColumn] = useState('created_at')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
 
@@ -643,6 +692,32 @@ export default function MintPage() {
       localStorage.setItem('mint_tab_index', String(tabIndex))
     }
   }, [tabIndex])
+
+  // 保存每页显示数量到本地存储
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mint_page_size', String(pageSize))
+    }
+  }, [pageSize])
+
+  // 强制在移动设备上使用卡片视图
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768 && viewMode !== 'card') {
+        setViewMode('card');
+      }
+    };
+    
+    // 添加客户端检测，以避免服务器端渲染问题
+    if (typeof window !== 'undefined') {
+      // 初始化时检查
+      handleResize();
+      
+      // 监听窗口大小变化
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, [viewMode]);
 
   // 共享排序逻辑
   const handleSort = (column: string) => {
@@ -814,9 +889,14 @@ export default function MintPage() {
               <Heading as="h2" size="lg" mb={2}>
                 {t('mintingTokens')}
               </Heading>
-              <Text color="gray.500">{t('viewAllTokens')}</Text>
             </Box>
-            <ButtonGroup isAttached variant="outline" colorScheme="purple">
+            {/* 在移动设备上隐藏视图切换按钮 */}
+            <ButtonGroup 
+              isAttached 
+              variant="outline" 
+              colorScheme="purple" 
+              display={{ base: 'none', md: 'flex' }}
+            >
               <Button
                 leftIcon={<FaThLarge />}
                 variant={viewMode === 'card' ? 'solid' : 'outline'}

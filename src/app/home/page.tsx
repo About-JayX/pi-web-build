@@ -106,10 +106,10 @@ export default function HomePage() {
   const iconHoverColor = useColorModeValue('brand.primary', 'brand.light')
   const hoverBg = useColorModeValue('gray.50', 'gray.700')
 
-  // 铸造中的代币数据
+  // 铸造代币数据
   const [mintingData, setMintingData] = useState<any[]>([])
   
-  // 获取铸造中的代币数据
+  // 获取铸造代币数据
   useEffect(() => {
     const fetchMintingData = async () => {
       try {
