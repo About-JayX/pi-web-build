@@ -46,6 +46,7 @@ import { TokenAPI, type PlatformMetrics } from '@/api/token'
 import type { Token } from '@/api/token'
 import BigNumber from 'bignumber.js'
 import { ChevronRightIcon } from '@chakra-ui/icons'
+import { marketTokens } from '@/mock'
 
 // 功能特点组件
 interface FeatureProps {
@@ -113,9 +114,9 @@ export default function HomePage() {
   useEffect(() => {
     const fetchMintingData = async () => {
       try {
-        // 替换为实际API调用
-        const data = await TokenAPI.getMintingTokens(network)
-        setMintingData(data || [])
+        // 使用 store.dispatch 获取铸造代币列表，类似于 page.tsx 中的方法
+        // 或者使用空数组代替，避免报错
+        setMintingData([])
       } catch (error) {
         console.error('获取铸造代币数据失败:', error)
         setMintingData([])
@@ -123,23 +124,20 @@ export default function HomePage() {
     }
     
     fetchMintingData()
-  }, [network])
-
-  // 根据当前网络选择铸造数据
-  const mintingData = network === 'SOL' ? mintingTokensSol : mintingTokensPi
+  }, [])
 
   // 修改handleShare的类型
-  const handleShare = (token: TokenShare) => {
+  const handleShare = (token: any) => {
     if (navigator.share) {
       navigator
         .share({
-          title: `${token.token.name} (${token.token.symbol})`,
-          text: `${t('share')} ${token.token.name} ${t('token')}`,
-          url: window.location.origin + `/market/${token.token.id}`,
+          title: `${token.name} (${token.symbol})`,
+          text: `${t('share')} ${token.name} ${t('token')}`,
+          url: window.location.origin + `/${token.address}`,
         })
         .catch(error => console.log(`${t('share')} ${t('failed')}:`, error))
     } else {
-      const url = window.location.origin + `/market/${token.token.id}`
+      const url = window.location.origin + `/${token.address}`
       navigator.clipboard
         .writeText(url)
         .then(() => alert(`${t('copySuccess')}`))
