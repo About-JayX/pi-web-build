@@ -25,7 +25,10 @@ export const useWss = () => useContext(WssContext);
 export const WssProvider = ({ children }: { children: ReactNode }) => {
   const [status, setStatus] = useState<boolean>(false);
 
-  const socket = new WebSocket(`${userApi.defaults.baseURL}/ws` || "");
+  const wsUrl = userApi.defaults.baseURL
+    ? userApi.defaults.baseURL.replace(/^http:\/\//i, 'ws://').replace(/^https:\/\//i, 'wss://') + '/ws'
+    : '';
+  const socket = new WebSocket(wsUrl);
   socket.onopen = () => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify({ mode: "ping", data: "ping" }));
