@@ -35,7 +35,7 @@ import {
   Image,
 } from '@chakra-ui/react'
 import { FaUpload, FaChevronDown, FaChevronUp, FaEdit } from 'react-icons/fa'
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useNetwork } from '@/contexts/NetworkContext'
 import { useTranslation } from 'react-i18next'
 import { useSolana } from '@/contexts/solanaProvider'
@@ -534,6 +534,8 @@ export default function DeployPage() {
   const [targetAmountTabIndex, setTargetAmountTabIndex] = useState(0)
   const [tokenSymbol, setTokenSymbol] = useState('')
   const [tokenName, setTokenName] = useState('')
+  const [isCheckingSymbol, setIsCheckingSymbol] = useState(false)
+  const [isSymbolValid, setIsSymbolValid] = useState<boolean | null>(null)
 
   // 折叠面板状态
   const { isOpen: isSocialOpen, onToggle: onSocialToggle } = useDisclosure()
@@ -587,11 +589,81 @@ export default function DeployPage() {
     }
   }
 
+  // 检查代币符号
+  const checkTokenSymbol = useCallback(async (symbol: string) => {
+    if (!symbol) {
+      setIsSymbolValid(null)
+      return
+    }
+    
+    try {
+      setIsCheckingSymbol(true)
+      const response = await TokenAPI.checkSymbol(symbol)
+      // 如果 exists 为 true 表示已注册，则不可用
+      setIsSymbolValid(!response.exists)
+      
+      if (response.exists) {
+        toast({
+          title: t('error'),
+          description: t('symbolAlreadyExists'),
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        })
+      }
+    } catch (error) {
+      console.error('检查代币符号失败：', error)
+      setIsSymbolValid(null)
+    } finally {
+      setIsCheckingSymbol(false)
+    }
+  }, [toast, t])
+
+  // 使用 useRef 来存储定时器
+  const timerRef = useRef<NodeJS.Timeout>()
+
+  // 处理代币符号输入
+  const handleSymbolChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.toUpperCase() // 自动转换为大写
+    setTokenSymbol(value)
+    
+    // 清除之前的定时器
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+    }
+    
+    // 设置新的定时器，1500ms 后检查
+    timerRef.current = setTimeout(() => {
+      checkTokenSymbol(value)
+    }, 1500)
+  }, [checkTokenSymbol])
+
+  // 组件卸载时清除定时器
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
+    }
+  }, [])
+
   const handleCreateToken = async () => {
     if (!tokenIcon || !tokenName || !tokenSymbol) {
       toast({
         title: t('error'),
         description: t('pleaseCompleteForm'),
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      })
+      return
+    }
+
+    // 检查代币符号是否可用
+    if (!isSymbolValid) {
+      toast({
+        title: t('error'),
+        description: t('symbolAlreadyExists'),
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -738,13 +810,25 @@ export default function DeployPage() {
                     </FormLabel>
                     <Input
                       value={tokenSymbol}
-                      onChange={e => setTokenSymbol(e.target.value)}
+                      onChange={handleSymbolChange}
                       placeholder=""
                       bg={inputBg}
-                      borderColor={borderColor}
+                      borderColor={isSymbolValid === false ? 'red.500' : isSymbolValid === true ? 'green.500' : borderColor}
                       _placeholder={{ color: 'gray.400' }}
                       size="md"
+                      isInvalid={isSymbolValid === false}
+                      disabled={isCheckingSymbol}
                     />
+                    {isCheckingSymbol && (
+                      <Text fontSize="sm" color="gray.500" mt={1}>
+                        {t('checkingSymbol')}...
+                      </Text>
+                    )}
+                    {isSymbolValid === false && (
+                      <Text fontSize="sm" color="red.500" mt={1}>
+                        {t('symbolAlreadyExists')}
+                      </Text>
+                    )}
                   </FormControl>
 
                   <FormControl isRequired>

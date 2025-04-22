@@ -13,6 +13,10 @@ export interface PlatformMetrics {
   tvl: number // 锁仓总价值
 }
 
+export interface SymbolCheckResponse {
+  exists: boolean
+}
+
 /**
  * Token 相关接口
  */
@@ -42,6 +46,15 @@ export const TokenAPI = {
    */
   getPlatformMetrics: (): Promise<PlatformMetrics> => {
     return request.get('/metrics/platform')
+  },
+
+  /**
+   * 检查代币符号是否可用
+   * @param symbol 代币符号
+   * @returns Promise<SymbolCheckResponse> 返回代币符号检查结果
+   */
+  checkSymbol: (symbol: string): Promise<SymbolCheckResponse> => {
+    return request.get(`/token/ticker/check?symbol=${symbol}`)
   },
 }
 
