@@ -9,6 +9,8 @@ export default {
   'hotTokens': 'Hot Tokens',
   'allMinting': 'All Minting',
   'latestDeployed': 'Latest Deployed',
+  'mintingFinished': 'Minting Finished',
+  'tabSwitchLoading': 'Loading data...',
   
   // Mint Page - Sorting & Filtering
   'sortBy': 'Sort by:',

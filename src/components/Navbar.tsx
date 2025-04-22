@@ -301,6 +301,7 @@ export default function Navbar() {
             flex={{ base: 1, md: 'auto' }}
             ml={{ base: -2 }}
             display={{ base: 'flex', xl: 'none' }}
+            alignItems="center"
           >
             <IconButton
               onClick={onToggle}
@@ -308,6 +309,20 @@ export default function Navbar() {
               variant="ghost"
               icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
             />
+            {/* 移动端显示Logo */}
+            <NextLink href="/" passHref>
+              <Flex align="center" cursor="pointer" ml={2}>
+                <ClientSideOnly>
+                  <Image
+                    src="/pis.png"
+                    alt="Pi Logo"
+                    boxSize="32px"
+                    objectFit="contain"
+                    borderRadius="full"
+                  />
+                </ClientSideOnly>
+              </Flex>
+            </NextLink>
           </Flex>
           <Flex
             flex={{ base: 1, xl: 'auto' }}

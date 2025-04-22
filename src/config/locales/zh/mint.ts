@@ -8,6 +8,8 @@ export default {
   'hotTokens': '热门铸造',
   'allMinting': '所有代币',
   'latestDeployed': '最新部署',
+  'mintingFinished': '铸造结束',
+  'tabSwitchLoading': '数据加载中...',
   
   // 铸造页面 - 排序和筛选
   'sortBy': '排序方式:',

@@ -34,6 +34,7 @@ import {
   useToast,
   Select,
   IconButton,
+  Spinner,
 } from '@chakra-ui/react'
 import {
   FaThLarge,
@@ -45,6 +46,7 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaSync,
+  FaPlus,
 } from 'react-icons/fa'
 import NextLink from 'next/link'
 import { useState, useEffect, useMemo, useCallback } from 'react'
@@ -268,7 +270,7 @@ function TokenListView({
               {t('participantsColumn')}
             </ThSortable>
             <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" textAlign="center">
-              {t('priceColumn')}
+              {t('mintingPrice')}
             </Th>
             <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
               {t('linksColumn')}
@@ -611,8 +613,25 @@ export default function MintPage() {
   // 获取token列表
   const getTokenList = async () => {
     try {
-      const sortField =
-        tabIndex === 0 ? 'progress' : tabIndex === 1 ? 'token_id' : 'created_at'
+      // 根据标签索引选择不同的排序字段
+      let sortField = '';
+      switch(tabIndex) {
+        case 0: // 热门铸造
+          sortField = 'progress';
+          break;
+        case 1: // 所有代币
+          sortField = 'token_id';
+          break;
+        case 2: // 最新部署
+          sortField = 'created_at';
+          break;
+        case 3: // 铸造结束
+          sortField = 'progress';
+          break;
+        default:
+          sortField = 'progress';
+      }
+      
       await store.dispatch(
         fetchTokenList({
           page: currentPage,
@@ -647,8 +666,25 @@ export default function MintPage() {
   // 切换tab时重置页码并获取数据
   useEffect(() => {
     setCurrentPage(1)
-    const sortField =
-      tabIndex === 0 ? 'progress' : tabIndex === 1 ? 'token_id' : 'created_at'
+    // 根据标签索引选择不同的排序字段
+    let sortField = '';
+    switch(tabIndex) {
+      case 0: // 热门铸造
+        sortField = 'progress';
+        break;
+      case 1: // 所有代币
+        sortField = 'token_id';
+        break;
+      case 2: // 最新部署
+        sortField = 'created_at';
+        break;
+      case 3: // 铸造结束
+        sortField = 'progress';
+        break;
+      default:
+        sortField = 'progress';
+    }
+    
     store.dispatch(
       fetchTokenList({
         page: 1,
@@ -662,8 +698,25 @@ export default function MintPage() {
   useEffect(() => {
     if (currentPage !== 1) {
       // 避免和tab切换时的重置冲突
-      const sortField =
-        tabIndex === 0 ? 'progress' : tabIndex === 1 ? 'token_id' : 'created_at'
+      // 根据标签索引选择不同的排序字段
+      let sortField = '';
+      switch(tabIndex) {
+        case 0: // 热门铸造
+          sortField = 'progress';
+          break;
+        case 1: // 所有代币
+          sortField = 'token_id';
+          break;
+        case 2: // 最新部署
+          sortField = 'created_at';
+          break;
+        case 3: // 铸造结束
+          sortField = 'progress';
+          break;
+        default:
+          sortField = 'progress';
+      }
+      
       store.dispatch(
         fetchTokenList({
           page: currentPage,
@@ -784,9 +837,18 @@ export default function MintPage() {
     if (loading) {
       return (
         <Box py={10} textAlign="center">
-          <Text color="gray.500" fontSize="lg">
-            {t('loading')}
-          </Text>
+          <VStack spacing={4}>
+            <Spinner 
+              thickness='4px'
+              speed='0.65s'
+              emptyColor='gray.200'
+              color='brand.primary'
+              size='xl'
+            />
+            <Text color="gray.500" fontSize="md">
+              {t('tabSwitchLoading')}
+            </Text>
+          </VStack>
         </Box>
       )
     }
@@ -879,17 +941,38 @@ export default function MintPage() {
   return (
     <Box>
       <Container maxW="container.xl" py={12}>
-        <VStack spacing={10} align="stretch">
+        <VStack spacing={{ base: 4, md: 10 }} align="stretch">
           <Stack
             direction={{ base: 'column', md: 'row' }}
             justify="space-between"
             align={{ base: 'flex-start', md: 'center' }}
+            mb={{ base: 2, md: 0 }}
+            spacing={{ base: 2, md: 0 }}
           >
-            <Box>
-              <Heading as="h2" size="lg" mb={2}>
+            <Flex 
+              align="baseline" 
+              width={{ base: "100%", md: "auto" }}
+              mb={{ base: 0, md: 0 }}
+            >
+              <Heading as="h2" size="lg" m={0}>
                 {t('mintingTokens')}
               </Heading>
-            </Box>
+              <Button
+                as={NextLink}
+                href="/deploy"
+                ml={4}
+                mt={{ base: 0, md: 1 }}
+                colorScheme="teal"
+                variant="solid"
+                size={{ base: "sm", md: "md" }}
+                bg="teal.400"
+                _hover={{ bg: 'teal.500' }}
+                leftIcon={<FaPlus />}
+                fontWeight="medium"
+              >
+                {t('deploy')}
+              </Button>
+            </Flex>
             {/* 在移动设备上隐藏视图切换按钮 */}
             <ButtonGroup 
               isAttached 
@@ -923,16 +1006,26 @@ export default function MintPage() {
             variant="enclosed"
             index={tabIndex}
             onChange={setTabIndex}
+            isLazy
+            mt={{ base: 0, md: 2 }}
           >
             <TabList
               borderBottom="2px"
               borderColor="brand.primary"
-              mb={4}
+              mb={{ base: 2, md: 4 }}
               overflow="hidden"
               overflowX="auto"
+              width="100%"
+              display="flex"
+              flexWrap="nowrap"
             >
               <Tab
                 fontWeight="medium"
+                fontSize={{ base: "xs", md: "sm" }}
+                p={{ base: 2, md: 3 }}
+                minWidth={{ base: "auto", md: "auto" }}
+                whiteSpace="nowrap"
+                flexShrink={0}
                 _selected={{
                   color: 'brand.primary',
                   borderColor: 'brand.primary',
@@ -950,6 +1043,11 @@ export default function MintPage() {
               </Tab>
               <Tab
                 fontWeight="medium"
+                fontSize={{ base: "xs", md: "sm" }}
+                p={{ base: 2, md: 3 }}
+                minWidth={{ base: "auto", md: "auto" }}
+                whiteSpace="nowrap"
+                flexShrink={0}
                 _selected={{
                   color: 'brand.primary',
                   borderColor: 'brand.primary',
@@ -967,6 +1065,11 @@ export default function MintPage() {
               </Tab>
               <Tab
                 fontWeight="medium"
+                fontSize={{ base: "xs", md: "sm" }}
+                p={{ base: 2, md: 3 }}
+                minWidth={{ base: "auto", md: "auto" }}
+                whiteSpace="nowrap"
+                flexShrink={0}
                 _selected={{
                   color: 'brand.primary',
                   borderColor: 'brand.primary',
@@ -981,6 +1084,28 @@ export default function MintPage() {
                 transition="all 0.2s"
               >
                 {t('latestDeployed')}
+              </Tab>
+              <Tab
+                fontWeight="medium"
+                fontSize={{ base: "xs", md: "sm" }}
+                p={{ base: 2, md: 3 }}
+                minWidth={{ base: "auto", md: "auto" }}
+                whiteSpace="nowrap"
+                flexShrink={0}
+                _selected={{
+                  color: 'brand.primary',
+                  borderColor: 'brand.primary',
+                  borderBottom: '3px solid',
+                  fontWeight: 'bold',
+                  bg: 'gray.50',
+                }}
+                _hover={{
+                  color: 'brand.primary',
+                  borderColor: 'brand.light',
+                }}
+                transition="all 0.2s"
+              >
+                {t('mintingFinished')}
               </Tab>
             </TabList>
 
@@ -1016,6 +1141,17 @@ export default function MintPage() {
                   onSearchChange={setSearchQuery}
                 />
                 {renderTabContent(tokenList)}
+              </TabPanel>
+              
+              <TabPanel px={0}>
+                <FilterPanel
+                  sortColumn={'progress'}
+                  sortDirection={'desc'}
+                  onSort={() => {}} // 禁用排序功能
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                />
+                {renderTabContent(tokenList.filter(token => token.progress >= 100))}
               </TabPanel>
             </TabPanels>
           </Tabs>
