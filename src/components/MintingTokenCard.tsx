@@ -37,6 +37,7 @@ interface MintingTokenCardProps {
     progress: number
     participants: number
     totalSupply: string
+    minterCounts: number
     presaleRate?: string
     address?: string
     website?: string
@@ -206,7 +207,7 @@ export default function MintingTokenCard({
                 {t('participants')}
               </Text>
               <Text fontWeight="bold" fontSize="sm">
-                {token.participants}
+                {token.minterCounts}
               </Text>
             </HStack>
 

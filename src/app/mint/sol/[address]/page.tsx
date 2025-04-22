@@ -192,11 +192,7 @@ export default function TokenMintPage() {
                             <Text>{t('totalSupply')}</Text>
                           </HStack>
                         </StatLabel>
-                        <StatNumber>
-                          {new BigNumber(formattedData.supply)
-                            .div(1e6)
-                            .toFormat(2)}
-                        </StatNumber>
+                        <StatNumber>{selectedToken.totalSupply}</StatNumber>
                       </Stat>
 
                       <Stat bg={statBg} p={4} borderRadius="lg">
@@ -206,7 +202,7 @@ export default function TokenMintPage() {
                             <Text>{t('participants')}</Text>
                           </HStack>
                         </StatLabel>
-                        <StatNumber>{selectedToken.participants}</StatNumber>
+                        <StatNumber>{selectedToken.minterCounts}</StatNumber>
                       </Stat>
 
                       <Stat bg={statBg} p={4} borderRadius="lg">
@@ -216,10 +212,10 @@ export default function TokenMintPage() {
                             <Text>{t('progress')}</Text>
                           </HStack>
                         </StatLabel>
-                        <StatNumber>{formattedData.progress}%</StatNumber>
+                        <StatNumber>{selectedToken.progress}%</StatNumber>
                         <StatHelpText>
                           <Progress
-                            value={formattedData.progress}
+                            value={selectedToken.progress}
                             size="sm"
                             colorScheme="purple"
                             borderRadius="full"
