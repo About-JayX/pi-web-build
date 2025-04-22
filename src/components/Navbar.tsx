@@ -67,6 +67,8 @@ export default function Navbar() {
   const { isLoggedIn, userInfo } = useAppSelector(state => state.user)
 
   const connectwallet = async () => {
+    console.log(window.solana, 'window_______solana')
+    console.log(window.solana, 'window_______solana')
     if (network === 'Solana') {
       if (!window.solana) {
         toast({
@@ -86,7 +88,7 @@ export default function Navbar() {
           const result = await window.solana.connect()
           const newPublicKey = result.publicKey.toString()
           setPublicKey(newPublicKey)
-          
+
           // 立即执行登录
           const message = 'Hello from PiSale!'
           const encodedMessage = new TextEncoder().encode(message)
@@ -110,7 +112,9 @@ export default function Navbar() {
 
             toast({
               title: '登录成功',
-              description: `欢迎回来，${loginResult.data.user.nickname || 'User'}`,
+              description: `欢迎回来，${
+                loginResult.data.user.nickname || 'User'
+              }`,
               status: 'success',
               duration: 3000,
               isClosable: true,
@@ -167,7 +171,8 @@ export default function Navbar() {
         console.error('操作失败:', error)
         toast({
           title: '错误',
-          description: error instanceof Error ? error.message : '操作失败，请重试',
+          description:
+            error instanceof Error ? error.message : '操作失败，请重试',
           status: 'error',
           duration: 3000,
           isClosable: true,

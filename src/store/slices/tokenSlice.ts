@@ -10,6 +10,27 @@ interface TokenParams {
   sort: string
 }
 
+interface TokenResponse {
+  token_id: number
+  token_name: string
+  token_symbol: string
+  token_address: string
+  token_decimal: number
+  total_supply: number
+  total_transactions: number
+  progress: number
+  net_volume: number
+  created_at: string
+  first_trade_time: string
+  last_trade_time: string
+  logo: string
+  minter_counts: number
+  buy_transactions: number
+  sell_transactions: number
+  total_buy_amount: number
+  total_sell_amount: number
+}
+
 interface MintToken {
   id: number
   name: string
@@ -24,6 +45,14 @@ interface MintToken {
   raised: string
   presaleRate: string
   created_at: string
+  minterCounts: number
+  buyTransactions: number
+  sellTransactions: number
+  totalBuyAmount: number
+  totalSellAmount: number
+  firstTradeTime: string
+  lastTradeTime: string
+  logo?: string
 }
 
 interface TokenState {
@@ -54,11 +83,19 @@ export const fetchTokenList = createAsyncThunk(
       participants: token.total_transactions,
       progress: Number(token.progress.toFixed(2)),
       net_volume: token.net_volume,
-      image: '/token-logo.png',
+      image: token.logo || '/token-logo.png',
+      logo: token.logo,
       target: '100%',
       raised: `${(token.net_volume / 1e6).toFixed(2)}`,
       presaleRate: '1:1',
       created_at: token.created_at,
+      minterCounts: token.minter_counts,
+      buyTransactions: token.buy_transactions,
+      sellTransactions: token.sell_transactions,
+      totalBuyAmount: token.total_buy_amount,
+      totalSellAmount: token.total_sell_amount,
+      firstTradeTime: token.first_trade_time,
+      lastTradeTime: token.last_trade_time,
     }))
   }
 )
