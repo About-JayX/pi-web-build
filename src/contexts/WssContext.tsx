@@ -6,87 +6,135 @@
   4. 收到close或error后，设置状态为false
   5. 收到new_msg后，更新代币
 */
-"use client";
-import React, { createContext, useContext, ReactNode, useState } from "react";
-import { userApi } from "@/config/axios";
+"use client"
+import React, {
+  createContext,
+  useContext,
+  ReactNode,
+  useState,
+  useEffect,
+  useRef,
+} from "react"
+import { userApi } from "@/config/axios"
 
 interface WssContextType {
-  socket: WebSocket | null;
-  updateToken: (tokenAddress: string) => void;
+  socket: WebSocket | null
+  updateToken: (tokenAddress: string) => void
 }
 
 export const WssContext = createContext<WssContextType>({
   socket: null,
   updateToken: () => {},
-});
+})
 
-export const useWss = () => useContext(WssContext);
+export const useWss = () => useContext(WssContext)
 
 export const WssProvider = ({ children }: { children: ReactNode }) => {
-  const [status, setStatus] = useState<boolean>(false);
+  const [status, setStatus] = useState<boolean>(false)
+  const [socket, setSocket] = useState<WebSocket | null>(null)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const tokenAddressesRef = useRef<string[]>([])
 
-  const wsUrl = userApi.defaults.baseURL
-    ? userApi.defaults.baseURL.replace(/^http:\/\//i, 'ws://').replace(/^https:\/\//i, 'wss://') + '/ws'
-    : '';
-  const socket = new WebSocket(wsUrl);
-  socket.onopen = () => {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(JSON.stringify({ mode: "ping", data: "ping" }));
-      setStatus(true);
-      console.log("socket onopen");
+  // 使用useEffect管理WebSocket连接
+  useEffect(() => {
+    const wsUrl = userApi.defaults.baseURL
+      ? userApi.defaults.baseURL
+          .replace(/^http:\/\//i, "ws://")
+          .replace(/^https:\/\//i, "wss://") + "/ws"
+      : ""
+
+    if (!wsUrl) return
+
+    const ws = new WebSocket(wsUrl)
+    setSocket(ws)
+
+    ws.onopen = () => {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ mode: "ping", data: "ping" }))
+        setStatus(true)
+        console.log("socket onopen")
+      }
     }
-  };
 
-  socket.onmessage = (event) => {
-    const response = JSON.parse(event.data);
-    if (response.message === "pong") {
-      const data = response.data;
-      console.log("socket onmessage start updateToken");
-      const interval = setInterval(async () => {
-        if (status) {
+    ws.onmessage = (event) => {
+      try {
+        const response = JSON.parse(event.data)
+        // console.log("收到WebSocket消息:", response)
+
+        if (response.message === "pong") {
+          const data = response.data
+          console.log("收到pong消息，代币地址列表:", data)
+          // 立即执行一次更新
           data.forEach(async (item: string) => {
-            await updateToken(item);
-          });
-        } else {
-          clearInterval(interval);
+            tokenAddressesRef.current.push(item)
+          })
         }
-      }, 30000);
+
+        if (response.message === "go") {
+          // console.log("收到go消息，开始更新代币")
+          tokenAddressesRef.current.forEach(async (item: string) => {
+            const new_msg = await updateToken(item)
+            if (new_msg) {
+              ws.send(JSON.stringify(new_msg))
+            }
+          })
+          // Reset tokenAddressesRef
+          tokenAddressesRef.current = []
+          //Get Token Data again
+          ws.send(JSON.stringify({ mode: "ping", data: "ping" }))
+        }
+      } catch (error) {
+        console.error("解析WebSocket消息失败:", error)
+      }
     }
-  };
 
-  socket.onclose = () => {
-    setStatus(false);
-  };
+    ws.onclose = () => {
+      console.log("WebSocket连接关闭")
+      setStatus(false)
+    }
 
-  socket.onerror = () => {
-    setStatus(false);
-  };
+    ws.onerror = (error) => {
+      console.error("WebSocket错误:", error)
+      setStatus(false)
+    }
+
+    // 清理函数
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+      if (ws) {
+        ws.close()
+      }
+    }
+  }, []) // 空依赖数组，只在组件挂载时执行一次
 
   const updateToken = async (tokenAddress: string) => {
-    if (!tokenAddress) return;
     try {
-      const url = `https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`;
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        const new_msg = {
-          mode: "up_dexscreener",
-          data: { tokenAddress: tokenAddress, ...data },
-        };
-        socket.send(JSON.stringify(new_msg));
-        // log(new_msg);
+      const url = `https://api.dexscreener.com/latest/dex/tokens/${tokenAddress}`
+      const response = await fetch(url)
+      const data = await response.json()
+      const new_msg = {
+        mode: "up_dexscreener",
+        data: { tokenAddress: tokenAddress, ...data },
       }
+      return new_msg
+      // if (ws && ws.readyState === WebSocket.OPEN) {
+      // const new_msg = {
+      //   mode: "up_dexscreener",
+      //   data: { tokenAddress: tokenAddress, ...data },
+      // }
+      //   ws.send(JSON.stringify(new_msg))
+      //   console.log("Token updated:", tokenAddress)
+      // }
     } catch (error) {
-      // console.error("更新代币失败:", error);
-      // log(`更新代币失败: ${error}`);
-      console.log("updateToken error", error);
+      console.log("updateToken error", error)
     }
-  };
+  }
 
   return (
     <WssContext.Provider value={{ socket, updateToken }}>
       {children}
     </WssContext.Provider>
-  );
-};
+  )
+}
