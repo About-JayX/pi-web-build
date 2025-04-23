@@ -260,32 +260,48 @@ export default function MintingTokenCard({
 
             <Divider />
 
-            {/* 统计数据区域 - 紧凑展示 */}
-            <HStack justify="space-between" py={2}>
-              {/* 铸造人数 */}
-              <HStack>
-                <Icon as={FaUsers} color="brand.primary" boxSize="14px" />
-                <Text fontWeight="bold" fontSize="sm" color="brand.primary">
-                  {token.minterCounts}
+            {/* 统计数据区域 - 重点突出铸造人数 */}
+            <Box py={2}>
+              {/* 铸造人数 - 突出显示 */}
+              <HStack 
+                justify="space-between" 
+                bg="rgba(128, 90, 213, 0.08)" 
+                p={2} 
+                borderRadius="md"
+                mb={2}
+              >
+                <HStack spacing={2}>
+                  <Icon as={FaUsers} color="brand.primary" boxSize="16px" />
+                  <Text fontWeight="bold" fontSize="md" color="brand.primary">
+                    {token.minterCounts}
+                  </Text>
+                </HStack>
+                
+                {/* 右侧小标题：人数 */}
+                <Text fontSize="xs" color="gray.500" fontWeight="medium">
+                  {t('participants')}
                 </Text>
               </HStack>
               
-              {/* 总供应量 */}
-              <HStack>
-                <Icon as={FaCoins} color="brand.primary" boxSize="14px" />
-                <Text fontWeight="bold" fontSize="sm">
-                  {formatSupply(token.totalSupply)}
-                </Text>
+              {/* 次要数据行 - 总供应量和铸造价格 */}
+              <HStack justify="space-between" opacity={0.85}>
+                {/* 总供应量 */}
+                <HStack spacing={1}>
+                  <Icon as={FaCoins} color="gray.500" boxSize="12px" />
+                  <Text fontSize="xs" fontWeight="medium">
+                    {formatSupply(token.totalSupply)}
+                  </Text>
+                </HStack>
+                
+                {/* 铸造价格 */}
+                <HStack spacing={1}>
+                  <Icon as={FaExchangeAlt} color="gray.500" boxSize="12px" />
+                  <Text fontSize="xs" fontWeight="medium">
+                    {formatMintRate()}
+                  </Text>
+                </HStack>
               </HStack>
-              
-              {/* 铸造价格 */}
-              <HStack>
-                <Icon as={FaExchangeAlt} color="brand.primary" boxSize="14px" />
-                <Text fontWeight="bold" fontSize="sm">
-                  {formatMintRate()}
-                </Text>
-              </HStack>
-            </HStack>
+            </Box>
           </Stack>
         </Stack>
       </CardBody>
