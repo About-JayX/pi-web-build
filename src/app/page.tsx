@@ -64,6 +64,7 @@ import { useMintingCalculations } from '@/hooks/useMintingCalculations'
 import PaginationControl from '@/components/PaginationControl'
 import TokenListView from '@/components/TokenListView'
 import FilterPanel from '@/components/FilterPanel'
+import { LoadingSpinner } from '@/components'
 
 interface MintToken {
   id: number
@@ -342,22 +343,7 @@ export default function MintPage() {
   const renderTabContent = (tokens: MintToken[]) => {
     // 显示加载状态
     if (loading) {
-      return (
-        <Box py={10} textAlign="center">
-          <VStack spacing={4}>
-            <Spinner 
-              thickness='4px'
-              speed='0.65s'
-              emptyColor='gray.200'
-              color='brand.primary'
-              size='xl'
-            />
-            <Text color="gray.500" fontSize="md">
-              {t('tabSwitchLoading')}
-            </Text>
-          </VStack>
-        </Box>
-      )
+      return <LoadingSpinner />
     }
 
     // 显示API错误

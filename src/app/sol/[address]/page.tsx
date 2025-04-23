@@ -39,6 +39,7 @@ import { getAssociatedTokenAddress } from '@solana/spl-token'
 import BigNumber from 'bignumber.js'
 import Link from 'next/link'
 import { ChevronLeftIcon } from '@chakra-ui/icons'
+import { LoadingSpinner } from '@/components'
 
 export default function TokenMintPage() {
   const { address } = useParams()
@@ -125,7 +126,7 @@ export default function TokenMintPage() {
   if (tokenLoading || fairCurveLoading) {
     return (
       <Center minH="60vh">
-        <Spinner size="xl" color="brand.primary" />
+        <LoadingSpinner />
       </Center>
     )
   }

@@ -28,6 +28,7 @@ import NextLink from 'next/link';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { ChevronLeftIcon } from '@chakra-ui/icons';
+import { SkeletonLoading } from '@/components';
 
 // 导入组件
 import {
@@ -93,55 +94,7 @@ export default function PiTokenDetailPage() {
   
   // 加载状态UI
   if (loading) {
-    return (
-      <Box bg={softBg} minH="100vh" w="100%" pb={10} overflowX="hidden">
-        <Container maxW="container.xl" py={12}>
-          <VStack spacing={10} align="stretch">
-            <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'flex-start', md: 'center' }}>
-              <Box>
-                <Skeleton height="32px" width="180px" mb={2} />
-                <Skeleton height="16px" width="240px" />
-              </Box>
-              <Skeleton height="32px" width="120px" />
-            </Stack>
-            
-            <Grid templateColumns={{ base: "1fr", lg: "3fr 2fr" }} gap={8} width="100%">
-              <GridItem width="100%" overflow="hidden">
-                <Box
-                  bg={cardBg}
-                  borderRadius="lg"
-                  boxShadow="md"
-                  height={{ base: "320px", md: "400px" }}
-                  width="100%"
-                >
-                  <Skeleton height="100%" width="100%" />
-                </Box>
-              </GridItem>
-
-              <GridItem width="100%" overflow="hidden">
-                <Box
-                  bg={cardBg}
-                  borderRadius="lg"
-                  boxShadow="md"
-                  p={{ base: 4, md: 6 }}
-                  height={{ base: "300px", md: "400px" }}
-                  width="100%"
-                >
-                  <VStack spacing={6} align="stretch">
-                    <Skeleton height="24px" />
-                    <Skeleton height="16px" width="80%" />
-                    <Skeleton height="40px" borderRadius="md" />
-                    <Skeleton height="24px" width="60%" />
-                    <Skeleton height="100px" borderRadius="md" />
-                    <Skeleton height="40px" borderRadius="md" />
-                  </VStack>
-                </Box>
-              </GridItem>
-            </Grid>
-          </VStack>
-        </Container>
-      </Box>
-    );
+    return <SkeletonLoading />;
   }
   
   // 找不到代币的提示UI
