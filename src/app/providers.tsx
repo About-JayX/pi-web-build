@@ -5,6 +5,8 @@ import {
   ChakraProvider,
   ColorModeScript,
   createLocalStorageManager,
+  Flex,
+  VStack,
 } from "@chakra-ui/react";
 import theme from "@/theme";
 import dynamic from "next/dynamic";
@@ -18,6 +20,7 @@ import { store } from "../store";
 import { fetchTokenList } from "@/store/slices/tokenSlice";
 import { WssProvider } from "@/contexts/WssContext";
 import AuthRestorer from "@/contexts/AuthRestorer";
+import Image from "next/image";
 
 // 动态导入Navbar，避免SSR
 const Navbar = dynamic(() => import("@/components/Navbar"), { ssr: false });
@@ -69,11 +72,24 @@ export function Providers({ children }: { children: React.ReactNode }) {
               <NetworkProvider>
                 <SolanaProvider>
                   <I18nProvider>
+                    <Flex
+                      position="fixed"
+                      bgImage="/bg.png"
+                      bgSize="cover"
+                      bgPosition="center"
+                      bgRepeat="no-repeat"
+                      w="100%"
+                      right={1}
+                      h="calc(100vh - 60px)"
+                      pointerEvents="none"
+                      
+                    />
                     <AuthRestorer />
                     <Navbar />
                     <main style={{ minHeight: "calc(100vh - 60px)" }}>
                       {children}
                     </main>
+
                     <Footer />
                     <Announcement />
                   </I18nProvider>
