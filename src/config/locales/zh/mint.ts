@@ -22,7 +22,7 @@ export default {
   // 铸造页面 - 分页
   'itemsPerPage': '每页显示',
   'pageInfo': '第{current}页/共{total}页',
-  'currentPage': '第{current}页',
+  'currentPage': '第 {current} 页',
   'prevPage': '上一页',
   'nextPage': '下一页',
   'firstPage': '第一页',

@@ -19,7 +19,7 @@ import { PROGRAM_ID } from '@/config'
 interface solanaContextType {
   publicKey: string
   setPublicKey: (publicKey: string) => void
-  conn: Connection | null
+  conn: Connection
   FAIR_CURVE_SEED: Buffer
   programId: PublicKey
   wallet: Wallet | null
@@ -32,7 +32,7 @@ interface solanaContextType {
 export const SolanaContext = createContext<solanaContextType>({
   publicKey: '',
   setPublicKey: () => {},
-  conn: null,
+  conn: new Connection('https://api.devnet.solana.com', 'confirmed'),
   FAIR_CURVE_SEED: Buffer.from('fair_curve'),
   programId: new PublicKey(PROGRAM_ID),
   wallet: null,
@@ -45,7 +45,7 @@ export const SolanaContext = createContext<solanaContextType>({
 export const useSolana = () => useContext(SolanaContext)
 export const SolanaProvider = ({ children }: { children: ReactNode }) => {
   const [publicKey, setPublicKey] = useState('')
-  const [conn, setConn] = useState<Connection | null>(null)
+  const [conn, setConn] = useState<Connection>(new Connection('https://api.devnet.solana.com', 'confirmed'))
   const [wallet, setWallet] = useState<Wallet | null>(null)
   const [isConnecting, setIsConnecting] = useState(false)
   const [autoConnected, setAutoConnected] = useState(false)
@@ -53,6 +53,33 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
   const FAIR_CURVE_SEED = Buffer.from('fair_curve')
   const programId = new PublicKey(PROGRAM_ID)
   const key = publicKey ? new PublicKey(publicKey) : null
+  
+  // 确保连接始终可用，如果初始化失败则重试
+  useEffect(() => {
+    console.log('确保Solana RPC连接可用...')
+    
+    // 如果连接对象已存在，可以选择刷新或验证连接
+    const validateConnection = async () => {
+      try {
+        // 简单验证连接是否工作 - 例如获取最新区块高度
+        const blockHeight = await conn.getBlockHeight()
+        console.log('Solana连接有效，当前区块高度:', blockHeight)
+      } catch (error) {
+        console.error('Solana连接验证失败，重新创建连接:', error)
+        
+        // 如果验证失败，重新创建连接
+        try {
+          const newConnection = new Connection('https://api.devnet.solana.com', 'confirmed')
+          setConn(newConnection)
+          console.log('Solana连接已重新建立')
+        } catch (retryError) {
+          console.error('重新创建Solana连接失败:', retryError)
+        }
+      }
+    }
+    
+    validateConnection()
+  }, [])
   
   // 更新钱包对象
   useEffect(() => {
@@ -178,7 +205,7 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
     setIsConnecting(true)
     
     try {
-      setConn(new Connection('https://api.devnet.solana.com', 'confirmed'))
+      // 钱包连接检查不再负责初始化Solana连接
       
       // 检查钱包是否已连接
       const isPhantomConnected = window.solana.isConnected

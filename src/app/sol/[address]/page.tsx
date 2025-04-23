@@ -56,7 +56,7 @@ export default function TokenMintPage() {
     data: fairCurveData,
     loading: fairCurveLoading,
     error: fairCurveError,
-  } = useFairCurve(conn, selectedToken?.address && selectedToken.address.trim() !== '' ? selectedToken.address : undefined)
+  } = useFairCurve(conn, selectedToken?.address ? (selectedToken.address.trim() !== '' ? selectedToken.address : undefined) : undefined)
 
   const formattedData = fairCurveData
 
@@ -76,7 +76,7 @@ export default function TokenMintPage() {
   // 添加代币账户查询逻辑
   useEffect(() => {
     const checkTokenAccount = async () => {
-      if (!conn || !wallet?.publicKey || !selectedToken?.address) return
+      if (!wallet?.publicKey || !selectedToken?.address) return
 
       try {
         const tokenMint = new PublicKey(selectedToken.address)
@@ -118,18 +118,8 @@ export default function TokenMintPage() {
   }
 
   // 格式化费率为百分比 (除以10000)
-  const formatFeeRate = (rate: string) => {
+  const formatFeeRate = (rate: number | string) => {
     return `${new BigNumber(rate).div(10000).toFixed(2)}%`
-  }
-
-  if (!conn) {
-    return (
-      <Center minH="60vh">
-        <VStack spacing={4}>
-          <Text color="red.500">{t('noConnection')}</Text>
-        </VStack>
-      </Center>
-    )
   }
 
   if (tokenLoading || fairCurveLoading) {

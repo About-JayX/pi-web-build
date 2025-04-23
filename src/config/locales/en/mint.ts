@@ -23,7 +23,7 @@ export default {
   // Mint Page - Pagination
   'itemsPerPage': 'Items per page',
   'pageInfo': 'Page {current} of {total}',
-  'currentPage': 'Page {current}',
+  'currentPage': 'Page {current} ',
   'prevPage': 'Previous',
   'nextPage': 'Next',
   'firstPage': 'First Page',

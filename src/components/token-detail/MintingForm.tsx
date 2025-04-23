@@ -78,6 +78,7 @@ interface MintingFormProps {
     currencyUnit?: string
     totalSupply?: string
     target?: string
+    network?: string
   }
   tokenAccount?: string | null
   tokenBalance?: number | null
@@ -112,7 +113,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
   const { mintToken, returnToken } = useProgram()
   const { conn, publicKey } = useSolana()
   const isLoggedIn = useAppSelector(state => state.user.isLoggedIn)
-  const { data: fairCurveData } = useFairCurve(conn, token.address && token.address.trim() !== '' ? token.address : undefined)
+  const { data: fairCurveData } = useFairCurve(conn, token.address ? (token.address.trim() !== '' ? token.address : undefined) : undefined)
   const { isOpen: disclosureIsOpen, onOpen, onClose: disclosureOnClose } = useDisclosure()
 
   const currencyUnit = token.currencyUnit || 'SOL'
@@ -150,7 +151,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
   // 获取钱包余额
   useEffect(() => {
     const fetchBalance = async () => {
-      if (!conn || !publicKey) {
+      if (!publicKey) {
         setWalletBalance(0)
         return
       }
@@ -208,11 +209,11 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
 
   // 检查金额是否有效
   const isAmountValid = () => {
-    if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) < 0.01) {
+    if (!amount || isNaN(parseFloat(amount)) || safeParseFloat(amount) < 0.01) {
       return false
     }
     // 检查余额是否足够
-    return parseFloat(amount) <= walletBalance
+    return safeParseFloat(amount) <= walletBalance
   }
 
   // 检查退还金额是否有效
@@ -220,18 +221,18 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
     if (
       !refundAmount ||
       isNaN(parseFloat(refundAmount)) ||
-      parseFloat(refundAmount) <= 0
+      safeParseFloat(refundAmount) <= 0
     ) {
       return false
     }
     // 检查退还金额是否小于等于已铸造金额
-    return parseFloat(refundAmount) <= mintedAmount
+    return safeParseFloat(refundAmount) <= mintedAmount
   }
 
   // 获取最新余额的函数
   const updateBalances = async () => {
-    if (!conn || !publicKey) {
-      console.error('Connection or public key not available')
+    if (!publicKey) {
+      console.error('Public key not available')
       return
     }
 
@@ -264,7 +265,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
     }
 
     try {
-      if (!conn || !publicKey) {
+      if (!publicKey) {
         toast({
           title: t('请先连接钱包'),
           status: 'error',
@@ -293,7 +294,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
       }
 
       setSubmitting(true)
-      const mintAmount = parseFloat(amount)
+      const mintAmount = safeParseFloat(amount)
 
       // 调用真实的mintToken函数，传入货币金额（转换为最小单位）和token地址
       await mintToken(mintAmount * 1e9, token.address)
@@ -304,7 +305,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
       }, 2000)
 
       // 显示成功提示
-      const amountFormatted = Math.floor(parseFloat(getEstimatedTokens(amount))).toLocaleString()
+      const amountFormatted = Math.floor(safeParseFloat(getEstimatedTokens(amount))).toLocaleString()
       const descMessage = t('receivedTokens')
         .replace('{amount}', amountFormatted)
         .replace('{symbol}', token.symbol)
@@ -444,7 +445,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
   // 修改取消铸造 - 基于代币数量
   const handleCancel = async () => {
     try {
-      if (!isTokenRefundAmountValid() || !conn || !publicKey || !tokenAccount) {
+      if (!isTokenRefundAmountValid() || !publicKey || !tokenAccount) {
         return
       }
       
@@ -460,7 +461,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
 
       setCancelling(true)
       // 将代币数量乘以 1e6 以匹配代币精度
-      const tokenRefundValue = parseFloat(refundAmount) * 1e6
+      const tokenRefundValue = safeParseFloat(refundAmount) * 1e6
 
       // 调用合约的退还函数，参数顺序：token地址，退还数量，手续费账户地址
       const feeAccountAddress = CLMM_PROGRAM_ID
@@ -480,7 +481,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
 
       // 显示成功消息
       const refundAmountFormatted = Math.floor(
-        parseFloat(refundAmount)
+        safeParseFloat(refundAmount)
       ).toLocaleString()
       const refundMessage = t('refundedTokens')
         .replace('{amount}', refundAmountFormatted)
@@ -499,7 +500,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
       setRefundAmount('')
 
       // 如果全部退还，切换回铸造页面
-      if (parseFloat(refundAmount) >= (tokenBalance || 0)) {
+      if (safeParseFloat(refundAmount) >= (tokenBalance || 0)) {
         setActiveTab(0)
       }
     } catch (error) {
@@ -521,25 +522,63 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
   const getMintProgress = () => {
     if (!fairCurveData) return 0
 
-    const supplied = Number(fairCurveData.supplied)
-    const remaining = Number(fairCurveData.remaining)
+    try {
+      const supplied = new BigNumber(fairCurveData.supplied)
+      const remaining = new BigNumber(fairCurveData.remaining)
 
-    if (!supplied) return 0
+      if (supplied.isZero()) return 0
 
-    // 使用公式: 1 - remaining/supplied
-    const progress = (1 - remaining / supplied) * 100
-    return progress.toFixed(2)
+      // 使用公式: 1 - remaining/supplied
+      const progress = new BigNumber(1).minus(remaining.div(supplied)).times(100)
+      
+      // 确保进度在0-100范围内
+      if (progress.isLessThan(0)) return '0'
+      if (progress.isGreaterThan(100)) return '100'
+      
+      return progress.toFixed(2)
+    } catch (error) {
+      console.error('计算铸造进度时出错:', error)
+      return 0
+    }
   }
 
-  // 计算预估获取的代币数量
+  // 安全地将字符串转换为数字，避免溢出
+  const safeParseFloat = (str: string): number => {
+    try {
+      const num = parseFloat(str);
+      if (Number.isNaN(num)) return 0;
+      
+      // 确保在安全整数范围内
+      if (Math.abs(num) > Number.MAX_SAFE_INTEGER) {
+        // 对于非常大的数字，使用BigNumber处理
+        const bn = new BigNumber(str);
+        // 如果BigNumber转换后溢出，返回安全的最大值
+        if (bn.isGreaterThan(Number.MAX_SAFE_INTEGER)) {
+          return Number.MAX_SAFE_INTEGER;
+        }
+        if (bn.isLessThan(-Number.MAX_SAFE_INTEGER)) {
+          return -Number.MAX_SAFE_INTEGER;
+        }
+      }
+      
+      return num;
+    } catch (error) {
+      console.error('字符串转换为数字时出错:', error);
+      return 0;
+    }
+  };
+
+  // 获取预估获取的代币数量
   const getEstimatedTokens = (amount: string): string => {
     if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
       return '0';
     }
 
     try {
+      // 使用安全解析
+      const safeAmount = safeParseFloat(amount);
       // 使用 Hook 提供的计算函数
-      const tokens = calculateTokensFromCurrency(parseFloat(amount));
+      const tokens = calculateTokensFromCurrency(safeAmount);
       return tokens.toString();
     } catch (error) {
       console.error('计算代币数量时出错:', error);
@@ -567,21 +606,35 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
 
   // 修改快速选择函数
   const quickSelect = (value: number) => {
-    if (value > new BigNumber(walletBalance).div(1e9).toNumber()) {
+    try {
+      // 安全转换钱包余额
+      const walletBalanceSol = new BigNumber(walletBalance).div(1e9);
+      
+      if (new BigNumber(value).isGreaterThan(walletBalanceSol)) {
+        toast({
+          title: t('insufficientBalance'),
+          description: t('walletBalanceInsufficient', {
+            balance: getDisplayBalance(walletBalance),
+            currency: currencyUnit,
+          }),
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+          position: 'top',
+        })
+        return
+      }
+      setAmount(value.toString())
+    } catch (error) {
+      console.error('处理金额选择时出错:', error);
       toast({
-        title: t('insufficientBalance'),
-        description: t('walletBalanceInsufficient', {
-          balance: getDisplayBalance(walletBalance),
-          currency: currencyUnit,
-        }),
+        title: t('操作失败'),
+        description: t('处理金额时出现错误'),
         status: 'error',
         duration: 3000,
         isClosable: true,
-        position: 'top',
-      })
-      return
+      });
     }
-    setAmount(value.toString())
   }
 
   // 重置金额
