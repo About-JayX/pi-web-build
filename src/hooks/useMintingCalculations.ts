@@ -120,7 +120,6 @@ export function useMintingCalculations({
    * 根据输入的货币金额计算可获得的代币数量
    */
   const calculateTokensFromCurrency = (currencyAmount: number): number => {
-    // 直接调用utils中的函数
     return calcTokensFromCurrency(
       totalSupply || '',
       currencyAmount,

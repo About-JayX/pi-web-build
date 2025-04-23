@@ -1,37 +1,23 @@
 'use client'
 
-import { useState, useEffect, memo, useRef, useMemo } from 'react'
+import { useState, useEffect, memo } from 'react'
 import {
   Box,
   Button,
   Flex,
-  FormControl,
-  FormLabel,
   HStack,
   Input,
-  Stack,
   Text,
-  useBreakpointValue,
   VStack,
   useColorModeValue,
   useToast,
-  Tooltip,
   Tabs,
   TabList,
   TabPanels,
   Tab,
   TabPanel,
-  Badge,
-  Divider,
   Circle,
-  InputGroup,
-  InputRightElement,
-  InputLeftElement,
   IconButton,
-  Slider,
-  SliderTrack,
-  SliderFilledTrack,
-  SliderThumb,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -41,16 +27,7 @@ import {
   useDisclosure,
   Icon,
 } from '@chakra-ui/react'
-import {
-  FaInfoCircle,
-  FaWallet,
-  FaCoins,
-  FaUndo,
-  FaChevronRight,
-  FaTimes,
-  FaPercent,
-  FaRocket,
-} from 'react-icons/fa'
+import { FaCoins, FaUndo, FaChevronRight, FaTimes } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
 import { useProgram } from '@/web3/fairMint/hooks/useProgram'
 import { useSolana } from '@/contexts/solanaProvider'
@@ -58,10 +35,8 @@ import { PublicKey } from '@solana/web3.js'
 import { useAppSelector } from '@/store/hooks'
 import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
 import { MintToken, TokenInfo } from '@/api/types'
-import BN from 'bn.js'
 import { CLMM_PROGRAM_ID } from '@/config'
 import BigNumber from 'bignumber.js'
-import { formatTokenAmount } from '@/utils'
 import useMintingCalculations from '@/hooks/useMintingCalculations'
 import ErrorDisplay from '@/components/common/ErrorDisplay'
 
@@ -129,15 +104,12 @@ const MintingForm: React.FC<MintingFormProps> = memo(
     const {
       mintingPrice,
       mintingRatio,
-      parseMintingPrice,
-      calculateMintedAmount,
-      getFormattedMintRate,
       calculateTokensFromCurrency,
       calculateCurrencyFromTokens,
     } = useMintingCalculations({
       totalSupply: token.totalSupply,
       target: token.target,
-      mintRate: token.mintRate,
+      mintRate: fairCurveData?.feeRate,
       currencyUnit: token.currencyUnit || 'SOL',
       tokenDecimals: token.tokenDecimal || 0,
     })

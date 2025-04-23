@@ -127,13 +127,16 @@ const formatFairCurveState = (
       // 使用字符串操作和BigNumber来计算百分比，避免整数溢出
       const remainingStr = remaining.toString(10)
       const suppliedStr = supplied.toString(10)
-      
+
       const remainingBN = new BigNumber(remainingStr)
       const suppliedBN = new BigNumber(suppliedStr)
-      
+
       // 使用公式: 1 - remaining/supplied (剩余量/已供应量的比例)
       if (!suppliedBN.isZero()) {
-        progress = new BigNumber(1).minus(remainingBN.div(suppliedBN)).times(100).toNumber()
+        progress = new BigNumber(1)
+          .minus(remainingBN.div(suppliedBN))
+          .times(100)
+          .toNumber()
         // 限制在0-100范围内
         progress = Math.max(0, Math.min(100, progress))
       }
@@ -156,7 +159,11 @@ const formatFairCurveState = (
         return new BN(value).toString(10)
       }
       // 如果是对象并且有toString方法
-      if (typeof value === 'object' && 'toString' in value && typeof value.toString === 'function') {
+      if (
+        typeof value === 'object' &&
+        'toString' in value &&
+        typeof value.toString === 'function'
+      ) {
         return value.toString()
       }
       return '0'
@@ -189,38 +196,42 @@ const formatFairCurveState = (
 const safeToNumber = (bn: BN): number => {
   try {
     // 检查数值是否超出安全整数范围
-    const str = bn.toString(10);
-    const value = Number(str);
+    const str = bn.toString(10)
+    const value = Number(str)
     if (Number.isSafeInteger(value)) {
-      return value;
+      return value
     }
-    
+
     // 如果数值太大，则使用BigNumber处理
-    return new BigNumber(str).toNumber();
+    return new BigNumber(str).toNumber()
   } catch (error) {
-    console.error('转换BN到数字时出错:', error);
-    return 0;
+    console.error('转换BN到数字时出错:', error)
+    return 0
   }
-};
+}
 
 // 安全执行BN比较，避免可能的错误
-const safeCompareBN = (a: BN, b: BN, operation: 'lt' | 'gt' | 'eq'): boolean => {
+const safeCompareBN = (
+  a: BN,
+  b: BN,
+  operation: 'lt' | 'gt' | 'eq'
+): boolean => {
   try {
     switch (operation) {
       case 'lt':
-        return a.lt(b);
+        return a.lt(b)
       case 'gt':
-        return a.gt(b);
+        return a.gt(b)
       case 'eq':
-        return a.eq(b);
+        return a.eq(b)
       default:
-        return false;
+        return false
     }
   } catch (error) {
-    console.error('BN比较时出错:', error);
-    return false;
+    console.error('BN比较时出错:', error)
+    return false
   }
-};
+}
 
 export function useFairCurve(
   connection: Connection,
@@ -234,46 +245,46 @@ export function useFairCurve(
   const fetchFairCurveState = async () => {
     try {
       // 不再需要检查connection是否为null，因为它现在是必需的参数
-      
+
       // 确保mintAddress是可用的
       if (!mintAddress || mintAddress.trim() === '') {
-        console.warn('尝试获取FairCurve状态，但mint地址未提供');
-        setError('未提供 mint 地址');
-        setData(null);
-        return;
+        console.warn('尝试获取FairCurve状态，但mint地址未提供')
+        setError('未提供 mint 地址')
+        setData(null)
+        return
       }
 
       // 验证 mint 地址是否有效
-      let mintPubkey: PublicKey;
+      let mintPubkey: PublicKey
       try {
-        mintPubkey = new PublicKey(mintAddress);
+        mintPubkey = new PublicKey(mintAddress)
       } catch (err) {
-        console.error('无效的mint地址:', mintAddress, err);
-        setError('无效的 mint 地址');
-        setData(null);
-        return;
+        console.error('无效的mint地址:', mintAddress, err)
+        setError('无效的 mint 地址')
+        setData(null)
+        return
       }
 
-      setLoading(true);
-      setError(null);
+      setLoading(true)
+      setError(null)
 
       // 计算 PDA 地址
       const [fairCurvePda] = PublicKey.findProgramAddressSync(
         [FAIR_CURVE_SEED, mintPubkey.toBuffer()],
         programId
-      );
+      )
 
-      console.log('正在获取账户信息:', fairCurvePda.toString());
+      console.log('正在获取账户信息:', fairCurvePda.toString())
 
       // 获取账户信息
-      const accountInfo = await connection.getAccountInfo(fairCurvePda);
+      const accountInfo = await connection.getAccountInfo(fairCurvePda)
 
       if (!accountInfo) {
-        console.warn('未找到FairCurve账户:', fairCurvePda.toString());
-        setError('找不到该代币的铸造信息');
-        setData(null);
-        setLoading(false);
-        return;
+        console.warn('未找到FairCurve账户:', fairCurvePda.toString())
+        setError('找不到该代币的铸造信息')
+        setData(null)
+        setLoading(false)
+        return
       }
 
       console.log('账户数据长度:', accountInfo.data.length)
@@ -382,30 +393,30 @@ export function useFairCurve(
 
   useEffect(() => {
     // 创建一个标识符，用于处理异步操作
-    let isMounted = true;
-    
+    let isMounted = true
+
     // 定义异步函数
     const fetchData = async () => {
       if (isMounted) {
-        await fetchFairCurveState();
+        await fetchFairCurveState()
       }
-    };
-    
+    }
+
     // 只需要检查mintAddress是否存在
     if (mintAddress) {
-      fetchData();
+      fetchData()
     } else {
       // 如果没有mintAddress，设置相应的错误
-      setError('未提供 mint 地址');
-      setData(null);
+      setError('未提供 mint 地址')
+      setData(null)
     }
-    
+
     // 清理函数
     return () => {
-      isMounted = false;
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mintAddress, programId]); // 移除connection依赖，因为它总是有效的
+      isMounted = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mintAddress, programId]) // 移除connection依赖，因为它总是有效的
 
   return {
     loading,
