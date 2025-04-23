@@ -37,7 +37,7 @@ export default {
   'progressColumn': '铸造进度',
   'participantsColumn': '铸造人数',
   'priceColumn': '铸造比率',
-  'linksColumn': '链接',
+  'linksColumn': '社媒链接',
   'joinMinting': '参与铸造',
   'target': '总额',
   'raised': '已铸',

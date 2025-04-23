@@ -56,7 +56,7 @@ export default {
   'change24h': '24H涨跌',
   'marketCap': '市值',
   'volume': '交易量(24H)',
-  'links': '链接',
+  'links': '社媒链接',
 
   // 首页 - 行动召唤
   'readyToDeployQuestion': '准备好部署MEME代币了吗？',

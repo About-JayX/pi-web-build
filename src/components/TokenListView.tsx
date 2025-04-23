@@ -92,14 +92,12 @@ const TokenListView = ({
     (token: MintToken) => {
       // 使用已初始化的getFormattedMintRate函数
       // 注意这里只是使用函数，不再创建新的Hook实例
-      const rate =
-        token.mintRate ||
-        getFormattedMintRate({
-          totalSupply: token.totalSupply,
-          target: token.target,
-          currencyUnit,
-          tokenDecimals: 6,
-        });
+      const rate = getFormattedMintRate({
+        totalSupply: token.totalSupply,
+        target: token.target,
+        currencyUnit,
+        tokenDecimals: token.tokenDecimal || 6,
+      });
 
       // 移除数字中的千分号（逗号）
       return rate ? rate.replace(/,/g, "") : rate;
@@ -115,8 +113,8 @@ const TokenListView = ({
   // 缩略显示合约地址
   const formatContractAddress = (address: string) => {
     if (!address) return "";
-    const start = address.substring(0, 3);
-    const end = address.substring(address.length - 3);
+    const start = address.substring(0, 4);
+    const end = address.substring(address.length - 4);
     return `${start}...${end}`;
   };
 
@@ -169,6 +167,20 @@ const TokenListView = ({
         )
         .catch((err) => console.error(`${t("copy")} ${t("failed")}:`, err));
     }
+  };
+
+  // 计算已筹集的金额
+  const getCollectedAmount = (token: MintToken) => {
+    if (!token.target || !token.progress) return "0";
+    // 从target中提取数字部分
+    const targetMatch = token.target.match(/[0-9.]+/);
+    if (!targetMatch) return "0";
+    const targetAmount = parseFloat(targetMatch[0]);
+    // 计算已筹集金额 = 目标金额 * 进度百分比
+    const collected = targetAmount * (token.progress / 100);
+    // 保留2位小数，并添加币种单位
+    const unit = token.target.replace(/[0-9.]+/g, "").trim();
+    return collected.toFixed(2) + " " + unit;
   };
 
   const ThSortable = ({
@@ -319,9 +331,14 @@ const TokenListView = ({
                 <Box py={1} width="100%">
                   <HStack mb={1}>
                     <Text fontWeight="bold" fontSize="sm" color="brand.primary">
-                      {token.raised}
+                      {token.progress.toFixed(2)}%
                     </Text>
-                    <Text fontWeight="bold" fontSize="sm">
+                    {token.progress > 0 && (
+                      <Text fontWeight="medium" fontSize="sm" color="brand.600">
+                        ({getCollectedAmount(token)})
+                      </Text>
+                    )}
+                    <Text fontWeight="medium" fontSize="sm" ml="auto">
                       / {token.target}
                     </Text>
                   </HStack>
@@ -329,7 +346,6 @@ const TokenListView = ({
                     <Progress
                       value={token.progress}
                       variant="subtle"
-                      // colorScheme="purple"
                       borderRadius="full"
                       size="sm"
                       flex="1"
@@ -340,7 +356,8 @@ const TokenListView = ({
                         },
                         // 进度条颜色
                         '& > div:last-of-type': {
-                          bg: 'brand.primary !important'
+                          bg: 'brand.primary !important',
+                          transition: 'width 0.3s ease-in-out'
                         }
                       }}
                     />

@@ -10,11 +10,9 @@ export function formatNumberWithUnit(num: number, decimals = 2): string {
   if (absNum >= 1e12) {
     // 万亿 (T)
     return sign + (absNum / 1e12).toFixed(decimals).replace(/\.0+$/, '') + 'T'
-  } else if (absNum >= 1e9) {
-    // 十亿 (B)
-    return sign + (absNum / 1e9).toFixed(decimals).replace(/\.0+$/, '') + 'B'
   } else if (absNum >= 1e6) {
-    // 百万 (M)
+    // 对于小于1T的值，全部用M表示，不使用B
+    // 如果是十亿级别(B)的数值，以M为单位展示
     return sign + (absNum / 1e6).toFixed(decimals).replace(/\.0+$/, '') + 'M'
   } else if (absNum >= 1e3) {
     // 千 (K)

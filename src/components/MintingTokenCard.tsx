@@ -36,7 +36,7 @@ import { formatTokenAmount } from "@/utils";
 import { useMemo } from "react";
 import { useMintingCalculations } from "@/hooks/useMintingCalculations";
 import { useNetwork } from "@/contexts/NetworkContext";
-import { ExchangeSvg } from "./icon";
+import { useRouter } from "next/navigation";
 
 interface MintingTokenCardProps {
   token: {
@@ -64,12 +64,14 @@ export default function MintingTokenCard({
   currencyUnit = "SOL",
 }: MintingTokenCardProps) {
   const cardBg = useColorModeValue("white", "gray.800");
+  const hoverBg = useColorModeValue("gray.50", "gray.700");
   const textColor = useColorModeValue("gray.600", "gray.400");
   const iconColor = useColorModeValue("gray.600", "gray.400");
   const iconHoverColor = useColorModeValue("brand.primary", "brand.light");
   const toast = useToast();
   const { t } = useTranslation();
   const { network } = useNetwork();
+  const router = useRouter();
 
   // 使用自定义Hook处理铸造计算
   const { getFormattedMintRate } = useMintingCalculations({
@@ -104,6 +106,20 @@ export default function MintingTokenCard({
     const targetMatch = token.target.match(/[0-9.]+/);
     if (!targetMatch) return 0;
     return parseFloat(targetMatch[0]);
+  };
+
+  // 计算已筹集的金额
+  const getCollectedAmount = () => {
+    if (!token.target || !token.progress) return "0";
+    // 从target中提取数字部分
+    const targetMatch = token.target.match(/[0-9.]+/);
+    if (!targetMatch) return "0";
+    const targetAmount = parseFloat(targetMatch[0]);
+    // 计算已筹集金额 = 目标金额 * 进度百分比
+    const collected = targetAmount * (token.progress / 100);
+    // 保留2位小数，并添加币种单位
+    const unit = token.target.replace(/[0-9.]+/g, "").trim();
+    return collected.toFixed(2) + " " + unit;
   };
 
   // 分享功能处理
@@ -164,8 +180,39 @@ export default function MintingTokenCard({
     return rate ? rate.replace(/,/g, "") : rate;
   };
 
+  // 跳转到代币铸造页面
+  const navigateToMintPage = () => {
+    if (token.address) {
+      router.push(`/${network.toLowerCase()}/${token.address}`);
+    }
+  };
+
   return (
-    <Card p={4} rounded="2xl" shadow="0px 0px 12px 0px rgba(82, 53, 232, 0.20)">
+    <Card 
+      p={4} 
+      rounded="2xl" 
+      shadow="0px 0px 12px 0px rgba(82, 53, 232, 0.20)"
+      _hover={{ 
+        transform: "translateY(-4px)", 
+        shadow: "0px 8px 20px 0px rgba(82, 53, 232, 0.25)",
+        cursor: "pointer" 
+      }}
+      _active={{
+        transform: "translateY(-2px)",
+        shadow: "0px 4px 15px 0px rgba(82, 53, 232, 0.22)",
+      }}
+      transition="all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+      role="group"
+      onClick={(e) => {
+        // 确保点击按钮或其他交互元素时不触发整个卡片的跳转
+        if (
+          (e.target as HTMLElement).tagName !== "BUTTON" &&
+          !(e.target as HTMLElement).closest("button")
+        ) {
+          navigateToMintPage();
+        }
+      }}
+    >
       <CardBody
         p={0}
         display="flex"
@@ -181,6 +228,10 @@ export default function MintingTokenCard({
           objectFit="cover"
           border="2px solid"
           borderColor="brand.light"
+          transition="transform 0.3s ease"
+          _groupHover={{
+            transform: "scale(1.05)",
+          }}
         />
         <Flex flex={1} flexDirection="column" gap={0}>
           <Flex
@@ -188,8 +239,15 @@ export default function MintingTokenCard({
             justifyContent="space-between"
             alignItems="center"
           >
-            <Text fontSize="md" fontWeight="bold">
-              {token.name}
+            <Text 
+              as="span" 
+              fontSize="md" 
+              fontWeight="bold"
+              color="gray.800"
+              _groupHover={{ color: "brand.primary" }}
+              transition="color 0.2s ease"
+            >
+              {token.symbol}
             </Text>
             <Button
               h="26px"
@@ -200,32 +258,43 @@ export default function MintingTokenCard({
               bg="#F7F6FE"
               _hover={{ bg: "brand.light" }}
               _active={{ bg: "#F7F6FE" }}
+              _groupHover={{ 
+                borderColor: "brand.primary",
+                bg: "#F0EDFF"
+              }}
+              onClick={(e) => e.stopPropagation()}
               leftIcon={
                 <Icon as={FaUser} color="#fff" boxSize="16px" p="3px" bg="brand.primary" rounded="6px" />
               }
+              transition="all 0.2s"
             >
               {token.minterCounts}
             </Button>
           </Flex>
-          <Text fontSize="xs" color="gray.500" mt={-1}>
-            {token.symbol}
+          <Text as="span" fontSize="xs" color="gray.500" mt={-1}>
+            {token.name}
           </Text>
           <Grid mt={1} gap={0.5}>
             <HStack spacing={2} align="center">
               <Progress
                 value={token.progress || 0}
-                // colorScheme="purple"
                 borderRadius="full"
                 size="sm"
                 flex="1"
                 sx={{
                   // 轨道颜色（背景色）
                   '& > div:first-of-type': {
-                    bg: '#E7E3FC !important·'
+                    bg: '#E7E3FC !important'
                   },
                   // 进度条颜色
                   '& > div:last-of-type': {
-                    bg: 'brand.primary !important'
+                    bg: 'brand.primary !important',
+                    transition: 'width 0.5s ease-in-out'
+                  }
+                }}
+                _groupHover={{
+                  '& > div:last-of-type': {
+                    bg: 'brand.600 !important'
                   }
                 }}
               />
@@ -233,18 +302,37 @@ export default function MintingTokenCard({
             <Flex justifyContent="space-between" alignItems="center">
             {/* 进度及进度了多少SOL */}
             <Text
+                as="span"
                 fontSize="xs"
                 display="flex"
                 flexDirection="row"
                 alignItems="center"
                 gap={1}
+                transition="color 0.2s"
+                _groupHover={{ color: "gray.700" }}
               >
                 {(token.progress || 0).toFixed(2)}%
-                <Text color="brand.primary" fontSize="xs">
-                  ({token.target})
-                </Text>
+                {token.progress > 0 && (
+                  <Text 
+                    as="span" 
+                    color="brand.primary" 
+                    fontSize="xs"
+                    _groupHover={{ color: "brand.600" }}
+                    transition="color 0.2s"
+                  >
+                    ({getCollectedAmount()})
+                  </Text>
+                )}
               </Text>
-              <Text color="gray.500" fontSize="xs">{token.target}</Text>
+              <Text 
+                as="span" 
+                color="gray.500" 
+                fontSize="xs"
+                transition="color 0.2s"
+                _groupHover={{ color: "gray.700" }}
+              >
+                {token.target}
+              </Text>
               
             </Flex>
           </Grid>
@@ -253,17 +341,32 @@ export default function MintingTokenCard({
             {/* 总供应量 */}
             <HStack spacing={1}>
               <Image src="/coins.png" alt="coins" boxSize="16px" />
-              <Text fontSize="xs" fontWeight="medium" color="gray.500">
+              <Text as="span" fontSize="xs" fontWeight="medium" color="gray.500">
                 {formatSupply(token.totalSupply)}
               </Text>
             </HStack>
             {/* 铸造价格 */}
             <HStack spacing={1}>
               <Image src="/exchange.png" alt="exchange" boxSize="16px" />
-              <Text fontSize="xs" fontWeight="medium" color="gray.500">
+              <Text as="span" fontSize="xs" fontWeight="medium" color="gray.500">
                 {formatMintRate()}
               </Text>
             </HStack>
+            {/* 分享按钮 */}
+            <Box
+              as="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleShare();
+              }}
+              color={iconColor}
+              _hover={{ color: "brand.primary" }}
+              transition="color 0.2s"
+              ml={1}
+              display={{ base: "block", sm: "block" }}
+            >
+              <Icon as={FaShareAlt} boxSize="16px" />
+            </Box>
           </Flex>
         </Flex>
       </CardBody>

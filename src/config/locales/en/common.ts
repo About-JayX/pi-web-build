@@ -21,7 +21,7 @@ export default {
   
   'connectWallet': 'Connect',
   'selectNetwork': 'Select Network',
-  'language': 'Language',
+  'language': 'Lang',
   
   // Error and prompt messages
   'error': 'Error',

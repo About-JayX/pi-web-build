@@ -673,7 +673,7 @@ export default function MintPage() {
                     display: "none",
                   },
                   scrollbarWidth: "none", // Firefox
-                  "-ms-overflow-style": "none", // IE and Edge
+                  msOverflowStyle: "none", // IE and Edge
                 }}
               >
                 {[

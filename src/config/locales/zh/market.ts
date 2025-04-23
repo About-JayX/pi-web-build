@@ -10,7 +10,7 @@ export default {
   'marketCapColumn': '市值',
   'volumeColumn': '24H交易量',
   'holdersColumn': '持有人数',
-  'linksColumn': '链接',
+  'linksColumn': '社媒链接',
   'totalSupplyColumn': '总供应量',
   'contractAddressColumn': '合约地址',
   
