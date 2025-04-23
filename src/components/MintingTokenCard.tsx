@@ -30,6 +30,7 @@ import { useTranslation } from 'react-i18next'
 import { formatTokenAmount } from '@/utils'
 import { useMemo } from 'react'
 import { useMintingCalculations } from '@/hooks/useMintingCalculations'
+import { useNetwork } from '@/contexts/NetworkContext'
 
 interface MintingTokenCardProps {
   token: {
@@ -63,6 +64,7 @@ export default function MintingTokenCard({
   const iconHoverColor = useColorModeValue('brand.primary', 'brand.light')
   const toast = useToast()
   const { t } = useTranslation()
+  const { network } = useNetwork()
 
   // 使用自定义Hook处理铸造计算
   const { getFormattedMintRate } = useMintingCalculations({
@@ -106,12 +108,12 @@ export default function MintingTokenCard({
         .share({
           title: `${token.name} (${token.symbol})`,
           text: `${t('share')} ${token.name} ${t('token')}`,
-          url: window.location.origin + `/${token.address}`,
+          url: window.location.origin + `/${network.toLowerCase()}/${token.address}`,
         })
         .catch(error => console.log(`${t('share')} ${t('failed')}:`, error))
     } else {
       // 如果浏览器不支持，可以复制链接到剪贴板
-      const url = window.location.origin + `/${token.address}`
+      const url = window.location.origin + `/${network.toLowerCase()}/${token.address}`
       navigator.clipboard
         .writeText(url)
         .then(() =>
@@ -157,7 +159,7 @@ export default function MintingTokenCard({
   return (
     <Card
       as={NextLink}
-      href={`/${token.address}`}
+      href={`/${network.toLowerCase()}/${token.address}`}
       bg={cardBg}
       boxShadow="none"
       borderRadius="lg"

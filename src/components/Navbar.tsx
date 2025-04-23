@@ -156,48 +156,109 @@ export default function Navbar() {
       if (network === 'SOL') {
         // 如果未连接钱包，先连接钱包并立即进行登录
         if (!publicKey) {
-          const result = await window.solana.connect()
-          const newPublicKey = result.publicKey.toString()
-          setPublicKey(newPublicKey)
+          try {
+            const result = await window.solana.connect()
+            const newPublicKey = result.publicKey.toString()
+            setPublicKey(newPublicKey)
 
-          // 立即执行登录
-          const message = 'Hello from PiSale!'
-          const encodedMessage = new TextEncoder().encode(message)
-          const signed = await window.solana.signMessage(encodedMessage, 'utf8')
-          const signatureBytes = new Uint8Array(signed.signature)
+            // 立即执行登录
+            try {
+              const message = 'Hello from PiSale!'
+              const encodedMessage = new TextEncoder().encode(message)
+              const signed = await window.solana.signMessage(encodedMessage, 'utf8')
+              const signatureBytes = new Uint8Array(signed.signature)
 
-          const loginResult = await UserAPI.loginWithSolana({
-            publicKey: newPublicKey,
-            message,
-            signature: Array.from(signatureBytes),
-            code: 'K7QEISU9',
-          })
-
-          if (loginResult.data) {
-            // 保存用户基本信息到localStorage，便于恢复登录状态
-            localStorage.setItem('userId', loginResult.data.user.userId.toString())
-            localStorage.setItem('nickname', loginResult.data.user.nickname || '用户')
-            localStorage.setItem('avatar_url', loginResult.data.user.avatar_url || '')
-            
-            dispatch(
-              setUser({
-                user: loginResult.data.user,
-                authToken: loginResult.data.authToken,
+              const loginResult = await UserAPI.loginWithSolana({
+                publicKey: newPublicKey,
+                message,
+                signature: Array.from(signatureBytes),
+                code: 'K7QEISU9',
               })
-            )
 
-            toast({
-              title: '登录成功',
-              description: `欢迎回来，${
-                loginResult.data.user.nickname || 'User'
-              }`,
-              status: 'success',
-              duration: 3000,
-              isClosable: true,
-              position: 'top',
-            })
+              if (loginResult.data) {
+                // 保存用户基本信息到localStorage，便于恢复登录状态
+                localStorage.setItem('userId', loginResult.data.user.userId.toString())
+                localStorage.setItem('nickname', loginResult.data.user.nickname || '用户')
+                localStorage.setItem('avatar_url', loginResult.data.user.avatar_url || '')
+                
+                dispatch(
+                  setUser({
+                    user: loginResult.data.user,
+                    authToken: loginResult.data.authToken,
+                  })
+                )
+
+                toast({
+                  title: '登录成功',
+                  description: `欢迎回来，${
+                    loginResult.data.user.nickname || 'User'
+                  }`,
+                  status: 'success',
+                  duration: 3000,
+                  isClosable: true,
+                  position: 'top',
+                })
+              }
+            } catch (signError) {
+              console.error('消息签名失败:', signError)
+              // 检查是否是用户拒绝签名
+              if (signError.message && (
+                  signError.message.includes('User rejected') || 
+                  signError.message.includes('用户拒绝') || 
+                  signError.message.includes('cancelled') || 
+                  signError.message.includes('取消')
+                )) {
+                toast({
+                  title: '操作取消',
+                  description: '您取消了消息签名，请重试以完成登录',
+                  status: 'warning',
+                  duration: 3000,
+                  isClosable: true,
+                  position: 'top',
+                })
+              } else {
+                toast({
+                  title: '签名错误',
+                  description: '签名消息时出错，请重试',
+                  status: 'error',
+                  duration: 3000,
+                  isClosable: true,
+                  position: 'top',
+                })
+              }
+              // 如果签名失败，断开钱包连接
+              await disconnectWallet()
+            }
+            return
+          } catch (connectError) {
+            console.error('钱包连接失败:', connectError)
+            // 检查是否是用户拒绝连接
+            if (connectError.message && (
+                connectError.message.includes('User rejected') || 
+                connectError.message.includes('用户拒绝') || 
+                connectError.message.includes('cancelled') || 
+                connectError.message.includes('取消')
+              )) {
+              toast({
+                title: '连接取消',
+                description: '您取消了钱包连接请求',
+                status: 'warning',
+                duration: 3000,
+                isClosable: true,
+                position: 'top',
+              })
+            } else {
+              toast({
+                title: '连接错误',
+                description: '连接钱包时出错，请重试',
+                status: 'error',
+                duration: 3000,
+                isClosable: true,
+                position: 'top',
+              })
+            }
+            return
           }
-          return
         }
 
         // 如果已登录，显示已登录提示
@@ -214,57 +275,99 @@ export default function Navbar() {
         }
 
         // 如果已连接钱包但未登录，执行登录
-        const message = 'Hello from PiSale!'
-        const encodedMessage = new TextEncoder().encode(message)
-        const signed = await window.solana.signMessage(encodedMessage, 'utf8')
-        const signatureBytes = new Uint8Array(signed.signature)
+        try {
+          const message = 'Hello from PiSale!'
+          const encodedMessage = new TextEncoder().encode(message)
+          const signed = await window.solana.signMessage(encodedMessage, 'utf8')
+          const signatureBytes = new Uint8Array(signed.signature)
 
-        const result = await UserAPI.loginWithSolana({
-          publicKey,
-          message,
-          signature: Array.from(signatureBytes),
-          code: 'K7QEISU9',
-        })
+          const result = await UserAPI.loginWithSolana({
+            publicKey,
+            message,
+            signature: Array.from(signatureBytes),
+            code: 'K7QEISU9',
+          })
 
-        if (result.data) {
-          // 保存用户基本信息到localStorage，便于恢复登录状态
-          localStorage.setItem('userId', result.data.user.userId.toString())
-          localStorage.setItem('nickname', result.data.user.nickname || '用户')
-          localStorage.setItem('avatar_url', result.data.user.avatar_url || '')
-          
-          dispatch(
-            setUser({
-              user: result.data.user,
-              authToken: result.data.authToken,
+          if (result.data) {
+            // 保存用户基本信息到localStorage，便于恢复登录状态
+            localStorage.setItem('userId', result.data.user.userId.toString())
+            localStorage.setItem('nickname', result.data.user.nickname || '用户')
+            localStorage.setItem('avatar_url', result.data.user.avatar_url || '')
+            
+            dispatch(
+              setUser({
+                user: result.data.user,
+                authToken: result.data.authToken,
+              })
+            )
+
+            toast({
+              title: '登录成功',
+              description: `欢迎回来，${result.data.user.nickname || 'User'}`,
+              status: 'success',
+              duration: 3000,
+              isClosable: true,
+              position: 'top',
             })
-          )
-
+          }
+        } catch (signError) {
+          console.error('消息签名或登录失败:', signError)
+          // 检查是否是用户拒绝签名
+          if (signError.message && (
+              signError.message.includes('User rejected') || 
+              signError.message.includes('用户拒绝') || 
+              signError.message.includes('cancelled') || 
+              signError.message.includes('取消')
+            )) {
+            toast({
+              title: '操作取消',
+              description: '您取消了消息签名，请重试以完成登录',
+              status: 'warning',
+              duration: 3000,
+              isClosable: true,
+              position: 'top',
+            })
+          } else {
+            toast({
+              title: '错误',
+              description: '登录过程中发生错误，请重试',
+              status: 'error',
+              duration: 3000,
+              isClosable: true,
+              position: 'top',
+            })
+          }
+        }
+      } else {
+        // Pi Network 的连接逻辑
+        try {
           toast({
-            title: '登录成功',
-            description: `欢迎回来，${result.data.user.nickname || 'User'}`,
-            status: 'success',
+            title: '提示',
+            description: '即将支持 Pi 钱包连接',
+            status: 'info',
+            duration: 3000,
+            isClosable: true,
+            position: 'top',
+          })
+        } catch (piError) {
+          console.error('Pi Network操作失败:', piError)
+          toast({
+            title: '错误',
+            description: 'Pi Network操作失败，请稍后再试',
+            status: 'error',
             duration: 3000,
             isClosable: true,
             position: 'top',
           })
         }
-      } else {
-        // Pi Network 的连接逻辑
-        toast({
-          title: '提示',
-          description: '即将支持 Pi 钱包连接',
-          status: 'info',
-          duration: 3000,
-          isClosable: true,
-          position: 'top',
-        })
       }
     } catch (error) {
       console.error('操作失败:', error)
+      // 通用错误处理
+      const errorMessage = error instanceof Error ? error.message : '操作失败，请重试'
       toast({
         title: '错误',
-        description:
-          error instanceof Error ? error.message : '操作失败，请重试',
+        description: errorMessage,
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -873,10 +976,6 @@ interface NavItem {
 }
 
 const NAV_ITEMS: Array<NavItem> = [
-  /* {
-    label: 'nav.home',
-    href: '/',
-  }, */
   {
     label: 'nav.mint',
     href: '/',
@@ -912,3 +1011,4 @@ const NAV_ITEMS: Array<NavItem> = [
   },
     */
 ]
+

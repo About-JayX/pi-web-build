@@ -89,6 +89,8 @@ export default function MintPage() {
   const { network } = useNetwork()
   const { t } = useTranslation()
 
+  // 添加初次加载标记，用于避免页面刷新时不必要的数据请求
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(() => {
     // 仅在客户端执行
@@ -212,13 +214,22 @@ export default function MintPage() {
 
   // 监听页码或每页数量变化，获取对应页的数据
   useEffect(() => {
+    // 避免初始加载时的重复请求
+    if (isInitialLoad) return;
+    
     getTokenList()
     // 滚动到页面顶部以便看到新内容
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [currentPage, pageSize])
+  }, [currentPage, pageSize, isInitialLoad])
 
-  // 切换tab时重置页码并获取数据
+  // 修改切换tab时重置页码并获取数据的useEffect
   useEffect(() => {
+    // 如果是初始加载，不触发重复请求
+    if (isInitialLoad) {
+      setIsInitialLoad(false)
+      return
+    }
+
     setCurrentPage(1)
     // 根据标签索引选择不同的排序字段
     let sortField = '';
@@ -246,10 +257,13 @@ export default function MintPage() {
         sort: sortField,
       })
     )
-  }, [tabIndex, pageSize])
+  }, [tabIndex, pageSize, isInitialLoad])
 
   // 监听页码变化获取数据
   useEffect(() => {
+    // 避免初始加载时的重复请求
+    if (isInitialLoad) return;
+    
     if (currentPage !== 1) {
       // 避免和tab切换时的重置冲突
       // 根据标签索引选择不同的排序字段
@@ -279,7 +293,7 @@ export default function MintPage() {
         })
       )
     }
-  }, [currentPage, pageSize, tabIndex])
+  }, [currentPage, pageSize, tabIndex, isInitialLoad])
 
   // 设置当前网络的计价单位
   const currencyUnit = useMemo(() => {
@@ -306,6 +320,43 @@ export default function MintPage() {
       localStorage.setItem('mint_page_size', String(pageSize))
     }
   }, [pageSize])
+
+  // 初始化时基于tabIndex加载正确的数据
+  useEffect(() => {
+    if (isInitialLoad && typeof window !== 'undefined') {
+      // 根据初始化的标签索引选择正确的排序字段
+      let sortField = '';
+      switch(tabIndex) {
+        case 0: // 热门铸造
+          sortField = 'progress';
+          break;
+        case 1: // 所有代币
+          sortField = 'token_id';
+          break;
+        case 2: // 最新部署
+          sortField = 'created_at';
+          break;
+        case 3: // 铸造结束
+          sortField = 'progress';
+          break;
+        default:
+          sortField = 'progress';
+      }
+      
+      // 在初始化时基于本地存储中的tabIndex加载数据
+      store.dispatch(
+        fetchTokenList({
+          page: 1,
+          limit: pageSize,
+          sort: sortField,
+          finished: tabIndex === 3 // 如果是铸造结束标签页，添加进度100%的过滤条件
+        })
+      )
+
+      // 标记初始加载已完成
+      setIsInitialLoad(false)
+    }
+  }, [isInitialLoad, tabIndex, pageSize])
 
   // 强制在移动设备上使用卡片视图
   useEffect(() => {
