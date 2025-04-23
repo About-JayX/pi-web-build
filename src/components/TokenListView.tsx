@@ -183,9 +183,11 @@ const TokenListView = ({
   const ThSortable = ({
     column,
     children,
+    width,
   }: {
     column: string
     children: React.ReactNode
+    width?: string
   }) => (
     <Th
       onClick={() => onSort(column)}
@@ -198,6 +200,7 @@ const TokenListView = ({
       _hover={{ bg: thHoverBg }}
       transition="all 0.2s"
       textAlign="center"
+      width={width}
     >
       <Flex align="center" justify="center">
         {children}
@@ -211,32 +214,31 @@ const TokenListView = ({
   )
 
   return (
-    <TableContainer bg={bg} borderRadius="lg" boxShadow="md">
-      <Table variant="simple">
+    <TableContainer bg={bg} borderRadius="lg" boxShadow="md" width="100%" maxWidth="100%" overflowX="auto">
+      <Table variant="simple" width="100%" size="md" layout="fixed">
         <Thead>
           <Tr>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
+            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" width="15%">
               {t('tokenColumn')}
             </Th>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
+            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" width="15%">
               {t('contractAddressColumn')}
             </Th>
-            <ThSortable column="totalSupply">
+            <ThSortable column="totalSupply" width="12%">
               {t('totalSupplyColumn')}
             </ThSortable>
-            <ThSortable column="raised">
+            <ThSortable column="raised" width="25%">
               {t('progressColumn')}
             </ThSortable>
-            <ThSortable column="participants">
+            <ThSortable column="participants" width="10%">
               {t('participantsColumn')}
             </ThSortable>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" textAlign="center">
+            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" textAlign="center" width="15%">
               {t('mintingPrice')}
             </Th>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
+            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" width="8%">
               {t('linksColumn')}
             </Th>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary"></Th>
           </Tr>
         </Thead>
         <Tbody>
