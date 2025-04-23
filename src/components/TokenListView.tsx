@@ -23,24 +23,7 @@ import { useRouter } from 'next/navigation'
 import { formatTokenAmount } from '@/utils'
 import { useCallback } from 'react'
 import { useMintingCalculations } from '@/hooks/useMintingCalculations'
-
-interface MintToken {
-  id: number
-  name: string
-  symbol: string
-  address: string
-  totalSupply: string
-  participants: number
-  progress: number
-  image: string
-  target: string
-  raised: string
-  mintRate: string
-  created_at: string
-  deployedAt?: number
-  logo?: string
-  minterCounts: number
-}
+import { MintToken } from '@/api/types'
 
 interface TokenListViewProps {
   tokens: MintToken[]
@@ -82,7 +65,7 @@ const TokenListView = ({
   sortColumn,
   sortDirection,
   onSort,
-  currencyUnit
+  currencyUnit,
 }: TokenListViewProps) => {
   const router = useRouter()
   const bg = useColorModeValue('white', 'gray.800')
@@ -93,29 +76,34 @@ const TokenListView = ({
   const iconHoverColor = useColorModeValue('brand.primary', 'brand.light')
   const toast = useToast()
   const { t } = useTranslation()
-  
+
   // 将hook移到组件顶层，只初始化一次
   const { getFormattedMintRate } = useMintingCalculations({
-    totalSupply: "",  // 这里不提供具体值，只是初始化hook
-    target: "",
+    totalSupply: '', // 这里不提供具体值，只是初始化hook
+    target: '',
     currencyUnit,
-    tokenDecimals: 6
-  });
+    tokenDecimals: 6,
+  })
 
   // 修改格式化铸造价格函数，不在内部调用Hook
-  const formatMintRateForToken = useCallback((token: MintToken) => {
-    // 使用已初始化的getFormattedMintRate函数
-    // 注意这里只是使用函数，不再创建新的Hook实例
-    const rate = token.mintRate || getFormattedMintRate({
-      totalSupply: token.totalSupply,
-      target: token.target,
-      currencyUnit,
-      tokenDecimals: 6
-    });
-    
-    // 移除数字中的千分号（逗号）
-    return rate ? rate.replace(/,/g, '') : rate;
-  }, [getFormattedMintRate, currencyUnit]);
+  const formatMintRateForToken = useCallback(
+    (token: MintToken) => {
+      // 使用已初始化的getFormattedMintRate函数
+      // 注意这里只是使用函数，不再创建新的Hook实例
+      const rate =
+        token.mintRate ||
+        getFormattedMintRate({
+          totalSupply: token.totalSupply,
+          target: token.target,
+          currencyUnit,
+          tokenDecimals: 6,
+        })
+
+      // 移除数字中的千分号（逗号）
+      return rate ? rate.replace(/,/g, '') : rate
+    },
+    [getFormattedMintRate, currencyUnit]
+  )
 
   // 跳转到代币铸造页面
   const navigateToMintPage = (contractAddress: string) => {
@@ -222,13 +210,16 @@ const TokenListView = ({
             <ThSortable column="totalSupply">
               {t('totalSupplyColumn')}
             </ThSortable>
-            <ThSortable column="raised">
-              {t('progressColumn')}
-            </ThSortable>
+            <ThSortable column="raised">{t('progressColumn')}</ThSortable>
             <ThSortable column="participants">
               {t('participantsColumn')}
             </ThSortable>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" textAlign="center">
+            <Th
+              bg={thBg}
+              borderBottom="2px"
+              borderColor="brand.primary"
+              textAlign="center"
+            >
               {t('mintingPrice')}
             </Th>
             <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
@@ -313,7 +304,9 @@ const TokenListView = ({
                   </Box>
                 )}
               </Td>
-              <Td textAlign="center">{formatTokenAmount(token.totalSupply, { abbreviate: true })}</Td>
+              <Td textAlign="center">
+                {formatTokenAmount(token.totalSupply, { abbreviate: true })}
+              </Td>
               <Td>
                 <Box py={1} width="100%">
                   <HStack justify="space-between" mb={1}>
@@ -340,7 +333,12 @@ const TokenListView = ({
               </Td>
               <Td textAlign="center">{token.participants}</Td>
               <Td textAlign="center">
-                <Text fontWeight="medium" textAlign="center" width="100%" display="block">
+                <Text
+                  fontWeight="medium"
+                  textAlign="center"
+                  width="100%"
+                  display="block"
+                >
                   {formatMintRateForToken(token)}
                 </Text>
               </Td>
@@ -365,4 +363,4 @@ const TokenListView = ({
   )
 }
 
-export default TokenListView 
+export default TokenListView

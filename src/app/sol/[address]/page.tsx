@@ -56,7 +56,12 @@ export default function TokenMintPage() {
     data: fairCurveData,
     loading: fairCurveLoading,
     error: fairCurveError,
-  } = useFairCurve(conn, selectedToken?.address && selectedToken.address.trim() !== '' ? selectedToken.address : undefined)
+  } = useFairCurve(
+    conn,
+    selectedToken?.address && selectedToken.address.trim() !== ''
+      ? selectedToken.address
+      : undefined
+  )
 
   const formattedData = fairCurveData
 
@@ -146,7 +151,11 @@ export default function TokenMintPage() {
         <VStack spacing={4}>
           <Text color="red.500">{tokenError || fairCurveError}</Text>
           <Link href="/" passHref>
-            <Button variant="outline" leftIcon={<ChevronLeftIcon />} colorScheme="purple">
+            <Button
+              variant="outline"
+              leftIcon={<ChevronLeftIcon />}
+              colorScheme="purple"
+            >
               {t('backToMintingHome')}
             </Button>
           </Link>
@@ -240,14 +249,7 @@ export default function TokenMintPage() {
                   <Stack spacing={4}>
                     <Heading size="md">{t('mintToken')}</Heading>
                     <MintingForm
-                      token={{
-                        symbol: selectedToken.symbol,
-                        mintRate: formattedData.feeRate,
-                        network,
-                        currencyUnit,
-                        address: selectedToken.address,
-                        tokenDecimal: selectedToken.tokenDecimal,
-                      }}
+                      token={selectedToken}
                       tokenAccount={tokenAccount}
                       tokenBalance={tokenBalance}
                     />

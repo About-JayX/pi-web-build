@@ -64,24 +64,7 @@ import { useMintingCalculations } from '@/hooks/useMintingCalculations'
 import PaginationControl from '@/components/PaginationControl'
 import TokenListView from '@/components/TokenListView'
 import FilterPanel from '@/components/FilterPanel'
-
-interface MintToken {
-  id: number
-  name: string
-  symbol: string
-  address: string
-  totalSupply: string
-  participants: number
-  progress: number
-  image: string
-  target: string
-  raised: string
-  mintRate: string
-  created_at: string
-  deployedAt?: number
-  logo?: string
-  minterCounts: number
-}
+import { MintToken } from '@/api/types'
 
 export default function MintPage() {
   const { tokenList, loading, error } = useAppSelector(state => state.token)
@@ -118,58 +101,58 @@ export default function MintPage() {
       // 从localStorage中读取保存的视图模式
       const savedViewMode = localStorage.getItem('mint_view_mode')
       // 如果存在有效值则使用它，否则默认为'card'
-      return (savedViewMode === 'card' || savedViewMode === 'list') ? savedViewMode : 'card'
+      return savedViewMode === 'card' || savedViewMode === 'list'
+        ? savedViewMode
+        : 'card'
     }
     // 服务器端渲染时默认使用卡片视图
     return 'card'
   })
   const [sortColumn, setSortColumn] = useState('created_at')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
-  const [totalTokenCount, setTotalTokenCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalTokenCount, setTotalTokenCount] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
 
   // 获取token列表
   const getTokenList = async () => {
     try {
       // 根据标签索引选择不同的排序字段
-      let sortField = '';
-      switch(tabIndex) {
+      let sortField = ''
+      switch (tabIndex) {
         case 0: // 热门铸造
-          sortField = 'progress';
-          break;
+          sortField = 'progress'
+          break
         case 1: // 所有代币
-          sortField = 'token_id';
-          break;
+          sortField = 'token_id'
+          break
         case 2: // 最新部署
-          sortField = 'created_at';
-          break;
+          sortField = 'created_at'
+          break
         case 3: // 铸造结束
-          sortField = 'progress';
-          break;
+          sortField = 'progress'
+          break
         default:
-          sortField = 'progress';
+          sortField = 'progress'
       }
-      
+
       // 构建请求参数，添加搜索关键词
       const params: any = {
         page: currentPage,
         limit: pageSize,
         sort: sortField,
-      };
-      
+      }
+
       // 如果有搜索关键词，添加到请求参数中
       if (searchQuery.trim()) {
-        params.search = searchQuery.trim();
+        params.search = searchQuery.trim()
       }
-      
+
       // 如果是铸造结束标签页，添加进度100%的过滤条件
       if (tabIndex === 3) {
-        params.finished = true;
+        params.finished = true
       }
-      
-      await store.dispatch(
-        fetchTokenList(params)
-      )
+
+      await store.dispatch(fetchTokenList(params))
     } catch (error) {
       console.error('获取代币列表失败:', error)
     }
@@ -194,20 +177,25 @@ export default function MintPage() {
   useEffect(() => {
     if (tokenList && tokenList.length > 0) {
       // 如果返回的数据条数等于pageSize，说明可能还有下一页
-      const hasMorePages = tokenList.length >= pageSize;
+      const hasMorePages = tokenList.length >= pageSize
       // 如果当前页是第1页，并且有足够多的数据，则至少有2页
       // 否则，我们认为当前页就是最后一页
-      const calculatedTotalPages = (currentPage === 1 && hasMorePages) 
-        ? Math.max(2, currentPage + 1) 
-        : (hasMorePages ? currentPage + 1 : currentPage);
-      
-      setTotalPages(calculatedTotalPages);
-      setTotalTokenCount(tokenList.length + (calculatedTotalPages - currentPage) * pageSize);
+      const calculatedTotalPages =
+        currentPage === 1 && hasMorePages
+          ? Math.max(2, currentPage + 1)
+          : hasMorePages
+          ? currentPage + 1
+          : currentPage
+
+      setTotalPages(calculatedTotalPages)
+      setTotalTokenCount(
+        tokenList.length + (calculatedTotalPages - currentPage) * pageSize
+      )
     } else {
-      setTotalPages(1);
-      setTotalTokenCount(0);
+      setTotalPages(1)
+      setTotalTokenCount(0)
     }
-  }, [tokenList, currentPage, pageSize]);
+  }, [tokenList, currentPage, pageSize])
 
   // 监听页码或每页数量变化，获取对应页的数据
   useEffect(() => {
@@ -220,24 +208,24 @@ export default function MintPage() {
   useEffect(() => {
     setCurrentPage(1)
     // 根据标签索引选择不同的排序字段
-    let sortField = '';
-    switch(tabIndex) {
+    let sortField = ''
+    switch (tabIndex) {
       case 0: // 热门铸造
-        sortField = 'progress';
-        break;
+        sortField = 'progress'
+        break
       case 1: // 所有代币
-        sortField = 'token_id';
-        break;
+        sortField = 'token_id'
+        break
       case 2: // 最新部署
-        sortField = 'created_at';
-        break;
+        sortField = 'created_at'
+        break
       case 3: // 铸造结束
-        sortField = 'progress';
-        break;
+        sortField = 'progress'
+        break
       default:
-        sortField = 'progress';
+        sortField = 'progress'
     }
-    
+
     store.dispatch(
       fetchTokenList({
         page: 1,
@@ -252,24 +240,24 @@ export default function MintPage() {
     if (currentPage !== 1) {
       // 避免和tab切换时的重置冲突
       // 根据标签索引选择不同的排序字段
-      let sortField = '';
-      switch(tabIndex) {
+      let sortField = ''
+      switch (tabIndex) {
         case 0: // 热门铸造
-          sortField = 'progress';
-          break;
+          sortField = 'progress'
+          break
         case 1: // 所有代币
-          sortField = 'token_id';
-          break;
+          sortField = 'token_id'
+          break
         case 2: // 最新部署
-          sortField = 'created_at';
-          break;
+          sortField = 'created_at'
+          break
         case 3: // 铸造结束
-          sortField = 'progress';
-          break;
+          sortField = 'progress'
+          break
         default:
-          sortField = 'progress';
+          sortField = 'progress'
       }
-      
+
       store.dispatch(
         fetchTokenList({
           page: currentPage,
@@ -310,20 +298,20 @@ export default function MintPage() {
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768 && viewMode !== 'card') {
-        setViewMode('card');
+        setViewMode('card')
       }
-    };
-    
+    }
+
     // 添加客户端检测，以避免服务器端渲染问题
     if (typeof window !== 'undefined') {
       // 初始化时检查
-      handleResize();
-      
+      handleResize()
+
       // 监听窗口大小变化
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
+      window.addEventListener('resize', handleResize)
+      return () => window.removeEventListener('resize', handleResize)
     }
-  }, [viewMode]);
+  }, [viewMode])
 
   // 共享排序逻辑
   const handleSort = (column: string) => {
@@ -335,22 +323,22 @@ export default function MintPage() {
 
   // 当搜索条件、排序条件变化时，重置为第一页并重新请求数据
   useEffect(() => {
-    setCurrentPage(1);
+    setCurrentPage(1)
     // 通过监听currentPage变化会自动触发getTokenList
-  }, [searchQuery, sortColumn, sortDirection]);
-  
+  }, [searchQuery, sortColumn, sortDirection])
+
   const renderTabContent = (tokens: MintToken[]) => {
     // 显示加载状态
     if (loading) {
       return (
         <Box py={10} textAlign="center">
           <VStack spacing={4}>
-            <Spinner 
-              thickness='4px'
-              speed='0.65s'
-              emptyColor='gray.200'
-              color='brand.primary'
-              size='xl'
+            <Spinner
+              thickness="4px"
+              speed="0.65s"
+              emptyColor="gray.200"
+              color="brand.primary"
+              size="xl"
             />
             <Text color="gray.500" fontSize="md">
               {t('tabSwitchLoading')}
@@ -368,9 +356,9 @@ export default function MintPage() {
             {error}
           </Text>
           <VStack spacing={4}>
-            <Button 
-              colorScheme="purple" 
-              onClick={getTokenList} 
+            <Button
+              colorScheme="purple"
+              onClick={getTokenList}
               leftIcon={<Icon as={FaSync} />}
             >
               {t('tryAgain')}
@@ -384,7 +372,7 @@ export default function MintPage() {
     const processedTokens = tokens.map(token => ({
       ...token,
       image: token.logo || '/token-logo.png', // 使用token中的logo，如果没有则使用默认图片
-    }));
+    }))
 
     // 显示空结果状态
     if (processedTokens.length === 0) {
@@ -454,9 +442,9 @@ export default function MintPage() {
             mb={{ base: 2, md: 0 }}
             spacing={{ base: 2, md: 0 }}
           >
-            <Flex 
-              align="baseline" 
-              width={{ base: "100%", md: "auto" }}
+            <Flex
+              align="baseline"
+              width={{ base: '100%', md: 'auto' }}
               mb={{ base: 0, md: 0 }}
             >
               <Heading as="h2" size="lg" m={0}>
@@ -469,7 +457,7 @@ export default function MintPage() {
                 mt={{ base: 0, md: 1 }}
                 colorScheme="teal"
                 variant="solid"
-                size={{ base: "sm", md: "md" }}
+                size={{ base: 'sm', md: 'md' }}
                 bg="teal.400"
                 _hover={{ bg: 'teal.500' }}
                 leftIcon={<FaPlus />}
@@ -479,10 +467,10 @@ export default function MintPage() {
               </Button>
             </Flex>
             {/* 在移动设备上隐藏视图切换按钮 */}
-            <ButtonGroup 
-              isAttached 
-              variant="outline" 
-              colorScheme="purple" 
+            <ButtonGroup
+              isAttached
+              variant="outline"
+              colorScheme="purple"
               display={{ base: 'none', md: 'flex' }}
             >
               <Button
@@ -526,9 +514,9 @@ export default function MintPage() {
             >
               <Tab
                 fontWeight="medium"
-                fontSize={{ base: "xs", md: "sm" }}
+                fontSize={{ base: 'xs', md: 'sm' }}
                 p={{ base: 2, md: 3 }}
-                minWidth={{ base: "auto", md: "auto" }}
+                minWidth={{ base: 'auto', md: 'auto' }}
                 whiteSpace="nowrap"
                 flexShrink={0}
                 _selected={{
@@ -548,9 +536,9 @@ export default function MintPage() {
               </Tab>
               <Tab
                 fontWeight="medium"
-                fontSize={{ base: "xs", md: "sm" }}
+                fontSize={{ base: 'xs', md: 'sm' }}
                 p={{ base: 2, md: 3 }}
-                minWidth={{ base: "auto", md: "auto" }}
+                minWidth={{ base: 'auto', md: 'auto' }}
                 whiteSpace="nowrap"
                 flexShrink={0}
                 _selected={{
@@ -570,9 +558,9 @@ export default function MintPage() {
               </Tab>
               <Tab
                 fontWeight="medium"
-                fontSize={{ base: "xs", md: "sm" }}
+                fontSize={{ base: 'xs', md: 'sm' }}
                 p={{ base: 2, md: 3 }}
-                minWidth={{ base: "auto", md: "auto" }}
+                minWidth={{ base: 'auto', md: 'auto' }}
                 whiteSpace="nowrap"
                 flexShrink={0}
                 _selected={{
@@ -592,9 +580,9 @@ export default function MintPage() {
               </Tab>
               <Tab
                 fontWeight="medium"
-                fontSize={{ base: "xs", md: "sm" }}
+                fontSize={{ base: 'xs', md: 'sm' }}
                 p={{ base: 2, md: 3 }}
-                minWidth={{ base: "auto", md: "auto" }}
+                minWidth={{ base: 'auto', md: 'auto' }}
                 whiteSpace="nowrap"
                 flexShrink={0}
                 _selected={{
@@ -647,7 +635,7 @@ export default function MintPage() {
                 />
                 {renderTabContent(tokenList)}
               </TabPanel>
-              
+
               <TabPanel px={0}>
                 <FilterPanel
                   sortColumn={'progress'}

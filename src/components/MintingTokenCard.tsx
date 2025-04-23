@@ -40,7 +40,6 @@ interface MintingTokenCardProps {
     target: string
     raised: string
     progress: number
-    participants: number
     totalSupply: string
     minterCounts: number
     mintRate?: string
@@ -70,8 +69,8 @@ export default function MintingTokenCard({
     target: token.target,
     mintRate: token.mintRate,
     currencyUnit,
-    tokenDecimals: token.tokenDecimal || 6  // 从token对象获取小数位，默认为6
-  });
+    tokenDecimals: token.tokenDecimal || 6, // 从token对象获取小数位，默认为6
+  })
 
   // 缩略显示合约地址
   const formatContractAddress = (address: string) => {
@@ -85,18 +84,18 @@ export default function MintingTokenCard({
   const formatSupply = (supply: string) => {
     // 第一性原理：总供应量在tokenSlice中已经被除以10^tokenDecimal，这里仅进行格式化
     // 适当缩写大数字，如显示为：314M，1B等
-    return formatTokenAmount(supply, { 
-      abbreviate: true, 
-      decimals: 2
+    return formatTokenAmount(supply, {
+      abbreviate: true,
+      decimals: 2,
     })
   }
 
   // 获取铸造金额，确保只有在target存在时才返回值
   const getMintAmount = () => {
-    if (!token.target) return 0;
-    const targetMatch = token.target.match(/[0-9.]+/);
-    if (!targetMatch) return 0;
-    return parseFloat(targetMatch[0]);
+    if (!token.target) return 0
+    const targetMatch = token.target.match(/[0-9.]+/)
+    if (!targetMatch) return 0
+    return parseFloat(targetMatch[0])
   }
 
   // 分享功能处理
@@ -149,9 +148,9 @@ export default function MintingTokenCard({
 
   // 格式化铸造价格，移除千分号
   const formatMintRate = () => {
-    const rate = token.mintRate || getFormattedMintRate();
+    const rate = token.mintRate || getFormattedMintRate()
     // 移除数字中的千分号（逗号）
-    return rate ? rate.replace(/,/g, '') : rate;
+    return rate ? rate.replace(/,/g, '') : rate
   }
 
   return (
@@ -186,16 +185,12 @@ export default function MintingTokenCard({
         boxShadow="md"
         transform="rotate(25deg)"
         _hover={{
-          transform: "rotate(0deg)",
-          transition: "transform 0.3s"
+          transform: 'rotate(0deg)',
+          transition: 'transform 0.3s',
         }}
         transition="transform 0.3s"
       >
-        <Icon 
-          as={FaHammer} 
-          color="white" 
-          boxSize="16px" 
-        />
+        <Icon as={FaHammer} color="white" boxSize="16px" />
       </Box>
       <CardBody p={{ base: 1, md: 0, xl: 4 }}>
         <Stack spacing={3}>
@@ -260,10 +255,10 @@ export default function MintingTokenCard({
             <Divider />
 
             {/* 铸造人数 - 突出显示 */}
-            <HStack 
-              justify="space-between" 
-              bg="rgba(128, 90, 213, 0.06)" 
-              p={2} 
+            <HStack
+              justify="space-between"
+              bg="rgba(128, 90, 213, 0.06)"
+              p={2}
               borderRadius="md"
             >
               <HStack>
