@@ -24,6 +24,8 @@ import {
   FaFileContract,
   FaHammer,
   FaUsers,
+  FaCoins,
+  FaExchangeAlt,
 } from 'react-icons/fa'
 import NextLink from 'next/link'
 import { useTranslation } from 'react-i18next'
@@ -242,60 +244,47 @@ export default function MintingTokenCard({
                   {token.target}
                 </Text>
               </HStack>
-              <Progress
-                value={token.progress || 0}
-                colorScheme="purple"
-                borderRadius="full"
-                size="sm"
-                mb={1}
-              />
-              <HStack justify="space-between">
-                <Text fontSize="xs" color={textColor}>
-                  {t('progress')}
-                </Text>
-                <Text fontSize="xs" fontWeight="bold">
-                  {token.progress || 0}%
+              <HStack spacing={2} align="center">
+                <Progress
+                  value={token.progress || 0}
+                  colorScheme="purple"
+                  borderRadius="full"
+                  size="sm"
+                  flex="1"
+                />
+                <Text fontSize="xs" fontWeight="bold" whiteSpace="nowrap">
+                  {(token.progress || 0).toFixed(2)}%
                 </Text>
               </HStack>
             </Box>
 
             <Divider />
 
-            {/* 铸造人数 - 突出显示 */}
-            <HStack 
-              justify="space-between" 
-              bg="rgba(128, 90, 213, 0.06)" 
-              p={2} 
-              borderRadius="md"
-            >
+            {/* 统计数据区域 - 紧凑展示 */}
+            <HStack justify="space-between" py={2}>
+              {/* 铸造人数 */}
               <HStack>
-                <Icon as={FaUsers} color="brand.primary" boxSize="12px" />
-                <Text fontSize="xs" color={textColor} fontWeight="medium">
-                  {t('participants')}
+                <Icon as={FaUsers} color="brand.primary" boxSize="14px" />
+                <Text fontWeight="bold" fontSize="sm" color="brand.primary">
+                  {token.minterCounts}
                 </Text>
               </HStack>
-              <Text fontWeight="bold" fontSize="md" color="brand.primary">
-                {token.minterCounts}
-              </Text>
-            </HStack>
-
-            <HStack justify="space-between">
-              <Text fontSize="xs" color={textColor}>
-                {t('totalSupply')}
-              </Text>
-              <Text fontWeight="bold" fontSize="sm">
-                {formatSupply(token.totalSupply)}
-              </Text>
-            </HStack>
-
-            {/* 铸造比率显示 */}
-            <HStack justify="space-between">
-              <Text fontSize="xs" color={textColor}>
-                {t('mintingPrice')}
-              </Text>
-              <Text fontWeight="bold" fontSize="sm">
-                {formatMintRate()}
-              </Text>
+              
+              {/* 总供应量 */}
+              <HStack>
+                <Icon as={FaCoins} color="brand.primary" boxSize="14px" />
+                <Text fontWeight="bold" fontSize="sm">
+                  {formatSupply(token.totalSupply)}
+                </Text>
+              </HStack>
+              
+              {/* 铸造价格 */}
+              <HStack>
+                <Icon as={FaExchangeAlt} color="brand.primary" boxSize="14px" />
+                <Text fontWeight="bold" fontSize="sm">
+                  {formatMintRate()}
+                </Text>
+              </HStack>
             </HStack>
           </Stack>
         </Stack>
