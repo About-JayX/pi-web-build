@@ -2,8 +2,9 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Box, Container, Text, Spinner, VStack, Heading } from '@chakra-ui/react';
+import { Container } from '@chakra-ui/react';
 import { useTranslation } from 'react-i18next';
+import { LoadingSpinner } from '@/components';
 
 // 这是一个页面组件，而不是之前的功能性函数
 export default function MintPage() {
@@ -15,14 +16,10 @@ export default function MintPage() {
     router.push('/');
   }, [router]);
 
-  // 返回一个加载状态，这个组件会被预渲染，但随后会立即重定向
+  // 返回一个加载状态，使用通用的LoadingSpinner组件
   return (
-    <Container maxW="container.xl" py={20}>
-      <VStack spacing={6}>
-        <Heading size="lg">{t('redirecting')}</Heading>
-        <Spinner size="xl" color="brand.primary" thickness="4px" />
-        <Text>{t('loadingTokenDetails')}</Text>
-      </VStack>
+    <Container maxW="container.xl" py={12}>
+      <LoadingSpinner />
     </Container>
   );
 } 

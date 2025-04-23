@@ -145,12 +145,12 @@ export function formatTokenAmountByDecimals(
 }
 
 /**
- * 计算代币铸造价格
+ * 计算代币铸造比率
  * @param totalSupply 总供应量 (可以是原始值或已格式化的字符串如"10M")
  * @param currencyUnit 货币单位
  * @param tokenDecimals 代币小数位数 - 如果totalSupply是原始值则需要此参数
  * @param mintAmount 铸造总额
- * @returns 格式化的铸造价格字符串
+ * @returns 格式化的铸造比率字符串
  */
 export function calculateMintingPrice(
   totalSupply: string | number,
@@ -177,13 +177,13 @@ export function calculateMintingPrice(
 }
 
 /**
- * 计算代币铸造价格的比例形式
+ * 计算代币铸造比率的比例形式
  * @param totalSupply 总供应量 (可以是原始值或已格式化的字符串如"10M")
  * @param currencyUnit 货币单位 (当前实现中不再影响计算结果，仅保留参数以维持兼容性)
  * @param symbol 代币符号 (未使用)
  * @param tokenDecimals 代币小数位数 - 如果totalSupply是原始值则需要此参数
  * @param mintAmount 铸造总额 (实际调用时通常从token.target中提取)
- * @returns 格式化的铸造价格比例字符串
+ * @returns 格式化的铸造比率比例字符串
  */
 export function calculateMintingRatio(
   totalSupply: string | number,
@@ -234,7 +234,7 @@ export function getSimpleMintingRatio(
 }
 
 /**
- * 解析铸造价格值（适用于科学计数法和普通格式）
+ * 解析铸造比率值（适用于科学计数法和普通格式）
  * @param priceStr 价格字符串
  * @returns 解析后的数值
  */
@@ -270,7 +270,7 @@ export function getFormattedMintRate(
 ): string {
   // 如果有mintRate，将其转换为兑换比率
   if (mintRate) {
-    // 使用parsemintRate获取兑换比例
+    // 使用parsemintRate获取铸造比率
     const ratio = parsemintRate(mintRate);
     if (ratio > 0) {
       if (ratio >= 1000000) {
@@ -328,7 +328,7 @@ export function calculateMintedAmount(
   }
   
   // 铸造比例: 1单位货币可兑换的代币数量
-  // 使用parsemintRate获取兑换比例(非价格)
+  // 使用parsemintRate获取铸造比率(非价格)
   let exchangeRate = parsemintRate(mintRate);
   
   // 如果没有mintRate或解析失败，使用总供应量和铸造总额直接计算
@@ -337,7 +337,7 @@ export function calculateMintedAmount(
     exchangeRate = (parsedTotalSupply / Math.pow(10, tokenDecimals)) / mintAmount / 2;
   }
   
-  // 计算已铸造代币数量 = 已铸额度 * 兑换比例
+  // 计算已铸造代币数量 = 已铸额度 * 铸造比率
   const mintedAmount = Math.round(raisedAmount * exchangeRate);
   
   // 格式化显示(添加千位分隔符)
@@ -367,7 +367,7 @@ export function calculateTokensFromCurrency(
   // 使用parseTotalSupply解析总供应量
   const parsedTotalSupply = parseTotalSupply(totalSupply, tokenDecimals, true);
 
-  // 获取铸造比率 (使用parsemintRate获取兑换比例，非价格)
+  // 获取铸造比率 (使用parsemintRate获取铸造比率，非价格)
   let exchangeRate = parsemintRate(mintRate);
   
   // 如果没有mintRate或解析失败，使用总供应量和铸造总额计算
@@ -376,7 +376,7 @@ export function calculateTokensFromCurrency(
     exchangeRate = (parsedTotalSupply / Math.pow(10, tokenDecimals)) / mintAmount / 2;
   }
   
-  // 计算代币数量 = 输入金额 * 兑换比例
+  // 计算代币数量 = 输入金额 * 铸造比率
   return Math.floor(currencyAmount * exchangeRate);
 }
 
@@ -403,7 +403,7 @@ export function calculateCurrencyFromTokens(
   // 使用parseTotalSupply解析总供应量
   const parsedTotalSupply = parseTotalSupply(totalSupply, tokenDecimals, true);
 
-  // 获取铸造价格率 (使用parsemintRate获取价格，非兑换比例)
+  // 获取铸造比率率 (使用parsemintRate获取价格，非铸造比率)
   let exchangeRate = parsemintRate(mintRate, true);
   
   // 如果没有mintRate或解析失败，使用总供应量和铸造总额计算
@@ -452,7 +452,7 @@ export function parseTotalSupply(
 /**
  * 解析预设汇率，返回有效的汇率值
  * @param mintRate 预设汇率字符串
- * @param asPrice 是否将结果作为价格而非兑换比例返回 (默认false)
+ * @param asPrice 是否将结果作为价格而非铸造比率返回 (默认false)
  * @returns 解析后的汇率数值，无效时返回0
  */
 export function parsemintRate(
@@ -464,7 +464,7 @@ export function parsemintRate(
   const rate = parseFloat(mintRate.replace(/[^0-9.e+-]/g, ''));
   if (rate <= 0) return 0;
   
-  // 根据需要返回价格或兑换比例
+  // 根据需要返回价格或铸造比率
   return asPrice ? rate : 1 / rate;
 }
 

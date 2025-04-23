@@ -59,7 +59,7 @@ export default function MintingInstructions({ token, isModal = false, isOpen, on
     tokenDecimals: 6
   });
   
-  // 获取铸造价格 - 使用计算结果
+  // 获取铸造比率 - 使用计算结果
   const getMintingPrice = (displayMode: 'price' | 'ratio' = 'price') => {
     if (displayMode === 'ratio') {
       return mintingRatio;

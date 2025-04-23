@@ -24,12 +24,14 @@ import {
   Center,
   Spinner,
   Button,
+  Flex,
+  SimpleGrid,
 } from '@chakra-ui/react'
 import { useParams } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { selectTokenByAddress, fetchTokenList } from '@/store/slices/tokenSlice'
 import { useTranslation } from 'react-i18next'
-import { FaCoins, FaUsers, FaChartPie, FaSync } from 'react-icons/fa'
+import { FaCoins, FaUsers, FaChartPie, FaSync, FaArrowLeft } from 'react-icons/fa'
 import MintingForm from '@/components/token-detail/MintingForm'
 import { useSolana } from '@/contexts/solanaProvider'
 import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
@@ -39,6 +41,8 @@ import { getAssociatedTokenAddress } from '@solana/spl-token'
 import BigNumber from 'bignumber.js'
 import Link from 'next/link'
 import { ChevronLeftIcon } from '@chakra-ui/icons'
+import { LoadingSpinner } from '@/components'
+import { MintingInstructions } from '@/components/token-detail'
 
 export default function TokenMintPage() {
   const { address } = useParams()
@@ -56,18 +60,14 @@ export default function TokenMintPage() {
     data: fairCurveData,
     loading: fairCurveLoading,
     error: fairCurveError,
-  } = useFairCurve(
-    conn,
-    selectedToken?.address && selectedToken.address.trim() !== ''
-      ? selectedToken.address
-      : undefined
-  )
+  } = useFairCurve(conn, selectedToken?.address ? (selectedToken.address.trim() !== '' ? selectedToken.address : undefined) : undefined)
 
   const formattedData = fairCurveData
 
   const cardBg = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.700')
   const statBg = useColorModeValue('gray.50', 'gray.700')
+  const softBg = useColorModeValue('gray.50', 'gray.700')
 
   // 使用SOL作为货币单位
   const currencyUnit = 'SOL'
@@ -81,7 +81,7 @@ export default function TokenMintPage() {
   // 添加代币账户查询逻辑
   useEffect(() => {
     const checkTokenAccount = async () => {
-      if (!conn || !wallet?.publicKey || !selectedToken?.address) return
+      if (!wallet?.publicKey || !selectedToken?.address) return
 
       try {
         const tokenMint = new PublicKey(selectedToken.address)
@@ -123,24 +123,32 @@ export default function TokenMintPage() {
   }
 
   // 格式化费率为百分比 (除以10000)
-  const formatFeeRate = (rate: string) => {
+  const formatFeeRate = (rate: number | string) => {
     return `${new BigNumber(rate).div(10000).toFixed(2)}%`
   }
 
-  if (!conn) {
-    return (
-      <Center minH="60vh">
-        <VStack spacing={4}>
-          <Text color="red.500">{t('noConnection')}</Text>
-        </VStack>
-      </Center>
-    )
-  }
+  // 返回按钮组件
+  const BackButton = () => (
+    <Button
+      as={Link}
+      href="/"
+      leftIcon={<FaArrowLeft />}
+      variant="ghost"
+      mb={{ base: 3, md: 6 }}
+      size={{ base: 'sm', md: 'md' }}
+      color="brand.primary"
+      _hover={{ bg: 'purple.50' }}
+      px={{ base: 2, md: 4 }}
+      fontSize={{ base: 'sm', md: 'md' }}
+    >
+      {t('backToMintingHome')}
+    </Button>
+  )
 
   if (tokenLoading || fairCurveLoading) {
     return (
       <Center minH="60vh">
-        <Spinner size="xl" color="brand.primary" />
+        <LoadingSpinner />
       </Center>
     )
   }
@@ -150,15 +158,7 @@ export default function TokenMintPage() {
       <Center minH="60vh">
         <VStack spacing={4}>
           <Text color="red.500">{tokenError || fairCurveError}</Text>
-          <Link href="/" passHref>
-            <Button
-              variant="outline"
-              leftIcon={<ChevronLeftIcon />}
-              colorScheme="purple"
-            >
-              {t('backToMintingHome')}
-            </Button>
-          </Link>
+          <BackButton />
         </VStack>
       </Center>
     )
@@ -167,22 +167,41 @@ export default function TokenMintPage() {
   if (!selectedToken || !formattedData) {
     return (
       <Center minH="60vh">
-        <Text>{t('tokenNotFound')}</Text>
+        <VStack spacing={4}>
+          <Text>{t('tokenNotFound')}</Text>
+          <BackButton />
+        </VStack>
       </Center>
     )
   }
 
   return (
-    <Box>
-      <Container maxW="container.xl" py={{ base: 4, md: 8 }}>
-        <Grid templateColumns={{ base: '1fr', lg: '2fr 1fr' }} gap={8}>
-          <GridItem>
-            <VStack spacing={8} align="stretch">
+    <Box bg={softBg} minH="100vh" w="100%" pb={10} overflowX="hidden">
+      <Container maxW="container.xl" py={12}>
+        <VStack spacing={10} align="stretch">
+          <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'flex-start', md: 'center' }}>
+            <Box>
+              <Heading as="h2" size="lg" mb={2}>
+                {t('tokenInfoNetwork').replace('{network}', 'Solana')}
+              </Heading>
+              <Text color="gray.500">{t('mintTokenCancel')}</Text>
+            </Box>
+            <BackButton />
+          </Stack>
+
+          <Grid templateColumns={{ base: '1fr', lg: '3fr 2fr' }} gap={8}>
+            <GridItem width="100%" overflow="hidden">
               <Card bg={cardBg} borderWidth="1px" borderColor={borderColor}>
-                <CardBody>
-                  <Stack spacing={6}>
+                <CardBody p={{ base: 3, md: 5 }}>
+                  <VStack spacing={{ base: 4, md: 6 }} align="stretch">
+                    {/* 代币标题部分 */}
                     <Box>
-                      <Heading as="h1" size="lg" mb={2}>
+                      <Heading
+                        as="h1"
+                        size="lg"
+                        mb={2}
+                        color="brand.primary"
+                      >
                         {selectedToken.name} ({selectedToken.symbol})
                       </Heading>
                       <Text color="gray.500">
@@ -198,120 +217,200 @@ export default function TokenMintPage() {
 
                     <Divider />
 
-                    <Grid
-                      templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }}
-                      gap={4}
+                    {/* 进度部分 */}
+                    <Box>
+                      <Flex justify="space-between" mb={1} fontSize={{ base: 'xs', md: 'sm' }}>
+                        <HStack>
+                          <Text color="gray.600">{t('progress')}:</Text>
+                          <Text fontWeight="bold" color="brand.primary">
+                            {selectedToken.progress}%
+                          </Text>
+                        </HStack>
+                      </Flex>
+                      <Progress
+                        value={selectedToken.progress}
+                        size="sm"
+                        colorScheme="purple"
+                        borderRadius="full"
+                        mb={3}
+                      />
+                    </Box>
+
+                    {/* 统计数据部分 */}
+                    <SimpleGrid
+                      columns={3}
+                      spacing={4}
                     >
-                      <Stat bg={statBg} p={4} borderRadius="lg">
-                        <StatLabel>
-                          <HStack>
-                            <Icon as={FaCoins} color="brand.primary" />
-                            <Text>{t('totalSupply')}</Text>
-                          </HStack>
-                        </StatLabel>
-                        <StatNumber>{selectedToken.totalSupply}</StatNumber>
-                      </Stat>
+                      <Box
+                        bg={statBg}
+                        p={4}
+                        borderRadius="lg"
+                        boxShadow="sm"
+                        textAlign="center"
+                      >
+                        <Icon
+                          as={FaCoins}
+                          color="green.500"
+                          boxSize="24px"
+                          mb={2}
+                        />
+                        <Text color="gray.600" fontSize="sm">
+                          {t('totalSupply')}
+                        </Text>
+                        <Text fontWeight="bold" fontSize="xl" color="green.500">
+                          {selectedToken.totalSupply}
+                        </Text>
+                      </Box>
 
-                      <Stat bg={statBg} p={4} borderRadius="lg">
-                        <StatLabel>
-                          <HStack>
-                            <Icon as={FaUsers} color="brand.primary" />
-                            <Text>{t('participants')}</Text>
-                          </HStack>
-                        </StatLabel>
-                        <StatNumber>{selectedToken.minterCounts}</StatNumber>
-                      </Stat>
+                      <Box
+                        bg={statBg}
+                        p={4}
+                        borderRadius="lg"
+                        boxShadow="sm"
+                        textAlign="center"
+                      >
+                        <Icon
+                          as={FaUsers}
+                          color="blue.500"
+                          boxSize="24px"
+                          mb={2}
+                        />
+                        <Text color="gray.600" fontSize="sm">
+                          {t('participants')}
+                        </Text>
+                        <Text fontWeight="bold" fontSize="xl" color="blue.500">
+                          {selectedToken.minterCounts}
+                        </Text>
+                      </Box>
 
-                      <Stat bg={statBg} p={4} borderRadius="lg">
-                        <StatLabel>
-                          <HStack>
-                            <Icon as={FaChartPie} color="brand.primary" />
-                            <Text>{t('progress')}</Text>
-                          </HStack>
-                        </StatLabel>
-                        <StatNumber>{selectedToken.progress}%</StatNumber>
-                        <StatHelpText>
-                          <Progress
-                            value={selectedToken.progress}
-                            size="sm"
-                            colorScheme="purple"
-                            borderRadius="full"
-                          />
-                        </StatHelpText>
-                      </Stat>
-                    </Grid>
-                  </Stack>
-                </CardBody>
-              </Card>
+                      <Box
+                        bg={statBg}
+                        p={4}
+                        borderRadius="lg"
+                        boxShadow="sm"
+                        textAlign="center"
+                      >
+                        <Icon
+                          as={FaChartPie}
+                          color="purple.500"
+                          boxSize="24px"
+                          mb={2}
+                        />
+                        <Text color="gray.600" fontSize="sm">
+                          {t('supplied')}
+                        </Text>
+                        <Text fontWeight="bold" fontSize="xl" color="purple.500">
+                          {formatTokenAmount(formattedData.supplied)}{' '}
+                          {selectedToken.symbol}
+                        </Text>
+                      </Box>
+                    </SimpleGrid>
 
-              <Card bg={cardBg} borderWidth="1px" borderColor={borderColor}>
-                <CardBody>
-                  <Stack spacing={4}>
-                    <Heading size="md">{t('mintToken')}</Heading>
-                    <MintingForm
-                      token={selectedToken}
-                      tokenAccount={tokenAccount}
-                      tokenBalance={tokenBalance}
-                    />
-                  </Stack>
-                </CardBody>
-              </Card>
-            </VStack>
-          </GridItem>
-
-          <GridItem>
-            <Card bg={cardBg} borderWidth="1px" borderColor={borderColor}>
-              <CardBody>
-                <Stack spacing={4}>
-                  <Heading size="md">{t('tokenInfo')}</Heading>
-                  <VStack align="stretch" spacing={3}>
-                    <HStack justify="space-between">
-                      <Text color="gray.500">{t('mintRate')}:</Text>
-                      <Text fontWeight="bold">
-                        {formatFeeRate(formattedData.feeRate)}
-                      </Text>
-                    </HStack>
                     <Divider />
-                    <HStack justify="space-between">
-                      <Text color="gray.500">{t('remaining')}:</Text>
-                      <Text fontWeight="bold">
-                        {formatTokenAmount(formattedData.remaining)}{' '}
-                        {selectedToken.symbol}
+
+                    {/* 代币详情部分 */}
+                    <Box>
+                      <Text
+                        fontWeight="medium"
+                        mb={3}
+                        fontSize={{ base: 'sm', md: 'md' }}
+                      >
+                        {t('tokenInfo')}
                       </Text>
-                    </HStack>
-                    <Divider />
-                    <HStack justify="space-between">
-                      <Text color="gray.500">{t('supplied')}:</Text>
-                      <Text fontWeight="bold">
-                        {formatTokenAmount(formattedData.supplied)}{' '}
-                        {selectedToken.symbol}
-                      </Text>
-                    </HStack>
-                    <Divider />
-                    <HStack justify="space-between">
-                      <Text color="gray.500">{t('solReceived')}:</Text>
-                      <Text fontWeight="bold">
-                        {formatSolAmount(formattedData.solReceived)} SOL
-                      </Text>
-                    </HStack>
+                      <SimpleGrid columns={2} spacing={4}>
+                        <HStack
+                          justify="space-between"
+                          p={3}
+                          bg={statBg}
+                          borderRadius="md"
+                        >
+                          <Text color="gray.600" fontSize="sm">{t('mintRate')}:</Text>
+                          <Text fontWeight="bold">
+                            {formatFeeRate(formattedData.feeRate)}
+                          </Text>
+                        </HStack>
+                
+                        <HStack
+                          justify="space-between"
+                          p={3}
+                          bg={statBg}
+                          borderRadius="md"
+                        >
+                          <Text color="gray.600" fontSize="sm">{t('remaining')}:</Text>
+                          <Text fontWeight="bold">
+                            {formatTokenAmount(formattedData.remaining)}{' '}
+                            {selectedToken.symbol}
+                          </Text>
+                        </HStack>
+                
+                        <HStack
+                          justify="space-between"
+                          p={3}
+                          bg={statBg}
+                          borderRadius="md"
+                        >
+                          <Text color="gray.600" fontSize="sm">{t('supplied')}:</Text>
+                          <Text fontWeight="bold">
+                            {formatTokenAmount(formattedData.supplied)}{' '}
+                            {selectedToken.symbol}
+                          </Text>
+                        </HStack>
+                
+                        <HStack
+                          justify="space-between"
+                          p={3}
+                          bg={statBg}
+                          borderRadius="md"
+                        >
+                          <Text color="gray.600" fontSize="sm">{t('solReceived')}:</Text>
+                          <Text fontWeight="bold">
+                            {formatSolAmount(formattedData.solReceived)} SOL
+                          </Text>
+                        </HStack>
+                      </SimpleGrid>
+                    </Box>
                   </VStack>
-                </Stack>
-              </CardBody>
-            </Card>
-          </GridItem>
-        </Grid>
+                </CardBody>
+              </Card>
+            </GridItem>
 
-        <Link href="/" passHref>
-          <Button
-            mb={4}
-            leftIcon={<ChevronLeftIcon />}
-            variant="outline"
-            colorScheme="purple"
-            size="sm"
-          >
-            {t('backToMintingHome')}
-          </Button>
-        </Link>
+            {/* PC端右侧区域 - 显示铸造表单和铸造说明 */}
+            <GridItem width="100%" overflow="hidden" display={{ base: "none", lg: "block" }}>
+              <VStack spacing={5} align="stretch">
+                {/* 先显示铸造表单 */}
+                <Card bg={cardBg} borderWidth="1px" borderColor={borderColor}>
+                  <CardBody>
+                    <Stack spacing={4}>
+                      <Heading size="md">{t('mintToken')}</Heading>
+                      <MintingForm
+                        token={{
+                          symbol: selectedToken.symbol,
+                          mintRate: formattedData.feeRate,
+                          network,
+                          currencyUnit,
+                          address: selectedToken.address,
+                          tokenDecimal: selectedToken.tokenDecimal,
+                        }}
+                        tokenAccount={tokenAccount}
+                        tokenBalance={tokenBalance}
+                      />
+                    </Stack>
+                  </CardBody>
+                </Card>
+                
+                {/* 然后显示铸造说明 */}
+                <MintingInstructions
+                  token={{
+                    symbol: selectedToken.symbol,
+                    mintRate: formattedData.feeRate,
+                    currencyUnit: currencyUnit,
+                    totalSupply: selectedToken.totalSupply,
+                  }}
+                />
+              </VStack>
+            </GridItem>
+          </Grid>
+        </VStack>
       </Container>
     </Box>
   )

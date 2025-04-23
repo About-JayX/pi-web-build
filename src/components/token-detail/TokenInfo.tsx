@@ -848,7 +848,7 @@ export default function TokenInfo({
                     </Flex>
                   </GridItem>
 
-                  {/* 兑换比例栏，无论有没有mintRate都显示 */}
+                  {/* 铸造比率栏，无论有没有mintRate都显示 */}
                   <GridItem>
                     <HStack bg={softBg} p={2} borderRadius="md" h="full">
                       <Icon
@@ -947,7 +947,7 @@ export default function TokenInfo({
                   </Text>
                 </HStack>
 
-                {/* 兑换比例栏，无论有没有mintRate都显示 */}
+                {/* 铸造比率栏，无论有没有mintRate都显示 */}
                 <HStack
                   justify="space-between"
                   p={3}

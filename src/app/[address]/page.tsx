@@ -2,9 +2,10 @@
 
 import React, { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Box, Container, Heading, Text, VStack, Stack } from '@chakra-ui/react'
+import { Container } from '@chakra-ui/react'
 import { useNetwork } from '@/contexts/NetworkContext'
 import { useTranslation } from 'react-i18next'
+import { LoadingSpinner } from '@/components'
 
 export default function TokenDetailRedirectPage() {
   const params = useParams()
@@ -22,19 +23,10 @@ export default function TokenDetailRedirectPage() {
     }
   }, [network, address, router])
 
-  // 显示加载状态，直到重定向完成
+  // 显示加载状态，直到重定向完成，使用通用的LoadingSpinner组件
   return (
     <Container maxW="container.xl" py={12}>
-      <VStack spacing={10} align="center" justify="center" minH="60vh">
-        <Stack spacing={6} align="center">
-          <Heading as="h2" size="lg" textAlign="center">
-            {t('loadingTokenDetails')}
-          </Heading>
-          <Text color="gray.500" textAlign="center">
-            {t('redirectingToNetwork')}
-          </Text>
-        </Stack>
-      </VStack>
+      <LoadingSpinner />
     </Container>
   )
 }

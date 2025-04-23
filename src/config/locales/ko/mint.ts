@@ -21,6 +21,7 @@ export default {
   // Mint Page - Pagination
   'itemsPerPage': '페이지당 항목',
   'pageInfo': '페이지 {current}/{total}',
+  'currentPage': '페이지 {current} ',
   'prevPage': '이전',
   'nextPage': '다음',
   

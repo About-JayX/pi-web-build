@@ -24,7 +24,7 @@ import { formatTokenAmount } from '@/utils'
 import { useCallback } from 'react'
 import { useMintingCalculations } from '@/hooks/useMintingCalculations'
 import { MintToken } from '@/api/types'
-
+import { useNetwork } from '@/contexts/NetworkContext'
 interface TokenListViewProps {
   tokens: MintToken[]
   sortColumn: string
@@ -76,6 +76,7 @@ const TokenListView = ({
   const iconHoverColor = useColorModeValue('brand.primary', 'brand.light')
   const toast = useToast()
   const { t } = useTranslation()
+  const { network } = useNetwork()
 
   // 将hook移到组件顶层，只初始化一次
   const { getFormattedMintRate } = useMintingCalculations({
@@ -85,7 +86,7 @@ const TokenListView = ({
     tokenDecimals: 6,
   })
 
-  // 修改格式化铸造价格函数，不在内部调用Hook
+  // 修改格式化铸造比率函数，不在内部调用Hook
   const formatMintRateForToken = useCallback(
     (token: MintToken) => {
       // 使用已初始化的getFormattedMintRate函数
@@ -107,7 +108,7 @@ const TokenListView = ({
 
   // 跳转到代币铸造页面
   const navigateToMintPage = (contractAddress: string) => {
-    router.push(`/${contractAddress}`)
+    router.push(`/${network.toLowerCase()}/${contractAddress}`)
   }
 
   // 缩略显示合约地址
@@ -125,12 +126,15 @@ const TokenListView = ({
         .share({
           title: `${token.name} (${token.symbol})`,
           text: `${t('share')} ${token.name} ${t('token')}`,
-          url: window.location.origin + `/${token.address}`,
+          url:
+            window.location.origin +
+            `/${network.toLowerCase()}/${token.address}`,
         })
         .catch(error => console.log(`${t('share')} ${t('failed')}:`, error))
     } else {
       // 如果浏览器不支持，可以复制链接到剪贴板
-      const url = window.location.origin + `/${token.address}`
+      const url =
+        window.location.origin + `/${network.toLowerCase()}/${token.address}`
       navigator.clipboard
         .writeText(url)
         .then(() =>
@@ -169,9 +173,11 @@ const TokenListView = ({
   const ThSortable = ({
     column,
     children,
+    width,
   }: {
     column: string
     children: React.ReactNode
+    width?: string
   }) => (
     <Th
       onClick={() => onSort(column)}
@@ -184,6 +190,7 @@ const TokenListView = ({
       _hover={{ bg: thHoverBg }}
       transition="all 0.2s"
       textAlign="center"
+      width={width}
     >
       <Flex align="center" justify="center">
         {children}
@@ -197,21 +204,40 @@ const TokenListView = ({
   )
 
   return (
-    <TableContainer bg={bg} borderRadius="lg" boxShadow="md">
-      <Table variant="simple">
+    <TableContainer
+      bg={bg}
+      borderRadius="lg"
+      boxShadow="md"
+      width="100%"
+      maxWidth="100%"
+      overflowX="auto"
+    >
+      <Table variant="simple" width="100%" size="md" layout="fixed">
         <Thead>
           <Tr>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
+            <Th
+              bg={thBg}
+              borderBottom="2px"
+              borderColor="brand.primary"
+              width="15%"
+            >
               {t('tokenColumn')}
             </Th>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
+            <Th
+              bg={thBg}
+              borderBottom="2px"
+              borderColor="brand.primary"
+              width="15%"
+            >
               {t('contractAddressColumn')}
             </Th>
-            <ThSortable column="totalSupply">
+            <ThSortable column="totalSupply" width="12%">
               {t('totalSupplyColumn')}
             </ThSortable>
-            <ThSortable column="raised">{t('progressColumn')}</ThSortable>
-            <ThSortable column="participants">
+            <ThSortable column="raised" width="25%">
+              {t('progressColumn')}
+            </ThSortable>
+            <ThSortable column="participants" width="10%">
               {t('participantsColumn')}
             </ThSortable>
             <Th
@@ -219,13 +245,18 @@ const TokenListView = ({
               borderBottom="2px"
               borderColor="brand.primary"
               textAlign="center"
+              width="15%"
             >
               {t('mintingPrice')}
             </Th>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary">
+            <Th
+              bg={thBg}
+              borderBottom="2px"
+              borderColor="brand.primary"
+              width="8%"
+            >
               {t('linksColumn')}
             </Th>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary"></Th>
           </Tr>
         </Thead>
         <Tbody>

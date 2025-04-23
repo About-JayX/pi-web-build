@@ -3,15 +3,14 @@ import {
   Text,
   HStack,
   Select,
-  Input,
   ButtonGroup,
   IconButton,
   Icon,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useState, useEffect } from 'react'
-import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
 import { useTranslation } from 'react-i18next'
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa'
+import { useRef, useEffect } from 'react'
 
 interface PaginationControlProps {
   currentPage: number
@@ -34,44 +33,62 @@ const PaginationControl = ({
   const bg = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.700')
   const activeColor = 'brand.primary'
-  const [pageInput, setPageInput] = useState(currentPage.toString())
-
-  // 页码变化时更新输入框
+  
+  // 跟踪页面更改的ref
+  const pageChangeRef = useRef<number | null>(null);
+  
+  // 当页面更改时使用useEffect来滚动
   useEffect(() => {
-    setPageInput(currentPage.toString())
-  }, [currentPage])
-
-  // 处理页码输入框变化
-  const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    // 只允许输入数字
-    if (/^\d*$/.test(value)) {
-      setPageInput(value)
+    if (pageChangeRef.current !== null) {
+      // 立即滚动到顶部
+      window.scrollTo(0, 0);
+      // 重置ref
+      pageChangeRef.current = null;
     }
+  }, [currentPage, pageSize]);
+
+  // 处理分页点击并确保滚动到顶部
+  const handlePageClick = (newPage: number) => {
+    // 设置标记，表示页面已更改
+    pageChangeRef.current = newPage;
+    
+    // 首先尝试立即滚动到顶部
+    window.scrollTo(0, 0);
+    
+    // 调用父组件的回调
+    onPageChange(newPage);
+    
+    // 使用多个setTimeout确保在不同时间点尝试滚动，覆盖各种可能的数据加载和渲染时机
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 0);
+    
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, 100);
+    
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, 300);
+    
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }, 500);
   }
-
-  // 处理页码输入框回车事件
-  const handlePageInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      const page = parseInt(pageInput)
-      if (!isNaN(page) && page >= 1 && page <= totalPages) {
-        onPageChange(page)
-      } else {
-        // 如果输入无效，恢复为当前页码
-        setPageInput(currentPage.toString())
-      }
-    }
-  }
-
-  // 处理输入框失焦事件
-  const handlePageInputBlur = () => {
-    const page = parseInt(pageInput)
-    if (!isNaN(page) && page >= 1 && page <= totalPages) {
-      onPageChange(page)
-    } else {
-      // 如果输入无效，恢复为当前页码
-      setPageInput(currentPage.toString())
-    }
+  
+  // 处理每页数量变化
+  const handlePageSizeChange = (newSize: number) => {
+    // 设置标记，表示页面大小已更改
+    pageChangeRef.current = 0;
+    
+    // 调用父组件的回调
+    onPageSizeChange(newSize);
   }
 
   return (
@@ -97,7 +114,7 @@ const PaginationControl = ({
         </Text>
         <Select
           value={pageSize}
-          onChange={e => onPageSizeChange(Number(e.target.value))}
+          onChange={e => handlePageSizeChange(Number(e.target.value))}
           size="sm"
           w="80px"
           borderColor={borderColor}
@@ -117,33 +134,15 @@ const PaginationControl = ({
       </HStack>
 
       <Flex 
-        direction={{ base: 'column', sm: 'row' }} 
+        direction="row" 
         w={{ base: '100%', md: 'auto' }} 
         gap={3} 
         alignItems="center" 
         justifyContent={{ base: 'center', md: 'flex-end' }}
       >
-        <HStack spacing={2} justifyContent={{ base: 'center', md: 'flex-start' }}>
-          <Text fontSize="sm" fontWeight="medium" color="gray.600">
-            {t('goToPage')}:
-          </Text>
-          <Input
-            size="sm"
-            value={pageInput}
-            onChange={handlePageInputChange}
-            onKeyDown={handlePageInputKeyDown}
-            onBlur={handlePageInputBlur}
-            textAlign="center"
-            w="45px"
-            borderColor={borderColor}
-            _hover={{ borderColor: activeColor }}
-            _focus={{
-              borderColor: activeColor,
-              boxShadow: `0 0 0 1px var(--chakra-colors-brand-primary)`,
-            }}
-            borderRadius="md"
-          />
-        </HStack>
+        <Text fontSize="sm" fontWeight="medium" color="gray.600">
+          {t('currentPage').replace('{current}', currentPage.toString())}
+        </Text>
         
         <ButtonGroup 
           isAttached 
@@ -153,55 +152,27 @@ const PaginationControl = ({
           width={{ base: 'fit-content', md: 'auto' }}
         >
           <IconButton
-            aria-label={t('firstPage')}
-            icon={<Icon as={FaChevronLeft} fontSize="10px" />}
-            onClick={() => onPageChange(1)}
+            aria-label={t('prevPage')}
+            icon={<Icon as={FaChevronLeft} fontSize="13px" />}
+            onClick={() => handlePageClick(currentPage - 1)}
             isDisabled={currentPage <= 1}
             colorScheme="purple"
             borderColor={borderColor}
             _hover={{ bg: 'purple.50' }}
             _active={{ bg: 'purple.100' }}
             borderLeftRadius="md"
-            size="sm"
-            borderRight="0"
-            transition="all 0.2s"
-          />
-          <IconButton
-            aria-label={t('prevPage')}
-            icon={<Icon as={FaChevronLeft} fontSize="13px" />}
-            onClick={() => onPageChange(currentPage - 1)}
-            isDisabled={currentPage <= 1}
-            colorScheme="purple"
-            borderColor={borderColor}
-            _hover={{ bg: 'purple.50' }}
-            _active={{ bg: 'purple.100' }}
-            borderRadius="0"
             transition="all 0.2s"
           />
           <IconButton
             aria-label={t('nextPage')}
             icon={<Icon as={FaChevronRight} fontSize="13px" />}
-            onClick={() => onPageChange(currentPage + 1)}
-            isDisabled={currentPage >= totalPages}
-            colorScheme="purple"
-            borderColor={borderColor}
-            _hover={{ bg: 'purple.50' }}
-            _active={{ bg: 'purple.100' }}
-            borderRadius="0"
-            transition="all 0.2s"
-          />
-          <IconButton
-            aria-label={t('lastPage')}
-            icon={<Icon as={FaChevronRight} fontSize="10px" />}
-            onClick={() => onPageChange(totalPages)}
+            onClick={() => handlePageClick(currentPage + 1)}
             isDisabled={currentPage >= totalPages}
             colorScheme="purple"
             borderColor={borderColor}
             _hover={{ bg: 'purple.50' }}
             _active={{ bg: 'purple.100' }}
             borderRightRadius="md"
-            size="sm"
-            borderLeft="0"
             transition="all 0.2s"
           />
         </ButtonGroup>

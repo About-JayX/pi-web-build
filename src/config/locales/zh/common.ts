@@ -30,6 +30,8 @@ export default {
   'welcomeBack': '欢迎回来，{{username}}',
   'operationFailed': '操作失败:',
   'operationFailedTryAgain': '操作失败，请重试',
+  'tryAgain': '重试',
+  'rejected': '已拒绝',
   
   // 语言
   'chinese': '中文',

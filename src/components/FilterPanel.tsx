@@ -49,6 +49,7 @@ const FilterPanel = ({
       gap={4}
       flexWrap="wrap"
       justifyContent="space-between"
+      pt={{ base: 1, md: 2 }}
     >
       <InputGroup maxW={{ base: '100%', md: '300px' }} mb={{ base: 2, md: 0 }}>
         <InputLeftElement pointerEvents="none" flexShrink={1}>
@@ -59,18 +60,21 @@ const FilterPanel = ({
           value={searchQuery}
           onChange={e => onSearchChange(e.target.value)}
           bg={inputBg}
-          borderColor="gray.300"
+          borderColor="gray.200"
+          borderRadius="md"
           _hover={{ borderColor: 'brand.primary' }}
           _focus={{
             borderColor: 'brand.primary',
             boxShadow: '0 0 0 1px var(--chakra-colors-brand-primary)',
           }}
+          size="md"
+          fontSize="sm"
         />
       </InputGroup>
 
       {showSortButtons && (
         <Flex align="center" gap={2} flexWrap="wrap">
-          <Text fontWeight="medium" fontSize="sm" whiteSpace="nowrap">
+          <Text fontWeight="medium" fontSize="sm" whiteSpace="nowrap" color="gray.600">
             {t('sortBy')}
           </Text>
           {sortOptions.map(option => (
@@ -92,6 +96,9 @@ const FilterPanel = ({
               }
               color={sortColumn === option.column ? 'brand.primary' : 'gray.600'}
               _hover={{ borderColor: 'brand.primary', color: 'brand.primary' }}
+              transition="all 0.2s ease"
+              fontWeight={sortColumn === option.column ? "semibold" : "normal"}
+              boxShadow={sortColumn === option.column ? "sm" : "none"}
             >
               {option.label}
             </Button>

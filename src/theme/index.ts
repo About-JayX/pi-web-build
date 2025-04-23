@@ -1,124 +1,127 @@
 // Pi.Sale主题配置
-import { extendTheme, ThemeConfig } from '@chakra-ui/react';
+import { extendTheme, ThemeConfig } from "@chakra-ui/react";
 
 // Pi.Sale 主题配置 - 紫金色调
 const colors = {
   brand: {
-    primary: '#7B2CBF', // 主紫色
-    primaryGradient: 'linear-gradient(90deg,#8a348e 0%,#423f88 100%)', // 主紫色渐变
-    footer:{
-      primary:'#252525',
-      secondary:'#333',
-      text:'#ccc',
+    primary: "#5235E8", // 主紫色
+    primaryGradient: "linear-gradient(0deg, #FFF 0%, #EFEDFD 46.09%)", // 主紫色渐变
+    footer: {
+      primary: "#252525",
+      secondary: "#333",
+      text: "#ccc",
     }, // 底部
-    secondary: '#E6B325', // 金色
-    light: '#9D4EDD', // 亮紫色
-    dark: '#5A189A', // 深紫色
-    background: '#f2f2f2',
-    cardBg: '#FFFFFF',
+    secondary: "#E6B325", // 金色
+    light: "#D6D1FA", // 亮紫色
+    dark: "#5A189A", // 深紫色
+    background: "#FFFFFF",
+    cardBg: "#FFFFFF",
     text: {
-      primary: '#2D3748',
-      secondary: '#718096',
-      light: '#A0AEC0',
-    }
+      primary: "#2D3748",
+      secondary: "#718096",
+      light: "#0E0637",
+    },
   },
   // 状态颜色
   status: {
-    success: '#38A169',
-    warning: '#DD6B20',
-    error: '#E53E3E',
-    info: '#3182CE',
+    success: "#38A169",
+    warning: "#DD6B20",
+    error: "#E53E3E",
+    info: "#3182CE",
   },
   gold: {
-    50: '#fff9e5',
-    100: '#ffedb8',
-    200: '#ffe18a',
-    300: '#ffd45c',
-    400: '#ffc72e',
-    500: '#e6ad14', // 金色主色
-    600: '#b38a10',
-    700: '#81630b',
-    800: '#503c05',
-    900: '#211800',
+    50: "#fff9e5",
+    100: "#ffedb8",
+    200: "#ffe18a",
+    300: "#ffd45c",
+    400: "#ffc72e",
+    500: "#e6ad14", // 金色主色
+    600: "#b38a10",
+    700: "#81630b",
+    800: "#503c05",
+    900: "#211800",
   },
-  gray:{
-    50:'#e8e8e8',
-  }
+  gray: {
+    50: "#e8e8e8",
+  },
 };
 
 // 组件样式覆盖
 const components = {
   Button: {
     baseStyle: {
-      fontWeight: 'bold',
-      borderRadius: 'md',
+      fontWeight: "bold",
+      borderRadius: "md",
     },
     variants: {
       primary: {
-        bg: 'brand.primary',
-        color: 'white',
+        bg: "brand.primary",
+        color: "white",
         _hover: {
-          bg: 'brand.light',
+          bg: "brand.light",
         },
       },
       secondary: {
-        bg: 'brand.secondary',
-        color: 'white',
+        bg: "brand.secondary",
+        color: "white",
         _hover: {
-          bg: 'yellow.400',
+          bg: "yellow.400",
         },
       },
       outline: {
-        borderColor: 'brand.primary',
-        color: 'brand.primary',
+        borderColor: "#D6D1FA",
+        color: "brand.primary",
+        _hover: {
+          bg: "#D6D1FA",
+        },
       },
     },
     defaultProps: {
-      variant: 'solid', // 设置默认变体
+      variant: "solid", // 设置默认变体
     },
   },
   Card: {
     baseStyle: {
       container: {
-        p: '6',
-        rounded: 'lg',
-        bg: 'brand.cardBg',
-        boxShadow: 'md',
+        p: "6",
+        rounded: "lg",
+        bg: "brand.cardBg",
+        boxShadow: "md",
       },
     },
   },
   Heading: {
     baseStyle: {
-      fontWeight: 'bold',
+      fontWeight: "bold",
     },
   },
   Text: {
     baseStyle: {
-      color: 'brand.text.primary',
+      color: "brand.text.primary",
     },
   },
 };
 
 // 字体设置
 const fonts = {
-  body: 'Inter, system-ui, sans-serif',
-  heading: 'Inter, system-ui, sans-serif',
+  body: "Inter, system-ui, sans-serif",
+  heading: "Inter, system-ui, sans-serif",
 };
 
 const styles = {
   global: {
     body: {
-      bg: 'brand.background',
-      color: 'brand.text.primary',
+      bg: "brand.background",
+      color: "brand.text.primary",
     },
   },
 };
 
 // 配置主题 - 禁用系统颜色模式以避免SSR不匹配
 const config: ThemeConfig = {
-  initialColorMode: 'light',
+  initialColorMode: "light",
   useSystemColorMode: false, // 关闭系统颜色模式，避免服务端和客户端渲染不一致
-  cssVarPrefix: 'pi-sale', // 添加自定义CSS变量前缀
+  cssVarPrefix: "pi-sale", // 添加自定义CSS变量前缀
   disableTransitionOnChange: false, // 禁用颜色模式切换时的过渡效果
 };
 
@@ -130,4 +133,4 @@ const theme = extendTheme({
   config,
 });
 
-export default theme; 
+export default theme;

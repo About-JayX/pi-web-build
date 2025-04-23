@@ -57,12 +57,13 @@ import { useSolana } from '@/contexts/solanaProvider'
 import { PublicKey } from '@solana/web3.js'
 import { useAppSelector } from '@/store/hooks'
 import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
-import { TokenInfo, MintToken } from '@/api/types'
+import { MintToken, TokenInfo } from '@/api/types'
 import BN from 'bn.js'
 import { CLMM_PROGRAM_ID } from '@/config'
 import BigNumber from 'bignumber.js'
 import { formatTokenAmount } from '@/utils'
 import useMintingCalculations from '@/hooks/useMintingCalculations'
+import ErrorDisplay from '@/components/common/ErrorDisplay'
 
 interface Token extends TokenInfo {
   logo: string
@@ -107,7 +108,11 @@ const MintingForm: React.FC<MintingFormProps> = memo(
     const isLoggedIn = useAppSelector(state => state.user.isLoggedIn)
     const { data: fairCurveData } = useFairCurve(
       conn,
-      token.address && token.address.trim() !== '' ? token.address : undefined
+      token.address
+        ? token.address.trim() !== ''
+          ? token.address
+          : undefined
+        : undefined
     )
     const {
       isOpen: disclosureIsOpen,
@@ -130,11 +135,11 @@ const MintingForm: React.FC<MintingFormProps> = memo(
       calculateTokensFromCurrency,
       calculateCurrencyFromTokens,
     } = useMintingCalculations({
-      totalSupply: token.totalSupply || '0', // 提供默认值 '0'
-      target: token.target || '0 SOL', // 提供默认值 '0 SOL'
+      totalSupply: token.totalSupply,
+      target: token.target,
       mintRate: token.mintRate,
       currencyUnit: token.currencyUnit || 'SOL',
-      tokenDecimals: token.tokenDecimal || 6,
+      tokenDecimals: token.tokenDecimal || 0,
     })
 
     // 在组件顶部添加 inputFocus 状态
@@ -144,6 +149,10 @@ const MintingForm: React.FC<MintingFormProps> = memo(
     const [payAmount, setPayAmount] = useState<number | null>(null)
     const [tokenAmount, setTokenAmount] = useState<number | null>(null)
 
+    // 添加错误状态
+    const [mintError, setMintError] = useState<string | null>(null)
+    const [refundError, setRefundError] = useState<string | null>(null)
+
     // 获取钱包余额的显示值
     const getDisplayBalance = (balance: number) => {
       return new BigNumber(balance).div(1e9).toFixed(4)
@@ -152,7 +161,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
     // 获取钱包余额
     useEffect(() => {
       const fetchBalance = async () => {
-        if (!conn || !publicKey) {
+        if (!publicKey) {
           setWalletBalance(0)
           return
         }
@@ -210,11 +219,15 @@ const MintingForm: React.FC<MintingFormProps> = memo(
 
     // 检查金额是否有效
     const isAmountValid = () => {
-      if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) < 0.01) {
+      if (
+        !amount ||
+        isNaN(parseFloat(amount)) ||
+        safeParseFloat(amount) < 0.01
+      ) {
         return false
       }
       // 检查余额是否足够
-      return parseFloat(amount) <= walletBalance
+      return safeParseFloat(amount) <= walletBalance
     }
 
     // 检查退还金额是否有效
@@ -222,18 +235,18 @@ const MintingForm: React.FC<MintingFormProps> = memo(
       if (
         !refundAmount ||
         isNaN(parseFloat(refundAmount)) ||
-        parseFloat(refundAmount) <= 0
+        safeParseFloat(refundAmount) <= 0
       ) {
         return false
       }
       // 检查退还金额是否小于等于已铸造金额
-      return parseFloat(refundAmount) <= mintedAmount
+      return safeParseFloat(refundAmount) <= mintedAmount
     }
 
     // 获取最新余额的函数
     const updateBalances = async () => {
-      if (!conn || !publicKey) {
-        console.error('Connection or public key not available')
+      if (!publicKey) {
+        console.error('Public key not available')
         return
       }
 
@@ -268,7 +281,10 @@ const MintingForm: React.FC<MintingFormProps> = memo(
       }
 
       try {
-        if (!conn || !publicKey) {
+        // 每次尝试提交前清空先前的错误
+        setMintError(null)
+
+        if (!publicKey) {
           toast({
             title: t('请先连接钱包'),
             status: 'error',
@@ -297,7 +313,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
         }
 
         setSubmitting(true)
-        const mintAmount = parseFloat(amount)
+        const mintAmount = safeParseFloat(amount)
 
         // 调用真实的mintToken函数，传入货币金额（转换为最小单位）和token地址
         await mintToken(mintAmount * 1e9, token.address)
@@ -309,7 +325,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
 
         // 显示成功提示
         const amountFormatted = Math.floor(
-          parseFloat(getEstimatedTokens(amount))
+          safeParseFloat(getEstimatedTokens(amount))
         ).toLocaleString()
         const descMessage = t('receivedTokens')
           .replace('{amount}', amountFormatted)
@@ -328,9 +344,16 @@ const MintingForm: React.FC<MintingFormProps> = memo(
         setAmount('')
       } catch (error) {
         console.error('铸造失败:', error)
+        const errorMessage =
+          error instanceof Error ? error.message : t('未知错误')
+
+        // 设置错误状态而不是显示toast
+        setMintError(errorMessage)
+
+        // 仍然保留toast提示
         toast({
           title: t('铸造失败'),
-          description: error instanceof Error ? error.message : t('未知错误'),
+          description: errorMessage,
           status: 'error',
           duration: 3000,
           isClosable: true,
@@ -341,7 +364,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
       }
     }
 
-    // 获取铸造价格 - 优先使用mintRate，否则计算
+    // 获取铸造比率 - 优先使用mintRate，否则计算
     const getMintingPrice = (displayMode: 'price' | 'ratio' = 'price') => {
       if (displayMode === 'ratio') {
         return mintingRatio
@@ -450,12 +473,10 @@ const MintingForm: React.FC<MintingFormProps> = memo(
     // 修改取消铸造 - 基于代币数量
     const handleCancel = async () => {
       try {
-        if (
-          !isTokenRefundAmountValid() ||
-          !conn ||
-          !publicKey ||
-          !tokenAccount
-        ) {
+        // 每次尝试提交前清空先前的错误
+        setRefundError(null)
+
+        if (!isTokenRefundAmountValid() || !publicKey || !tokenAccount) {
           return
         }
 
@@ -471,7 +492,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
 
         setCancelling(true)
         // 将代币数量乘以 1e6 以匹配代币精度
-        const tokenRefundValue = parseFloat(refundAmount) * 1e6
+        const tokenRefundValue = safeParseFloat(refundAmount) * 1e6
 
         // 调用合约的退还函数，参数顺序：token地址，退还数量，手续费账户地址
         const feeAccountAddress = CLMM_PROGRAM_ID
@@ -491,7 +512,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
 
         // 显示成功消息
         const refundAmountFormatted = Math.floor(
-          parseFloat(refundAmount)
+          safeParseFloat(refundAmount)
         ).toLocaleString()
         const refundMessage = t('refundedTokens')
           .replace('{amount}', refundAmountFormatted)
@@ -510,14 +531,21 @@ const MintingForm: React.FC<MintingFormProps> = memo(
         setRefundAmount('')
 
         // 如果全部退还，切换回铸造页面
-        if (parseFloat(refundAmount) >= (tokenBalance || 0)) {
+        if (safeParseFloat(refundAmount) >= (tokenBalance || 0)) {
           setActiveTab(0)
         }
       } catch (error) {
         console.error('退还失败:', error)
+        const errorMessage =
+          error instanceof Error ? error.message : t('未知错误')
+
+        // 设置错误状态而不是显示toast
+        setRefundError(errorMessage)
+
+        // 仍然保留toast提示
         toast({
           title: t('退还失败'),
-          description: error instanceof Error ? error.message : t('未知错误'),
+          description: errorMessage,
           status: 'error',
           duration: 3000,
           isClosable: true,
@@ -532,25 +560,65 @@ const MintingForm: React.FC<MintingFormProps> = memo(
     const getMintProgress = () => {
       if (!fairCurveData) return 0
 
-      const supplied = Number(fairCurveData.supplied)
-      const remaining = Number(fairCurveData.remaining)
+      try {
+        const supplied = new BigNumber(fairCurveData.supplied)
+        const remaining = new BigNumber(fairCurveData.remaining)
 
-      if (!supplied) return 0
+        if (supplied.isZero()) return 0
 
-      // 使用公式: 1 - remaining/supplied
-      const progress = (1 - remaining / supplied) * 100
-      return progress.toFixed(2)
+        // 使用公式: 1 - remaining/supplied
+        const progress = new BigNumber(1)
+          .minus(remaining.div(supplied))
+          .times(100)
+
+        // 确保进度在0-100范围内
+        if (progress.isLessThan(0)) return '0'
+        if (progress.isGreaterThan(100)) return '100'
+
+        return progress.toFixed(2)
+      } catch (error) {
+        console.error('计算铸造进度时出错:', error)
+        return 0
+      }
     }
 
-    // 计算预估获取的代币数量
+    // 安全地将字符串转换为数字，避免溢出
+    const safeParseFloat = (str: string): number => {
+      try {
+        const num = parseFloat(str)
+        if (Number.isNaN(num)) return 0
+
+        // 确保在安全整数范围内
+        if (Math.abs(num) > Number.MAX_SAFE_INTEGER) {
+          // 对于非常大的数字，使用BigNumber处理
+          const bn = new BigNumber(str)
+          // 如果BigNumber转换后溢出，返回安全的最大值
+          if (bn.isGreaterThan(Number.MAX_SAFE_INTEGER)) {
+            return Number.MAX_SAFE_INTEGER
+          }
+          if (bn.isLessThan(-Number.MAX_SAFE_INTEGER)) {
+            return -Number.MAX_SAFE_INTEGER
+          }
+        }
+
+        return num
+      } catch (error) {
+        console.error('字符串转换为数字时出错:', error)
+        return 0
+      }
+    }
+
+    // 获取预估获取的代币数量
     const getEstimatedTokens = (amount: string): string => {
       if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
         return '0'
       }
 
       try {
+        // 使用安全解析
+        const safeAmount = safeParseFloat(amount)
         // 使用 Hook 提供的计算函数
-        const tokens = calculateTokensFromCurrency(parseFloat(amount))
+        const tokens = calculateTokensFromCurrency(safeAmount)
         return tokens.toString()
       } catch (error) {
         console.error('计算代币数量时出错:', error)
@@ -578,21 +646,35 @@ const MintingForm: React.FC<MintingFormProps> = memo(
 
     // 修改快速选择函数
     const quickSelect = (value: number) => {
-      if (value > new BigNumber(walletBalance).div(1e9).toNumber()) {
+      try {
+        // 安全转换钱包余额
+        const walletBalanceSol = new BigNumber(walletBalance).div(1e9)
+
+        if (new BigNumber(value).isGreaterThan(walletBalanceSol)) {
+          toast({
+            title: t('insufficientBalance'),
+            description: t('walletBalanceInsufficient', {
+              balance: getDisplayBalance(walletBalance),
+              currency: currencyUnit,
+            }),
+            status: 'error',
+            duration: 3000,
+            isClosable: true,
+            position: 'top',
+          })
+          return
+        }
+        setAmount(value.toString())
+      } catch (error) {
+        console.error('处理金额选择时出错:', error)
         toast({
-          title: t('insufficientBalance'),
-          description: t('walletBalanceInsufficient', {
-            balance: getDisplayBalance(walletBalance),
-            currency: currencyUnit,
-          }),
+          title: t('操作失败'),
+          description: t('处理金额时出现错误'),
           status: 'error',
           duration: 3000,
           isClosable: true,
-          position: 'top',
         })
-        return
       }
-      setAmount(value.toString())
     }
 
     // 重置金额
@@ -607,8 +689,14 @@ const MintingForm: React.FC<MintingFormProps> = memo(
 
     // 监听 amount 变化，更新估算代币数量
     useEffect(() => {
-      console.log(token, 'token')
-    }, [token])
+      if (amount) {
+        const estimatedAmount = calculateTokensFromCurrency(parseFloat(amount))
+        setEstimatedTokens(estimatedAmount.toString())
+      } else {
+        setEstimatedTokens('0')
+      }
+    }, [amount, calculateTokensFromCurrency])
+
     // 添加双向绑定处理
     // 监听payAmount变化，自动计算tokenAmount
     useEffect(() => {
@@ -650,6 +738,21 @@ const MintingForm: React.FC<MintingFormProps> = memo(
 
     // 渲染铸造标签页内容
     const renderMintingTab = () => {
+      // 存在错误状态时显示错误界面
+      if (mintError) {
+        return (
+          <Box my={4} textAlign="center">
+            <ErrorDisplay
+              message={mintError}
+              onRetry={() => {
+                setMintError(null)
+                handleSubmit()
+              }}
+            />
+          </Box>
+        )
+      }
+
       return (
         <VStack spacing={{ base: 4, md: 6 }} align="stretch">
           {/* 金额输入 */}
@@ -870,6 +973,21 @@ const MintingForm: React.FC<MintingFormProps> = memo(
 
     // 渲染退还标签页内容
     const renderRefundTab = () => {
+      // 存在错误状态时显示错误界面
+      if (refundError) {
+        return (
+          <Box my={4} textAlign="center">
+            <ErrorDisplay
+              message={refundError}
+              onRetry={() => {
+                setRefundError(null)
+                handleCancel()
+              }}
+            />
+          </Box>
+        )
+      }
+
       // 检查是否有代币余额
       if (!tokenAccount || !tokenBalance || tokenBalance <= 0) {
         return (
@@ -1287,5 +1405,6 @@ const MintingForm: React.FC<MintingFormProps> = memo(
     return renderContent()
   }
 )
+
 MintingForm.displayName = 'MintingForm'
 export default MintingForm

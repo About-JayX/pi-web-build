@@ -1,7 +1,6 @@
 export default {
   // Deploy Page - General
   'deployTitle': 'Deploy Token',
-  'deployDescription': 'Create MEME token, fill in the information and connect wallet to start deployment',
   
   // Deploy Page - Form Fields
   'tokenSymbol': 'Token Symbol (Ticker)',
@@ -9,6 +8,9 @@ export default {
   'tokenIcon': 'Token Icon',
   'uploadIcon': 'Upload Icon',
   'iconRequirements': 'JPEG, PNG or GIF<br/>Aspect ratio 1:1',
+  'symbolMaxLength': 'Symbol max 10 characters',
+  'enterSymbol': 'Enter token symbol',
+  'checkingSymbol': 'Checking symbol availability',
   
   // Deploy Page - Token Parameters
   'tokenParameters': 'Token Parameters',
