@@ -689,8 +689,9 @@ export default function MintPage() {
                     bg={tabIndex === index ? "transparent" : ""}
                     color={tabIndex === index ? "brand.primary" : "gray.500"}
                     borderColor={
-                      tabIndex === index ? "brand.primary" : "transparent"
+                      tabIndex === index ? "brand.light" : "transparent"
                     }
+                    borderWidth={tabIndex === index ? 2 : 0}
                     onClick={() => setTabIndex(index)}
                   >
                     {item}
