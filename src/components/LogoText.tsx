@@ -1,37 +1,21 @@
 'use client';
 
-import { Text } from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
+import { Text, Box } from '@chakra-ui/react';
 
+// 简化LogoText组件，去掉不必要的客户端检测
 const LogoText = () => {
-  // 使用useState和useEffect来确保只在客户端渲染
-  const [mounted, setMounted] = useState(false);
-  
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-  
-  if (!mounted) {
-    // 返回一个固定的占位符，避免服务端与客户端渲染不一致
-    return (
+  return (
+    <Box height="24px" width="80px" display="flex" alignItems="center" minWidth="80px" flexShrink={0}>
       <Text
         fontFamily="heading"
         fontWeight="bold"
         fontSize="xl"
-        color="brand.primary">
+        color="brand.primary"
+        lineHeight="1"
+        whiteSpace="nowrap">
         Pi.Sale
       </Text>
-    );
-  }
-  
-  return (
-    <Text
-      fontFamily="heading"
-      fontWeight="bold"
-      fontSize="xl"
-      color="brand.primary">
-      Pi.Sale
-    </Text>
+    </Box>
   );
 };
 

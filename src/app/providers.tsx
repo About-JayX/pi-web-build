@@ -5,6 +5,8 @@ import {
   ChakraProvider,
   ColorModeScript,
   createLocalStorageManager,
+  Box,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import theme from "@/theme";
 import dynamic from "next/dynamic";
@@ -20,11 +22,30 @@ import { WssProvider } from "@/contexts/WssContext";
 import AuthRestorer from "@/contexts/AuthRestorer";
 
 // 动态导入Navbar，避免SSR
-const Navbar = dynamic(() => import("@/components/Navbar"), { ssr: false });
+const Navbar = dynamic(() => import("@/components/Navbar"), { 
+  ssr: false,
+  loading: NavbarPlaceholder,
+});
 // 动态导入公告组件，避免SSR
 const Announcement = dynamic(() => import("@/components/Announcement"), {
   ssr: false,
 });
+
+// Navbar占位符，在Navbar加载前显示
+function NavbarPlaceholder() {
+  return (
+    <Box
+      as="nav"
+      position="sticky"
+      top="0"
+      zIndex="1000"
+      bg={useColorModeValue('white', 'gray.800')}
+      boxShadow="sm"
+      height="60px"
+      width="100%"
+    />
+  );
+}
 
 // 创建本地存储管理器 - 仅在客户端使用
 const localStorageManager = createLocalStorageManager("pi-sale-color-mode");
@@ -37,9 +58,14 @@ function ClientOnly({ children }: { children: React.ReactNode }) {
     setHasMounted(true);
   }, []);
 
-  // 在服务器端或者客户端首次渲染前不显示任何内容
+  // 在服务器端或者客户端首次渲染前不显示Navbar占位符
   if (!hasMounted) {
-    return null;
+    return (
+      <>
+        <NavbarPlaceholder />
+        <main style={{ minHeight: "calc(100vh - 60px)" }}></main>
+      </>
+    );
   }
 
   return <>{children}</>;

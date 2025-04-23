@@ -24,6 +24,7 @@ import {
   PopoverContent,
   useToast,
   Avatar,
+  Skeleton,
 } from '@chakra-ui/react'
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import NextLink from 'next/link'
@@ -38,19 +39,17 @@ import { useSolana } from '@/contexts/solanaProvider'
 import { UserAPI } from '@/api'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { setUser, clearUser } from '@/store/slices/userSlice'
-
-// 动态导入LogoText组件，禁用服务器端渲染
-const LogoText = dynamic(() => import('./LogoText'), { ssr: false })
+import LogoText from './LogoText'
 
 // 客户端专用组件，防止服务器端渲染不匹配
-const ClientSideOnly = ({ children }: { children: React.ReactNode }) => {
+const ClientSideOnly = ({ children, fallback }: { children: React.ReactNode, fallback?: React.ReactNode }) => {
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
   }, [])
 
-  return isClient ? <>{children}</> : null
+  return isClient ? <>{children}</> : <>{fallback}</>
 }
 
 // 格式化钱包地址，显示前4位和后4位
@@ -58,6 +57,140 @@ const formatWalletAddress = (address: string) => {
   if (!address) return ''
   return `${address.slice(0, 4)}...${address.slice(-4)}`
 }
+
+// 优化LogoSkeletonPlaceholder组件
+const LogoSkeletonPlaceholder = () => {
+  return (
+    <Flex align="center" width="auto" minWidth="120px">
+      <Skeleton boxSize={{ base: '36px', xl: '40px' }} borderRadius="full" mr={2} />
+      <Skeleton height="24px" width="80px" borderRadius="md" />
+    </Flex>
+  );
+};
+
+// 创建一个包含Logo和网站名称的组件，统一管理它们的加载
+const LogoWithName = () => {
+  return (
+    <Flex align="center" minWidth="120px">
+      <Image
+        src="/pis.png"
+        alt="Pi Logo"
+        boxSize={{ base: '36px', xl: '40px' }}
+        display="flex"
+        objectFit="contain"
+        mr={2}
+        borderRadius="full"
+      />
+      <LogoText />
+    </Flex>
+  );
+};
+
+// 添加一个移动端Logo骨架占位符
+const MobileLogoSkeletonPlaceholder = () => {
+  return (
+    <Skeleton boxSize="32px" borderRadius="full" />
+  );
+};
+
+// 添加一个在客户端渲染前显示的占位符组件
+const NavbarPlaceholder = () => {
+  const bgColor = useColorModeValue('white', 'gray.800')
+  
+  return (
+    <Box
+      as="nav"
+      position="sticky"
+      top="0"
+      zIndex="1000"
+      bg={bgColor}
+      boxShadow="sm"
+      height="60px" // 与实际 Navbar 保持相同高度
+      width="100%"
+    >
+      <Container maxW="container.xl" height="100%">
+        <Flex
+          minH="60px"
+          py={{ base: 2 }}
+          px={{ base: 0, xl: 4 }}
+          alignItems="center"
+          height="100%"
+          justify="space-between" // 确保两端对齐
+        >
+          {/* 移动端Logo占位符 */}
+          <Flex
+            flex={{ base: 1, md: 'auto' }}
+            ml={{ base: -2 }}
+            display={{ base: 'flex', xl: 'none' }}
+            alignItems="center"
+          >
+            <Skeleton width="24px" height="24px" borderRadius="md" mr={2} />
+            <Skeleton boxSize="32px" borderRadius="full" ml={2} />
+          </Flex>
+          
+          {/* 桌面端Logo和导航占位符 */}
+          <Flex
+            flex={{ base: 1, xl: 'auto' }}
+            alignItems="center"
+            justify={{ base: 'space-between', xl: 'start' }}
+            width="100%"
+          >
+            {/* Logo占位符 */}
+            <Flex minWidth="120px">
+              <LogoSkeletonPlaceholder />
+            </Flex>
+            
+            {/* 桌面导航占位符 */}
+            <Flex
+              display={{ base: 'none', xl: 'flex' }}
+              ml={{ base: 10, xl: 6 }}
+              flex="1"
+            >
+              <Skeleton height="24px" width="300px" borderRadius="md" />
+            </Flex>
+          </Flex>
+          
+          {/* 右侧按钮占位符 */}
+          <Flex justify="flex-end" width="auto" flexShrink={0}>
+            <NavButtonsPlaceholder />
+          </Flex>
+        </Flex>
+      </Container>
+    </Box>
+  )
+}
+
+// 添加完整的钱包和语言选择器占位符
+const NavButtonsPlaceholder = () => {
+  return (
+    <Stack
+      flex={{ base: 0, md: 0 }}
+      justify="flex-end"
+      direction="row"
+      spacing={{ base: 2, md: 1 }}
+      align="center"
+      ml={{ base: 2, md: 0 }}
+      width="auto"
+      flexShrink={0}
+    >
+      {/* 语言选择器占位符 */}
+      <Skeleton
+        width="36px"
+        height="36px"
+        borderRadius="md"
+        flexShrink={0}
+      />
+      
+      {/* 钱包连接按钮占位符 */}
+      <Skeleton
+        width={{ base: "80px", md: "100px" }}
+        height="40px"
+        borderRadius="md"
+        flexShrink={0}
+      />
+    </Stack>
+  );
+};
 
 export default function Navbar() {
   const { isOpen, onToggle } = useDisclosure()
@@ -71,10 +204,14 @@ export default function Navbar() {
   const toast = useToast()
   const dispatch = useAppDispatch()
   const { isLoggedIn, userInfo } = useAppSelector(state => state.user)
-
-  // 自动登录功能已移除
-  // 仅在用户主动点击"连接"按钮时进行登录
-
+  
+  // 添加客户端渲染状态检测
+  const [mounted, setMounted] = useState(false)
+  
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+  
   // 监听钱包状态变化，如果钱包断开连接，清除登录状态
   useEffect(() => {
     if (!publicKey && isLoggedIn) {
@@ -381,6 +518,11 @@ export default function Navbar() {
     // 逻辑已移至NetworkContext中处理
   }, [pathname, handleNetworkChange])
 
+  // 渲染前显示占位符
+  if (!mounted) {
+    return <NavbarPlaceholder />
+  }
+
   return (
     <Box
       as="nav"
@@ -392,13 +534,16 @@ export default function Navbar() {
       borderStyle="solid"
       borderColor={borderColor}
       boxShadow="sm"
+      height="60px" // 固定导航栏高度
     >
-      <Container maxW="container.xl">
+      <Container maxW="container.xl" height="100%">
         <Flex
           minH="60px"
           py={{ base: 2 }}
           px={{ base: 0, xl: 4 }}
           alignItems="center"
+          height="100%"
+          justify="space-between" // 确保两端对齐
         >
           <Flex
             flex={{ base: 1, md: 'auto' }}
@@ -415,7 +560,9 @@ export default function Navbar() {
             {/* 移动端显示Logo */}
             <NextLink href="/" passHref>
               <Flex align="center" cursor="pointer" ml={2}>
-                <ClientSideOnly>
+                <ClientSideOnly
+                  fallback={<MobileLogoSkeletonPlaceholder />}
+                >
                   <Image
                     src="/pis.png"
                     alt="Pi Logo"
@@ -437,21 +584,12 @@ export default function Navbar() {
                 align="center"
                 cursor="pointer"
                 display={{ base: 'none', xl: 'flex' }}
+                minWidth="120px" // 确保固定最小宽度，防止跳动
               >
-                <ClientSideOnly>
-                  <Image
-                    src="/pis.png"
-                    alt="Pi Logo"
-                    boxSize={{ base: '36px', xl: '40px' }}
-                    display={{ base: 'none', xl: 'flex' }}
-                    objectFit="contain"
-                    mr={2}
-                    borderRadius="full"
-                    flex={1}
-                  />
-                  <Flex display={{ base: 'none', xl: 'flex' }}>
-                    <LogoText />
-                  </Flex>
+                <ClientSideOnly
+                  fallback={<LogoSkeletonPlaceholder />}
+                >
+                  <LogoWithName />
                 </ClientSideOnly>
               </Flex>
             </NextLink>
@@ -459,176 +597,181 @@ export default function Navbar() {
             <Flex
               display={{ base: 'none', xl: 'flex' }}
               ml={{ base: 10, xl: 6 }}
+              flex="1"
             >
               <DesktopNav />
             </Flex>
           </Flex>
 
-          <Stack
-            flex={{ base: 0, md: 0 }}
-            justify="flex-end"
-            direction="row"
-            spacing={{ base: 2, md: 1 }}
-            align="center"
-            ml={{ base: 2, md: 0 }}
+          {/* 确保语言选择器和钱包按钮始终在右侧，无论是否加载完成 */}
+          <ClientSideOnly
+            fallback={<NavButtonsPlaceholder />}
           >
-            {/* 语言选择 */}
-            <Menu>
-              <MenuButton
-                as={IconButton}
-                aria-label={t('language')}
-                icon={<FaGlobeAsia />}
-                variant="unstyled"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                colorScheme="purple"
-                fontSize={{ base: '2xl', lg: '2xl' }}
-                mr={{ base: 0, md: 1 }}
-                color="brand.primary"
-                transition="color 0.2s ease"
-                _hover={{
-                  color: 'brand.secondary',
-                }}
-                _active={{
-                  color: 'brand.secondary',
-                  transform: 'scale(1.1)',
-                }}
-              />
-              <MenuList minW="120px">
-                <MenuItem
-                  fontWeight="500"
-                  onClick={() => changeLanguage('en')}
-                  bg={language === 'en' ? 'purple.50' : undefined}
-                  _dark={{
-                    bg: language === 'en' ? 'purple.900' : undefined,
-                  }}
-                >
-                  {t('english')}
-                </MenuItem>
-                <MenuItem
-                  fontWeight="500"
-                  onClick={() => changeLanguage('ko')}
-                  bg={language === 'ko' ? 'purple.50' : undefined}
-                  _dark={{
-                    bg: language === 'ko' ? 'purple.900' : undefined,
-                  }}
-                >
-                  {t('korean')}
-                </MenuItem>
-                <MenuItem
-                  fontWeight="500"
-                  onClick={() => changeLanguage('zh')}
-                  bg={language === 'zh' ? 'purple.50' : undefined}
-                  _dark={{
-                    bg: language === 'zh' ? 'purple.900' : undefined,
-                  }}
-                >
-                  {t('chinese')}
-                </MenuItem>
-              </MenuList>
-            </Menu>
-
-            {/* 网络选择 */}
-            <Box display="none">
+            <Stack
+              flex={{ base: 0, md: 0 }}
+              justify="flex-end"
+              direction="row"
+              spacing={{ base: 2, md: 1 }}
+              align="center"
+              ml={{ base: 2, md: 0 }}
+            >
+              {/* 语言选择 */}
               <Menu>
                 <MenuButton
-                  as={Button}
+                  as={IconButton}
+                  aria-label={t('language')}
+                  icon={<FaGlobeAsia />}
+                  variant="unstyled"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  colorScheme="purple"
+                  fontSize={{ base: '2xl', lg: '2xl' }}
+                  mr={{ base: 0, md: 1 }}
+                  color="brand.primary"
+                  transition="color 0.2s ease"
+                  _hover={{
+                    color: 'brand.secondary',
+                  }}
+                  _active={{
+                    color: 'brand.secondary',
+                    transform: 'scale(1.1)',
+                  }}
+                />
+                <MenuList minW="120px">
+                  <MenuItem
+                    fontWeight="500"
+                    onClick={() => changeLanguage('en')}
+                    bg={language === 'en' ? 'purple.50' : undefined}
+                    _dark={{
+                      bg: language === 'en' ? 'purple.900' : undefined,
+                    }}
+                  >
+                    {t('english')}
+                  </MenuItem>
+                  <MenuItem
+                    fontWeight="500"
+                    onClick={() => changeLanguage('ko')}
+                    bg={language === 'ko' ? 'purple.50' : undefined}
+                    _dark={{
+                      bg: language === 'ko' ? 'purple.900' : undefined,
+                    }}
+                  >
+                    {t('korean')}
+                  </MenuItem>
+                  <MenuItem
+                    fontWeight="500"
+                    onClick={() => changeLanguage('zh')}
+                    bg={language === 'zh' ? 'purple.50' : undefined}
+                    _dark={{
+                      bg: language === 'zh' ? 'purple.900' : undefined,
+                    }}
+                  >
+                    {t('chinese')}
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+
+              {/* 网络选择 */}
+              <Box display="none">
+                <Menu>
+                  <MenuButton
+                    as={Button}
+                    variant="outline"
+                    colorScheme="purple"
+                    size={{ base: 'sm', md: 'md' }}
+                    rightIcon={<ChevronDownIcon />}
+                    fontWeight={600}
+                    borderWidth="2px"
+                    h={{ base: '36px', md: '40px' }}
+                    minW={{ base: '80px', md: '100px' }}
+                    width="auto"
+                  >
+                    {network}
+                  </MenuButton>
+                  <MenuList minW="120px">
+                    <MenuItem
+                      icon={
+                        <Image
+                          src="/sol.png"
+                          alt="SOL"
+                          boxSize="18px"
+                          borderRadius="full"
+                        />
+                      }
+                      fontWeight="500"
+                      onClick={() => handleNetworkChange('SOL')}
+                      bg={network === 'SOL' ? 'purple.50' : undefined}
+                      _dark={{
+                        bg: network === 'SOL' ? 'purple.900' : undefined,
+                      }}
+                    >
+                      SOL
+                    </MenuItem>
+                    <MenuItem
+                      icon={
+                        <Image
+                          src="/pi.png"
+                          alt="PI"
+                          boxSize="18px"
+                          borderRadius="full"
+                        />
+                      }
+                      fontWeight="500"
+                      onClick={() => handleNetworkChange('PI')}
+                      bg={network === 'PI' ? 'purple.50' : undefined}
+                      _dark={{
+                        bg: network === 'PI' ? 'purple.900' : undefined,
+                      }}
+                    >
+                      PI
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+              </Box>
+
+              {/* 连接钱包按钮 或 已连接钱包的下拉菜单 */}
+              {network === 'SOL' && isLoggedIn && publicKey ? (
+                <Menu>
+                  <MenuButton
+                    as={Button}
+                    fontSize={{ base: 'xs', md: 'sm' }}
+                    fontWeight={600}
+                    variant="solid"
+                    bg="brand.primary"
+                    color="white"
+                    _hover={{ bg: 'brand.light' }}
+                    h={{ base: '36px', md: '40px' }}
+                    px={{ base: 3, md: 4 }}
+                    size={{ base: 'sm', md: 'md' }}
+                    rightIcon={<ChevronDownIcon />}
+                  >
+                    {formatWalletAddress(publicKey)}
+                  </MenuButton>
+                  <MenuList minW="120px">
+                    <MenuItem onClick={handleDisconnect} fontWeight="500">
+                      断开连接
+                    </MenuItem>
+                  </MenuList>
+                </Menu>
+              ) : (
+                <Button
                   variant="outline"
                   colorScheme="purple"
                   size={{ base: 'sm', md: 'md' }}
-                  rightIcon={<ChevronDownIcon />}
                   fontWeight={600}
                   borderWidth="2px"
+                  onClick={connectwallet}
+                  isLoading={isConnecting}
                   h={{ base: '36px', md: '40px' }}
                   minW={{ base: '80px', md: '100px' }}
                   width="auto"
                 >
-                  {network}
-                </MenuButton>
-                <MenuList minW="120px">
-                  <MenuItem
-                    icon={
-                      <Image
-                        src="/sol.png"
-                        alt="SOL"
-                        boxSize="18px"
-                        borderRadius="full"
-                      />
-                    }
-                    fontWeight="500"
-                    onClick={() => handleNetworkChange('SOL')}
-                    bg={network === 'SOL' ? 'purple.50' : undefined}
-                    _dark={{
-                      bg: network === 'SOL' ? 'purple.900' : undefined,
-                    }}
-                  >
-                    SOL
-                  </MenuItem>
-                  <MenuItem
-                    icon={
-                      <Image
-                        src="/pi.png"
-                        alt="PI"
-                        boxSize="18px"
-                        borderRadius="full"
-                      />
-                    }
-                    fontWeight="500"
-                    onClick={() => handleNetworkChange('PI')}
-                    bg={network === 'PI' ? 'purple.50' : undefined}
-                    _dark={{
-                      bg: network === 'PI' ? 'purple.900' : undefined,
-                    }}
-                  >
-                    PI
-                  </MenuItem>
-                </MenuList>
-              </Menu>
-            </Box>
-
-            {/* 连接钱包按钮 或 已连接钱包的下拉菜单 */}
-            {network === 'SOL' && isLoggedIn && publicKey ? (
-              <Menu>
-                <MenuButton
-                  as={Button}
-                  fontSize={{ base: 'xs', md: 'sm' }}
-                  fontWeight={600}
-                  variant="solid"
-                  bg="brand.primary"
-                  color="white"
-                  _hover={{ bg: 'brand.light' }}
-                  h={{ base: '36px', md: '40px' }}
-                  px={{ base: 3, md: 4 }}
-                  size={{ base: 'sm', md: 'md' }}
-                  rightIcon={<ChevronDownIcon />}
-                >
-                  {formatWalletAddress(publicKey)}
-                </MenuButton>
-                <MenuList minW="120px">
-                  <MenuItem onClick={handleDisconnect} fontWeight="500">
-                    断开连接
-                  </MenuItem>
-                </MenuList>
-              </Menu>
-            ) : (
-              <Button
-                onClick={connectwallet}
-                fontSize={{ base: 'xs', md: 'sm' }}
-                fontWeight={600}
-                variant="solid"
-                bg="brand.primary"
-                color="white"
-                _hover={{ bg: 'brand.light' }}
-                h={{ base: '36px', md: '40px' }}
-                px={{ base: 3, md: 4 }}
-                size={{ base: 'sm', md: 'md' }}
-                isLoading={isConnecting}
-              >
-                连接
-              </Button>
-            )}
-          </Stack>
+                  {t('connect')}
+                </Button>
+              )}
+            </Stack>
+          </ClientSideOnly>
         </Flex>
 
         <Box>{isOpen && <MobileNav onClose={onToggle} connectWallet={connectwallet} />}</Box>
