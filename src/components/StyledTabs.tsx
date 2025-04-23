@@ -115,6 +115,8 @@ const StyledTabs = forwardRef<StyledTabsProps, 'div'>((props, ref) => {
         justifyContent="flex-start"
         pb="1px"
         maxW={{ base: "100%", md: "fit-content" }}
+        borderRadius="8px 8px 0 0"
+        boxShadow="0 -2px 10px rgba(0,0,0,0.02)"
         _after={{
           content: '""',
           position: "absolute",
@@ -139,7 +141,7 @@ const StyledTabs = forwardRef<StyledTabsProps, 'div'>((props, ref) => {
             maxWidth: { base: "auto", md: "fit-content" },
             whiteSpace: "nowrap",
             flexShrink: 0,
-            borderRadius: 0,
+            borderRadius: { base: "4px 4px 0 0", md: "6px 6px 0 0" },
             border: "none !important",
             outline: "none !important",
             mr: { base: 3, md: 5 },
@@ -156,7 +158,9 @@ const StyledTabs = forwardRef<StyledTabsProps, 'div'>((props, ref) => {
               right: 0,
               height: "0px",
               bg: "brand.primary",
-              opacity: 0
+              opacity: 0,
+              transition: "all 0.2s ease-in-out",
+              borderRadius: "3px 3px 0 0"
             },
             
             "&[aria-selected=true]": {
@@ -165,7 +169,7 @@ const StyledTabs = forwardRef<StyledTabsProps, 'div'>((props, ref) => {
               border: "none !important",
               boxShadow: "none !important",
               outline: "none !important",
-              background: "transparent !important",
+              background: "rgba(128, 90, 213, 0.08) !important",
               "&::before": {
                 height: "3px !important",
                 opacity: "1 !important"
@@ -174,8 +178,24 @@ const StyledTabs = forwardRef<StyledTabsProps, 'div'>((props, ref) => {
             
             "&:hover": {
               color: "brand.primary",
-              textDecoration: "none"
+              textDecoration: "none",
+              background: "rgba(128, 90, 213, 0.06)",
+              transition: "all 0.2s ease",
+              transform: "translateY(-1px)",
+              fontWeight: "semibold",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+              "&::before": {
+                height: "2px",
+                opacity: "0.7"
+              }
             },
+            
+            "&:active": {
+              background: "rgba(128, 90, 213, 0.12)",
+              transform: "translateY(0)",
+            },
+            
+            "transition": "all 0.2s ease",
             
             "&:last-of-type": {
               mr: 0
