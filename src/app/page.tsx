@@ -15,11 +15,6 @@ import {
   Flex,
   Icon,
   Image,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
   ButtonGroup,
   Table,
   Thead,
@@ -64,7 +59,7 @@ import { useMintingCalculations } from '@/hooks/useMintingCalculations'
 import PaginationControl from '@/components/PaginationControl'
 import TokenListView from '@/components/TokenListView'
 import FilterPanel from '@/components/FilterPanel'
-import { LoadingSpinner } from '@/components'
+import { LoadingSpinner, StyledTabs } from '@/components'
 
 interface MintToken {
   id: number
@@ -89,6 +84,8 @@ export default function MintPage() {
   const { network } = useNetwork()
   const { t } = useTranslation()
 
+  // 添加初次加载标记，用于避免页面刷新时不必要的数据请求
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(() => {
     // 仅在客户端执行
@@ -132,6 +129,11 @@ export default function MintPage() {
   // 获取token列表
   const getTokenList = async () => {
     try {
+      // 在数据加载前先滚动到顶部
+      if (typeof window !== 'undefined') {
+        window.scrollTo(0, 0);
+      }
+      
       // 根据标签索引选择不同的排序字段
       let sortField = '';
       switch(tabIndex) {
@@ -168,9 +170,36 @@ export default function MintPage() {
         params.finished = true;
       }
       
+      // 先清空数据，显示加载状态，避免数据跳动
+      store.dispatch({
+        type: 'token/fetchTokenList/pending'
+      });
+      
+      // 发起数据请求
       await store.dispatch(
         fetchTokenList(params)
       )
+      
+      // 数据加载完成后再次滚动到顶部，确保数据渲染时页面保持在顶部
+      if (typeof window !== 'undefined') {
+        // 使用多种滚动方法确保兼容性
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        
+        // 延迟再次执行滚动，以应对可能的延迟渲染
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        }, 50);
+        
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        }, 150);
+      }
     } catch (error) {
       console.error('获取代币列表失败:', error)
     }
@@ -178,17 +207,19 @@ export default function MintPage() {
 
   // 处理页码变化
   const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage)
+    // 只更新页码，滚动由PaginationControl组件处理
+    setCurrentPage(newPage);
   }
 
   // 处理每页显示数量变化
   const handlePageSizeChange = (newSize: number) => {
     // 调整当前页以保持项目连续性
-    const firstItemIndex = (currentPage - 1) * pageSize
-    const newCurrentPage = Math.floor(firstItemIndex / newSize) + 1
+    const firstItemIndex = (currentPage - 1) * pageSize;
+    const newCurrentPage = Math.floor(firstItemIndex / newSize) + 1;
 
-    setPageSize(newSize)
-    setCurrentPage(newCurrentPage)
+    // 更新状态，滚动由PaginationControl组件处理
+    setPageSize(newSize);
+    setCurrentPage(newCurrentPage);
   }
 
   // 计算总页数
@@ -210,16 +241,26 @@ export default function MintPage() {
     }
   }, [tokenList, currentPage, pageSize]);
 
-  // 监听页码或每页数量变化，获取对应页的数据
+  // 监听页码变化获取数据
   useEffect(() => {
-    getTokenList()
-    // 滚动到页面顶部以便看到新内容
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [currentPage, pageSize])
-
-  // 切换tab时重置页码并获取数据
-  useEffect(() => {
-    setCurrentPage(1)
+    // 避免初始加载时的重复请求
+    if (isInitialLoad) return;
+    
+    // 先清空数据，显示加载状态，避免数据跳动
+    store.dispatch({
+      type: 'token/fetchTokenList/pending'
+    });
+    
+    // 创建一个强制滚动到顶部的函数
+    const forceScrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+    
+    // 首先强制滚动到顶部
+    forceScrollToTop();
+    
     // 根据标签索引选择不同的排序字段
     let sortField = '';
     switch(tabIndex) {
@@ -239,47 +280,45 @@ export default function MintPage() {
         sortField = 'progress';
     }
     
-    store.dispatch(
-      fetchTokenList({
-        page: 1,
-        limit: pageSize,
-        sort: sortField,
-      })
-    )
-  }, [tabIndex, pageSize])
-
-  // 监听页码变化获取数据
-  useEffect(() => {
-    if (currentPage !== 1) {
-      // 避免和tab切换时的重置冲突
-      // 根据标签索引选择不同的排序字段
-      let sortField = '';
-      switch(tabIndex) {
-        case 0: // 热门铸造
-          sortField = 'progress';
-          break;
-        case 1: // 所有代币
-          sortField = 'token_id';
-          break;
-        case 2: // 最新部署
-          sortField = 'created_at';
-          break;
-        case 3: // 铸造结束
-          sortField = 'progress';
-          break;
-        default:
-          sortField = 'progress';
-      }
-      
-      store.dispatch(
-        fetchTokenList({
-          page: currentPage,
-          limit: pageSize,
-          sort: sortField,
-        })
-      )
+    // 构建请求参数
+    const params: any = {
+      page: currentPage,
+      limit: pageSize,
+      sort: sortField,
+    };
+    
+    // 如果是铸造结束标签页，添加进度100%的过滤条件
+    if (tabIndex === 3) {
+      params.finished = true;
     }
-  }, [currentPage, pageSize, tabIndex])
+    
+    // 添加短延迟，确保UI可以显示加载状态
+    setTimeout(() => {
+      // 发起数据请求
+      store.dispatch(
+        fetchTokenList(params)
+      );
+      
+      // 添加延迟滚动，确保在渲染后保持在顶部
+      const scrollTimeouts: number[] = [
+        setTimeout(forceScrollToTop, 50) as unknown as number,
+        setTimeout(forceScrollToTop, 150) as unknown as number,
+        setTimeout(forceScrollToTop, 300) as unknown as number,
+        setTimeout(forceScrollToTop, 500) as unknown as number
+      ];
+      
+      // 清理函数注册
+      const timeoutCleaner = setTimeout(() => {
+        scrollTimeouts.forEach(timeout => clearTimeout(timeout));
+      }, 600);
+      
+      return () => {
+        clearTimeout(timeoutCleaner);
+        scrollTimeouts.forEach(timeout => clearTimeout(timeout));
+      };
+    }, 50);
+    
+  }, [currentPage, pageSize, tabIndex, isInitialLoad]);
 
   // 设置当前网络的计价单位
   const currencyUnit = useMemo(() => {
@@ -307,6 +346,62 @@ export default function MintPage() {
     }
   }, [pageSize])
 
+  // 修改切换tab时重置页码并获取数据的useEffect
+  useEffect(() => {
+    // 如果是初始加载，不触发重复请求
+    if (isInitialLoad) {
+      return
+    }
+
+    // 注意：不需要重置页码，因为在handleTabChange中已经重置了
+    // 这里不再需要 setCurrentPage(1)
+    
+    // 根据标签索引选择不同的排序字段
+    let sortField = '';
+    switch(tabIndex) {
+      case 0: // 热门铸造
+        sortField = 'progress';
+        break;
+      case 1: // 所有代币
+        sortField = 'token_id';
+        break;
+      case 2: // 最新部署
+        sortField = 'created_at';
+        break;
+      case 3: // 铸造结束
+        sortField = 'progress';
+        break;
+      default:
+        sortField = 'progress';
+    }
+    
+    // 先清空数据，显示加载状态，避免数据跳动
+    store.dispatch({
+      type: 'token/fetchTokenList/pending'
+    });
+    
+    // 构建请求参数
+    const params: any = {
+      page: 1, // 始终从第一页开始
+      limit: pageSize,
+      sort: sortField,
+    };
+    
+    // 如果是铸造结束标签页，添加进度100%的过滤条件
+    if (tabIndex === 3) {
+      params.finished = true;
+    }
+    
+    // 添加延迟，确保UI更新后再发起请求
+    setTimeout(() => {
+      // 发起数据请求
+      store.dispatch(
+        fetchTokenList(params)
+      );
+    }, 50);
+    
+  }, [tabIndex, pageSize, isInitialLoad]);
+
   // 强制在移动设备上使用卡片视图
   useEffect(() => {
     const handleResize = () => {
@@ -326,6 +421,105 @@ export default function MintPage() {
     }
   }, [viewMode]);
 
+  // 当搜索条件、排序条件变化时，重置为第一页并重新请求数据
+  useEffect(() => {
+    setCurrentPage(1);
+    // 通过监听currentPage变化会自动触发getTokenList
+  }, [searchQuery, sortColumn, sortDirection]);
+  
+  // Tab切换处理函数，添加到组件中
+  const handleTabChange = (index: number) => {
+    // 使用多种滚动方法确保最大兼容性
+    if (typeof window !== 'undefined') {
+      // 强制滚动函数
+      const forceScrollToTop = () => {
+        // 方法1：使用window.scrollTo
+        window.scrollTo(0, 0);
+        
+        // 方法2：使用document.documentElement
+        document.documentElement.scrollTop = 0;
+        
+        // 方法3：使用document.body
+        document.body.scrollTop = 0;
+      };
+      
+      // 立即执行滚动
+      forceScrollToTop();
+      
+      // 先更新标签索引
+      setTabIndex(index);
+      
+      // 重要：始终将页码重置为1，避免数据跳动
+      setCurrentPage(1);
+      
+      // 添加多次延迟滚动，以覆盖各种可能的渲染时机
+      const scrollTimeouts: number[] = [];
+      
+      for (let delay of [10, 50, 100, 300, 500, 800]) {
+        scrollTimeouts.push(setTimeout(forceScrollToTop, delay) as unknown as number);
+      }
+      
+      // 一段时间后清除所有定时器
+      setTimeout(() => {
+        scrollTimeouts.forEach(id => clearTimeout(id));
+      }, 1000);
+    } else {
+      // 直接更新标签索引
+      setTabIndex(index);
+      // 重置页码
+      setCurrentPage(1);
+    }
+  }
+
+  // 初始化时基于tabIndex加载正确的数据
+  useEffect(() => {
+    if (isInitialLoad && typeof window !== 'undefined') {
+      // 根据初始化的标签索引选择正确的排序字段
+      let sortField = '';
+      switch(tabIndex) {
+        case 0: // 热门铸造
+          sortField = 'progress';
+          break;
+        case 1: // 所有代币
+          sortField = 'token_id';
+          break;
+        case 2: // 最新部署
+          sortField = 'created_at';
+          break;
+        case 3: // 铸造结束
+          sortField = 'progress';
+          break;
+        default:
+          sortField = 'progress';
+      }
+      
+      // 在初始化时基于本地存储中的tabIndex加载数据
+      const params: any = {
+        page: 1,
+        limit: pageSize,
+        sort: sortField,
+      };
+      
+      // 如果是铸造结束标签页，添加进度100%的过滤条件
+      if (tabIndex === 3) {
+        params.finished = true;
+      }
+      
+      // 清除tokenList，避免数据跳动
+      store.dispatch({
+        type: 'token/fetchTokenList/pending'
+      });
+      
+      // 发起数据请求
+      store.dispatch(
+        fetchTokenList(params)
+      )
+
+      // 标记初始加载已完成
+      setIsInitialLoad(false)
+    }
+  }, [isInitialLoad, tabIndex, pageSize])
+
   // 共享排序逻辑
   const handleSort = (column: string) => {
     const newDirection =
@@ -334,15 +528,9 @@ export default function MintPage() {
     setSortDirection(newDirection)
   }
 
-  // 当搜索条件、排序条件变化时，重置为第一页并重新请求数据
-  useEffect(() => {
-    setCurrentPage(1);
-    // 通过监听currentPage变化会自动触发getTokenList
-  }, [searchQuery, sortColumn, sortDirection]);
-  
   const renderTabContent = (tokens: MintToken[]) => {
     // 显示加载状态
-    if (loading) {
+    if (loading || isInitialLoad) {
       return <LoadingSpinner />
     }
 
@@ -492,160 +680,73 @@ export default function MintPage() {
             </ButtonGroup>
           </Stack>
 
-          <Tabs
-            colorScheme="purple"
-            variant="enclosed"
+          <StyledTabs
             index={tabIndex}
-            onChange={setTabIndex}
-            isLazy
+            onChange={handleTabChange}
             mt={{ base: 0, md: 2 }}
-          >
-            <TabList
-              borderBottom="2px"
-              borderColor="brand.primary"
-              mb={{ base: 2, md: 4 }}
-              overflow="hidden"
-              overflowX="auto"
-              width="100%"
-              display="flex"
-              flexWrap="nowrap"
-            >
-              <Tab
-                fontWeight="medium"
-                fontSize={{ base: "xs", md: "sm" }}
-                p={{ base: 2, md: 3 }}
-                minWidth={{ base: "auto", md: "auto" }}
-                whiteSpace="nowrap"
-                flexShrink={0}
-                _selected={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.primary',
-                  borderBottom: '3px solid',
-                  fontWeight: 'bold',
-                  bg: 'gray.50',
-                }}
-                _hover={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.light',
-                }}
-                transition="all 0.2s"
-              >
-                {t('hotTokens')}
-              </Tab>
-              <Tab
-                fontWeight="medium"
-                fontSize={{ base: "xs", md: "sm" }}
-                p={{ base: 2, md: 3 }}
-                minWidth={{ base: "auto", md: "auto" }}
-                whiteSpace="nowrap"
-                flexShrink={0}
-                _selected={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.primary',
-                  borderBottom: '3px solid',
-                  fontWeight: 'bold',
-                  bg: 'gray.50',
-                }}
-                _hover={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.light',
-                }}
-                transition="all 0.2s"
-              >
-                {t('allMinting')}
-              </Tab>
-              <Tab
-                fontWeight="medium"
-                fontSize={{ base: "xs", md: "sm" }}
-                p={{ base: 2, md: 3 }}
-                minWidth={{ base: "auto", md: "auto" }}
-                whiteSpace="nowrap"
-                flexShrink={0}
-                _selected={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.primary',
-                  borderBottom: '3px solid',
-                  fontWeight: 'bold',
-                  bg: 'gray.50',
-                }}
-                _hover={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.light',
-                }}
-                transition="all 0.2s"
-              >
-                {t('latestDeployed')}
-              </Tab>
-              <Tab
-                fontWeight="medium"
-                fontSize={{ base: "xs", md: "sm" }}
-                p={{ base: 2, md: 3 }}
-                minWidth={{ base: "auto", md: "auto" }}
-                whiteSpace="nowrap"
-                flexShrink={0}
-                _selected={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.primary',
-                  borderBottom: '3px solid',
-                  fontWeight: 'bold',
-                  bg: 'gray.50',
-                }}
-                _hover={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.light',
-                }}
-                transition="all 0.2s"
-              >
-                {t('mintingFinished')}
-              </Tab>
-            </TabList>
-
-            <TabPanels>
-              <TabPanel px={0}>
-                <FilterPanel
-                  sortColumn={sortColumn}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                />
-                {renderTabContent(tokenList)}
-              </TabPanel>
-
-              <TabPanel px={0}>
-                <FilterPanel
-                  sortColumn={sortColumn}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                />
-                {renderTabContent(tokenList)}
-              </TabPanel>
-
-              <TabPanel px={0}>
-                <FilterPanel
-                  sortColumn={'deployedAt'}
-                  sortDirection={'desc'}
-                  onSort={() => {}} // 禁用排序功能
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                />
-                {renderTabContent(tokenList)}
-              </TabPanel>
-              
-              <TabPanel px={0}>
-                <FilterPanel
-                  sortColumn={'progress'}
-                  sortDirection={'desc'}
-                  onSort={() => {}} // 禁用排序功能
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                />
-                {renderTabContent(tokenList)}
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
+            tabItems={[
+              {
+                label: t('hotTokens'),
+                content: (
+                  <>
+                    <FilterPanel
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                    />
+                    {renderTabContent(tokenList)}
+                  </>
+                )
+              },
+              {
+                label: t('allMinting'),
+                content: (
+                  <>
+                    <FilterPanel
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                    />
+                    {renderTabContent(tokenList)}
+                  </>
+                )
+              },
+              {
+                label: t('latestDeployed'),
+                content: (
+                  <>
+                    <FilterPanel
+                      sortColumn={'deployedAt'}
+                      sortDirection={'desc'}
+                      onSort={() => {}} // 禁用排序功能
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                    />
+                    {renderTabContent(tokenList)}
+                  </>
+                )
+              },
+              {
+                label: t('mintingFinished'),
+                content: (
+                  <>
+                    <FilterPanel
+                      sortColumn={'progress'}
+                      sortDirection={'desc'}
+                      onSort={() => {}} // 禁用排序功能
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                    />
+                    {renderTabContent(tokenList)}
+                  </>
+                )
+              }
+            ]}
+          />
         </VStack>
       </Container>
     </Box>

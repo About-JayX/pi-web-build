@@ -7,4 +7,5 @@ export { default as Footer } from './Footer';
 export { default as TokenCard } from './TokenCard';
 export { default as Announcement } from './Announcement';
 export { default as LoadingSpinner } from './LoadingSpinner';
-export { default as SkeletonLoading } from './SkeletonLoading'; 
+export { default as SkeletonLoading } from './SkeletonLoading';
+export { default as StyledTabs } from './StyledTabs'; 
