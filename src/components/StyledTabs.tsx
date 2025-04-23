@@ -129,7 +129,7 @@ const StyledTabs = forwardRef<StyledTabsProps, 'div'>((props, ref) => {
           "&::-webkit-scrollbar": {
             display: { base: "none", md: "auto" }
           },
-          "scrollbar-width": { base: "none", md: "auto" },
+          "scrollbarWidth": { base: "none", md: "auto" },
           "& > button": {
             flex: { base: "0 0 auto", md: "0 0 auto" },
             fontWeight: "medium",

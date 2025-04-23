@@ -241,10 +241,15 @@ export default function MintPage() {
     }
   }, [tokenList, currentPage, pageSize]);
 
-  // 监听页码或每页数量变化，获取对应页的数据
+  // 监听页码变化获取数据
   useEffect(() => {
     // 避免初始加载时的重复请求
     if (isInitialLoad) return;
+    
+    // 先清空数据，显示加载状态，避免数据跳动
+    store.dispatch({
+      type: 'token/fetchTokenList/pending'
+    });
     
     // 创建一个强制滚动到顶部的函数
     const forceScrollToTop = () => {
@@ -256,23 +261,64 @@ export default function MintPage() {
     // 首先强制滚动到顶部
     forceScrollToTop();
     
-    // 获取数据
-    getTokenList();
+    // 根据标签索引选择不同的排序字段
+    let sortField = '';
+    switch(tabIndex) {
+      case 0: // 热门铸造
+        sortField = 'progress';
+        break;
+      case 1: // 所有代币
+        sortField = 'token_id';
+        break;
+      case 2: // 最新部署
+        sortField = 'created_at';
+        break;
+      case 3: // 铸造结束
+        sortField = 'progress';
+        break;
+      default:
+        sortField = 'progress';
+    }
     
-    // 添加延迟滚动，确保在渲染后保持在顶部
-    const scrollTimeouts: number[] = [
-      setTimeout(forceScrollToTop, 50) as unknown as number,
-      setTimeout(forceScrollToTop, 150) as unknown as number,
-      setTimeout(forceScrollToTop, 300) as unknown as number,
-      setTimeout(forceScrollToTop, 500) as unknown as number
-    ];
-    
-    // 清理函数，清除所有定时器
-    return () => {
-      scrollTimeouts.forEach(timeout => clearTimeout(timeout));
+    // 构建请求参数
+    const params: any = {
+      page: currentPage,
+      limit: pageSize,
+      sort: sortField,
     };
     
-  }, [currentPage, pageSize, isInitialLoad]);
+    // 如果是铸造结束标签页，添加进度100%的过滤条件
+    if (tabIndex === 3) {
+      params.finished = true;
+    }
+    
+    // 添加短延迟，确保UI可以显示加载状态
+    setTimeout(() => {
+      // 发起数据请求
+      store.dispatch(
+        fetchTokenList(params)
+      );
+      
+      // 添加延迟滚动，确保在渲染后保持在顶部
+      const scrollTimeouts: number[] = [
+        setTimeout(forceScrollToTop, 50) as unknown as number,
+        setTimeout(forceScrollToTop, 150) as unknown as number,
+        setTimeout(forceScrollToTop, 300) as unknown as number,
+        setTimeout(forceScrollToTop, 500) as unknown as number
+      ];
+      
+      // 清理函数注册
+      const timeoutCleaner = setTimeout(() => {
+        scrollTimeouts.forEach(timeout => clearTimeout(timeout));
+      }, 600);
+      
+      return () => {
+        clearTimeout(timeoutCleaner);
+        scrollTimeouts.forEach(timeout => clearTimeout(timeout));
+      };
+    }, 50);
+    
+  }, [currentPage, pageSize, tabIndex, isInitialLoad]);
 
   // 设置当前网络的计价单位
   const currencyUnit = useMemo(() => {
@@ -307,8 +353,8 @@ export default function MintPage() {
       return
     }
 
-    // 重置页码
-    setCurrentPage(1)
+    // 注意：不需要重置页码，因为在handleTabChange中已经重置了
+    // 这里不再需要 setCurrentPage(1)
     
     // 根据标签索引选择不同的排序字段
     let sortField = '';
@@ -329,9 +375,14 @@ export default function MintPage() {
         sortField = 'progress';
     }
     
+    // 先清空数据，显示加载状态，避免数据跳动
+    store.dispatch({
+      type: 'token/fetchTokenList/pending'
+    });
+    
     // 构建请求参数
     const params: any = {
-      page: 1,
+      page: 1, // 始终从第一页开始
       limit: pageSize,
       sort: sortField,
     };
@@ -341,66 +392,15 @@ export default function MintPage() {
       params.finished = true;
     }
     
-    // 先清空数据，显示加载状态，避免数据跳动
-    store.dispatch({
-      type: 'token/fetchTokenList/pending'
-    });
-    
-    // 发起数据请求
-    store.dispatch(
-      fetchTokenList(params)
-    )
-  }, [tabIndex, pageSize, isInitialLoad])
-
-  // 监听页码变化获取数据
-  useEffect(() => {
-    // 避免初始加载时的重复请求
-    if (isInitialLoad) return;
-    
-    if (currentPage !== 1) {
-      // 避免和tab切换时的重置冲突
-      // 根据标签索引选择不同的排序字段
-      let sortField = '';
-      switch(tabIndex) {
-        case 0: // 热门铸造
-          sortField = 'progress';
-          break;
-        case 1: // 所有代币
-          sortField = 'token_id';
-          break;
-        case 2: // 最新部署
-          sortField = 'created_at';
-          break;
-        case 3: // 铸造结束
-          sortField = 'progress';
-          break;
-        default:
-          sortField = 'progress';
-      }
-      
-      // 构建请求参数
-      const params: any = {
-        page: currentPage,
-        limit: pageSize,
-        sort: sortField,
-      };
-      
-      // 如果是铸造结束标签页，添加进度100%的过滤条件
-      if (tabIndex === 3) {
-        params.finished = true;
-      }
-      
-      // 先清空数据，显示加载状态，避免数据跳动
-      store.dispatch({
-        type: 'token/fetchTokenList/pending'
-      });
-      
+    // 添加延迟，确保UI更新后再发起请求
+    setTimeout(() => {
       // 发起数据请求
       store.dispatch(
         fetchTokenList(params)
-      )
-    }
-  }, [currentPage, pageSize, tabIndex, isInitialLoad])
+      );
+    }, 50);
+    
+  }, [tabIndex, pageSize, isInitialLoad]);
 
   // 强制在移动设备上使用卡片视图
   useEffect(() => {
@@ -446,8 +446,11 @@ export default function MintPage() {
       // 立即执行滚动
       forceScrollToTop();
       
-      // 更新标签索引
+      // 先更新标签索引
       setTabIndex(index);
+      
+      // 重要：始终将页码重置为1，避免数据跳动
+      setCurrentPage(1);
       
       // 添加多次延迟滚动，以覆盖各种可能的渲染时机
       const scrollTimeouts: number[] = [];
@@ -463,6 +466,8 @@ export default function MintPage() {
     } else {
       // 直接更新标签索引
       setTabIndex(index);
+      // 重置页码
+      setCurrentPage(1);
     }
   }
 
