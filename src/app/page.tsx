@@ -129,6 +129,11 @@ export default function MintPage() {
   // 获取token列表
   const getTokenList = async () => {
     try {
+      // 在数据加载前先滚动到顶部
+      if (typeof window !== 'undefined') {
+        window.scrollTo(0, 0);
+      }
+      
       // 根据标签索引选择不同的排序字段
       let sortField = '';
       switch(tabIndex) {
@@ -174,6 +179,27 @@ export default function MintPage() {
       await store.dispatch(
         fetchTokenList(params)
       )
+      
+      // 数据加载完成后再次滚动到顶部，确保数据渲染时页面保持在顶部
+      if (typeof window !== 'undefined') {
+        // 使用多种滚动方法确保兼容性
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        
+        // 延迟再次执行滚动，以应对可能的延迟渲染
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        }, 50);
+        
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        }, 150);
+      }
     } catch (error) {
       console.error('获取代币列表失败:', error)
     }
@@ -181,17 +207,19 @@ export default function MintPage() {
 
   // 处理页码变化
   const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage)
+    // 只更新页码，滚动由PaginationControl组件处理
+    setCurrentPage(newPage);
   }
 
   // 处理每页显示数量变化
   const handlePageSizeChange = (newSize: number) => {
     // 调整当前页以保持项目连续性
-    const firstItemIndex = (currentPage - 1) * pageSize
-    const newCurrentPage = Math.floor(firstItemIndex / newSize) + 1
+    const firstItemIndex = (currentPage - 1) * pageSize;
+    const newCurrentPage = Math.floor(firstItemIndex / newSize) + 1;
 
-    setPageSize(newSize)
-    setCurrentPage(newCurrentPage)
+    // 更新状态，滚动由PaginationControl组件处理
+    setPageSize(newSize);
+    setCurrentPage(newCurrentPage);
   }
 
   // 计算总页数
@@ -218,10 +246,59 @@ export default function MintPage() {
     // 避免初始加载时的重复请求
     if (isInitialLoad) return;
     
-    getTokenList()
-    // 滚动到页面顶部以便看到新内容
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [currentPage, pageSize, isInitialLoad])
+    // 创建一个强制滚动到顶部的函数
+    const forceScrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+    
+    // 首先强制滚动到顶部
+    forceScrollToTop();
+    
+    // 获取数据
+    getTokenList();
+    
+    // 添加延迟滚动，确保在渲染后保持在顶部
+    const scrollTimeouts: number[] = [
+      setTimeout(forceScrollToTop, 50) as unknown as number,
+      setTimeout(forceScrollToTop, 150) as unknown as number,
+      setTimeout(forceScrollToTop, 300) as unknown as number,
+      setTimeout(forceScrollToTop, 500) as unknown as number
+    ];
+    
+    // 清理函数，清除所有定时器
+    return () => {
+      scrollTimeouts.forEach(timeout => clearTimeout(timeout));
+    };
+    
+  }, [currentPage, pageSize, isInitialLoad]);
+
+  // 设置当前网络的计价单位
+  const currencyUnit = useMemo(() => {
+    return network === 'SOL' ? 'SOL' : 'PI'
+  }, [network])
+
+  // 保存视图模式到本地存储
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mint_view_mode', viewMode)
+    }
+  }, [viewMode])
+
+  // 保存标签页选择到本地存储
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mint_tab_index', String(tabIndex))
+    }
+  }, [tabIndex])
+
+  // 保存每页显示数量到本地存储
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('mint_page_size', String(pageSize))
+    }
+  }, [pageSize])
 
   // 修改切换tab时重置页码并获取数据的useEffect
   useEffect(() => {
@@ -325,31 +402,69 @@ export default function MintPage() {
     }
   }, [currentPage, pageSize, tabIndex, isInitialLoad])
 
-  // 设置当前网络的计价单位
-  const currencyUnit = useMemo(() => {
-    return network === 'SOL' ? 'SOL' : 'PI'
-  }, [network])
-
-  // 保存视图模式到本地存储
+  // 强制在移动设备上使用卡片视图
   useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768 && viewMode !== 'card') {
+        setViewMode('card');
+      }
+    };
+    
+    // 添加客户端检测，以避免服务器端渲染问题
     if (typeof window !== 'undefined') {
-      localStorage.setItem('mint_view_mode', viewMode)
+      // 初始化时检查
+      handleResize();
+      
+      // 监听窗口大小变化
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
     }
-  }, [viewMode])
+  }, [viewMode]);
 
-  // 保存标签页选择到本地存储
+  // 当搜索条件、排序条件变化时，重置为第一页并重新请求数据
   useEffect(() => {
+    setCurrentPage(1);
+    // 通过监听currentPage变化会自动触发getTokenList
+  }, [searchQuery, sortColumn, sortDirection]);
+  
+  // Tab切换处理函数，添加到组件中
+  const handleTabChange = (index: number) => {
+    // 使用多种滚动方法确保最大兼容性
     if (typeof window !== 'undefined') {
-      localStorage.setItem('mint_tab_index', String(tabIndex))
+      // 强制滚动函数
+      const forceScrollToTop = () => {
+        // 方法1：使用window.scrollTo
+        window.scrollTo(0, 0);
+        
+        // 方法2：使用document.documentElement
+        document.documentElement.scrollTop = 0;
+        
+        // 方法3：使用document.body
+        document.body.scrollTop = 0;
+      };
+      
+      // 立即执行滚动
+      forceScrollToTop();
+      
+      // 更新标签索引
+      setTabIndex(index);
+      
+      // 添加多次延迟滚动，以覆盖各种可能的渲染时机
+      const scrollTimeouts: number[] = [];
+      
+      for (let delay of [10, 50, 100, 300, 500, 800]) {
+        scrollTimeouts.push(setTimeout(forceScrollToTop, delay) as unknown as number);
+      }
+      
+      // 一段时间后清除所有定时器
+      setTimeout(() => {
+        scrollTimeouts.forEach(id => clearTimeout(id));
+      }, 1000);
+    } else {
+      // 直接更新标签索引
+      setTabIndex(index);
     }
-  }, [tabIndex])
-
-  // 保存每页显示数量到本地存储
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('mint_page_size', String(pageSize))
-    }
-  }, [pageSize])
+  }
 
   // 初始化时基于tabIndex加载正确的数据
   useEffect(() => {
@@ -400,25 +515,6 @@ export default function MintPage() {
     }
   }, [isInitialLoad, tabIndex, pageSize])
 
-  // 强制在移动设备上使用卡片视图
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768 && viewMode !== 'card') {
-        setViewMode('card');
-      }
-    };
-    
-    // 添加客户端检测，以避免服务器端渲染问题
-    if (typeof window !== 'undefined') {
-      // 初始化时检查
-      handleResize();
-      
-      // 监听窗口大小变化
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }
-  }, [viewMode]);
-
   // 共享排序逻辑
   const handleSort = (column: string) => {
     const newDirection =
@@ -427,12 +523,6 @@ export default function MintPage() {
     setSortDirection(newDirection)
   }
 
-  // 当搜索条件、排序条件变化时，重置为第一页并重新请求数据
-  useEffect(() => {
-    setCurrentPage(1);
-    // 通过监听currentPage变化会自动触发getTokenList
-  }, [searchQuery, sortColumn, sortDirection]);
-  
   const renderTabContent = (tokens: MintToken[]) => {
     // 显示加载状态
     if (loading || isInitialLoad) {
@@ -587,7 +677,7 @@ export default function MintPage() {
 
           <StyledTabs
             index={tabIndex}
-            onChange={setTabIndex}
+            onChange={handleTabChange}
             mt={{ base: 0, md: 2 }}
             tabItems={[
               {
