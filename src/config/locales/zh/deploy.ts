@@ -39,6 +39,6 @@ export default {
   
   // 部署页面 - 按钮状态
   'creating': '创建中...',
-  'createToken': '创建代币',
+  'createToken': '部署代币',
   'connectWallet': '连接钱包',
 }; 

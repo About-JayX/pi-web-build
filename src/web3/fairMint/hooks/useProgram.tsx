@@ -62,7 +62,7 @@ export const useProgram = () => {
       fairCurvePda, // 所有者
       true // 允许 PDA 作为所有者
     )
-    // 提交创建代币的交易
+    // 提交部署代币的交易
     const tx = await program.methods
       .createToken(
         // 调用合约的 createToken 方法

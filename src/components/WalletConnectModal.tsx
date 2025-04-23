@@ -189,7 +189,7 @@ const WalletConnectModal = ({
 
           // 显示成功消息
           toast({
-            title: t("loginSuccess"),
+            title: t("connectSuccess"),
             description: t("connectedWallet", { 
               address: formatWalletAddress(publicKey)
             }),

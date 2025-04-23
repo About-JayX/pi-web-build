@@ -16,6 +16,7 @@ import React, {
   useRef,
 } from "react"
 import { userApi } from "@/config/axios"
+import { usePathname } from "next/navigation"
 
 interface WssContextType {
   socket: WebSocket | null
@@ -34,9 +35,16 @@ export const WssProvider = ({ children }: { children: ReactNode }) => {
   const [socket, setSocket] = useState<WebSocket | null>(null)
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const tokenAddressesRef = useRef<string[]>([])
+  const pathname = usePathname()
+  
+  // 检查当前路径是否是/market或其子路径
+  const isMarketPage = pathname === "/market" || pathname?.startsWith("/market/")
 
-  // 使用useEffect管理WebSocket连接
+  // 使用useEffect管理WebSocket连接，只在Market页面初始化
   useEffect(() => {
+    // 如果不是Market页面，则不建立WebSocket连接
+    if (!isMarketPage) return
+
     const wsUrl = userApi.defaults.baseURL
       ? userApi.defaults.baseURL
           .replace(/^http:\/\//i, "ws://")
@@ -107,7 +115,7 @@ export const WssProvider = ({ children }: { children: ReactNode }) => {
         ws.close()
       }
     }
-  }, []) // 空依赖数组，只在组件挂载时执行一次
+  }, [isMarketPage, pathname]) // 添加pathname作为依赖，当路径改变时重新评估
 
   const updateToken = async (tokenAddress: string) => {
     try {

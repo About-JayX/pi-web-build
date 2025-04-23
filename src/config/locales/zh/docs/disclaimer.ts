@@ -26,7 +26,7 @@ export default {
   'liabilityLimitationText2': '在法律允许的最大范围内，Pi.Sale 平台及其团队成员、合作伙伴不对任何直接、间接、特殊或附带的损害承担责任，包括但不限于利润损失、商业中断或数据丢失。',
   'userResponsibility': '4. 用户责任',
   'userResponsibilityText': '使用 Pi.Sale 平台，用户需要承担以下责任：',
-  'projectLegal': '确保所创建代币项目符合相关法律法规和对应区块链网络的规则',
+  'projectLegal': '确保所部署代币项目符合相关法律法规和对应区块链网络的规则',
   'accountSecurity': '保护好自己的账户和私钥安全',
   'riskAssessment': '自行评估项目风险并做出投资决策',
   'intellectualProperty': '尊重他人知识产权，不发布侵权内容',

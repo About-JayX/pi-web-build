@@ -69,7 +69,7 @@ export default {
   'getMarketTradesEndpoint': '获取最近交易记录',
   
   // 部署相关端点
-  'createTokenEndpoint': '创建代币',
+  'createTokenEndpoint': '部署代币',
   'createTokenDesc': '创建新的代币项目',
   'deployTokenEndpoint': '部署代币',
   'deployTokenDesc': '将已创建的代币部署到区块链上',

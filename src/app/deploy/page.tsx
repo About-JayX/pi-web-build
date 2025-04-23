@@ -42,6 +42,7 @@ import { useSolana } from '@/contexts/solanaProvider'
 import { TokenAPI } from '@/api/token'
 import type { CreateTokenParams } from '@/api/types'
 import WalletConnectModal from '@/components/WalletConnectModal'
+import ErrorModal from '@/components/ErrorModal'
 
 // 定义代币参数组件的属性接口
 interface TokenParametersSectionProps {
@@ -614,7 +615,24 @@ export default function DeployPage() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setTokenIcon(e.target.files[0])
+      const file = e.target.files[0];
+      
+      // 检查文件大小，限制为 2MB
+      const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+      
+      if (file.size > maxSizeInBytes) {
+        toast({
+          title: t('error'),
+          description: t('imageTooLarge'),
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+          position: "top",
+        });
+        return;
+      }
+      
+      setTokenIcon(file);
     }
   }
 
@@ -638,6 +656,7 @@ export default function DeployPage() {
           status: 'error',
           duration: 3000,
           isClosable: true,
+          position: "top",
         })
       }
     } catch (error) {
@@ -698,6 +717,13 @@ export default function DeployPage() {
     setPublicKey(newPublicKey);
   };
 
+  const [error, setError] = useState<{ message: string; details: any } | null>(null);
+  const { 
+    isOpen: isErrorModalOpen, 
+    onOpen: onErrorModalOpen, 
+    onClose: onErrorModalClose 
+  } = useDisclosure();
+
   const handleCreateToken = async () => {
     // 如果未连接钱包，则打开钱包连接弹窗
     if (!publicKey) {
@@ -712,6 +738,7 @@ export default function DeployPage() {
         status: 'error',
         duration: 3000,
         isClosable: true,
+        position: "top",
       })
       return
     }
@@ -724,6 +751,7 @@ export default function DeployPage() {
         status: 'error',
         duration: 3000,
         isClosable: true,
+        position: "top",
       })
       return
     }
@@ -749,16 +777,45 @@ export default function DeployPage() {
         status: 'success',
         duration: 3000,
         isClosable: true,
+        position: "top",
       })
-    } catch (error) {
+    } catch (error: any) {
       console.error('Token creation failed:', error)
+      
+      // 存储错误信息并打开错误弹窗
+      let errorMessage = t('createTokenFailed');
+      
+      // 处理特定类型的错误
+      if (error.response && error.response.status === 413) {
+        errorMessage = t('imageTooLarge');
+      } else if (error.response && error.response.status === 500) {
+        errorMessage = t('serverError');
+      } else if (error instanceof Error) {
+        errorMessage = error.message || errorMessage;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      // 设置错误详情
+      setError({
+        message: errorMessage,
+        details: error
+      });
+      
+      // 显示标准的toast提示
       toast({
         title: t('error'),
-        description: t('createTokenFailed'),
+        description: errorMessage,
         status: 'error',
         duration: 3000,
         isClosable: true,
-      })
+        position: "top",
+      });
+      
+      // 在开发环境中打开详细错误弹窗
+      if (process.env.NODE_ENV === 'development') {
+        onErrorModalOpen();
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -769,7 +826,7 @@ export default function DeployPage() {
   const [twitter, setTwitter] = useState('')
   const [telegram, setTelegram] = useState('')
 
-  // 监听创建代币所需的所有参数
+  // 监听部署代币所需的所有参数
   useEffect(() => {
     const params = {
       // 基本信息
@@ -965,6 +1022,10 @@ export default function DeployPage() {
                               __html: t('iconRequirements'),
                             }}
                           />
+                          <br />
+                          <span style={{ color: 'red.400' }}>
+                            {t('fileSizeLimit')}
+                          </span>
                         </Text>
                       </>
                     )}
@@ -1028,10 +1089,18 @@ export default function DeployPage() {
       </Container>
       
       {/* 钱包连接弹窗 */}
-      <WalletConnectModal 
-        isOpen={isWalletModalOpen} 
+      <WalletConnectModal
+        isOpen={isWalletModalOpen}
         onClose={onWalletModalClose}
         onConnect={handleWalletConnected}
+      />
+      
+      {/* 错误弹窗组件 */}
+      <ErrorModal
+        isOpen={isErrorModalOpen}
+        onClose={onErrorModalClose}
+        errorMessage={error?.message || t('createTokenFailed')}
+        errorDetails={error?.details}
       />
     </Box>
   )

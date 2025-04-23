@@ -17,12 +17,22 @@ export default {
   'error': '错误',
   'installPhantomWallet': '请安装Phantom钱包插件',
   'loginSuccess': '登录成功',
+  'connectSuccess': '连接成功',
   'welcomeBack': '欢迎回来，{{username}}',
   'connectedWallet': '已连接钱包 {{address}}',
   'operationFailed': '操作失败:',
   'operationFailedTryAgain': '操作失败，请重试',
   'tryAgain': '重试',
   'rejected': '已拒绝',
+  
+  // 文件上传相关错误
+  'imageTooLarge': '图片文件过大，请上传小于 2MB 的图片',
+  'imageUploadFailed': '图片上传失败，请重试',
+  'fileSizeLimit': '文件大小不超过 2MB',
+  
+  // 服务器错误
+  'serverError': '服务器内部错误，请稍后再试',
+  'serverBusy': '服务器繁忙，请稍后再试',
   
   // 语言
   'chinese': '中文',
