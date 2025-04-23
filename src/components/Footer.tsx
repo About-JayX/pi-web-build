@@ -18,6 +18,7 @@ export default function Footer() {
   
   return (
     <Box
+      as="footer"
       bg={useColorModeValue('black', 'gray.900')}
       color={useColorModeValue('gray.400', 'gray.400')}
       py={4}>

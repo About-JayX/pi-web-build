@@ -32,7 +32,7 @@ const FilterPanel = ({
 }: FilterPanelProps) => {
   const buttonBg = useColorModeValue('white', 'gray.700')
   const activeBg = useColorModeValue('gray.100', 'gray.600')
-  const inputBg = useColorModeValue('white', 'gray.800')
+  // const inputBg = useColorModeValue('white', 'gray.800')
   const { t } = useTranslation()
 
   const sortOptions = [
@@ -51,26 +51,6 @@ const FilterPanel = ({
       justifyContent="space-between"
       pt={{ base: 1, md: 2 }}
     >
-      <InputGroup maxW={{ base: '100%', md: '300px' }} mb={{ base: 2, md: 0 }}>
-        <InputLeftElement pointerEvents="none" flexShrink={1}>
-          <Icon as={FaSearch} color="gray.400" />
-        </InputLeftElement>
-        <Input
-          placeholder={t('searchPlaceholder')}
-          value={searchQuery}
-          onChange={e => onSearchChange(e.target.value)}
-          bg={inputBg}
-          borderColor="gray.200"
-          borderRadius="md"
-          _hover={{ borderColor: 'brand.primary' }}
-          _focus={{
-            borderColor: 'brand.primary',
-            boxShadow: '0 0 0 1px var(--chakra-colors-brand-primary)',
-          }}
-          size="md"
-          fontSize="sm"
-        />
-      </InputGroup>
 
       {showSortButtons && (
         <Flex align="center" gap={2} flexWrap="wrap">

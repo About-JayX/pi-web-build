@@ -42,7 +42,7 @@ const colors = {
     900: "#211800",
   },
   gray: {
-    50: "#e8e8e8",
+    50: "#F9F9FA",
   },
 };
 
@@ -69,10 +69,12 @@ const components = {
         },
       },
       outline: {
+        bg: "#FFF",
         borderColor: "#D6D1FA",
         color: "brand.primary",
         _hover: {
           bg: "#D6D1FA",
+          color: "brand.primary",
         },
       },
     },
@@ -98,6 +100,11 @@ const components = {
   Text: {
     baseStyle: {
       color: "brand.text.primary",
+    },
+  },
+  Table: {
+    baseStyle: {
+      bg: "transparent",
     },
   },
 };

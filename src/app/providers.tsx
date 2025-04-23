@@ -75,41 +75,39 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <Provider store={store}>
       <WssProvider>
-        {/* ColorModeScript 应该在 ClientOnly 之外，以便在服务器端渲染 */}
         <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-
-        {/* 使用 CacheProvider 在客户端和服务器端之间共享样式 */}
         <CacheProvider>
-          {/* 使用 ClientOnly 确保 ChakraProvider 仅在客户端渲染 */}
           <ClientOnly>
-            <ChakraProvider
-              theme={theme}
-              resetCSS
-              colorModeManager={localStorageManager}
-            >
+            <ChakraProvider theme={theme} resetCSS colorModeManager={localStorageManager}>
               <NetworkProvider>
                 <SolanaProvider>
                   <I18nProvider>
-                    <Flex
-                      position="fixed"
-                      bgImage="/bg.png"
-                      bgSize="cover"
-                      bgPosition="center"
-                      bgRepeat="no-repeat"
-                      w="100%"
-                      right={1}
-                      h="calc(100vh - 60px)"
-                      pointerEvents="none"
+                    <Box position="relative" minHeight="100vh">
+                      <Box
+                        position="fixed"
+                        top="60px"
+                        left="0"
+                        right="0"
+                        bottom="0"
+                        bgImage="/bg.png"
+                        bgSize="cover"
+                        bgPosition="center"
+                        bgRepeat="no-repeat"
+                        opacity="0.8"
+                        zIndex="0"
+                        pointerEvents="none"
+                      />
                       
-                    />
-                    <AuthRestorer />
-                    <Navbar />
-                    <main style={{ minHeight: "calc(100vh - 60px)" }}>
-                      {children}
-                    </main>
-
-                    <Footer />
-                    <Announcement />
+                      <Box position="relative" zIndex="1">
+                        <AuthRestorer />
+                        <Navbar />
+                        <main style={{ minHeight: "calc(100vh - 60px)" }}>
+                          {children}
+                        </main>
+                        <Footer />
+                        <Announcement />
+                      </Box>
+                    </Box>
                   </I18nProvider>
                 </SolanaProvider>
               </NetworkProvider>

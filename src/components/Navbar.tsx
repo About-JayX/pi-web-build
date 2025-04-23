@@ -25,32 +25,38 @@ import {
   useToast,
   Avatar,
   Skeleton,
-} from '@chakra-ui/react'
-import { HamburgerIcon, CloseIcon, ChevronDownIcon } from '@chakra-ui/icons'
-import NextLink from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useState, useEffect } from 'react'
-import dynamic from 'next/dynamic'
-import { useNetwork } from '@/contexts/NetworkContext'
-import { useI18n } from '@/contexts/I18nProvider'
-import { useTranslation } from 'react-i18next'
-import { FaGlobeAsia } from 'react-icons/fa'
-import { useSolana } from '@/contexts/solanaProvider'
-import { UserAPI } from '@/api'
-import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { setUser, clearUser } from '@/store/slices/userSlice'
-import LogoText from './LogoText'
+} from "@chakra-ui/react";
+import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import NextLink from "next/link";
+import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+import { useNetwork } from "@/contexts/NetworkContext";
+import { useI18n } from "@/contexts/I18nProvider";
+import { useTranslation } from "react-i18next";
+import { FaGlobeAsia } from "react-icons/fa";
+import { useSolana } from "@/contexts/solanaProvider";
+import { UserAPI } from "@/api";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setUser, clearUser } from "@/store/slices/userSlice";
+import LogoText from "./LogoText";
 
 // 客户端专用组件，防止服务器端渲染不匹配
-const ClientSideOnly = ({ children, fallback }: { children: React.ReactNode, fallback?: React.ReactNode }) => {
-  const [isClient, setIsClient] = useState(false)
+const ClientSideOnly = ({
+  children,
+  fallback,
+}: {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}) => {
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  return isClient ? <>{children}</> : <>{fallback}</>
-}
+  return isClient ? <>{children}</> : <>{fallback}</>;
+};
 
 // 格式化钱包地址，显示前4位和后4位
 const formatWalletAddress = (address: string) => {
@@ -62,7 +68,11 @@ const formatWalletAddress = (address: string) => {
 const LogoSkeletonPlaceholder = () => {
   return (
     <Flex align="center" width="auto" minWidth="120px">
-      <Skeleton boxSize={{ base: '36px', xl: '40px' }} borderRadius="full" mr={2} />
+      <Skeleton
+        boxSize={{ base: "36px", xl: "40px" }}
+        borderRadius="full"
+        mr={2}
+      />
       <Skeleton height="24px" width="80px" borderRadius="md" />
     </Flex>
   );
@@ -75,7 +85,7 @@ const LogoWithName = () => {
       <Image
         src="/pis.png"
         alt="Pi Logo"
-        boxSize={{ base: '36px', xl: '40px' }}
+        boxSize={{ base: "36px", xl: "40px" }}
         display="flex"
         objectFit="contain"
         mr={2}
@@ -88,15 +98,13 @@ const LogoWithName = () => {
 
 // 添加一个移动端Logo骨架占位符
 const MobileLogoSkeletonPlaceholder = () => {
-  return (
-    <Skeleton boxSize="32px" borderRadius="full" />
-  );
+  return <Skeleton boxSize="32px" borderRadius="full" />;
 };
 
 // 添加一个在客户端渲染前显示的占位符组件
 const NavbarPlaceholder = () => {
-  const bgColor = useColorModeValue('white', 'gray.800')
-  
+  const bgColor = useColorModeValue("white", "gray.800");
+
   return (
     <Box
       as="nav"
@@ -119,37 +127,37 @@ const NavbarPlaceholder = () => {
         >
           {/* 移动端Logo占位符 */}
           <Flex
-            flex={{ base: 1, md: 'auto' }}
+            flex={{ base: 1, md: "auto" }}
             ml={{ base: -2 }}
-            display={{ base: 'flex', xl: 'none' }}
+            display={{ base: "flex", xl: "none" }}
             alignItems="center"
           >
             <Skeleton width="24px" height="24px" borderRadius="md" mr={2} />
             <Skeleton boxSize="32px" borderRadius="full" ml={2} />
           </Flex>
-          
+
           {/* 桌面端Logo和导航占位符 */}
           <Flex
-            flex={{ base: 1, xl: 'auto' }}
+            flex={{ base: 1, xl: "auto" }}
             alignItems="center"
-            justify={{ base: 'space-between', xl: 'start' }}
+            justify={{ base: "space-between", xl: "start" }}
             width="100%"
           >
             {/* Logo占位符 */}
             <Flex minWidth="120px">
               <LogoSkeletonPlaceholder />
             </Flex>
-            
+
             {/* 桌面导航占位符 */}
             <Flex
-              display={{ base: 'none', xl: 'flex' }}
+              display={{ base: "none", xl: "flex" }}
               ml={{ base: 10, xl: 6 }}
               flex="1"
             >
               <Skeleton height="24px" width="300px" borderRadius="md" />
             </Flex>
           </Flex>
-          
+
           {/* 右侧按钮占位符 */}
           <Flex justify="flex-end" width="auto" flexShrink={0}>
             <NavButtonsPlaceholder />
@@ -157,8 +165,8 @@ const NavbarPlaceholder = () => {
         </Flex>
       </Container>
     </Box>
-  )
-}
+  );
+};
 
 // 添加完整的钱包和语言选择器占位符
 const NavButtonsPlaceholder = () => {
@@ -174,13 +182,8 @@ const NavButtonsPlaceholder = () => {
       flexShrink={0}
     >
       {/* 语言选择器占位符 */}
-      <Skeleton
-        width="36px"
-        height="36px"
-        borderRadius="md"
-        flexShrink={0}
-      />
-      
+      <Skeleton width="36px" height="36px" borderRadius="md" flexShrink={0} />
+
       {/* 钱包连接按钮占位符 */}
       <Skeleton
         width={{ base: "80px", md: "100px" }}
@@ -193,25 +196,32 @@ const NavButtonsPlaceholder = () => {
 };
 
 export default function Navbar() {
-  const { isOpen, onToggle } = useDisclosure()
-  const bgColor = useColorModeValue("rgba(255,255,255,0.4)", "rgba(0,0,0,0.4)")
-  const borderColor = useColorModeValue('gray.200', 'gray.700')
-  const { network, handleNetworkChange } = useNetwork()
-  const { publicKey, setPublicKey, disconnectWallet, isConnecting, reconnectWallet, autoConnected } = useSolana()
-  const { t } = useTranslation()
-  const { language, changeLanguage } = useI18n()
-  const pathname = usePathname()
-  const toast = useToast()
-  const dispatch = useAppDispatch()
-  const { isLoggedIn, userInfo } = useAppSelector(state => state.user)
-  
+  const { isOpen, onToggle } = useDisclosure();
+  const bgColor = useColorModeValue("rgba(255,255,255,0.4)", "rgba(0,0,0,0.4)");
+  const borderColor = useColorModeValue("gray.200", "gray.700");
+  const { network, handleNetworkChange } = useNetwork();
+  const {
+    publicKey,
+    setPublicKey,
+    disconnectWallet,
+    isConnecting,
+    reconnectWallet,
+    autoConnected,
+  } = useSolana();
+  const { t } = useTranslation();
+  const { language, changeLanguage } = useI18n();
+  const pathname = usePathname();
+  const toast = useToast();
+  const dispatch = useAppDispatch();
+  const { isLoggedIn, userInfo } = useAppSelector((state) => state.user);
+
   // 添加客户端渲染状态检测
-  const [mounted, setMounted] = useState(false)
-  
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    setMounted(true)
-  }, [])
-  
+    setMounted(true);
+  }, []);
+
   // 监听钱包状态变化，如果钱包断开连接，清除登录状态
   useEffect(() => {
     if (!publicKey && isLoggedIn) {
@@ -294,107 +304,121 @@ export default function Navbar() {
         // 如果未连接钱包，先连接钱包并立即进行登录
         if (!publicKey) {
           try {
-            const result = await window.solana.connect()
-            const newPublicKey = result.publicKey.toString()
-            setPublicKey(newPublicKey)
+            const result = await window.solana.connect();
+            const newPublicKey = result.publicKey.toString();
+            setPublicKey(newPublicKey);
 
             // 立即执行登录
             try {
-              const message = 'Hello from PiSale!'
-              const encodedMessage = new TextEncoder().encode(message)
-              const signed = await window.solana.signMessage(encodedMessage, 'utf8')
-              const signatureBytes = new Uint8Array(signed.signature)
+              const message = "Hello from PiSale!";
+              const encodedMessage = new TextEncoder().encode(message);
+              const signed = await window.solana.signMessage(
+                encodedMessage,
+                "utf8"
+              );
+              const signatureBytes = new Uint8Array(signed.signature);
 
               const loginResult = await UserAPI.loginWithSolana({
                 publicKey: newPublicKey,
                 message,
                 signature: Array.from(signatureBytes),
-                code: 'K7QEISU9',
-              })
+                code: "K7QEISU9",
+              });
 
               if (loginResult.data) {
                 // 保存用户基本信息到localStorage，便于恢复登录状态
-                localStorage.setItem('userId', loginResult.data.user.userId.toString())
-                localStorage.setItem('nickname', loginResult.data.user.nickname || '用户')
-                localStorage.setItem('avatar_url', loginResult.data.user.avatar_url || '')
-                
+                localStorage.setItem(
+                  "userId",
+                  loginResult.data.user.userId.toString()
+                );
+                localStorage.setItem(
+                  "nickname",
+                  loginResult.data.user.nickname || "用户"
+                );
+                localStorage.setItem(
+                  "avatar_url",
+                  loginResult.data.user.avatar_url || ""
+                );
+
                 dispatch(
                   setUser({
                     user: loginResult.data.user,
                     authToken: loginResult.data.authToken,
                   })
-                )
+                );
 
                 toast({
-                  title: '登录成功',
+                  title: "登录成功",
                   description: `欢迎回来，${
-                    loginResult.data.user.nickname || 'User'
+                    loginResult.data.user.nickname || "User"
                   }`,
-                  status: 'success',
+                  status: "success",
                   duration: 3000,
                   isClosable: true,
-                  position: 'top',
-                })
+                  position: "top",
+                });
               }
             } catch (signError) {
-              console.error('消息签名失败:', signError)
+              console.error("消息签名失败:", signError);
               // 检查是否是用户拒绝签名
-              if (signError.message && (
-                  signError.message.includes('User rejected') || 
-                  signError.message.includes('用户拒绝') || 
-                  signError.message.includes('cancelled') || 
-                  signError.message.includes('取消')
-                )) {
+              if (
+                signError.message &&
+                (signError.message.includes("User rejected") ||
+                  signError.message.includes("用户拒绝") ||
+                  signError.message.includes("cancelled") ||
+                  signError.message.includes("取消"))
+              ) {
                 toast({
-                  title: '操作取消',
-                  description: '您取消了消息签名，请重试以完成登录',
-                  status: 'warning',
+                  title: "操作取消",
+                  description: "您取消了消息签名，请重试以完成登录",
+                  status: "warning",
                   duration: 3000,
                   isClosable: true,
-                  position: 'top',
-                })
+                  position: "top",
+                });
               } else {
                 toast({
-                  title: '签名错误',
-                  description: '签名消息时出错，请重试',
-                  status: 'error',
+                  title: "签名错误",
+                  description: "签名消息时出错，请重试",
+                  status: "error",
                   duration: 3000,
                   isClosable: true,
-                  position: 'top',
-                })
+                  position: "top",
+                });
               }
               // 如果签名失败，断开钱包连接
-              await disconnectWallet()
+              await disconnectWallet();
             }
-            return
+            return;
           } catch (connectError) {
-            console.error('钱包连接失败:', connectError)
+            console.error("钱包连接失败:", connectError);
             // 检查是否是用户拒绝连接
-            if (connectError.message && (
-                connectError.message.includes('User rejected') || 
-                connectError.message.includes('用户拒绝') || 
-                connectError.message.includes('cancelled') || 
-                connectError.message.includes('取消')
-              )) {
+            if (
+              connectError.message &&
+              (connectError.message.includes("User rejected") ||
+                connectError.message.includes("用户拒绝") ||
+                connectError.message.includes("cancelled") ||
+                connectError.message.includes("取消"))
+            ) {
               toast({
-                title: '连接取消',
-                description: '您取消了钱包连接请求',
-                status: 'warning',
+                title: "连接取消",
+                description: "您取消了钱包连接请求",
+                status: "warning",
                 duration: 3000,
                 isClosable: true,
-                position: 'top',
-              })
+                position: "top",
+              });
             } else {
               toast({
-                title: '连接错误',
-                description: '连接钱包时出错，请重试',
-                status: 'error',
+                title: "连接错误",
+                description: "连接钱包时出错，请重试",
+                status: "error",
                 duration: 3000,
                 isClosable: true,
-                position: 'top',
-              })
+                position: "top",
+              });
             }
-            return
+            return;
           }
         }
 
@@ -413,85 +437,95 @@ export default function Navbar() {
 
         // 如果已连接钱包但未登录，执行登录
         try {
-          const message = 'Hello from PiSale!'
-          const encodedMessage = new TextEncoder().encode(message)
-          const signed = await window.solana.signMessage(encodedMessage, 'utf8')
-          const signatureBytes = new Uint8Array(signed.signature)
+          const message = "Hello from PiSale!";
+          const encodedMessage = new TextEncoder().encode(message);
+          const signed = await window.solana.signMessage(
+            encodedMessage,
+            "utf8"
+          );
+          const signatureBytes = new Uint8Array(signed.signature);
 
           const result = await UserAPI.loginWithSolana({
             publicKey,
             message,
             signature: Array.from(signatureBytes),
-            code: 'K7QEISU9',
-          })
+            code: "K7QEISU9",
+          });
 
           if (result.data) {
             // 保存用户基本信息到localStorage，便于恢复登录状态
-            localStorage.setItem('userId', result.data.user.userId.toString())
-            localStorage.setItem('nickname', result.data.user.nickname || '用户')
-            localStorage.setItem('avatar_url', result.data.user.avatar_url || '')
-            
+            localStorage.setItem("userId", result.data.user.userId.toString());
+            localStorage.setItem(
+              "nickname",
+              result.data.user.nickname || "用户"
+            );
+            localStorage.setItem(
+              "avatar_url",
+              result.data.user.avatar_url || ""
+            );
+
             dispatch(
               setUser({
                 user: result.data.user,
                 authToken: result.data.authToken,
               })
-            )
+            );
 
             toast({
-              title: '登录成功',
-              description: `欢迎回来，${result.data.user.nickname || 'User'}`,
-              status: 'success',
+              title: "登录成功",
+              description: `欢迎回来，${result.data.user.nickname || "User"}`,
+              status: "success",
               duration: 3000,
               isClosable: true,
-              position: 'top',
-            })
+              position: "top",
+            });
           }
         } catch (signError) {
-          console.error('消息签名或登录失败:', signError)
+          console.error("消息签名或登录失败:", signError);
           // 检查是否是用户拒绝签名
-          if (signError.message && (
-              signError.message.includes('User rejected') || 
-              signError.message.includes('用户拒绝') || 
-              signError.message.includes('cancelled') || 
-              signError.message.includes('取消')
-            )) {
+          if (
+            signError.message &&
+            (signError.message.includes("User rejected") ||
+              signError.message.includes("用户拒绝") ||
+              signError.message.includes("cancelled") ||
+              signError.message.includes("取消"))
+          ) {
             toast({
-              title: '操作取消',
-              description: '您取消了消息签名，请重试以完成登录',
-              status: 'warning',
+              title: "操作取消",
+              description: "您取消了消息签名，请重试以完成登录",
+              status: "warning",
               duration: 3000,
               isClosable: true,
-              position: 'top',
-            })
+              position: "top",
+            });
           } else {
             toast({
-              title: '错误',
-              description: '登录过程中发生错误，请重试',
-              status: 'error',
+              title: "错误",
+              description: "登录过程中发生错误，请重试",
+              status: "error",
               duration: 3000,
               isClosable: true,
-              position: 'top',
-            })
+              position: "top",
+            });
           }
         }
       } else {
         // Pi Network 的连接逻辑
         try {
           toast({
-            title: '提示',
-            description: '即将支持 Pi 钱包连接',
-            status: 'info',
+            title: "提示",
+            description: "即将支持 Pi 钱包连接",
+            status: "info",
             duration: 3000,
             isClosable: true,
-            position: 'top',
-          })
+            position: "top",
+          });
         } catch (piError) {
-          console.error('Pi Network操作失败:', piError)
+          console.error("Pi Network操作失败:", piError);
           toast({
-            title: '错误',
-            description: 'Pi Network操作失败，请稍后再试',
-            status: 'error',
+            title: "错误",
+            description: "Pi Network操作失败，请稍后再试",
+            status: "error",
             duration: 3000,
             isClosable: true,
             position: "top",
@@ -499,13 +533,14 @@ export default function Navbar() {
         }
       }
     } catch (error) {
-      console.error('操作失败:', error)
+      console.error("操作失败:", error);
       // 通用错误处理
-      const errorMessage = error instanceof Error ? error.message : '操作失败，请重试'
+      const errorMessage =
+        error instanceof Error ? error.message : "操作失败，请重试";
       toast({
-        title: '错误',
+        title: "错误",
         description: errorMessage,
-        status: 'error',
+        status: "error",
         duration: 3000,
         isClosable: true,
         position: "top",
@@ -520,7 +555,7 @@ export default function Navbar() {
 
   // 渲染前显示占位符
   if (!mounted) {
-    return <NavbarPlaceholder />
+    return <NavbarPlaceholder />;
   }
 
   return (
@@ -562,10 +597,8 @@ export default function Navbar() {
             />
             {/* 移动端显示Logo */}
             <NextLink href="/" passHref>
-              <Flex align="center" cursor="pointer" ml={2}>
-                <ClientSideOnly
-                  fallback={<MobileLogoSkeletonPlaceholder />}
-                >
+              <Flex align="center" cursor="pointer" ml={2} display="contents">
+                <ClientSideOnly fallback={<MobileLogoSkeletonPlaceholder />}>
                   <Image
                     src="/pis.png"
                     alt="Pi Logo"
@@ -586,12 +619,10 @@ export default function Navbar() {
               <Flex
                 align="center"
                 cursor="pointer"
-                display={{ base: 'none', xl: 'flex' }}
+                display={{ base: "none", xl: "flex" }}
                 minWidth="120px" // 确保固定最小宽度，防止跳动
               >
-                <ClientSideOnly
-                  fallback={<LogoSkeletonPlaceholder />}
-                >
+                <ClientSideOnly fallback={<LogoSkeletonPlaceholder />}>
                   <LogoWithName />
                 </ClientSideOnly>
               </Flex>
@@ -610,9 +641,7 @@ export default function Navbar() {
           </Flex>
 
           {/* 确保语言选择器和钱包按钮始终在右侧，无论是否加载完成 */}
-          <ClientSideOnly
-            fallback={<NavButtonsPlaceholder />}
-          >
+          <ClientSideOnly fallback={<NavButtonsPlaceholder />}>
             <Stack
               flex={{ base: 0, md: 0 }}
               justify="flex-end"
@@ -628,43 +657,45 @@ export default function Navbar() {
                   variant="outline"
                   // colorScheme="purple"
                   color="text."
-                  size={{ base: 'sm', md: 'md' }}
+                  size={{ base: "sm", md: "md" }}
                   fontWeight={600}
                   borderWidth="2px"
-                  h={{ base: '36px', md: '40px' }}
-                  minW={{ base: '80px', md: '100px' }}
+                  h={{ base: "36px", md: "40px" }}
+                  minW={{ base: "80px", md: "100px" }}
                   width="auto"
-                >{t('language')} <ChevronDownIcon /></MenuButton>
+                >
+                  {t("language")} <ChevronDownIcon />
+                </MenuButton>
                 <MenuList minW="140px">
                   <MenuItem
                     fontWeight="500"
-                    onClick={() => changeLanguage('en')}
-                    bg={language === 'en' ? 'purple.50' : undefined}
+                    onClick={() => changeLanguage("en")}
+                    bg={language === "en" ? "purple.50" : undefined}
                     _dark={{
-                      bg: language === 'en' ? 'purple.900' : undefined,
+                      bg: language === "en" ? "purple.900" : undefined,
                     }}
                   >
-                    {t('english')}
+                    {t("english")}
                   </MenuItem>
                   <MenuItem
                     fontWeight="500"
-                    onClick={() => changeLanguage('ko')}
-                    bg={language === 'ko' ? 'purple.50' : undefined}
+                    onClick={() => changeLanguage("ko")}
+                    bg={language === "ko" ? "purple.50" : undefined}
                     _dark={{
-                      bg: language === 'ko' ? 'purple.900' : undefined,
+                      bg: language === "ko" ? "purple.900" : undefined,
                     }}
                   >
-                    {t('korean')}
+                    {t("korean")}
                   </MenuItem>
                   <MenuItem
                     fontWeight="500"
-                    onClick={() => changeLanguage('zh')}
-                    bg={language === 'zh' ? 'purple.50' : undefined}
+                    onClick={() => changeLanguage("zh")}
+                    bg={language === "zh" ? "purple.50" : undefined}
                     _dark={{
-                      bg: language === 'zh' ? 'purple.900' : undefined,
+                      bg: language === "zh" ? "purple.900" : undefined,
                     }}
                   >
-                    {t('chinese')}
+                    {t("chinese")}
                   </MenuItem>
                 </MenuList>
               </Menu>
@@ -676,12 +707,12 @@ export default function Navbar() {
                     as={Button}
                     variant="outline"
                     colorScheme="purple"
-                    size={{ base: 'sm', md: 'md' }}
+                    size={{ base: "sm", md: "md" }}
                     rightIcon={<ChevronDownIcon />}
                     fontWeight={600}
                     borderWidth="2px"
-                    h={{ base: '36px', md: '40px' }}
-                    minW={{ base: '80px', md: '100px' }}
+                    h={{ base: "36px", md: "40px" }}
+                    minW={{ base: "80px", md: "100px" }}
                     width="auto"
                   >
                     {network}
@@ -697,10 +728,10 @@ export default function Navbar() {
                         />
                       }
                       fontWeight="500"
-                      onClick={() => handleNetworkChange('SOL')}
-                      bg={network === 'SOL' ? 'purple.50' : undefined}
+                      onClick={() => handleNetworkChange("SOL")}
+                      bg={network === "SOL" ? "purple.50" : undefined}
                       _dark={{
-                        bg: network === 'SOL' ? 'purple.900' : undefined,
+                        bg: network === "SOL" ? "purple.900" : undefined,
                       }}
                     >
                       SOL
@@ -715,10 +746,10 @@ export default function Navbar() {
                         />
                       }
                       fontWeight="500"
-                      onClick={() => handleNetworkChange('PI')}
-                      bg={network === 'PI' ? 'purple.50' : undefined}
+                      onClick={() => handleNetworkChange("PI")}
+                      bg={network === "PI" ? "purple.50" : undefined}
                       _dark={{
-                        bg: network === 'PI' ? 'purple.900' : undefined,
+                        bg: network === "PI" ? "purple.900" : undefined,
                       }}
                     >
                       PI
@@ -728,19 +759,20 @@ export default function Navbar() {
               </Box>
 
               {/* 连接钱包按钮 或 已连接钱包的下拉菜单 */}
-              {network === 'SOL' && isLoggedIn && publicKey ? (
+              {network === "SOL" && isLoggedIn && publicKey ? (
                 <Menu>
                   <MenuButton
                     as={Button}
-                    fontSize={{ base: 'xs', md: 'sm' }}
+                    fontSize={{ base: "xs", md: "sm" }}
                     fontWeight={600}
                     variant="solid"
                     bg="brand.primary"
                     color="white"
-                    _hover={{ bg: 'brand.light' }}
-                    h={{ base: '36px', md: '40px' }}
+                    _hover={{ bg: "brand.primary" }}
+                    _active={{ bg: "brand.primary" }}
+                    h={{ base: "36px", md: "40px" }}
                     px={{ base: 3, md: 4 }}
-                    size={{ base: 'sm', md: 'md' }}
+                    size={{ base: "sm", md: "md" }}
                     rightIcon={<ChevronDownIcon />}
                   >
                     {formatWalletAddress(publicKey)}
@@ -753,18 +785,20 @@ export default function Navbar() {
                 </Menu>
               ) : (
                 <Button
-                  variant="outline"
-                  colorScheme="purple"
-                  size={{ base: 'sm', md: 'md' }}
+                  variant="solid"
+                  bg="brand.primary"
+                  color="white"
+                  _hover={{ bg: "brand.primary" }}
+                  _active={{ bg: "brand.primary" }}
+                  size={{ base: "sm", md: "md" }}
                   fontWeight={600}
-                  borderWidth="2px"
                   onClick={connectwallet}
                   isLoading={isConnecting}
-                  h={{ base: '36px', md: '40px' }}
-                  minW={{ base: '80px', md: '100px' }}
+                  h={{ base: "36px", md: "40px" }}
+                  minW={{ base: "80px", md: "100px" }}
                   width="auto"
                 >
-                  {t('connect')}
+                  {t("connect")}
                 </Button>
               )}
             </Stack>
@@ -1160,5 +1194,4 @@ const NAV_ITEMS: Array<NavItem> = [
     href: '/points',
   },
     */
-]
-
+];
