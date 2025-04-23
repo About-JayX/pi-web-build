@@ -58,11 +58,11 @@ import { useMintingCalculations } from '@/hooks/useMintingCalculations'
 
 // 添加本地formatAddress函数
 const formatAddress = (address: string): string => {
-  if (!address) return '';
-  const start = address.substring(0, 6);
-  const end = address.substring(address.length - 4);
-  return `${start}...${end}`;
-};
+  if (!address) return ''
+  const start = address.substring(0, 6)
+  const end = address.substring(address.length - 4)
+  return `${start}...${end}`
+}
 
 interface TokenInfoProps {
   token: {
@@ -72,7 +72,6 @@ interface TokenInfoProps {
     totalSupply: string
     target: string
     raised: string
-    participants: number
     progress: number
     mintRate?: string
     contractAddress?: string
@@ -108,18 +107,18 @@ export default function TokenInfo({
   const { t } = useTranslation()
 
   // 使用自定义Hook处理铸造计算
-  const { 
+  const {
     mintingPrice,
     mintingRatio,
     getFormattedMintRate,
-    calculateMintedAmount
+    calculateMintedAmount,
   } = useMintingCalculations({
     totalSupply: token.totalSupply,
     target: token.target,
     mintRate: token.mintRate,
     currencyUnit,
-    tokenDecimals: 6
-  });
+    tokenDecimals: 6,
+  })
 
   // 打开铸造弹窗
   const openMinting = () => {
@@ -174,19 +173,19 @@ export default function TokenInfo({
   // 获取兑换比率 (X代币:1货币单位)
   const getExchangeRate = () => {
     // 优先使用token.exchangeRate
-    if (token.exchangeRate) return token.exchangeRate;
-    
+    if (token.exchangeRate) return token.exchangeRate
+
     // 否则使用Hook提供的格式化方法
-    return getFormattedMintRate();
+    return getFormattedMintRate()
   }
 
   // 计算已铸造代币数量
   const getMintedAmount = () => {
     // 优先使用token.mintedAmount
-    if (token.mintedAmount) return token.mintedAmount;
-    
+    if (token.mintedAmount) return token.mintedAmount
+
     // 否则使用Hook提供的计算方法
-    return calculateMintedAmount(token.raised, token.symbol);
+    return calculateMintedAmount(token.raised, token.symbol)
   }
 
   // 分享功能处理
@@ -815,7 +814,11 @@ export default function TokenInfo({
                       align="center"
                       justify="flex-end"
                     >
-                      <Text fontWeight="bold">{formatTokenAmount(token.totalSupply, { abbreviate: true })}</Text>
+                      <Text fontWeight="bold">
+                        {formatTokenAmount(token.totalSupply, {
+                          abbreviate: true,
+                        })}
+                      </Text>
                     </Flex>
                   </GridItem>
 
@@ -853,9 +856,7 @@ export default function TokenInfo({
                         color="brand.primary"
                         boxSize="12px"
                       />
-                      <Text color={secondaryText}>
-                        {t('mintRate')}
-                      </Text>
+                      <Text color={secondaryText}>{t('mintRate')}</Text>
                     </HStack>
                   </GridItem>
                   <GridItem>
@@ -936,11 +937,7 @@ export default function TokenInfo({
                   borderRadius="md"
                 >
                   <HStack spacing={1}>
-                    <Icon
-                      as={FaWallet}
-                      color="brand.primary"
-                      boxSize="14px"
-                    />
+                    <Icon as={FaWallet} color="brand.primary" boxSize="14px" />
                     <Text color={secondaryText} fontSize="sm">
                       {t('priceColumn')}
                     </Text>

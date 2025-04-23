@@ -26,6 +26,44 @@ export interface TokenInfo {
   first_trade_time: string
   created_at: string
   progress: number
+  liquidity_amount: number
+  net_quote_amount: number
+}
+
+export interface MintToken
+  extends Omit<
+    TokenInfo,
+    | 'token_id'
+    | 'token_name'
+    | 'token_symbol'
+    | 'token_address'
+    | 'token_decimal'
+    | 'total_supply'
+    | 'total_buy_amount'
+    | 'buy_transactions'
+    | 'total_sell_amount'
+    | 'sell_transactions'
+    | 'minter_counts'
+    | 'last_trade_time'
+    | 'first_trade_time'
+  > {
+  id: number // from token_id
+  name: string // from token_name
+  symbol: string // from token_symbol
+  address: string // from token_address
+  tokenDecimal: number // from token_decimal
+  totalSupply: string // formatted total_supply
+  totalBuyAmount: number // formatted total_buy_amount
+  buyTransactions: number // from buy_transactions
+  totalSellAmount: number // formatted total_sell_amount
+  sellTransactions: number // from sell_transactions
+  minterCounts: number // from minter_counts
+  lastTradeTime: string // from last_trade_time
+  firstTradeTime: string // from first_trade_time
+  image: string // same as logo
+  target: string // formatted from liquidity_amount
+  raised: string // formatted from net_quote_amount
+  currencyUnit?: string
 }
 
 export type TokenList = TokenInfo[]

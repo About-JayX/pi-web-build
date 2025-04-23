@@ -1,9 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from '@/config/axios'
-import { TokenList } from '@/api/types'
+import { MintToken, TokenList } from '@/api/types'
 import { RootState } from '@/store'
 import BigNumber from 'bignumber.js'
-import { formatTokenAmountByDecimals, calculateMintingPrice, formatTokenAmount } from '@/utils'
+import {
+  formatTokenAmountByDecimals,
+  calculateMintingPrice,
+  formatTokenAmount,
+} from '@/utils'
 
 interface TokenParams {
   page: number
@@ -34,31 +38,6 @@ interface TokenResponse {
   liquidity_amount: number
 }
 
-interface MintToken {
-  id: number
-  name: string
-  symbol: string
-  address: string
-  totalSupply: string
-  participants: number
-  progress: number
-  net_volume: number
-  image: string
-  target: string
-  raised: string
-  mintRate: string
-  created_at: string
-  minterCounts: number
-  buyTransactions: number
-  sellTransactions: number
-  totalBuyAmount: number
-  totalSellAmount: number
-  firstTradeTime: string
-  lastTradeTime: string
-  logo?: string
-  tokenDecimal?: number
-}
-
 interface TokenState {
   tokenList: MintToken[]
   selectedToken: MintToken | null
@@ -83,82 +62,90 @@ export const fetchTokenList = createAsyncThunk(
   async (params: TokenParams, { rejectWithValue, dispatch }) => {
     try {
       const data: TokenList = await axios.get('/token/list', { params })
-      
+
+      console.log(data, 'data_')
+
       if (!data || !Array.isArray(data)) {
-        return rejectWithValue('服务器返回的数据格式无效，请稍后再试');
+        return rejectWithValue('服务器返回的数据格式无效，请稍后再试')
       }
 
       return data.map(token => {
         // 根据代币的精度格式化各种金额
         const tokenDecimal = token.token_decimal || 6
         const divisor = 10 ** tokenDecimal
-        
+
         // 转换为SOL单位（9位小数）
         const solDivisor = 10 ** 9
 
         // 使用liquidity_amount作为铸造总额
-        const liquidityAmount = token.liquidity_amount 
+        const liquidityAmount = token.liquidity_amount
           ? new BigNumber(token.liquidity_amount).div(solDivisor).toFixed(2)
           : '0'
 
         // 使用net_quote_amount作为已铸额度
-        const netQuoteAmount = token.net_quote_amount 
+        const netQuoteAmount = token.net_quote_amount
           ? new BigNumber(token.net_quote_amount).div(solDivisor).toFixed(2)
           : '0'
-        
+
         // 计算总供应量 - 修正：不再硬编码单位，保留原始数值
         // 第一性原理：链上原始总供应量 / 10^tokenDecimal = 实际显示总供应量
-        const totalSupplyValue = new BigNumber(token.total_supply).div(divisor).toFixed()
-        
-        // 动态计算铸造比率，不再使用固定的1:1比例
-        const networkCurrency = 'SOL'  // 可以从配置或上下文获取
-        
+        const totalSupplyValue = new BigNumber(token.total_supply)
+          .div(divisor)
+          .toFixed()
+
+        // 动态计算铸造价格，不再使用固定的1:1比例
+        const networkCurrency = 'SOL' // 可以从配置或上下文获取
+
         return {
           id: token.token_id,
           name: token.token_name,
           symbol: token.token_symbol,
           address: token.token_address,
           tokenDecimal: tokenDecimal,
-          totalSupply: totalSupplyValue, // 不再添加单位后缀，由显示组件处理
-          participants: token.total_transactions,
+          totalSupply: totalSupplyValue,
           progress: Number(token.progress.toFixed(2)),
           net_volume: new BigNumber(token.net_volume).div(divisor).toNumber(),
-          image: token.logo || '/token-logo.png',
           logo: token.logo,
+          image: token.logo,
           target: `${liquidityAmount} ${networkCurrency}`,
           raised: `${netQuoteAmount} ${networkCurrency}`,
           created_at: token.created_at,
           minterCounts: token.minter_counts,
           buyTransactions: token.buy_transactions,
           sellTransactions: token.sell_transactions,
-          totalBuyAmount: new BigNumber(token.total_buy_amount).div(divisor).toNumber(),
-          totalSellAmount: new BigNumber(token.total_sell_amount).div(divisor).toNumber(),
+          totalBuyAmount: new BigNumber(token.total_buy_amount)
+            .div(divisor)
+            .toNumber(),
+          totalSellAmount: new BigNumber(token.total_sell_amount)
+            .div(divisor)
+            .toNumber(),
           firstTradeTime: token.first_trade_time,
           lastTradeTime: token.last_trade_time,
-        }
+          currencyUnit: networkCurrency,
+        } as MintToken
       })
     } catch (error: any) {
-      console.error('获取代币列表失败:', error);
-      
+      console.error('获取代币列表失败:', error)
+
       if (error.response) {
         // 服务器响应错误
-        const status = error.response.status;
-        
+        const status = error.response.status
+
         if (status === 500) {
-          return rejectWithValue('服务器内部错误，请稍后重试');
+          return rejectWithValue('服务器内部错误，请稍后重试')
         } else if (status === 404) {
-          return rejectWithValue('请求的资源不存在');
+          return rejectWithValue('请求的资源不存在')
         } else if (status === 401) {
-          return rejectWithValue('未授权，请重新登录');
+          return rejectWithValue('未授权，请重新登录')
         } else {
-          return rejectWithValue(`服务器返回错误: ${status}`);
+          return rejectWithValue(`服务器返回错误: ${status}`)
         }
       } else if (error.request) {
         // 网络错误
-        return rejectWithValue('网络连接失败，请检查您的网络连接并重试');
+        return rejectWithValue('网络连接失败，请检查您的网络连接并重试')
       } else {
         // 请求配置错误
-        return rejectWithValue('请求配置错误: ' + (error.message || '未知错误'));
+        return rejectWithValue('请求配置错误: ' + (error.message || '未知错误'))
       }
     }
   }

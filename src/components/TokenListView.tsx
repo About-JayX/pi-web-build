@@ -23,26 +23,8 @@ import { useRouter } from 'next/navigation'
 import { formatTokenAmount } from '@/utils'
 import { useCallback } from 'react'
 import { useMintingCalculations } from '@/hooks/useMintingCalculations'
+import { MintToken } from '@/api/types'
 import { useNetwork } from '@/contexts/NetworkContext'
-
-interface MintToken {
-  id: number
-  name: string
-  symbol: string
-  address: string
-  totalSupply: string
-  participants: number
-  progress: number
-  image: string
-  target: string
-  raised: string
-  mintRate: string
-  created_at: string
-  deployedAt?: number
-  logo?: string
-  minterCounts: number
-}
-
 interface TokenListViewProps {
   tokens: MintToken[]
   sortColumn: string
@@ -83,7 +65,7 @@ const TokenListView = ({
   sortColumn,
   sortDirection,
   onSort,
-  currencyUnit
+  currencyUnit,
 }: TokenListViewProps) => {
   const router = useRouter()
   const bg = useColorModeValue('white', 'gray.800')
@@ -95,29 +77,34 @@ const TokenListView = ({
   const toast = useToast()
   const { t } = useTranslation()
   const { network } = useNetwork()
-  
+
   // 将hook移到组件顶层，只初始化一次
   const { getFormattedMintRate } = useMintingCalculations({
-    totalSupply: "",  // 这里不提供具体值，只是初始化hook
-    target: "",
+    totalSupply: '', // 这里不提供具体值，只是初始化hook
+    target: '',
     currencyUnit,
-    tokenDecimals: 6
-  });
+    tokenDecimals: 6,
+  })
 
   // 修改格式化铸造比率函数，不在内部调用Hook
-  const formatMintRateForToken = useCallback((token: MintToken) => {
-    // 使用已初始化的getFormattedMintRate函数
-    // 注意这里只是使用函数，不再创建新的Hook实例
-    const rate = token.mintRate || getFormattedMintRate({
-      totalSupply: token.totalSupply,
-      target: token.target,
-      currencyUnit,
-      tokenDecimals: 6
-    });
-    
-    // 移除数字中的千分号（逗号）
-    return rate ? rate.replace(/,/g, '') : rate;
-  }, [getFormattedMintRate, currencyUnit]);
+  const formatMintRateForToken = useCallback(
+    (token: MintToken) => {
+      // 使用已初始化的getFormattedMintRate函数
+      // 注意这里只是使用函数，不再创建新的Hook实例
+      const rate =
+        token.mintRate ||
+        getFormattedMintRate({
+          totalSupply: token.totalSupply,
+          target: token.target,
+          currencyUnit,
+          tokenDecimals: 6,
+        })
+
+      // 移除数字中的千分号（逗号）
+      return rate ? rate.replace(/,/g, '') : rate
+    },
+    [getFormattedMintRate, currencyUnit]
+  )
 
   // 跳转到代币铸造页面
   const navigateToMintPage = (contractAddress: string) => {
@@ -139,12 +126,15 @@ const TokenListView = ({
         .share({
           title: `${token.name} (${token.symbol})`,
           text: `${t('share')} ${token.name} ${t('token')}`,
-          url: window.location.origin + `/${network.toLowerCase()}/${token.address}`,
+          url:
+            window.location.origin +
+            `/${network.toLowerCase()}/${token.address}`,
         })
         .catch(error => console.log(`${t('share')} ${t('failed')}:`, error))
     } else {
       // 如果浏览器不支持，可以复制链接到剪贴板
-      const url = window.location.origin + `/${network.toLowerCase()}/${token.address}`
+      const url =
+        window.location.origin + `/${network.toLowerCase()}/${token.address}`
       navigator.clipboard
         .writeText(url)
         .then(() =>
@@ -214,14 +204,31 @@ const TokenListView = ({
   )
 
   return (
-    <TableContainer bg={bg} borderRadius="lg" boxShadow="md" width="100%" maxWidth="100%" overflowX="auto">
+    <TableContainer
+      bg={bg}
+      borderRadius="lg"
+      boxShadow="md"
+      width="100%"
+      maxWidth="100%"
+      overflowX="auto"
+    >
       <Table variant="simple" width="100%" size="md" layout="fixed">
         <Thead>
           <Tr>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" width="15%">
+            <Th
+              bg={thBg}
+              borderBottom="2px"
+              borderColor="brand.primary"
+              width="15%"
+            >
               {t('tokenColumn')}
             </Th>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" width="15%">
+            <Th
+              bg={thBg}
+              borderBottom="2px"
+              borderColor="brand.primary"
+              width="15%"
+            >
               {t('contractAddressColumn')}
             </Th>
             <ThSortable column="totalSupply" width="12%">
@@ -233,10 +240,21 @@ const TokenListView = ({
             <ThSortable column="participants" width="10%">
               {t('participantsColumn')}
             </ThSortable>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" textAlign="center" width="15%">
+            <Th
+              bg={thBg}
+              borderBottom="2px"
+              borderColor="brand.primary"
+              textAlign="center"
+              width="15%"
+            >
               {t('mintingPrice')}
             </Th>
-            <Th bg={thBg} borderBottom="2px" borderColor="brand.primary" width="8%">
+            <Th
+              bg={thBg}
+              borderBottom="2px"
+              borderColor="brand.primary"
+              width="8%"
+            >
               {t('linksColumn')}
             </Th>
           </Tr>
@@ -317,7 +335,9 @@ const TokenListView = ({
                   </Box>
                 )}
               </Td>
-              <Td textAlign="center">{formatTokenAmount(token.totalSupply, { abbreviate: true })}</Td>
+              <Td textAlign="center">
+                {formatTokenAmount(token.totalSupply, { abbreviate: true })}
+              </Td>
               <Td>
                 <Box py={1} width="100%">
                   <HStack justify="space-between" mb={1}>
@@ -344,7 +364,12 @@ const TokenListView = ({
               </Td>
               <Td textAlign="center">{token.participants}</Td>
               <Td textAlign="center">
-                <Text fontWeight="medium" textAlign="center" width="100%" display="block">
+                <Text
+                  fontWeight="medium"
+                  textAlign="center"
+                  width="100%"
+                  display="block"
+                >
                   {formatMintRateForToken(token)}
                 </Text>
               </Td>
@@ -369,4 +394,4 @@ const TokenListView = ({
   )
 }
 
-export default TokenListView 
+export default TokenListView

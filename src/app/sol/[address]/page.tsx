@@ -31,7 +31,13 @@ import { useParams } from 'next/navigation'
 import { useAppSelector, useAppDispatch } from '@/store/hooks'
 import { selectTokenByAddress, fetchTokenList } from '@/store/slices/tokenSlice'
 import { useTranslation } from 'react-i18next'
-import { FaCoins, FaUsers, FaChartPie, FaSync, FaArrowLeft } from 'react-icons/fa'
+import {
+  FaCoins,
+  FaUsers,
+  FaChartPie,
+  FaSync,
+  FaArrowLeft,
+} from 'react-icons/fa'
 import MintingForm from '@/components/token-detail/MintingForm'
 import { useSolana } from '@/contexts/solanaProvider'
 import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
@@ -60,7 +66,14 @@ export default function TokenMintPage() {
     data: fairCurveData,
     loading: fairCurveLoading,
     error: fairCurveError,
-  } = useFairCurve(conn, selectedToken?.address ? (selectedToken.address.trim() !== '' ? selectedToken.address : undefined) : undefined)
+  } = useFairCurve(
+    conn,
+    selectedToken?.address
+      ? selectedToken.address.trim() !== ''
+        ? selectedToken.address
+        : undefined
+      : undefined
+  )
 
   const formattedData = fairCurveData
 
@@ -179,7 +192,11 @@ export default function TokenMintPage() {
     <Box bg={softBg} minH="100vh" w="100%" pb={10} overflowX="hidden">
       <Container maxW="container.xl" py={12}>
         <VStack spacing={10} align="stretch">
-          <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ base: 'flex-start', md: 'center' }}>
+          <Stack
+            direction={{ base: 'column', md: 'row' }}
+            justify="space-between"
+            align={{ base: 'flex-start', md: 'center' }}
+          >
             <Box>
               <Heading as="h2" size="lg" mb={2}>
                 {t('tokenInfoNetwork').replace('{network}', 'Solana')}
@@ -196,12 +213,7 @@ export default function TokenMintPage() {
                   <VStack spacing={{ base: 4, md: 6 }} align="stretch">
                     {/* 代币标题部分 */}
                     <Box>
-                      <Heading
-                        as="h1"
-                        size="lg"
-                        mb={2}
-                        color="brand.primary"
-                      >
+                      <Heading as="h1" size="lg" mb={2} color="brand.primary">
                         {selectedToken.name} ({selectedToken.symbol})
                       </Heading>
                       <Text color="gray.500">
@@ -219,7 +231,11 @@ export default function TokenMintPage() {
 
                     {/* 进度部分 */}
                     <Box>
-                      <Flex justify="space-between" mb={1} fontSize={{ base: 'xs', md: 'sm' }}>
+                      <Flex
+                        justify="space-between"
+                        mb={1}
+                        fontSize={{ base: 'xs', md: 'sm' }}
+                      >
                         <HStack>
                           <Text color="gray.600">{t('progress')}:</Text>
                           <Text fontWeight="bold" color="brand.primary">
@@ -237,10 +253,7 @@ export default function TokenMintPage() {
                     </Box>
 
                     {/* 统计数据部分 */}
-                    <SimpleGrid
-                      columns={3}
-                      spacing={4}
-                    >
+                    <SimpleGrid columns={3} spacing={4}>
                       <Box
                         bg={statBg}
                         p={4}
@@ -299,7 +312,11 @@ export default function TokenMintPage() {
                         <Text color="gray.600" fontSize="sm">
                           {t('supplied')}
                         </Text>
-                        <Text fontWeight="bold" fontSize="xl" color="purple.500">
+                        <Text
+                          fontWeight="bold"
+                          fontSize="xl"
+                          color="purple.500"
+                        >
                           {formatTokenAmount(formattedData.supplied)}{' '}
                           {selectedToken.symbol}
                         </Text>
@@ -324,45 +341,53 @@ export default function TokenMintPage() {
                           bg={statBg}
                           borderRadius="md"
                         >
-                          <Text color="gray.600" fontSize="sm">{t('mintRate')}:</Text>
+                          <Text color="gray.600" fontSize="sm">
+                            {t('mintRate')}:
+                          </Text>
                           <Text fontWeight="bold">
                             {formatFeeRate(formattedData.feeRate)}
                           </Text>
                         </HStack>
-                
+
                         <HStack
                           justify="space-between"
                           p={3}
                           bg={statBg}
                           borderRadius="md"
                         >
-                          <Text color="gray.600" fontSize="sm">{t('remaining')}:</Text>
+                          <Text color="gray.600" fontSize="sm">
+                            {t('remaining')}:
+                          </Text>
                           <Text fontWeight="bold">
                             {formatTokenAmount(formattedData.remaining)}{' '}
                             {selectedToken.symbol}
                           </Text>
                         </HStack>
-                
+
                         <HStack
                           justify="space-between"
                           p={3}
                           bg={statBg}
                           borderRadius="md"
                         >
-                          <Text color="gray.600" fontSize="sm">{t('supplied')}:</Text>
+                          <Text color="gray.600" fontSize="sm">
+                            {t('supplied')}:
+                          </Text>
                           <Text fontWeight="bold">
                             {formatTokenAmount(formattedData.supplied)}{' '}
                             {selectedToken.symbol}
                           </Text>
                         </HStack>
-                
+
                         <HStack
                           justify="space-between"
                           p={3}
                           bg={statBg}
                           borderRadius="md"
                         >
-                          <Text color="gray.600" fontSize="sm">{t('solReceived')}:</Text>
+                          <Text color="gray.600" fontSize="sm">
+                            {t('solReceived')}:
+                          </Text>
                           <Text fontWeight="bold">
                             {formatSolAmount(formattedData.solReceived)} SOL
                           </Text>
@@ -375,7 +400,11 @@ export default function TokenMintPage() {
             </GridItem>
 
             {/* PC端右侧区域 - 显示铸造表单和铸造说明 */}
-            <GridItem width="100%" overflow="hidden" display={{ base: "none", lg: "block" }}>
+            <GridItem
+              width="100%"
+              overflow="hidden"
+              display={{ base: 'none', lg: 'block' }}
+            >
               <VStack spacing={5} align="stretch">
                 {/* 先显示铸造表单 */}
                 <Card bg={cardBg} borderWidth="1px" borderColor={borderColor}>
@@ -383,21 +412,14 @@ export default function TokenMintPage() {
                     <Stack spacing={4}>
                       <Heading size="md">{t('mintToken')}</Heading>
                       <MintingForm
-                        token={{
-                          symbol: selectedToken.symbol,
-                          mintRate: formattedData.feeRate,
-                          network,
-                          currencyUnit,
-                          address: selectedToken.address,
-                          tokenDecimal: selectedToken.tokenDecimal,
-                        }}
+                        token={selectedToken}
                         tokenAccount={tokenAccount}
                         tokenBalance={tokenBalance}
                       />
                     </Stack>
                   </CardBody>
                 </Card>
-                
+
                 {/* 然后显示铸造说明 */}
                 <MintingInstructions
                   token={{
