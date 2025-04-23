@@ -415,6 +415,9 @@ export default function TokenMintPage() {
                         token={selectedToken}
                         tokenAccount={tokenAccount}
                         tokenBalance={tokenBalance}
+                        onBalanceUpdate={v => {
+                          setTokenBalance(v)
+                        }}
                       />
                     </Stack>
                   </CardBody>

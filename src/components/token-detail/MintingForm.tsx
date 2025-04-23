@@ -52,7 +52,7 @@ interface MintingFormProps {
   isOpen?: boolean
   onClose?: () => void
   isModal?: boolean
-  onBalanceUpdate?: () => void
+  onBalanceUpdate?: (v: any) => void
 }
 
 const MintingForm: React.FC<MintingFormProps> = memo(
@@ -81,7 +81,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
     const { mintToken, returnToken } = useProgram()
     const { conn, publicKey } = useSolana()
     const isLoggedIn = useAppSelector(state => state.user.isLoggedIn)
-    const { data: fairCurveData } = useFairCurve(
+    const { data: fairCurveData, refetch } = useFairCurve(
       conn,
       token.address
         ? token.address.trim() !== ''
@@ -151,8 +151,9 @@ const MintingForm: React.FC<MintingFormProps> = memo(
               tokenAccountPubkey
             )
             const newBalance = tokenAccountInfo.value.uiAmount || 0
+
             if (onBalanceUpdate) {
-              onBalanceUpdate()
+              onBalanceUpdate(newBalance)
             }
           }
         } catch (error) {
@@ -238,7 +239,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
 
           // 通过 props 更新父组件的 tokenBalance
           if (onBalanceUpdate) {
-            onBalanceUpdate()
+            onBalanceUpdate(newBalance)
           }
         }
       } catch (error) {
@@ -290,9 +291,15 @@ const MintingForm: React.FC<MintingFormProps> = memo(
         // 调用真实的mintToken函数，传入货币金额（转换为最小单位）和token地址
         await mintToken(mintAmount * 1e9, token.address)
 
-        // 等待交易确认后更新余额
+        // 等待交易确认后更新余额和代币信息
         setTimeout(async () => {
+          // 更新 SOL 余额
           await updateBalances()
+          // 更新 FairCurve 数据
+          if (fairCurveData && token.address) {
+            await refetch()
+          }
+          // 更新代币余额
         }, 2000)
 
         // 显示成功提示
