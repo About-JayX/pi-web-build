@@ -60,6 +60,7 @@ import PaginationControl from '@/components/PaginationControl'
 import TokenListView from '@/components/TokenListView'
 import FilterPanel from '@/components/FilterPanel'
 import { LoadingSpinner, StyledTabs } from '@/components'
+import ErrorDisplay from '@/components/common/ErrorDisplay'
 
 interface MintToken {
   id: number
@@ -538,18 +539,10 @@ export default function MintPage() {
     if (error) {
       return (
         <Box py={10} textAlign="center">
-          <Text color="red.500" fontSize="lg" mb={4}>
-            {error}
-          </Text>
-          <VStack spacing={4}>
-            <Button 
-              colorScheme="purple" 
-              onClick={getTokenList} 
-              leftIcon={<Icon as={FaSync} />}
-            >
-              {t('tryAgain')}
-            </Button>
-          </VStack>
+          <ErrorDisplay 
+            message={error} 
+            onRetry={getTokenList} 
+          />
         </Box>
       )
     }
