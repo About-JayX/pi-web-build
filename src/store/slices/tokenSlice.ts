@@ -110,7 +110,7 @@ export const fetchTokenList = createAsyncThunk(
         // 第一性原理：链上原始总供应量 / 10^tokenDecimal = 实际显示总供应量
         const totalSupplyValue = new BigNumber(token.total_supply).div(divisor).toFixed()
         
-        // 动态计算铸造价格，不再使用固定的1:1比例
+        // 动态计算铸造比率，不再使用固定的1:1比例
         const networkCurrency = 'SOL'  // 可以从配置或上下文获取
         
         return {

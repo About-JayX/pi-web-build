@@ -102,7 +102,7 @@ const TokenListView = ({
     tokenDecimals: 6
   });
 
-  // 修改格式化铸造价格函数，不在内部调用Hook
+  // 修改格式化铸造比率函数，不在内部调用Hook
   const formatMintRateForToken = useCallback((token: MintToken) => {
     // 使用已初始化的getFormattedMintRate函数
     // 注意这里只是使用函数，不再创建新的Hook实例

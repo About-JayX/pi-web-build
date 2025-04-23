@@ -147,7 +147,7 @@ export default function MintingTokenCard({
     }
   }
 
-  // 格式化铸造价格，移除千分号
+  // 格式化铸造比率，移除千分号
   const formatMintRate = () => {
     const rate = token.mintRate || getFormattedMintRate();
     // 移除数字中的千分号（逗号）
@@ -286,7 +286,7 @@ export default function MintingTokenCard({
               </Text>
             </HStack>
 
-            {/* 铸造价格显示 */}
+            {/* 铸造比率显示 */}
             <HStack justify="space-between">
               <Text fontSize="xs" color={textColor}>
                 {t('mintingPrice')}

@@ -26,7 +26,7 @@ export default {
   'progress': '铸造进度',
   'participants': '铸造人数',
   'totalSupply': '总供应量',
-  'mintingPrice': '铸造价格',
+  'mintingPrice': '铸造比率',
   'contractAddress': '合约地址',
   'joinMinting': '参与铸造',
   'moreMintingProjects': '更多铸造代币',

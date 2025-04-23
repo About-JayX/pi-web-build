@@ -1,7 +1,6 @@
 export default {
   // 部署页面 - 通用
   'deployTitle': '部署代币',
-  'deployDescription': '部署MEME代币，填写信息并连接钱包开始部署',
   
   // 部署页面 - 表单字段
   'tokenSymbol': '代币符号 (Ticker)',
@@ -9,13 +8,16 @@ export default {
   'tokenIcon': '代币图标',
   'uploadIcon': '上传图标',
   'iconRequirements': 'JPEG、PNG 或 GIF<br/>宽高比 1:1',
+  'symbolMaxLength': '符号最多10个字符',
+  'enterSymbol': '输入代币符号',
+  'checkingSymbol': '正在检查符号可用性',
   
   // 部署页面 - 代币参数
   'tokenParameters': '代币参数',
   'totalSupply': '总供应量',
   'mintingAmount': '铸造总额',
-  'exchangeRate': '兑换比例',
-  'tokenPrice': '代币单价',
+  'exchangeRate': '铸造比率',
+  'tokenPrice': '代币价格',
   'settings': '设置',
   'confirm': '确认',
   

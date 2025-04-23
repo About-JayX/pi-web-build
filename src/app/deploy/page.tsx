@@ -109,7 +109,7 @@ const TokenParametersSection = ({
     }
   }
 
-  // 计算代币单价
+  // 计算代币价格
   const getTokenPrice = (totalSupply: string, targetAmount: string) => {
     if (!totalSupply || !targetAmount) return '0'
 
@@ -124,6 +124,26 @@ const TokenParametersSection = ({
     return (supply / 2 / amount).toLocaleString('en-US', {
       maximumFractionDigits: 8,
     })
+  }
+
+  // 添加函数计算单个代币的价格
+  const getSingleTokenPrice = (totalSupply: string, targetAmount: string) => {
+    if (!totalSupply || !targetAmount) return '0'
+
+    const supply = parseFloat(totalSupply)
+    const amountParts = targetAmount.split(' ')
+    const amount = parseFloat(amountParts[0])
+    const unit = amountParts[1] || ''
+
+    if (isNaN(supply) || isNaN(amount) || amount === 0) {
+      return '0'
+    }
+
+    // 单个代币价格 = 铸造金额 / (总量/2)
+    const singlePrice = amount / (supply / 2)
+    return `${singlePrice.toLocaleString('en-US', {
+      maximumFractionDigits: 8,
+    })} ${unit}`
   }
 
   return (
@@ -213,11 +233,12 @@ const TokenParametersSection = ({
             {t('tokenPrice')}
           </Text>
           <Text fontWeight="bold" color={labelColor}>
-            {
+            {getSingleTokenPrice(
+              totalSupplyOptions[totalSupplyTabIndex],
               targetAmountOptionsMap[totalSupplyOptions[totalSupplyTabIndex]][
                 targetAmountTabIndex
               ]
-            }
+            )}
           </Text>
         </Box>
       </SimpleGrid>
@@ -612,7 +633,7 @@ export default function DeployPage() {
         })
       }
     } catch (error) {
-      console.error('检查代币符号失败：', error)
+      console.error('Failed to check token symbol:', error)
       setIsSymbolValid(null)
     } finally {
       setIsCheckingSymbol(false)
@@ -620,23 +641,33 @@ export default function DeployPage() {
   }, [toast, t])
 
   // 使用 useRef 来存储定时器
-  const timerRef = useRef<NodeJS.Timeout>()
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   // 处理代币符号输入
   const handleSymbolChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toUpperCase() // 自动转换为大写
-    setTokenSymbol(value)
+    // 1. 移除空格
+    // 2. 过滤掉中文字符，只保留英文字母、数字和特殊符号
+    // 使用正则表达式匹配非中文字符
+    const value = e.target.value.replace(/\s/g, '').replace(/[\u4e00-\u9fa5]/g, '')
     
-    // 清除之前的定时器
-    if (timerRef.current) {
-      clearTimeout(timerRef.current)
+    // 限制最大长度为10个字符
+    const truncatedValue = value.slice(0, 10)
+    
+    // 只在值不同时更新状态，避免不必要的重新渲染
+    if (truncatedValue !== tokenSymbol) {
+      setTokenSymbol(truncatedValue)
+      
+      // 清除之前的定时器
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
+      
+      // 设置新的定时器，1500ms 后检查
+      timerRef.current = setTimeout(() => {
+        checkTokenSymbol(truncatedValue)
+      }, 1500)
     }
-    
-    // 设置新的定时器，1500ms 后检查
-    timerRef.current = setTimeout(() => {
-      checkTokenSymbol(value)
-    }, 1500)
-  }, [checkTokenSymbol])
+  }, [checkTokenSymbol, tokenSymbol])
 
   // 组件卸载时清除定时器
   useEffect(() => {
@@ -684,7 +715,7 @@ export default function DeployPage() {
       }
 
       const result = await TokenAPI.createToken(params)
-      console.log('创建成功：', result)
+      console.log('Token created successfully:', result)
 
       toast({
         title: t('success'),
@@ -694,7 +725,7 @@ export default function DeployPage() {
         isClosable: true,
       })
     } catch (error) {
-      console.error('创建失败：', error)
+      console.error('Token creation failed:', error)
       toast({
         title: t('error'),
         description: t('createTokenFailed'),
@@ -741,15 +772,15 @@ export default function DeployPage() {
       publicKey: publicKey?.toString() || null,
     }
 
-    console.log('代币创建参数:', params)
+    console.log('Token creation parameters:', params)
 
     // 验证必填参数
     const requiredFields = {
-      name: '代币名称',
-      symbol: '代币符号',
-      file: '代币图标',
-      total_supply: '发行总量',
-      init_liquidity: '目标铸造金额',
+      name: 'Token Name',
+      symbol: 'Token Symbol',
+      file: 'Token Icon',
+      total_supply: 'Total Supply',
+      init_liquidity: 'Minting Amount',
     }
 
     const missingFields = Object.entries(requiredFields)
@@ -757,7 +788,7 @@ export default function DeployPage() {
       .map(([, label]) => label)
 
     if (missingFields.length > 0) {
-      console.warn('缺少必填参数:', missingFields.join(', '))
+      console.warn('Missing required fields:', missingFields.join(', '))
     }
   }, [
     tokenName,
@@ -779,9 +810,6 @@ export default function DeployPage() {
           <Heading as="h1" size="xl" mb={4} color="brand.primary">
             {t('deployTitle')}
           </Heading>
-          <Text fontSize="lg" color={useColorModeValue('gray.600', 'gray.300')}>
-            {t('deployDescription')}
-          </Text>
         </Container>
       </Box>
 
@@ -811,14 +839,22 @@ export default function DeployPage() {
                     <Input
                       value={tokenSymbol}
                       onChange={handleSymbolChange}
-                      placeholder=""
+                      placeholder={t('enterSymbol')}
                       bg={inputBg}
                       borderColor={isSymbolValid === false ? 'red.500' : isSymbolValid === true ? 'green.500' : borderColor}
                       _placeholder={{ color: 'gray.400' }}
                       size="md"
                       isInvalid={isSymbolValid === false}
                       disabled={isCheckingSymbol}
+                      maxLength={10}  // 添加最大长度限制为10
+                      type="text"
+                      inputMode="text"
                     />
+                    {tokenSymbol && tokenSymbol.length >= 10 && (
+                      <Text fontSize="sm" color="orange.500" mt={1}>
+                        {t('symbolMaxLength')}
+                      </Text>
+                    )}
                     {isCheckingSymbol && (
                       <Text fontSize="sm" color="gray.500" mt={1}>
                         {t('checkingSymbol')}...

@@ -336,7 +336,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
     }
   }
 
-  // 获取铸造价格 - 优先使用mintRate，否则计算
+  // 获取铸造比率 - 优先使用mintRate，否则计算
   const getMintingPrice = (displayMode: 'price' | 'ratio' = 'price') => {
     if (displayMode === 'ratio') {
       return mintingRatio;

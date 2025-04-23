@@ -63,7 +63,7 @@ export function useMintingCalculations({
     );
   }, [totalSupply, mintAmount, mintRate, currencyUnit, tokenDecimals]);
 
-  // 计算铸造价格
+  // 计算铸造比率
   const mintingPrice = useMemo(() => {
     // 如果有预设汇率，优先使用
     if (mintRate) return mintRate;
