@@ -15,11 +15,6 @@ import {
   Flex,
   Icon,
   Image,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
   ButtonGroup,
   Table,
   Thead,
@@ -64,7 +59,7 @@ import { useMintingCalculations } from '@/hooks/useMintingCalculations'
 import PaginationControl from '@/components/PaginationControl'
 import TokenListView from '@/components/TokenListView'
 import FilterPanel from '@/components/FilterPanel'
-import { LoadingSpinner } from '@/components'
+import { LoadingSpinner, StyledTabs } from '@/components'
 
 interface MintToken {
   id: number
@@ -170,6 +165,12 @@ export default function MintPage() {
         params.finished = true;
       }
       
+      // 先清空数据，显示加载状态，避免数据跳动
+      store.dispatch({
+        type: 'token/fetchTokenList/pending'
+      });
+      
+      // 发起数据请求
       await store.dispatch(
         fetchTokenList(params)
       )
@@ -226,11 +227,12 @@ export default function MintPage() {
   useEffect(() => {
     // 如果是初始加载，不触发重复请求
     if (isInitialLoad) {
-      setIsInitialLoad(false)
       return
     }
 
+    // 重置页码
     setCurrentPage(1)
+    
     // 根据标签索引选择不同的排序字段
     let sortField = '';
     switch(tabIndex) {
@@ -250,12 +252,26 @@ export default function MintPage() {
         sortField = 'progress';
     }
     
+    // 构建请求参数
+    const params: any = {
+      page: 1,
+      limit: pageSize,
+      sort: sortField,
+    };
+    
+    // 如果是铸造结束标签页，添加进度100%的过滤条件
+    if (tabIndex === 3) {
+      params.finished = true;
+    }
+    
+    // 先清空数据，显示加载状态，避免数据跳动
+    store.dispatch({
+      type: 'token/fetchTokenList/pending'
+    });
+    
+    // 发起数据请求
     store.dispatch(
-      fetchTokenList({
-        page: 1,
-        limit: pageSize,
-        sort: sortField,
-      })
+      fetchTokenList(params)
     )
   }, [tabIndex, pageSize, isInitialLoad])
 
@@ -285,12 +301,26 @@ export default function MintPage() {
           sortField = 'progress';
       }
       
+      // 构建请求参数
+      const params: any = {
+        page: currentPage,
+        limit: pageSize,
+        sort: sortField,
+      };
+      
+      // 如果是铸造结束标签页，添加进度100%的过滤条件
+      if (tabIndex === 3) {
+        params.finished = true;
+      }
+      
+      // 先清空数据，显示加载状态，避免数据跳动
+      store.dispatch({
+        type: 'token/fetchTokenList/pending'
+      });
+      
+      // 发起数据请求
       store.dispatch(
-        fetchTokenList({
-          page: currentPage,
-          limit: pageSize,
-          sort: sortField,
-        })
+        fetchTokenList(params)
       )
     }
   }, [currentPage, pageSize, tabIndex, isInitialLoad])
@@ -344,13 +374,25 @@ export default function MintPage() {
       }
       
       // 在初始化时基于本地存储中的tabIndex加载数据
+      const params: any = {
+        page: 1,
+        limit: pageSize,
+        sort: sortField,
+      };
+      
+      // 如果是铸造结束标签页，添加进度100%的过滤条件
+      if (tabIndex === 3) {
+        params.finished = true;
+      }
+      
+      // 清除tokenList，避免数据跳动
+      store.dispatch({
+        type: 'token/fetchTokenList/pending'
+      });
+      
+      // 发起数据请求
       store.dispatch(
-        fetchTokenList({
-          page: 1,
-          limit: pageSize,
-          sort: sortField,
-          finished: tabIndex === 3 // 如果是铸造结束标签页，添加进度100%的过滤条件
-        })
+        fetchTokenList(params)
       )
 
       // 标记初始加载已完成
@@ -393,7 +435,7 @@ export default function MintPage() {
   
   const renderTabContent = (tokens: MintToken[]) => {
     // 显示加载状态
-    if (loading) {
+    if (loading || isInitialLoad) {
       return <LoadingSpinner />
     }
 
@@ -543,160 +585,73 @@ export default function MintPage() {
             </ButtonGroup>
           </Stack>
 
-          <Tabs
-            colorScheme="purple"
-            variant="enclosed"
+          <StyledTabs
             index={tabIndex}
             onChange={setTabIndex}
-            isLazy
             mt={{ base: 0, md: 2 }}
-          >
-            <TabList
-              borderBottom="2px"
-              borderColor="brand.primary"
-              mb={{ base: 2, md: 4 }}
-              overflow="hidden"
-              overflowX="auto"
-              width="100%"
-              display="flex"
-              flexWrap="nowrap"
-            >
-              <Tab
-                fontWeight="medium"
-                fontSize={{ base: "xs", md: "sm" }}
-                p={{ base: 2, md: 3 }}
-                minWidth={{ base: "auto", md: "auto" }}
-                whiteSpace="nowrap"
-                flexShrink={0}
-                _selected={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.primary',
-                  borderBottom: '3px solid',
-                  fontWeight: 'bold',
-                  bg: 'gray.50',
-                }}
-                _hover={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.light',
-                }}
-                transition="all 0.2s"
-              >
-                {t('hotTokens')}
-              </Tab>
-              <Tab
-                fontWeight="medium"
-                fontSize={{ base: "xs", md: "sm" }}
-                p={{ base: 2, md: 3 }}
-                minWidth={{ base: "auto", md: "auto" }}
-                whiteSpace="nowrap"
-                flexShrink={0}
-                _selected={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.primary',
-                  borderBottom: '3px solid',
-                  fontWeight: 'bold',
-                  bg: 'gray.50',
-                }}
-                _hover={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.light',
-                }}
-                transition="all 0.2s"
-              >
-                {t('allMinting')}
-              </Tab>
-              <Tab
-                fontWeight="medium"
-                fontSize={{ base: "xs", md: "sm" }}
-                p={{ base: 2, md: 3 }}
-                minWidth={{ base: "auto", md: "auto" }}
-                whiteSpace="nowrap"
-                flexShrink={0}
-                _selected={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.primary',
-                  borderBottom: '3px solid',
-                  fontWeight: 'bold',
-                  bg: 'gray.50',
-                }}
-                _hover={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.light',
-                }}
-                transition="all 0.2s"
-              >
-                {t('latestDeployed')}
-              </Tab>
-              <Tab
-                fontWeight="medium"
-                fontSize={{ base: "xs", md: "sm" }}
-                p={{ base: 2, md: 3 }}
-                minWidth={{ base: "auto", md: "auto" }}
-                whiteSpace="nowrap"
-                flexShrink={0}
-                _selected={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.primary',
-                  borderBottom: '3px solid',
-                  fontWeight: 'bold',
-                  bg: 'gray.50',
-                }}
-                _hover={{
-                  color: 'brand.primary',
-                  borderColor: 'brand.light',
-                }}
-                transition="all 0.2s"
-              >
-                {t('mintingFinished')}
-              </Tab>
-            </TabList>
-
-            <TabPanels>
-              <TabPanel px={0}>
-                <FilterPanel
-                  sortColumn={sortColumn}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                />
-                {renderTabContent(tokenList)}
-              </TabPanel>
-
-              <TabPanel px={0}>
-                <FilterPanel
-                  sortColumn={sortColumn}
-                  sortDirection={sortDirection}
-                  onSort={handleSort}
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                />
-                {renderTabContent(tokenList)}
-              </TabPanel>
-
-              <TabPanel px={0}>
-                <FilterPanel
-                  sortColumn={'deployedAt'}
-                  sortDirection={'desc'}
-                  onSort={() => {}} // 禁用排序功能
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                />
-                {renderTabContent(tokenList)}
-              </TabPanel>
-              
-              <TabPanel px={0}>
-                <FilterPanel
-                  sortColumn={'progress'}
-                  sortDirection={'desc'}
-                  onSort={() => {}} // 禁用排序功能
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                />
-                {renderTabContent(tokenList)}
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
+            tabItems={[
+              {
+                label: t('hotTokens'),
+                content: (
+                  <>
+                    <FilterPanel
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                    />
+                    {renderTabContent(tokenList)}
+                  </>
+                )
+              },
+              {
+                label: t('allMinting'),
+                content: (
+                  <>
+                    <FilterPanel
+                      sortColumn={sortColumn}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                    />
+                    {renderTabContent(tokenList)}
+                  </>
+                )
+              },
+              {
+                label: t('latestDeployed'),
+                content: (
+                  <>
+                    <FilterPanel
+                      sortColumn={'deployedAt'}
+                      sortDirection={'desc'}
+                      onSort={() => {}} // 禁用排序功能
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                    />
+                    {renderTabContent(tokenList)}
+                  </>
+                )
+              },
+              {
+                label: t('mintingFinished'),
+                content: (
+                  <>
+                    <FilterPanel
+                      sortColumn={'progress'}
+                      sortDirection={'desc'}
+                      onSort={() => {}} // 禁用排序功能
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                    />
+                    {renderTabContent(tokenList)}
+                  </>
+                )
+              }
+            ]}
+          />
         </VStack>
       </Container>
     </Box>
