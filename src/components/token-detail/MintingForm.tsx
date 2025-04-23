@@ -63,6 +63,7 @@ import { CLMM_PROGRAM_ID } from '@/config'
 import BigNumber from 'bignumber.js'
 import { formatTokenAmount } from '@/utils'
 import useMintingCalculations from '@/hooks/useMintingCalculations'
+import ErrorDisplay from '@/components/common/ErrorDisplay'
 
 interface Token extends TokenInfo {
   logo: string
@@ -142,6 +143,10 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
   const [inputFocus, setInputFocus] = useState<'payAmount' | 'tokenAmount'>('payAmount');
   const [payAmount, setPayAmount] = useState<number | null>(null);
   const [tokenAmount, setTokenAmount] = useState<number | null>(null);
+
+  // 添加错误状态
+  const [mintError, setMintError] = useState<string | null>(null);
+  const [refundError, setRefundError] = useState<string | null>(null);
 
   // 获取钱包余额的显示值
   const getDisplayBalance = (balance: number) => {
@@ -265,6 +270,9 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
     }
 
     try {
+      // 每次尝试提交前清空先前的错误
+      setMintError(null);
+      
       if (!publicKey) {
         toast({
           title: t('请先连接钱包'),
@@ -323,9 +331,15 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
       setAmount('')
     } catch (error) {
       console.error('铸造失败:', error)
+      const errorMessage = error instanceof Error ? error.message : t('未知错误')
+      
+      // 设置错误状态而不是显示toast
+      setMintError(errorMessage);
+      
+      // 仍然保留toast提示
       toast({
         title: t('铸造失败'),
-        description: error instanceof Error ? error.message : t('未知错误'),
+        description: errorMessage,
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -445,6 +459,9 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
   // 修改取消铸造 - 基于代币数量
   const handleCancel = async () => {
     try {
+      // 每次尝试提交前清空先前的错误
+      setRefundError(null);
+      
       if (!isTokenRefundAmountValid() || !publicKey || !tokenAccount) {
         return
       }
@@ -505,9 +522,15 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
       }
     } catch (error) {
       console.error('退还失败:', error)
+      const errorMessage = error instanceof Error ? error.message : t('未知错误');
+      
+      // 设置错误状态而不是显示toast
+      setRefundError(errorMessage);
+      
+      // 仍然保留toast提示
       toast({
         title: t('退还失败'),
-        description: error instanceof Error ? error.message : t('未知错误'),
+        description: errorMessage,
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -694,6 +717,21 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
 
   // 渲染铸造标签页内容
   const renderMintingTab = () => {
+    // 存在错误状态时显示错误界面
+    if (mintError) {
+      return (
+        <Box my={4} textAlign="center">
+          <ErrorDisplay 
+            message={mintError} 
+            onRetry={() => {
+              setMintError(null);
+              handleSubmit();
+            }} 
+          />
+        </Box>
+      );
+    }
+    
     return (
       <VStack spacing={{ base: 4, md: 6 }} align="stretch">
         {/* 金额输入 */}
@@ -914,6 +952,21 @@ const MintingForm: React.FC<MintingFormProps> = memo(({
 
   // 渲染退还标签页内容
   const renderRefundTab = () => {
+    // 存在错误状态时显示错误界面
+    if (refundError) {
+      return (
+        <Box my={4} textAlign="center">
+          <ErrorDisplay 
+            message={refundError} 
+            onRetry={() => {
+              setRefundError(null);
+              handleCancel();
+            }} 
+          />
+        </Box>
+      );
+    }
+
     // 检查是否有代币余额
     if (!tokenAccount || !tokenBalance || tokenBalance <= 0) {
       return (

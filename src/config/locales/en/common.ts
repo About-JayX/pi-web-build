@@ -23,6 +23,16 @@ export default {
   'selectNetwork': 'Select Network',
   'language': 'Language',
   
+  // Error and prompt messages
+  'error': 'Error',
+  'installPhantomWallet': 'Please install Phantom wallet extension first',
+  'loginSuccess': 'Login Success',
+  'welcomeBack': 'Welcome back, {{username}}',
+  'operationFailed': 'Operation Failed:',
+  'operationFailedTryAgain': 'Operation failed, please try again',
+  'tryAgain': 'Try Again',
+  'rejected': 'Rejected',
+  
   // Languages
   'chinese': '中文',
   'english': 'English',
