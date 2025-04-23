@@ -65,4 +65,15 @@ export default {
   'minutesAgo': '분 전',
   'hourAgo': '시간 전',
   'completed': '완료',
+
+  // 오류 및 프롬프트 메시지
+  'error': '오류',
+  'installPhantomWallet': 'Phantom 지갑 확장 프로그램을 먼저 설치하세요',
+  'loginSuccess': '로그인 성공',
+  'welcomeBack': '다시 오신 것을 환영합니다, {{username}}',
+  'connectedWallet': '지갑 {{address}}에 연결됨',
+  'operationFailed': '작업 실패:',
+  'operationFailedTryAgain': '작업에 실패했습니다. 다시 시도하세요',
+  'tryAgain': '다시 시도',
+  'rejected': '거부됨',
 }; 

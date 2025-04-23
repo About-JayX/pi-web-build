@@ -40,6 +40,7 @@ import { UserAPI } from "@/api";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setUser, clearUser } from "@/store/slices/userSlice";
 import LogoText from "./LogoText";
+import WalletConnectModal from "./WalletConnectModal";
 
 // 客户端专用组件，防止服务器端渲染不匹配
 const ClientSideOnly = ({
@@ -215,6 +216,13 @@ export default function Navbar() {
   const dispatch = useAppDispatch();
   const { isLoggedIn, userInfo } = useAppSelector((state) => state.user);
 
+  // 添加钱包连接弹窗状态
+  const {
+    isOpen: isWalletModalOpen,
+    onOpen: onWalletModalOpen,
+    onClose: onWalletModalClose,
+  } = useDisclosure();
+
   // 添加客户端渲染状态检测
   const [mounted, setMounted] = useState(false);
 
@@ -240,8 +248,8 @@ export default function Navbar() {
       localStorage.removeItem("avatar_url");
 
       toast({
-        title: "已断开连接",
-        description: "钱包已成功断开连接",
+        title: t("disconnected"),
+        description: t("disconnectSuccess"),
         status: "info",
         duration: 3000,
         isClosable: true,
@@ -250,8 +258,8 @@ export default function Navbar() {
     } catch (error) {
       console.error("断开连接失败:", error);
       toast({
-        title: "错误",
-        description: "断开连接失败，请重试",
+        title: t("error"),
+        description: t("disconnectFailed"),
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -264,8 +272,8 @@ export default function Navbar() {
     try {
       await reconnectWallet();
       toast({
-        title: "已重新连接",
-        description: "钱包已成功重新连接",
+        title: t("reconnected"),
+        description: t("reconnectSuccess"),
         status: "success",
         duration: 3000,
         isClosable: true,
@@ -274,8 +282,8 @@ export default function Navbar() {
     } catch (error) {
       console.error("重新连接失败:", error);
       toast({
-        title: "错误",
-        description: "重新连接失败，请重试",
+        title: t("error"),
+        description: t("reconnectFailed"),
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -284,268 +292,16 @@ export default function Navbar() {
     }
   };
 
-  const connectwallet = async () => {
-    console.log(window.solana, "window_______solana");
-    console.log(window.solana, "window_______solana");
-    if (!window.solana) {
-      toast({
-        title: "错误",
-        description: "请先安装 Phantom 钱包插件",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-        position: "top",
-      });
-      return;
-    }
+  // 处理连接按钮点击事件
+  const handleConnectButtonClick = () => {
+    // 打开钱包选择弹窗
+    onWalletModalOpen();
+  };
 
-    try {
-      if (network === "SOL") {
-        // 如果未连接钱包，先连接钱包并立即进行登录
-        if (!publicKey) {
-          try {
-            const result = await window.solana.connect();
-            const newPublicKey = result.publicKey.toString();
-            setPublicKey(newPublicKey);
-
-            // 立即执行登录
-            try {
-              const message = "Hello from PiSale!";
-              const encodedMessage = new TextEncoder().encode(message);
-              const signed = await window.solana.signMessage(
-                encodedMessage,
-                "utf8"
-              );
-              const signatureBytes = new Uint8Array(signed.signature);
-
-              const loginResult = await UserAPI.loginWithSolana({
-                publicKey: newPublicKey,
-                message,
-                signature: Array.from(signatureBytes),
-                code: "K7QEISU9",
-              });
-
-              if (loginResult.data) {
-                // 保存用户基本信息到localStorage，便于恢复登录状态
-                localStorage.setItem(
-                  "userId",
-                  loginResult.data.user.userId.toString()
-                );
-                localStorage.setItem(
-                  "nickname",
-                  loginResult.data.user.nickname || "用户"
-                );
-                localStorage.setItem(
-                  "avatar_url",
-                  loginResult.data.user.avatar_url || ""
-                );
-
-                dispatch(
-                  setUser({
-                    user: loginResult.data.user,
-                    authToken: loginResult.data.authToken,
-                  })
-                );
-
-                toast({
-                  title: "登录成功",
-                  description: `欢迎回来，${
-                    loginResult.data.user.nickname || "User"
-                  }`,
-                  status: "success",
-                  duration: 3000,
-                  isClosable: true,
-                  position: "top",
-                });
-              }
-            } catch (signError) {
-              console.error("消息签名失败:", signError);
-              // 检查是否是用户拒绝签名
-              if (
-                signError.message &&
-                (signError.message.includes("User rejected") ||
-                  signError.message.includes("用户拒绝") ||
-                  signError.message.includes("cancelled") ||
-                  signError.message.includes("取消"))
-              ) {
-                toast({
-                  title: "操作取消",
-                  description: "您取消了消息签名，请重试以完成登录",
-                  status: "warning",
-                  duration: 3000,
-                  isClosable: true,
-                  position: "top",
-                });
-              } else {
-                toast({
-                  title: "签名错误",
-                  description: "签名消息时出错，请重试",
-                  status: "error",
-                  duration: 3000,
-                  isClosable: true,
-                  position: "top",
-                });
-              }
-              // 如果签名失败，断开钱包连接
-              await disconnectWallet();
-            }
-            return;
-          } catch (connectError) {
-            console.error("钱包连接失败:", connectError);
-            // 检查是否是用户拒绝连接
-            if (
-              connectError.message &&
-              (connectError.message.includes("User rejected") ||
-                connectError.message.includes("用户拒绝") ||
-                connectError.message.includes("cancelled") ||
-                connectError.message.includes("取消"))
-            ) {
-              toast({
-                title: "连接取消",
-                description: "您取消了钱包连接请求",
-                status: "warning",
-                duration: 3000,
-                isClosable: true,
-                position: "top",
-              });
-            } else {
-              toast({
-                title: "连接错误",
-                description: "连接钱包时出错，请重试",
-                status: "error",
-                duration: 3000,
-                isClosable: true,
-                position: "top",
-              });
-            }
-            return;
-          }
-        }
-
-        // 如果已登录，显示已登录提示
-        if (isLoggedIn) {
-          toast({
-            title: "提示",
-            description: "您已经登录了",
-            status: "info",
-            duration: 3000,
-            isClosable: true,
-            position: "top",
-          });
-          return;
-        }
-
-        // 如果已连接钱包但未登录，执行登录
-        try {
-          const message = "Hello from PiSale!";
-          const encodedMessage = new TextEncoder().encode(message);
-          const signed = await window.solana.signMessage(
-            encodedMessage,
-            "utf8"
-          );
-          const signatureBytes = new Uint8Array(signed.signature);
-
-          const result = await UserAPI.loginWithSolana({
-            publicKey,
-            message,
-            signature: Array.from(signatureBytes),
-            code: "K7QEISU9",
-          });
-
-          if (result.data) {
-            // 保存用户基本信息到localStorage，便于恢复登录状态
-            localStorage.setItem("userId", result.data.user.userId.toString());
-            localStorage.setItem(
-              "nickname",
-              result.data.user.nickname || "用户"
-            );
-            localStorage.setItem(
-              "avatar_url",
-              result.data.user.avatar_url || ""
-            );
-
-            dispatch(
-              setUser({
-                user: result.data.user,
-                authToken: result.data.authToken,
-              })
-            );
-
-            toast({
-              title: "登录成功",
-              description: `欢迎回来，${result.data.user.nickname || "User"}`,
-              status: "success",
-              duration: 3000,
-              isClosable: true,
-              position: "top",
-            });
-          }
-        } catch (signError) {
-          console.error("消息签名或登录失败:", signError);
-          // 检查是否是用户拒绝签名
-          if (
-            signError.message &&
-            (signError.message.includes("User rejected") ||
-              signError.message.includes("用户拒绝") ||
-              signError.message.includes("cancelled") ||
-              signError.message.includes("取消"))
-          ) {
-            toast({
-              title: "操作取消",
-              description: "您取消了消息签名，请重试以完成登录",
-              status: "warning",
-              duration: 3000,
-              isClosable: true,
-              position: "top",
-            });
-          } else {
-            toast({
-              title: "错误",
-              description: "登录过程中发生错误，请重试",
-              status: "error",
-              duration: 3000,
-              isClosable: true,
-              position: "top",
-            });
-          }
-        }
-      } else {
-        // Pi Network 的连接逻辑
-        try {
-          toast({
-            title: "提示",
-            description: "即将支持 Pi 钱包连接",
-            status: "info",
-            duration: 3000,
-            isClosable: true,
-            position: "top",
-          });
-        } catch (piError) {
-          console.error("Pi Network操作失败:", piError);
-          toast({
-            title: "错误",
-            description: "Pi Network操作失败，请稍后再试",
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-            position: "top",
-          });
-        }
-      }
-    } catch (error) {
-      console.error("操作失败:", error);
-      // 通用错误处理
-      const errorMessage =
-        error instanceof Error ? error.message : "操作失败，请重试";
-      toast({
-        title: "错误",
-        description: errorMessage,
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-        position: "top",
-      });
-    }
+  // 处理钱包连接成功
+  const handleWalletConnected = (newPublicKey: string) => {
+    // 设置公钥
+    setPublicKey(newPublicKey);
   };
 
   // 组件加载时检查路径，确保网络选择器已同步
@@ -779,7 +535,7 @@ export default function Navbar() {
                   </MenuButton>
                   <MenuList minW="120px">
                     <MenuItem onClick={handleDisconnect} fontWeight="500">
-                      断开连接
+                      {t("disconnect")}
                     </MenuItem>
                   </MenuList>
                 </Menu>
@@ -792,7 +548,7 @@ export default function Navbar() {
                   _active={{ bg: "brand.primary" }}
                   size={{ base: "sm", md: "md" }}
                   fontWeight={600}
-                  onClick={connectwallet}
+                  onClick={handleConnectButtonClick}
                   isLoading={isConnecting}
                   h={{ base: "36px", md: "40px" }}
                   minW={{ base: "80px", md: "100px" }}
@@ -807,10 +563,17 @@ export default function Navbar() {
 
         <Box>
           {isOpen && (
-            <MobileNav onClose={onToggle} connectWallet={connectwallet} />
+            <MobileNav onClose={onToggle} connectWallet={handleConnectButtonClick} />
           )}
         </Box>
       </Container>
+      
+      {/* 钱包连接弹窗 */}
+      <WalletConnectModal 
+        isOpen={isWalletModalOpen} 
+        onClose={onWalletModalClose}
+        onConnect={handleWalletConnected}
+      />
     </Box>
   );
 }
@@ -909,7 +672,7 @@ const MobileNav = ({
   connectWallet,
 }: {
   onClose: () => void;
-  connectWallet: () => Promise<void>;
+  connectWallet: () => void; // 修改类型
 }) => {
   const pathname = usePathname();
   const { network, handleNetworkChange } = useNetwork();
@@ -925,8 +688,8 @@ const MobileNav = ({
       await disconnectWallet();
       dispatch(clearUser());
       toast({
-        title: "已断开连接",
-        description: "钱包已成功断开连接",
+        title: t("disconnected"),
+        description: t("disconnectSuccess"),
         status: "info",
         duration: 3000,
         isClosable: true,
@@ -936,8 +699,8 @@ const MobileNav = ({
     } catch (error) {
       console.error("断开连接失败:", error);
       toast({
-        title: "错误",
-        description: "断开连接失败，请重试",
+        title: t("error"),
+        description: t("disconnectFailed"),
         status: "error",
         duration: 3000,
         isClosable: true,
@@ -1025,7 +788,7 @@ const MobileNav = ({
               onClick={handleDisconnect}
               size="md"
             >
-              断开连接
+              {t("disconnect")}
             </Button>
           </Stack>
         ) : (
@@ -1035,10 +798,13 @@ const MobileNav = ({
             color="white"
             _hover={{ bg: "brand.light" }}
             size="md"
-            onClick={connectWallet}
+            onClick={() => {
+              connectWallet(); // 打开钱包选择弹窗
+              onClose(); // 关闭移动菜单
+            }}
             isLoading={isConnecting}
           >
-            连接
+            {t("connect")}
           </Button>
         )}
       </Box>

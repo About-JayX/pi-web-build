@@ -28,4 +28,17 @@ export default {
   'website': '网站',
   'twitter': '推特',
   'telegram': '电报',
+  
+  // 部署页面 - 错误和成功提示
+  'error': '错误',
+  'pleaseCompleteForm': '请完成所有必填项',
+  'symbolAlreadyExists': '此代币符号已被使用',
+  'success': '成功',
+  'tokenCreated': '代币创建成功',
+  'createTokenFailed': '代币创建失败',
+  
+  // 部署页面 - 按钮状态
+  'creating': '创建中...',
+  'createToken': '创建代币',
+  'connectWallet': '连接钱包',
 }; 

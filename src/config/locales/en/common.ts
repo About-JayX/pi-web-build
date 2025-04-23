@@ -28,6 +28,7 @@ export default {
   'installPhantomWallet': 'Please install Phantom wallet extension first',
   'loginSuccess': 'Login Success',
   'welcomeBack': 'Welcome back, {{username}}',
+  'connectedWallet': 'Connected to wallet {{address}}',
   'operationFailed': 'Operation Failed:',
   'operationFailedTryAgain': 'Operation failed, please try again',
   'tryAgain': 'Try Again',

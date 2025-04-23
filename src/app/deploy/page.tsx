@@ -41,6 +41,7 @@ import { useTranslation } from 'react-i18next'
 import { useSolana } from '@/contexts/solanaProvider'
 import { TokenAPI } from '@/api/token'
 import type { CreateTokenParams } from '@/api/types'
+import WalletConnectModal from '@/components/WalletConnectModal'
 
 // 定义代币参数组件的属性接口
 interface TokenParametersSectionProps {
@@ -536,7 +537,7 @@ const SocialLinksSection = ({
 }
 
 export default function DeployPage() {
-  const { publicKey } = useSolana()
+  const { publicKey, setPublicKey, isConnecting } = useSolana()
   const { network } = useNetwork()
   const { t } = useTranslation()
   const toast = useToast()
@@ -560,6 +561,13 @@ export default function DeployPage() {
 
   // 折叠面板状态
   const { isOpen: isSocialOpen, onToggle: onSocialToggle } = useDisclosure()
+
+  // 添加钱包连接弹窗状态
+  const {
+    isOpen: isWalletModalOpen,
+    onOpen: onWalletModalOpen,
+    onClose: onWalletModalClose,
+  } = useDisclosure();
 
   // 定义当前网络的计价单位
   const currencyUnit = useMemo(() => {
@@ -678,7 +686,25 @@ export default function DeployPage() {
     }
   }, [])
 
+  // 处理连接按钮点击事件
+  const handleConnectButtonClick = () => {
+    // 打开钱包选择弹窗
+    onWalletModalOpen();
+  };
+
+  // 处理钱包连接成功
+  const handleWalletConnected = (newPublicKey: string) => {
+    // 设置公钥
+    setPublicKey(newPublicKey);
+  };
+
   const handleCreateToken = async () => {
+    // 如果未连接钱包，则打开钱包连接弹窗
+    if (!publicKey) {
+      handleConnectButtonClick();
+      return;
+    }
+    
     if (!tokenIcon || !tokenName || !tokenSymbol) {
       toast({
         title: t('error'),
@@ -992,14 +1018,21 @@ export default function DeployPage() {
               height={{ base: '54px', md: '48px' }}
               fontSize={{ base: 'md', md: 'md' }}
               width="full"
-              isLoading={isSubmitting}
-              loadingText={t('creating')}
+              isLoading={isSubmitting || isConnecting}
+              loadingText={publicKey ? t('creating') : t('connecting')}
             >
               {publicKey ? t('createToken') : t('connectWallet')}
             </Button>
           </CardFooter>
         </Card>
       </Container>
+      
+      {/* 钱包连接弹窗 */}
+      <WalletConnectModal 
+        isOpen={isWalletModalOpen} 
+        onClose={onWalletModalClose}
+        onConnect={handleWalletConnected}
+      />
     </Box>
   )
 }

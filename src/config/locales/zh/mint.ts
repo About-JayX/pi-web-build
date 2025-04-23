@@ -27,18 +27,15 @@ export default {
   'nextPage': '下一页',
   'firstPage': '第一页',
   'lastPage': '最后一页',
-  'goToPage': '跳转到',
   
   // 铸造页面 - 列表视图
   'tokenColumn': '代币',
   'contractAddressColumn': '合约地址',
   'totalSupplyColumn': '总供应量',
-  'amountColumn': '总额 / 已铸',
   'progressColumn': '铸造进度',
   'participantsColumn': '铸造人数',
   'priceColumn': '铸造比率',
   'linksColumn': '社媒链接',
-  'joinMinting': '参与铸造',
   'target': '总额',
   'raised': '已铸',
   
@@ -51,12 +48,9 @@ export default {
   'tokenInfoNetwork': '代币信息 ({network})',
   'mintTokenCancel': '铸造代币/取消铸造',
   'backToMintingHome': '返回铸造主页',
-  'loadingTokenDetails': '正在加载...',
-  'redirectingToNetwork': '请稍后，正在跳转到相应网络的页面',
   
   // 代币详情页 - 错误状态
   'tokenNotFound': '无法找到代币',
-  'tokenNotFoundDesc': '找不到代币信息。请确认合约地址是否正确。',
   
   // 代币详情页 - TokenInfo组件
   'mintToken': '铸造代币',
@@ -65,37 +59,19 @@ export default {
   'addressCopied': '合约地址已复制',
   'linkCopied': '链接已复制',
   'copyFailed': '复制失败',
-  'shareToken': '分享代币',
   'tokenDetails': '代币详情',
   'mintingLastUpdated': '最后更新：',
   'deployed': '部署时间',
-  'remainingAmount': '剩余金额',
   'mintRate': '铸造比率',
-  'notSet': '未设置',
   'mintedTokens': '已铸造代币',
   'share': '分享',
   
   // 代币详情页 - MintingForm组件
-  'mintFormTitle': '铸造表单',
-  'walletBalance': '钱包余额',
-  'inputAmount': '输入金额',
-  'minAmount': '最小铸造金额: 0.01',
   'insufficientBalance': '余额不足',
   'estimatedTokens': '获得代币',
-  'submitMint': '确认铸造',
-  'cancel': '取消',
-  'selectPercentage': '选择百分比',
-  'refundTab': '退还',
-  'mintTab': '铸造',
   'refundAmount': '退还金额',
-  'selectRefundPercentage': '选择退还百分比',
-  'actualRefund': '实际退还',
-  'refundFee': '退还手续费',
-  'confirmRefund': '确认退还',
-  'mintSuccess': '铸造成功',
-  'obtainedTokens': '获得 {amount} {symbol}',
-  'refundSuccess': '退还成功',
   'refundedTokens': '已退还 {amount} {symbol}',
+  'walletBalance': '钱包余额',
   
   // 新增键值
   'mint': '铸造',
