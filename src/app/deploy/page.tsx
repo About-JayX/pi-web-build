@@ -33,7 +33,7 @@ import {
   useBreakpointValue,
   useToast,
   Image,
-  Grid,
+  Grid
 } from '@chakra-ui/react'
 import { FaUpload, FaChevronDown, FaChevronUp, FaEdit } from 'react-icons/fa'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
@@ -44,6 +44,7 @@ import { TokenAPI } from '@/api/token'
 import type { CreateTokenParams } from '@/api/types'
 import WalletConnectModal from '@/components/WalletConnectModal'
 import ErrorModal from '@/components/ErrorModal'
+import DeploySuccessModal from '@/components/DeploySuccessModal'
 import BigNumber from 'bignumber.js'
 import { useRouter } from 'next/navigation'
 // 定义代币参数组件的属性接口
@@ -634,7 +635,7 @@ export default function DeployPage() {
         `100 ${currencyUnit}`,
         `200 ${currencyUnit}`,
         `250 ${currencyUnit}`,
-        `400 ${currencyUnit}`,
+        // `400 ${currencyUnit}`,
         `500 ${currencyUnit}`,
       ],
     }),
@@ -827,6 +828,28 @@ export default function DeployPage() {
     onClose: onErrorModalClose,
   } = useDisclosure()
 
+  // 添加部署成功弹窗状态
+  const [deployedTokenMint, setDeployedTokenMint] = useState<string>('');
+  const {
+    isOpen: isSuccessModalOpen,
+    onOpen: onSuccessModalOpen,
+    onClose: onSuccessModalClose,
+  } = useDisclosure();
+
+  // 清空表单内容
+  const resetForm = () => {
+    setTokenName('');
+    setTokenSymbol('');
+    setTokenIcon(null);
+    setWebsite('');
+    setTwitter('');
+    setTelegram('');
+    setDescription('');
+    // 重置到默认选项
+    setTotalSupplyTabIndex(0);
+    setTargetAmountTabIndex(0);
+  };
+
   const handleCreateToken = async () => {
     // 如果未连接钱包，则打开钱包连接弹窗
     if (!publicKey) {
@@ -922,6 +945,15 @@ export default function DeployPage() {
 
       const { mint } = (await TokenAPI.createToken(params)) as any
 
+      // 保存部署成功的代币地址
+      setDeployedTokenMint(mint);
+      
+      // 清空表单
+      resetForm();
+      
+      // 打开成功弹窗
+      onSuccessModalOpen();
+
       toast({
         title: t('success'),
         description: t('tokenCreated'),
@@ -930,9 +962,11 @@ export default function DeployPage() {
         isClosable: true,
         position: 'top',
       })
-      setTimeout(() => {
-        router.push(`/sol/${mint}`)
-      }, 1000)
+      
+      // 注释掉自动跳转，因为现在用户可以通过弹窗中的按钮跳转
+      // setTimeout(() => {
+      //   router.push(`/sol/${mint}`)
+      // }, 1000)
     } catch (error: any) {
       console.error('Token creation failed:', error)
 
@@ -1294,14 +1328,23 @@ export default function DeployPage() {
         </Card>
       </Container>
 
+      {/* 添加成功弹窗 */}
+      <DeploySuccessModal 
+        isOpen={isSuccessModalOpen} 
+        onClose={onSuccessModalClose} 
+        tokenMint={deployedTokenMint}
+        tokenName={tokenName}
+        tokenSymbol={tokenSymbol}
+      />
+      
       {/* 钱包连接弹窗 */}
       <WalletConnectModal
         isOpen={isWalletModalOpen}
         onClose={onWalletModalClose}
         onConnect={handleWalletConnected}
       />
-
-      {/* 错误弹窗组件 */}
+      
+      {/* 错误弹窗 */}
       <ErrorModal
         isOpen={isErrorModalOpen}
         onClose={onErrorModalClose}

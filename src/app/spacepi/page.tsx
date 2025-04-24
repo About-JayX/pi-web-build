@@ -435,7 +435,7 @@ const utils = {
   contractAddress: "D4985oNS95Ajjz4VvrSxXKpx9VrTQNA1XufhJA18pXPS", 
   x: {
     name: "𝕏",
-    url: "https://twitter.com/SpacePi_token",
+    url: "https://x.com/SpacePi_Com",
   },
   tg: {
     name: "✈️",

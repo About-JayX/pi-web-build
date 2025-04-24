@@ -44,4 +44,11 @@ export default {
   'creating': '创建中...',
   'createToken': '部署代币',
   'connectWallet': '连接钱包',
+  
+  // 部署成功弹窗
+  'deploySuccess': '部署成功',
+  'tokenCreatedSuccessfully': '代币创建成功！',
+  'yourTokenHasBeenDeployed': '您的代币 {{name}} ({{symbol}}) 已成功部署',
+  'tokenContract': '代币合约',
+  'viewTokenDetails': '查看代币详情',
 }; 

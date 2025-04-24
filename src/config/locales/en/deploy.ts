@@ -44,4 +44,11 @@ export default {
   'creating': 'Creating...',
   'createToken': 'Deploy Token',
   'connectWallet': 'Connect Wallet',
+  
+  // Deploy Success Modal
+  'deploySuccess': 'Deploy Success',
+  'tokenCreatedSuccessfully': 'Token Created Successfully!',
+  'yourTokenHasBeenDeployed': 'Your token {{name}} ({{symbol}}) has been deployed successfully',
+  'tokenContract': 'Token Contract',
+  'viewTokenDetails': 'View Token Details',
 }; 

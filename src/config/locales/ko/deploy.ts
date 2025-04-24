@@ -43,4 +43,11 @@ export default {
   'creating': '생성 중...',
   'createToken': '토큰 배포',
   'connectWallet': '지갑 연결',
+  
+  // Deploy Success Modal
+  'deploySuccess': '배포 성공',
+  'tokenCreatedSuccessfully': '토큰이 성공적으로 생성되었습니다!',
+  'yourTokenHasBeenDeployed': '토큰 {{name}} ({{symbol}})이(가) 성공적으로 배포되었습니다',
+  'tokenContract': '토큰 계약',
+  'viewTokenDetails': '토큰 상세 보기',
 }; 
