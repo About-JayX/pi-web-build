@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities; */
 
+@font-face {
+  font-family: 'EDIX';
+  src: url('/fonts/EDIX.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Space-Grotesk';
+  src: url('/fonts/Space-Grotesk.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --brand-primary: #7B2CBF;

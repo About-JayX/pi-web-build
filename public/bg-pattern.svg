@@ -1,0 +1,24 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
+      <path d="M 100 0 L 0 0 0 100" fill="none" stroke="white" stroke-width="0.5" opacity="0.2"/>
+    </pattern>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="glow" />
+      <feComposite in="SourceGraphic" in2="glow" operator="over" />
+    </filter>
+  </defs>
+  
+  <rect width="100%" height="100%" fill="url(#grid)" />
+  
+  <g filter="url(#glow)">
+    <circle cx="300" cy="300" r="50" fill="white" opacity="0.1" />
+    <circle cx="800" cy="200" r="70" fill="white" opacity="0.08" />
+    <circle cx="1100" cy="500" r="90" fill="white" opacity="0.1" />
+    <circle cx="400" cy="700" r="60" fill="white" opacity="0.07" />
+    <circle cx="1200" cy="800" r="40" fill="white" opacity="0.05" />
+  </g>
+  
+  <path d="M0,100 C150,200 350,0 500,100 C650,200 850,0 1000,100 C1150,200 1350,0 1500,100 V900 H0 Z" fill="white" opacity="0.03" />
+</svg> 

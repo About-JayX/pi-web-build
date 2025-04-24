@@ -62,6 +62,20 @@ export default function RootLayout({
     <html suppressHydrationWarning data-js-focus-visible>
       <head>
         <link rel="icon" href="/pis.png" />
+        <link
+          rel="preload"
+          href="/fonts/EDIX.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/Space-Grotesk.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         <Script
           strategy="afterInteractive"
           src="https://www.googletagmanager.com/gtag/js?id=G-30XL4ZTGXR"

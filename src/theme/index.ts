@@ -111,8 +111,8 @@ const components = {
 
 // 字体设置
 const fonts = {
-  body: "Inter, system-ui, sans-serif",
-  heading: "Inter, system-ui, sans-serif",
+  body: "Space-Grotesk, Inter, system-ui, sans-serif",
+  heading: "EDIX, Inter, system-ui, sans-serif",
 };
 
 const styles = {
@@ -121,6 +121,22 @@ const styles = {
       bg: "brand.background",
       color: "brand.text.primary",
     },
+    "@font-face": [
+      {
+        fontFamily: "EDIX",
+        src: "url('/fonts/EDIX.ttf') format('truetype')",
+        fontWeight: "normal",
+        fontStyle: "normal",
+        fontDisplay: "swap",
+      },
+      {
+        fontFamily: "Space-Grotesk",
+        src: "url('/fonts/Space-Grotesk.woff2') format('woff2')",
+        fontWeight: "normal",
+        fontStyle: "normal",
+        fontDisplay: "swap",
+      },
+    ],
   },
 };
 

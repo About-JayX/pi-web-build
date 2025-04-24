@@ -8,6 +8,7 @@ export default {
   'tutorials': 'Tutorials',
   'points': 'Points',
   'deploy': 'Deploy',
+  'XPI': 'XPI',
   
   // Navigation with prefix (to avoid conflicts)
   'nav.home': 'Home',
@@ -18,6 +19,7 @@ export default {
   'nav.tutorials': 'Tutorials',
   'nav.points': 'Points',
   'nav.deploy': 'Deploy',
+  'nav.XPI': 'XPI',
   
   'connectWallet': 'Connect',
   'selectNetwork': 'Select Network',

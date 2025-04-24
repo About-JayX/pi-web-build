@@ -8,6 +8,8 @@ export default {
   'nav.tutorials': '教程',
   'nav.points': '积分',
   'nav.deploy': '部署',
+  'nav.XPI': '𝕏ℙ𝕚',
+  'XPI': '𝕏ℙ𝕚',
   
   'connectWallet': '连接',
   'selectNetwork': '选择网络',
