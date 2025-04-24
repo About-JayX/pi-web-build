@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
   Box,
@@ -25,45 +25,45 @@ import {
   useToast,
   Avatar,
   Skeleton,
-} from "@chakra-ui/react";
-import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
-import NextLink from "next/link";
-import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
-import { useNetwork } from "@/contexts/NetworkContext";
-import { useI18n } from "@/contexts/I18nProvider";
-import { useTranslation } from "react-i18next";
-import { FaGlobeAsia } from "react-icons/fa";
-import { useSolana } from "@/contexts/solanaProvider";
-import { UserAPI } from "@/api";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setUser, clearUser } from "@/store/slices/userSlice";
-import LogoText from "./LogoText";
-import WalletConnectModal from "./WalletConnectModal";
+} from "@chakra-ui/react"
+import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons"
+import NextLink from "next/link"
+import { usePathname } from "next/navigation"
+import { useState, useEffect } from "react"
+import dynamic from "next/dynamic"
+import { useNetwork } from "@/contexts/NetworkContext"
+import { useI18n } from "@/contexts/I18nProvider"
+import { useTranslation } from "react-i18next"
+import { FaGlobeAsia } from "react-icons/fa"
+import { useSolana } from "@/contexts/solanaProvider"
+import { UserAPI } from "@/api"
+import { useAppDispatch, useAppSelector } from "@/store/hooks"
+import { setUser, clearUser } from "@/store/slices/userSlice"
+import LogoText from "./LogoText"
+import WalletConnectModal from "./WalletConnectModal"
 
 // 客户端专用组件，防止服务器端渲染不匹配
 const ClientSideOnly = ({
   children,
   fallback,
 }: {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
+  children: React.ReactNode
+  fallback?: React.ReactNode
 }) => {
-  const [isClient, setIsClient] = useState(false);
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    setIsClient(true)
+  }, [])
 
-  return isClient ? <>{children}</> : <>{fallback}</>;
-};
+  return isClient ? <>{children}</> : <>{fallback}</>
+}
 
 // 格式化钱包地址，显示前4位和后4位
 const formatWalletAddress = (address: string) => {
-  if (!address) return "";
-  return `${address.slice(0, 4)}...${address.slice(-4)}`;
-};
+  if (!address) return ""
+  return `${address.slice(0, 4)}...${address.slice(-4)}`
+}
 
 // 优化LogoSkeletonPlaceholder组件
 const LogoSkeletonPlaceholder = () => {
@@ -76,8 +76,8 @@ const LogoSkeletonPlaceholder = () => {
       />
       <Skeleton height="24px" width="80px" borderRadius="md" />
     </Flex>
-  );
-};
+  )
+}
 
 // 创建一个包含Logo和网站名称的组件，统一管理它们的加载
 const LogoWithName = () => {
@@ -94,20 +94,23 @@ const LogoWithName = () => {
       />
       <LogoText />
     </Flex>
-  );
-};
+  )
+}
 
 // 添加一个移动端Logo骨架占位符
 const MobileLogoSkeletonPlaceholder = () => {
-  return <Skeleton boxSize="32px" borderRadius="full" />;
-};
+  return <Skeleton boxSize="32px" borderRadius="full" />
+}
 
 // 添加一个在客户端渲染前显示的占位符组件
 const NavbarPlaceholder = () => {
-  const bgColor = useColorModeValue("rgba(255,255,255,0.4)", "rgba(0, 0, 0, 0.36)");
-  const borderColor = useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)");
-  const isXpiMode = false; // 因为是占位符，无法获取实际路径，假设非XPI页面
-  const boxShadowValue = useColorModeValue(isXpiMode ? "none" : "sm", "none"); // 深色模式下不显示阴影
+  const bgColor = useColorModeValue(
+    "rgba(255,255,255,0.4)",
+    "rgba(0, 0, 0, 0.36)"
+  )
+  const borderColor = useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)")
+  const isXpiMode = false // 因为是占位符，无法获取实际路径，假设非XPI页面
+  const boxShadowValue = useColorModeValue(isXpiMode ? "none" : "sm", "none") // 深色模式下不显示阴影
 
   return (
     <Box
@@ -126,8 +129,7 @@ const NavbarPlaceholder = () => {
         backdropFilter: "saturate(180%) blur(8px)",
         WebkitBackdropFilter: "saturate(180%) blur(8px)",
         transition: "all 0.3s ease-out",
-      }}
-    >
+      }}>
       <Container maxW="container.xl" height="100%">
         <Flex
           minH="60px"
@@ -142,8 +144,7 @@ const NavbarPlaceholder = () => {
             flex={{ base: 1, md: "auto" }}
             ml={{ base: -2 }}
             display={{ base: "flex", xl: "none" }}
-            alignItems="center"
-          >
+            alignItems="center">
             <Skeleton width="24px" height="24px" borderRadius="md" mr={2} />
             <Skeleton boxSize="32px" borderRadius="full" ml={2} />
           </Flex>
@@ -153,8 +154,7 @@ const NavbarPlaceholder = () => {
             flex={{ base: 1, xl: "auto" }}
             alignItems="center"
             justify={{ base: "space-between", xl: "start" }}
-            width="100%"
-          >
+            width="100%">
             {/* Logo占位符 */}
             <Flex minWidth="120px">
               <LogoSkeletonPlaceholder />
@@ -164,8 +164,7 @@ const NavbarPlaceholder = () => {
             <Flex
               display={{ base: "none", xl: "flex" }}
               ml={{ base: 10, xl: 6 }}
-              flex="1"
-            >
+              flex="1">
               <Skeleton height="24px" width="300px" borderRadius="md" />
             </Flex>
           </Flex>
@@ -177,8 +176,8 @@ const NavbarPlaceholder = () => {
         </Flex>
       </Container>
     </Box>
-  );
-};
+  )
+}
 
 // 添加完整的钱包和语言选择器占位符
 const NavButtonsPlaceholder = () => {
@@ -191,8 +190,7 @@ const NavButtonsPlaceholder = () => {
       align="center"
       ml={{ base: 2, md: 0 }}
       width="auto"
-      flexShrink={0}
-    >
+      flexShrink={0}>
       {/* 语言选择器占位符 */}
       <Skeleton width="36px" height="36px" borderRadius="md" flexShrink={0} />
 
@@ -204,16 +202,16 @@ const NavButtonsPlaceholder = () => {
         flexShrink={0}
       />
     </Stack>
-  );
-};
+  )
+}
 
 export default function Navbar() {
-  const { isOpen, onToggle } = useDisclosure();
-  const pathname = usePathname();
-  
+  const { isOpen, onToggle } = useDisclosure()
+  const pathname = usePathname()
+
   // 确保所有钩子都在顶部调用，避免条件渲染导致钩子顺序变化
-  const { t } = useTranslation();
-  const { network, handleNetworkChange } = useNetwork();
+  const { t } = useTranslation()
+  const { network, handleNetworkChange } = useNetwork()
   const {
     publicKey,
     setPublicKey,
@@ -221,70 +219,83 @@ export default function Navbar() {
     isConnecting,
     reconnectWallet,
     autoConnected,
-  } = useSolana();
-  const { language, changeLanguage } = useI18n();
-  const toast = useToast();
-  const dispatch = useAppDispatch();
-  const { isLoggedIn, userInfo } = useAppSelector((state) => state.user);
-  
+  } = useSolana()
+  const { language, changeLanguage } = useI18n()
+  const toast = useToast()
+  const dispatch = useAppDispatch()
+  const { isLoggedIn, userInfo } = useAppSelector((state) => state.user)
+
   // 判断是否在 XPI 页面，如果是则使用深色模式
-  const isXpiPage = pathname === "/xpi";
-  
+  const isXpiPage = pathname === "/xpi"
+
   // 提前计算所有颜色值，避免在条件渲染中使用useColorModeValue
   const bgColor = useColorModeValue(
-    isXpiPage ? "rgba(0, 0, 0, 0.36)" : "rgba(255,255,255,0.4)", 
+    isXpiPage ? "rgba(0, 0, 0, 0.36)" : "rgba(255,255,255,0.4)",
     "rgba(0, 0, 0, 0.36)" // 更改深色模式背景为半透明黑色，与xpi-web-frontend一致
-  );
-  const textColor = isXpiPage ? "white" : useColorModeValue("gray.600", "gray.200");
+  )
+  const textColor = isXpiPage
+    ? "white"
+    : useColorModeValue("gray.600", "gray.200")
   // 在XPI页面或深色模式下使用更接近xpi-web-frontend的边框颜色
   const borderColor = useColorModeValue(
-    isXpiPage ? "rgba(255, 255, 255, 0.2)" : "gray.200", 
+    isXpiPage ? "rgba(255, 255, 255, 0.2)" : "gray.200",
     "rgba(255, 255, 255, 0.2)"
-  ); 
-  const buttonBgColor = isXpiPage ? "white" : "brand.primary";
-  const buttonTextColor = isXpiPage ? "black" : "white";
-  const buttonHoverBgColor = isXpiPage ? "gray.200" : "brand.light";
-  const iconButtonColor = isXpiPage ? "white" : "inherit";
-  const boxShadowValue = useColorModeValue(isXpiPage ? "none" : "sm", "none");
-  const menuBgColor = useColorModeValue("white", "gray.800");
-  const menuBorderColor = useColorModeValue("gray.200", "gray.700");
+  )
+  const buttonBgColor = isXpiPage ? "white" : "brand.primary"
+  const buttonTextColor = isXpiPage ? "black" : "white"
+  const buttonHoverBgColor = isXpiPage ? "gray.200" : "brand.light"
+  const iconButtonColor = isXpiPage ? "white" : "inherit"
+  const boxShadowValue = useColorModeValue(isXpiPage ? "none" : "sm", "none")
+  const menuBgColor = useColorModeValue("white", "gray.800")
+  const menuBorderColor = useColorModeValue("gray.200", "gray.700")
   const buttonColorProps = {
-    bg: isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark"),
+    bg: isXpiPage
+      ? "brand.primary"
+      : useColorModeValue("brand.primary", "brand.dark"),
     color: buttonTextColor,
-    _hover: { bg: isXpiPage ? "brand.light" : useColorModeValue("brand.light", "brand.primary") },
-    _active: { bg: isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark") }
-  };
-  
+    _hover: {
+      bg: isXpiPage
+        ? "brand.light"
+        : useColorModeValue("brand.light", "brand.primary"),
+    },
+    _active: {
+      bg: isXpiPage
+        ? "brand.primary"
+        : useColorModeValue("brand.primary", "brand.dark"),
+    },
+  }
+
   // 添加钱包连接弹窗状态
   const {
     isOpen: isWalletModalOpen,
     onOpen: onWalletModalOpen,
     onClose: onWalletModalClose,
-  } = useDisclosure();
+  } = useDisclosure()
 
   // 添加客户端渲染状态检测
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setMounted(true)
+  }, [])
 
   // 监听钱包状态变化，如果钱包断开连接，清除登录状态
   useEffect(() => {
     if (!publicKey && isLoggedIn) {
-      dispatch(clearUser());
+      dispatch(clearUser())
     }
-  }, [publicKey, isLoggedIn, dispatch]);
+  }, [publicKey, isLoggedIn, dispatch])
 
   const handleDisconnect = async () => {
     try {
-      await disconnectWallet();
-      dispatch(clearUser());
+      await disconnectWallet()
+      dispatch(clearUser())
 
       // 清除用户信息
-      localStorage.removeItem("userId");
-      localStorage.removeItem("nickname");
-      localStorage.removeItem("avatar_url");
+      localStorage.removeItem("userId")
+      localStorage.removeItem("nickname")
+      localStorage.removeItem("avatar_url")
+      localStorage.removeItem("token")
 
       toast({
         title: t("disconnected"),
@@ -293,9 +304,9 @@ export default function Navbar() {
         duration: 3000,
         isClosable: true,
         position: "top",
-      });
+      })
     } catch (error) {
-      console.error("断开连接失败:", error);
+      console.error("断开连接失败:", error)
       toast({
         title: t("error"),
         description: t("disconnectFailed"),
@@ -303,13 +314,13 @@ export default function Navbar() {
         duration: 3000,
         isClosable: true,
         position: "top",
-      });
+      })
     }
-  };
+  }
 
   const handleReconnect = async () => {
     try {
-      await reconnectWallet();
+      await reconnectWallet()
       toast({
         title: t("reconnected"),
         description: t("reconnectSuccess"),
@@ -317,9 +328,9 @@ export default function Navbar() {
         duration: 3000,
         isClosable: true,
         position: "top",
-      });
+      })
     } catch (error) {
-      console.error("重新连接失败:", error);
+      console.error("重新连接失败:", error)
       toast({
         title: t("error"),
         description: t("reconnectFailed"),
@@ -327,88 +338,125 @@ export default function Navbar() {
         duration: 3000,
         isClosable: true,
         position: "top",
-      });
+      })
     }
-  };
+  }
 
   // 处理连接按钮点击事件
   const handleConnectButtonClick = () => {
     // 打开钱包选择弹窗
-    onWalletModalOpen();
-  };
+    onWalletModalOpen()
+  }
 
   // 处理钱包连接成功
   const handleWalletConnected = (newPublicKey: string) => {
     // 设置公钥
-    setPublicKey(newPublicKey);
-  };
+    setPublicKey(newPublicKey)
+  }
 
   // 组件加载时检查路径，确保网络选择器已同步
   useEffect(() => {
     // 逻辑已移至NetworkContext中处理
-  }, [pathname, handleNetworkChange]);
+  }, [pathname, handleNetworkChange])
 
   // 添加更多预计算的样式常量
   const languageButtonProps = {
     color: isXpiPage ? "white" : useColorModeValue("gray.700", "white"),
     borderWidth: "2px",
-    borderColor: isXpiPage ? "whiteAlpha.400" : useColorModeValue("gray.200", "whiteAlpha.400"),
-    bg: isXpiPage ? "transparent" : useColorModeValue("transparent", "transparent"),
+    borderColor: isXpiPage
+      ? "whiteAlpha.400"
+      : useColorModeValue("gray.200", "whiteAlpha.400"),
+    bg: isXpiPage
+      ? "transparent"
+      : useColorModeValue("transparent", "transparent"),
     _hover: {
-      borderColor: isXpiPage ? "whiteAlpha.600" : useColorModeValue("gray.300", "whiteAlpha.600"),
-      bg: isXpiPage ? "whiteAlpha.200" : useColorModeValue("gray.50", "whiteAlpha.100")
+      borderColor: isXpiPage
+        ? "whiteAlpha.600"
+        : useColorModeValue("gray.300", "whiteAlpha.600"),
+      bg: isXpiPage
+        ? "whiteAlpha.200"
+        : useColorModeValue("gray.50", "whiteAlpha.100"),
     },
     _active: {
-      bg: isXpiPage ? "whiteAlpha.300" : useColorModeValue("gray.100", "whiteAlpha.200")
-    }
-  };
+      bg: isXpiPage
+        ? "whiteAlpha.300"
+        : useColorModeValue("gray.100", "whiteAlpha.200"),
+    },
+  }
 
   // 预先计算所有语言选项的样式，而不是使用函数
   const enLanguageMenuItemProps = {
-    bg: language === "en" ? useColorModeValue("purple.50", "brand.dark") : undefined,
-    color: language === "en" ? useColorModeValue("brand.primary", "white") : useColorModeValue("gray.700", "gray.300"),
-    _hover: { 
+    bg:
+      language === "en"
+        ? useColorModeValue("purple.50", "brand.dark")
+        : undefined,
+    color:
+      language === "en"
+        ? useColorModeValue("brand.primary", "white")
+        : useColorModeValue("gray.700", "gray.300"),
+    _hover: {
       bg: useColorModeValue(
-        language === "en" ? "purple.100" : "gray.100", 
+        language === "en" ? "purple.100" : "gray.100",
         language === "en" ? "brand.primary" : "whiteAlpha.200"
-      )
+      ),
     },
     _active: {
-      bg: language === "en" ? useColorModeValue("brand.primary", "white") : useColorModeValue("gray.800", "white")
-    }
-  };
+      bg:
+        language === "en"
+          ? useColorModeValue("brand.primary", "white")
+          : useColorModeValue("gray.800", "white"),
+    },
+  }
 
   const koLanguageMenuItemProps = {
-    bg: language === "ko" ? useColorModeValue("purple.50", "brand.dark") : undefined,
-    color: language === "ko" ? useColorModeValue("brand.primary", "white") : useColorModeValue("gray.700", "gray.300"),
-    _hover: { 
+    bg:
+      language === "ko"
+        ? useColorModeValue("purple.50", "brand.dark")
+        : undefined,
+    color:
+      language === "ko"
+        ? useColorModeValue("brand.primary", "white")
+        : useColorModeValue("gray.700", "gray.300"),
+    _hover: {
       bg: useColorModeValue(
-        language === "ko" ? "purple.100" : "gray.100", 
+        language === "ko" ? "purple.100" : "gray.100",
         language === "ko" ? "brand.primary" : "whiteAlpha.200"
-      )
+      ),
     },
     _active: {
-      bg: language === "ko" ? useColorModeValue("brand.primary", "white") : useColorModeValue("gray.800", "white")
-    }
-  };
+      bg:
+        language === "ko"
+          ? useColorModeValue("brand.primary", "white")
+          : useColorModeValue("gray.800", "white"),
+    },
+  }
 
   const zhLanguageMenuItemProps = {
-    bg: language === "zh" ? useColorModeValue("purple.50", "brand.dark") : undefined,
-    color: language === "zh" ? useColorModeValue("brand.primary", "white") : useColorModeValue("gray.700", "gray.300"),
-    _hover: { 
+    bg:
+      language === "zh"
+        ? useColorModeValue("purple.50", "brand.dark")
+        : undefined,
+    color:
+      language === "zh"
+        ? useColorModeValue("brand.primary", "white")
+        : useColorModeValue("gray.700", "gray.300"),
+    _hover: {
       bg: useColorModeValue(
-        language === "zh" ? "purple.100" : "gray.100", 
+        language === "zh" ? "purple.100" : "gray.100",
         language === "zh" ? "brand.primary" : "whiteAlpha.200"
-      )
+      ),
     },
     _active: {
-      bg: language === "zh" ? useColorModeValue("brand.primary", "white") : useColorModeValue("gray.800", "white")
-    }
-  };
+      bg:
+        language === "zh"
+          ? useColorModeValue("brand.primary", "white")
+          : useColorModeValue("gray.800", "white"),
+    },
+  }
 
   // 渲染前显示占位符
   if (!mounted) {
-    return <NavbarPlaceholder />;
+    return <NavbarPlaceholder />
   }
 
   return (
@@ -443,8 +491,7 @@ export default function Navbar() {
             flex={{ base: 1, md: "auto" }}
             ml={{ base: -2 }}
             display={{ base: "flex", xl: "none" }}
-            alignItems="center"
-          >
+            alignItems="center">
             <IconButton
               onClick={onToggle}
               aria-label="Toggle Navigation"
@@ -473,8 +520,7 @@ export default function Navbar() {
             flex={{ base: 1, xl: "auto" }}
             alignItems="center"
             justify={{ base: "space-between", xl: "start" }}
-            width={{ xl: "30%" }}
-          >
+            width={{ xl: "30%" }}>
             <NextLink href="/" passHref>
               <Flex
                 align="center"
@@ -506,8 +552,7 @@ export default function Navbar() {
             position="absolute"
             left="50%"
             transform="translateX(-50%)"
-            width="auto"
-          >
+            width="auto">
             <DesktopNav />
           </Flex>
 
@@ -520,8 +565,7 @@ export default function Navbar() {
               spacing={{ base: 2, md: 1 }}
               align="center"
               ml={{ base: 2, md: 0 }}
-              width={{ xl: "30%" }}
-            >
+              width={{ xl: "30%" }}>
               {/* 语言选择 */}
               <Menu>
                 <MenuButton
@@ -533,35 +577,30 @@ export default function Navbar() {
                   h={{ base: "36px", md: "40px" }}
                   minW={{ base: "80px", md: "100px" }}
                   width="auto"
-                  rightIcon={<ChevronDownIcon />}
-                >
+                  rightIcon={<ChevronDownIcon />}>
                   {t("language")}
                 </MenuButton>
-                <MenuList 
-                  minW="140px" 
-                  bg={menuBgColor} 
+                <MenuList
+                  minW="140px"
+                  bg={menuBgColor}
                   borderColor={menuBorderColor}
-                  boxShadow="lg"
-                >
+                  boxShadow="lg">
                   <MenuItem
                     fontWeight="500"
                     onClick={() => changeLanguage("en")}
-                    {...enLanguageMenuItemProps}
-                  >
+                    {...enLanguageMenuItemProps}>
                     {t("english")}
                   </MenuItem>
                   <MenuItem
                     fontWeight="500"
                     onClick={() => changeLanguage("ko")}
-                    {...koLanguageMenuItemProps}
-                  >
+                    {...koLanguageMenuItemProps}>
                     {t("korean")}
                   </MenuItem>
                   <MenuItem
                     fontWeight="500"
                     onClick={() => changeLanguage("zh")}
-                    {...zhLanguageMenuItemProps}
-                  >
+                    {...zhLanguageMenuItemProps}>
                     {t("chinese")}
                   </MenuItem>
                 </MenuList>
@@ -580,8 +619,7 @@ export default function Navbar() {
                     borderWidth="2px"
                     h={{ base: "36px", md: "40px" }}
                     minW={{ base: "80px", md: "100px" }}
-                    width="auto"
-                  >
+                    width="auto">
                     {network}
                   </MenuButton>
                   <MenuList minW="120px">
@@ -599,8 +637,7 @@ export default function Navbar() {
                       bg={network === "SOL" ? "purple.50" : undefined}
                       _dark={{
                         bg: network === "SOL" ? "purple.900" : undefined,
-                      }}
-                    >
+                      }}>
                       SOL
                     </MenuItem>
                     <MenuItem
@@ -617,8 +654,7 @@ export default function Navbar() {
                       bg={network === "PI" ? "purple.50" : undefined}
                       _dark={{
                         bg: network === "PI" ? "purple.900" : undefined,
-                      }}
-                    >
+                      }}>
                       PI
                     </MenuItem>
                   </MenuList>
@@ -630,18 +666,29 @@ export default function Navbar() {
                 <Button
                   display={{ base: "inline-flex", md: "inline-flex" }}
                   variant="solid"
-                  bg={isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark")}
+                  bg={
+                    isXpiPage
+                      ? "brand.primary"
+                      : useColorModeValue("brand.primary", "brand.dark")
+                  }
                   color="white"
-                  _hover={{ bg: isXpiPage ? "brand.light" : useColorModeValue("brand.light", "brand.primary") }}
-                  _active={{ bg: isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark") }}
+                  _hover={{
+                    bg: isXpiPage
+                      ? "brand.light"
+                      : useColorModeValue("brand.light", "brand.primary"),
+                  }}
+                  _active={{
+                    bg: isXpiPage
+                      ? "brand.primary"
+                      : useColorModeValue("brand.primary", "brand.dark"),
+                  }}
                   size={{ base: "sm", md: "md" }}
                   fontWeight={600}
                   h={{ base: "36px", md: "40px" }}
                   minW={{ base: "80px", md: "100px" }}
                   onClick={handleConnectButtonClick}
                   isLoading={isConnecting}
-                  loadingText={t("connecting")}
-                >
+                  loadingText={t("connecting")}>
                   {t("connect")}
                 </Button>
               )}
@@ -654,18 +701,32 @@ export default function Navbar() {
                     fontSize={{ base: "xs", md: "sm" }}
                     fontWeight={600}
                     variant="solid"
-                    bg={isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark")}
+                    bg={
+                      isXpiPage
+                        ? "brand.primary"
+                        : useColorModeValue("brand.primary", "brand.dark")
+                    }
                     color="white"
-                    _hover={{ bg: isXpiPage ? "brand.light" : useColorModeValue("brand.light", "brand.primary") }}
-                    _active={{ bg: isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark") }}
+                    _hover={{
+                      bg: isXpiPage
+                        ? "brand.light"
+                        : useColorModeValue("brand.light", "brand.primary"),
+                    }}
+                    _active={{
+                      bg: isXpiPage
+                        ? "brand.primary"
+                        : useColorModeValue("brand.primary", "brand.dark"),
+                    }}
                     h={{ base: "36px", md: "40px" }}
                     px={{ base: 3, md: 4 }}
                     size={{ base: "sm", md: "md" }}
-                    rightIcon={<ChevronDownIcon />}
-                  >
+                    rightIcon={<ChevronDownIcon />}>
                     {formatWalletAddress(publicKey || "")}
                   </MenuButton>
-                  <MenuList minW="120px" bg={menuBgColor} borderColor={menuBorderColor}>
+                  <MenuList
+                    minW="120px"
+                    bg={menuBgColor}
+                    borderColor={menuBorderColor}>
                     <MenuItem onClick={handleDisconnect} fontWeight="500">
                       {t("disconnect")}
                     </MenuItem>
@@ -678,18 +739,29 @@ export default function Navbar() {
                 <Button
                   display={{ base: "inline-flex", md: "inline-flex" }}
                   variant="solid"
-                  bg={isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark")}
+                  bg={
+                    isXpiPage
+                      ? "brand.primary"
+                      : useColorModeValue("brand.primary", "brand.dark")
+                  }
                   color="white"
-                  _hover={{ bg: isXpiPage ? "brand.light" : useColorModeValue("brand.light", "brand.primary") }}
-                  _active={{ bg: isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark") }}
+                  _hover={{
+                    bg: isXpiPage
+                      ? "brand.light"
+                      : useColorModeValue("brand.light", "brand.primary"),
+                  }}
+                  _active={{
+                    bg: isXpiPage
+                      ? "brand.primary"
+                      : useColorModeValue("brand.primary", "brand.dark"),
+                  }}
                   size={{ base: "sm", md: "md" }}
                   fontWeight={600}
                   h={{ base: "36px", md: "40px" }}
                   minW={{ base: "80px", md: "100px" }}
                   onClick={handleReconnect}
                   isLoading={isConnecting}
-                  loadingText={t("reconnecting")}
-                >
+                  loadingText={t("reconnecting")}>
                   {formatWalletAddress(publicKey)}
                 </Button>
               )}
@@ -699,50 +771,50 @@ export default function Navbar() {
 
         <Box>
           {isOpen && (
-            <MobileNav 
-              onClose={onToggle} 
-              connectWallet={handleConnectButtonClick} 
+            <MobileNav
+              onClose={onToggle}
+              connectWallet={handleConnectButtonClick}
               isXpiPage={isXpiPage}
             />
           )}
         </Box>
       </Container>
-      
+
       {/* 钱包连接弹窗 */}
-      <WalletConnectModal 
-        isOpen={isWalletModalOpen} 
+      <WalletConnectModal
+        isOpen={isWalletModalOpen}
         onClose={onWalletModalClose}
         onConnect={handleWalletConnected}
       />
     </Box>
-  );
+  )
 }
 
 const DesktopNav = () => {
-  const pathname = usePathname();
-  const { t } = useTranslation();
-  
+  const pathname = usePathname()
+  const { t } = useTranslation()
+
   // 判断是否在 XPI 页面，如果是则使用深色模式
-  const isXpiPage = pathname === "/xpi";
-  const linkColor = isXpiPage 
-    ? "gray.200" 
-    : useColorModeValue("gray.600", "gray.200");
-  
-  const linkHoverColor = isXpiPage 
-    ? "white" 
-    : useColorModeValue("brand.primary", "white");
-  
-  const activeLinkColor = isXpiPage 
-    ? "brand.light" 
-    : useColorModeValue("brand.primary", "brand.light");
-  
-  const activeBgColor = useColorModeValue("brand.background", "gray.700");
-  const hoverBgColor = useColorModeValue("gray.50", "gray.700");
+  const isXpiPage = pathname === "/xpi"
+  const linkColor = isXpiPage
+    ? "gray.200"
+    : useColorModeValue("gray.600", "gray.200")
+
+  const linkHoverColor = isXpiPage
+    ? "white"
+    : useColorModeValue("brand.primary", "white")
+
+  const activeLinkColor = isXpiPage
+    ? "brand.light"
+    : useColorModeValue("brand.primary", "brand.light")
+
+  const activeBgColor = useColorModeValue("brand.background", "gray.700")
+  const hoverBgColor = useColorModeValue("gray.50", "gray.700")
 
   return (
     <HStack spacing={4} width="auto">
       {NAV_ITEMS.map((navItem) => {
-        const isActive = pathname === navItem.href;
+        const isActive = pathname === navItem.href
 
         return (
           <Box key={navItem.label}>
@@ -758,8 +830,7 @@ const DesktopNav = () => {
                   _hover={{
                     textDecoration: "none",
                     color: linkHoverColor,
-                  }}
-                >
+                  }}>
                   {t(navItem.label)} <ChevronDownIcon />
                 </MenuButton>
                 <MenuList>
@@ -767,8 +838,7 @@ const DesktopNav = () => {
                     <MenuItem
                       key={child.label}
                       as={NextLink}
-                      href={child.href ?? "#"}
-                    >
+                      href={child.href ?? "#"}>
                       <Text>{t(child.label)}</Text>
                       <Text fontSize="xs" color="gray.500">
                         {t(child.subLabel || "")}
@@ -807,76 +877,109 @@ const DesktopNav = () => {
                   textDecoration: "none",
                   color: isActive ? activeLinkColor : linkHoverColor,
                   // bg: isActive ? activeBgColor : hoverBgColor,
-                }}
-              >
+                }}>
                 {t(navItem.label)}
               </Link>
             )}
           </Box>
-        );
+        )
       })}
     </HStack>
-  );
-};
+  )
+}
 
 const MobileNav = ({
   onClose,
   connectWallet,
   isXpiPage = false,
 }: {
-  onClose: () => void;
-  connectWallet: () => void;
-  isXpiPage?: boolean;
+  onClose: () => void
+  connectWallet: () => void
+  isXpiPage?: boolean
 }) => {
-  const pathname = usePathname();
-  const { network, handleNetworkChange } = useNetwork();
-  const { publicKey, disconnectWallet, isConnecting } = useSolana();
-  const { t } = useTranslation();
-  const { language, changeLanguage } = useI18n();
-  const toast = useToast();
-  const dispatch = useAppDispatch();
-  const { isLoggedIn } = useAppSelector((state) => state.user);
+  const pathname = usePathname()
+  const { network, handleNetworkChange } = useNetwork()
+  const { publicKey, disconnectWallet, isConnecting } = useSolana()
+  const { t } = useTranslation()
+  const { language, changeLanguage } = useI18n()
+  const toast = useToast()
+  const dispatch = useAppDispatch()
+  const { isLoggedIn } = useAppSelector((state) => state.user)
 
   // 提前计算所有颜色值，避免在条件渲染中使用useColorModeValue
-  const navBgColor = isXpiPage ? "gray.900" : useColorModeValue("white", "gray.900");
-  const buttonBgColor = isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark");
+  const navBgColor = isXpiPage
+    ? "gray.900"
+    : useColorModeValue("white", "gray.900")
+  const buttonBgColor = isXpiPage
+    ? "brand.primary"
+    : useColorModeValue("brand.primary", "brand.dark")
   // 定义一个统一的按钮选中背景色，确保在所有模式下一致
-  const activeButtonBgColor = "brand.primary"; // 始终使用品牌主色，无论XPI模式与否
-  const buttonTextColor = "white";
-  const buttonHoverBgColor = isXpiPage ? "brand.light" : useColorModeValue("brand.light", "brand.primary");
-  
+  const activeButtonBgColor = "brand.primary" // 始终使用品牌主色，无论XPI模式与否
+  const buttonTextColor = "white"
+  const buttonHoverBgColor = isXpiPage
+    ? "brand.light"
+    : useColorModeValue("brand.light", "brand.primary")
+
   // 专门为深色模式定义固定的颜色值
-  const darkModeActiveBg = "#5235E8"; // 手动设置为brand.primary的颜色值
-  
+  const darkModeActiveBg = "#5235E8" // 手动设置为brand.primary的颜色值
+
   // 使用固定的十六进制颜色值代替主题变量，确保一致性
-  const activeButtonHexColor = "#5235E8"; // 固定为brand.primary的值
-  
+  const activeButtonHexColor = "#5235E8" // 固定为brand.primary的值
+
   // 提前计算语言按钮的颜色
-  const borderColor = isXpiPage ? "rgba(255, 255, 255, 0.2)" : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)");
-  const languageLabelColor = isXpiPage ? "gray.300" : useColorModeValue("gray.500", "gray.300");
-  
-  const inactiveTextColor = isXpiPage ? "gray.200" : useColorModeValue("gray.700", "gray.300");
-  const inactiveBorderColor = isXpiPage ? "whiteAlpha.400" : useColorModeValue("gray.200", "whiteAlpha.400");
-  const inactiveBgColor = isXpiPage ? "transparent" : useColorModeValue("white", "transparent");
-  
-  const hoverBorderColor = isXpiPage ? "whiteAlpha.600" : useColorModeValue("gray.300", "whiteAlpha.500");
-  const inactiveHoverBgColor = isXpiPage ? "whiteAlpha.200" : useColorModeValue("gray.50", "whiteAlpha.200");
-  const hoverTextColor = useColorModeValue("gray.800", "white");
-  
-  const inactiveActiveBgColor = isXpiPage ? "whiteAlpha.300" : useColorModeValue("gray.100", "whiteAlpha.300");
-  
-  const walletBgColor = isXpiPage ? "gray.700" : useColorModeValue("brand.background", "gray.700");
-  const walletTextColor = isXpiPage ? "white" : useColorModeValue("brand.primary", "white");
-  const walletBorderColor = isXpiPage ? "gray.600" : useColorModeValue("brand.primary", "gray.600");
-  const walletHoverBgColor = isXpiPage ? "gray.600" : useColorModeValue("brand.background", "gray.600");
-  
-  const disconnectColor = isXpiPage ? "red.300" : useColorModeValue(undefined, "red.300");
-  const disconnectBorderColor = isXpiPage ? "red.300" : useColorModeValue(undefined, "red.300");
+  const borderColor = isXpiPage
+    ? "rgba(255, 255, 255, 0.2)"
+    : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)")
+  const languageLabelColor = isXpiPage
+    ? "gray.300"
+    : useColorModeValue("gray.500", "gray.300")
+
+  const inactiveTextColor = isXpiPage
+    ? "gray.200"
+    : useColorModeValue("gray.700", "gray.300")
+  const inactiveBorderColor = isXpiPage
+    ? "whiteAlpha.400"
+    : useColorModeValue("gray.200", "whiteAlpha.400")
+  const inactiveBgColor = isXpiPage
+    ? "transparent"
+    : useColorModeValue("white", "transparent")
+
+  const hoverBorderColor = isXpiPage
+    ? "whiteAlpha.600"
+    : useColorModeValue("gray.300", "whiteAlpha.500")
+  const inactiveHoverBgColor = isXpiPage
+    ? "whiteAlpha.200"
+    : useColorModeValue("gray.50", "whiteAlpha.200")
+  const hoverTextColor = useColorModeValue("gray.800", "white")
+
+  const inactiveActiveBgColor = isXpiPage
+    ? "whiteAlpha.300"
+    : useColorModeValue("gray.100", "whiteAlpha.300")
+
+  const walletBgColor = isXpiPage
+    ? "gray.700"
+    : useColorModeValue("brand.background", "gray.700")
+  const walletTextColor = isXpiPage
+    ? "white"
+    : useColorModeValue("brand.primary", "white")
+  const walletBorderColor = isXpiPage
+    ? "gray.600"
+    : useColorModeValue("brand.primary", "gray.600")
+  const walletHoverBgColor = isXpiPage
+    ? "gray.600"
+    : useColorModeValue("brand.background", "gray.600")
+
+  const disconnectColor = isXpiPage
+    ? "red.300"
+    : useColorModeValue(undefined, "red.300")
+  const disconnectBorderColor = isXpiPage
+    ? "red.300"
+    : useColorModeValue(undefined, "red.300")
 
   const handleDisconnect = async () => {
     try {
-      await disconnectWallet();
-      dispatch(clearUser());
+      await disconnectWallet()
+      dispatch(clearUser())
       toast({
         title: t("disconnected"),
         description: t("disconnectSuccess"),
@@ -884,10 +987,10 @@ const MobileNav = ({
         duration: 3000,
         isClosable: true,
         position: "top",
-      });
-      onClose(); // 关闭移动菜单
+      })
+      onClose() // 关闭移动菜单
     } catch (error) {
-      console.error("断开连接失败:", error);
+      console.error("断开连接失败:", error)
       toast({
         title: t("error"),
         description: t("disconnectFailed"),
@@ -895,9 +998,9 @@ const MobileNav = ({
         duration: 3000,
         isClosable: true,
         position: "top",
-      });
+      })
     }
-  };
+  }
 
   return (
     <Stack
@@ -910,8 +1013,7 @@ const MobileNav = ({
         backdropFilter: "saturate(180%) blur(8px)",
         WebkitBackdropFilter: "saturate(180%) blur(8px)",
         transition: "all 0.3s ease-out",
-      }}
-    >
+      }}>
       {NAV_ITEMS.map((navItem) => (
         <MobileNavItem
           key={navItem.label}
@@ -935,24 +1037,30 @@ const MobileNav = ({
             onClick={() => changeLanguage("en")}
             h="36px"
             color={language === "en" ? "white" : inactiveTextColor}
-            borderColor={language === "en" ? activeButtonHexColor : inactiveBorderColor}
+            borderColor={
+              language === "en" ? activeButtonHexColor : inactiveBorderColor
+            }
             borderWidth={language === "en" ? "1px" : "1px"}
             bg={language === "en" ? activeButtonHexColor : inactiveBgColor}
             _hover={{
-              borderColor: language === "en" ? activeButtonHexColor : hoverBorderColor,
+              borderColor:
+                language === "en" ? activeButtonHexColor : hoverBorderColor,
               bg: language === "en" ? buttonHoverBgColor : inactiveHoverBgColor,
-              color: language === "en" ? "white" : hoverTextColor
+              color: language === "en" ? "white" : hoverTextColor,
             }}
             _active={{
-              bg: language === "en" ? activeButtonHexColor : inactiveActiveBgColor,
+              bg:
+                language === "en"
+                  ? activeButtonHexColor
+                  : inactiveActiveBgColor,
             }}
             _dark={{
-              borderColor: language === "en" ? darkModeActiveBg : "whiteAlpha.400",
+              borderColor:
+                language === "en" ? darkModeActiveBg : "whiteAlpha.400",
               color: language === "en" ? "white" : "gray.300",
               bg: language === "en" ? darkModeActiveBg : "transparent",
-              opacity: 1
-            }}
-          >
+              opacity: 1,
+            }}>
             {t("english")}
           </Button>
           <Button
@@ -962,24 +1070,30 @@ const MobileNav = ({
             onClick={() => changeLanguage("ko")}
             h="36px"
             color={language === "ko" ? "white" : inactiveTextColor}
-            borderColor={language === "ko" ? activeButtonHexColor : inactiveBorderColor}
+            borderColor={
+              language === "ko" ? activeButtonHexColor : inactiveBorderColor
+            }
             borderWidth={language === "ko" ? "1px" : "1px"}
             bg={language === "ko" ? activeButtonHexColor : inactiveBgColor}
             _hover={{
-              borderColor: language === "ko" ? activeButtonHexColor : hoverBorderColor,
+              borderColor:
+                language === "ko" ? activeButtonHexColor : hoverBorderColor,
               bg: language === "ko" ? buttonHoverBgColor : inactiveHoverBgColor,
-              color: language === "ko" ? "white" : hoverTextColor
+              color: language === "ko" ? "white" : hoverTextColor,
             }}
             _active={{
-              bg: language === "ko" ? activeButtonHexColor : inactiveActiveBgColor,
+              bg:
+                language === "ko"
+                  ? activeButtonHexColor
+                  : inactiveActiveBgColor,
             }}
             _dark={{
-              borderColor: language === "ko" ? darkModeActiveBg : "whiteAlpha.400",
+              borderColor:
+                language === "ko" ? darkModeActiveBg : "whiteAlpha.400",
               color: language === "ko" ? "white" : "gray.300",
               bg: language === "ko" ? darkModeActiveBg : "transparent",
-              opacity: 1
-            }}
-          >
+              opacity: 1,
+            }}>
             {t("korean")}
           </Button>
           <Button
@@ -989,24 +1103,30 @@ const MobileNav = ({
             onClick={() => changeLanguage("zh")}
             h="36px"
             color={language === "zh" ? "white" : inactiveTextColor}
-            borderColor={language === "zh" ? activeButtonHexColor : inactiveBorderColor}
+            borderColor={
+              language === "zh" ? activeButtonHexColor : inactiveBorderColor
+            }
             borderWidth={language === "zh" ? "1px" : "1px"}
             bg={language === "zh" ? activeButtonHexColor : inactiveBgColor}
             _hover={{
-              borderColor: language === "zh" ? activeButtonHexColor : hoverBorderColor,
+              borderColor:
+                language === "zh" ? activeButtonHexColor : hoverBorderColor,
               bg: language === "zh" ? buttonHoverBgColor : inactiveHoverBgColor,
-              color: language === "zh" ? "white" : hoverTextColor
+              color: language === "zh" ? "white" : hoverTextColor,
             }}
             _active={{
-              bg: language === "zh" ? activeButtonHexColor : inactiveActiveBgColor,
+              bg:
+                language === "zh"
+                  ? activeButtonHexColor
+                  : inactiveActiveBgColor,
             }}
             _dark={{
-              borderColor: language === "zh" ? darkModeActiveBg : "whiteAlpha.400",
+              borderColor:
+                language === "zh" ? darkModeActiveBg : "whiteAlpha.400",
               color: language === "zh" ? "white" : "gray.300",
               bg: language === "zh" ? darkModeActiveBg : "transparent",
-              opacity: 1
-            }}
-          >
+              opacity: 1,
+            }}>
             {t("chinese")}
           </Button>
         </Stack>
@@ -1026,8 +1146,7 @@ const MobileNav = ({
               borderWidth="1px"
               borderColor={walletBorderColor}
               _hover={{ bg: walletHoverBgColor }}
-              size="md"
-            >
+              size="md">
               {formatWalletAddress(publicKey)}
             </Button>
             <Button
@@ -1037,8 +1156,7 @@ const MobileNav = ({
               onClick={handleDisconnect}
               size="md"
               color={disconnectColor}
-              borderColor={disconnectBorderColor}
-            >
+              borderColor={disconnectBorderColor}>
               {t("disconnect")}
             </Button>
           </Stack>
@@ -1051,18 +1169,17 @@ const MobileNav = ({
             _active={{ bg: buttonBgColor }}
             size="md"
             onClick={() => {
-              connectWallet(); // 打开钱包选择弹窗
-              onClose(); // 关闭移动菜单
+              connectWallet() // 打开钱包选择弹窗
+              onClose() // 关闭移动菜单
             }}
-            isLoading={isConnecting}
-          >
+            isLoading={isConnecting}>
             {t("connect")}
           </Button>
         )}
       </Box>
     </Stack>
-  );
-};
+  )
+}
 
 const MobileNavItem = ({
   label,
@@ -1071,34 +1188,38 @@ const MobileNavItem = ({
   isActive,
   onClose,
   isXpiPage = false,
-}: NavItem & { isActive?: boolean; onClose: () => void; isXpiPage?: boolean }) => {
-  const { isOpen, onToggle } = useDisclosure();
-  const { t } = useTranslation();
-  
+}: NavItem & {
+  isActive?: boolean
+  onClose: () => void
+  isXpiPage?: boolean
+}) => {
+  const { isOpen, onToggle } = useDisclosure()
+  const { t } = useTranslation()
+
   // 提前计算所有颜色值
-  const activeLinkColor = isXpiPage 
-    ? "brand.light" 
-    : useColorModeValue("brand.primary", "brand.light");
-  
-  const linkColor = isXpiPage 
-    ? "gray.200" 
-    : useColorModeValue("gray.600", "gray.200");
-  
+  const activeLinkColor = isXpiPage
+    ? "brand.light"
+    : useColorModeValue("brand.primary", "brand.light")
+
+  const linkColor = isXpiPage
+    ? "gray.200"
+    : useColorModeValue("gray.600", "gray.200")
+
   const submenuBgColor = isXpiPage
     ? "gray.800"
-    : useColorModeValue("gray.50", "gray.800");
-    
-  const submenuBorderColor = isXpiPage 
-    ? "rgba(255, 255, 255, 0.2)" 
-    : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)");
+    : useColorModeValue("gray.50", "gray.800")
+
+  const submenuBorderColor = isXpiPage
+    ? "rgba(255, 255, 255, 0.2)"
+    : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)")
 
   const handleClick = () => {
     if (href && !children) {
-      onClose(); // 点击普通链接时关闭菜单
+      onClose() // 点击普通链接时关闭菜单
     } else {
-      onToggle(); // 点击有子菜单的项时切换子菜单
+      onToggle() // 点击有子菜单的项时切换子菜单
     }
-  };
+  }
 
   return (
     <Stack spacing={4} onClick={handleClick}>
@@ -1108,8 +1229,7 @@ const MobileNavItem = ({
         align="center"
         _hover={{
           textDecoration: "none",
-        }}
-      >
+        }}>
         <Link
           as={NextLink}
           href={href ?? "#"}
@@ -1133,10 +1253,9 @@ const MobileNavItem = ({
           }
           onClick={(e) => {
             if (children) {
-              e.preventDefault(); // 阻止链接导航，只触发onToggle
+              e.preventDefault() // 阻止链接导航，只触发onToggle
             }
-          }}
-        >
+          }}>
           {isActive && (
             <Box
               as="span"
@@ -1175,8 +1294,7 @@ const MobileNavItem = ({
           style={{
             backdropFilter: "saturate(180%) blur(8px)",
             WebkitBackdropFilter: "saturate(180%) blur(8px)",
-          }}
-        >
+          }}>
           {children &&
             children.map((child) => (
               <Link
@@ -1187,23 +1305,22 @@ const MobileNavItem = ({
                 color={linkColor}
                 _hover={{
                   color: activeLinkColor,
-                  textDecoration: "none"
-                }}
-              >
+                  textDecoration: "none",
+                }}>
                 {t(child.label)}
               </Link>
             ))}
         </Stack>
       </Box>
     </Stack>
-  );
-};
+  )
+}
 
 interface NavItem {
-  label: string;
-  subLabel?: string;
-  children?: Array<NavItem>;
-  href?: string;
+  label: string
+  subLabel?: string
+  children?: Array<NavItem>
+  href?: string
 }
 
 const NAV_ITEMS: Array<NavItem> = [
@@ -1245,4 +1362,4 @@ const NAV_ITEMS: Array<NavItem> = [
     href: '/points',
   },
     */
-];
+]

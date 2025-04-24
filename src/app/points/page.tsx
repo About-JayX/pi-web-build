@@ -27,6 +27,14 @@ import {
   Icon,
   Center,
   Avatar,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
 } from "@chakra-ui/react"
 import {
   FaTwitter,
@@ -40,12 +48,19 @@ import {
   FaWallet,
   FaTrophy,
   FaCoins,
+  FaLink,
 } from "react-icons/fa"
 import { useTranslation } from "react-i18next"
 import { useAppSelector, useAppDispatch } from "@/store/hooks"
 import { UserAPI } from "@/api"
-import type { RankItem, RankResponse, SignInInfoResponse } from "@/api/types"
-import { setSignInInfo } from "@/store/slices/userSlice"
+import type {
+  RankItem,
+  RankResponse,
+  SignInInfoResponse,
+  HistoryResponse,
+  PointsItem,
+} from "@/api/types"
+import { setSignInInfo, setUserInfo } from "@/store/slices/userSlice"
 import { useWss } from "@/contexts/WssContext"
 
 // 从模拟数据文件导入
@@ -64,80 +79,65 @@ export default function PointsPage() {
   const { userInfo, authToken, signInInfo } = useAppSelector(
     (state) => state.user
   )
-  // const { authToken, signInInfo } = useAppSelector((state) => state.user);
-  // const userInfo = {
-  //   nickname: "张三",
-  //   avatar_url: "https://example.com/avatar.jpg",
-  //   solana_wallet: "1234567890",
-  //   telegramId: "1234567890",
-  //   twitterId: "1234567890",
-  //   userId: 5,
-  // };
+
+  const [WssUserData, setWssUserData] = useState<any>({
+    code: "",
+    token: 0,
+  })
+
   const [rankList, setRankList] = useState<RankItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [tokenData, setTokenData] = useState<any[]>([])
 
+  const { isOpen, onOpen, onClose } = useDisclosure() // 用于控制积分历史模态框
+
   // 使用WebSocket上下文
-  const { socket, updateToken } = useWss()
+  const { socket } = useWss()
 
-  // 初始化WebSocket连接
-  useEffect(() => {
-    if (!socket) {
-      // 发送ping消息以初始化连接
-      const wsUrl = UserAPI.defaults.baseURL
-        ? UserAPI.defaults.baseURL
-            .replace(/^http:\/\//i, "ws://")
-            .replace(/^https:\/\//i, "wss://") + "/ws"
-        : ""
-
-      if (wsUrl) {
-        const ws = new WebSocket(wsUrl)
-        ws.onopen = () => {
-          if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ mode: "ping", data: "ping" }))
-            console.log("WebSocket连接已建立")
-          }
-        }
-      }
+  // 发送WebSocket消息的方法
+  const sendWssMessage = (mode: string, data: any) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      const message = JSON.stringify({ mode, data: data })
+      socket.send(message)
+      console.log("发送WebSocket消息:", message)
+    } else {
+      console.warn("WebSocket未连接")
     }
-  }, [socket])
+  }
+
+  const [pointsHistory, setPointsHistory] = useState<PointsItem[]>([])
+  const [pointsTotal, setPointsTotal] = useState<number>(0)
+  const [pointsPage, setPointsPage] = useState<number>(1)
+  const [pointsLimit, setPointsLimit] = useState<number>(50)
+
+  // 获取积分历史
+  const fetchPointsHistory = async () => {
+    const result = (await UserAPI.getPointsHistory(
+      pointsPage,
+      pointsLimit
+    )) as HistoryResponse
+    if (result.success) {
+      console.log("历史记录", result.data.data)
+      setPointsTotal(Number(result.data.total))
+      setPointsPage(pointsPage + 1)
+      setPointsHistory(result.data.data)
+    }
+  }
 
   // 监听WebSocket消息
   useEffect(() => {
     if (!socket) return
 
-    const handleMessage = (event: MessageEvent) => {
+    const handleMessage = async (event: MessageEvent) => {
       try {
         const response = JSON.parse(event.data)
-        if (response.mode === "up_dexscreener") {
-          // 更新代币数据
-          setTokenData((prevData) => {
-            const newData = [...prevData]
-            const index = newData.findIndex(
-              (item) => item.tokenAddress === response.data.tokenAddress
-            )
+        console.log("收到WebSocket消息:", response)
 
-            if (index >= 0) {
-              newData[index] = response.data
-            } else {
-              newData.push(response.data)
-            }
-
-            return newData
-          })
-
-          // 显示通知
-          toast({
-            title: t("代币数据已更新"),
-            description: `${response.data.tokenAddress} 的价格: $${
-              response.data.pairs?.[0]?.priceUsd || "N/A"
-            }`,
-            status: "info",
-            duration: 3000,
-            isClosable: true,
-            position: "top",
-          })
+        if (response.mode === "user_info") {
+          //更新用户信息
+          // dispatch(setUserInfo(response.data))
+          setWssUserData(response.data)
         }
       } catch (error) {
         console.error("解析WebSocket消息失败:", error)
@@ -153,6 +153,23 @@ export default function PointsPage() {
     }
   }, [socket, toast, t])
 
+  // 示例：在组件挂载时发送ping消息
+  useEffect(() => {
+    const sendAuthMessage = async () => {
+      //等待两秒
+      await new Promise((resolve) => setTimeout(resolve, 2000))
+      console.log(socket, userInfo, "in")
+
+      if (socket && userInfo?.solana_wallet) {
+        await sendWssMessage("auth_user", {
+          publicKey: userInfo.solana_wallet,
+          token: localStorage.getItem("token"),
+        })
+      }
+    }
+    sendAuthMessage()
+  }, [socket, userInfo])
+
   // 获取签到信息
   useEffect(() => {
     const fetchSignInInfo = async () => {
@@ -166,8 +183,21 @@ export default function PointsPage() {
       }
     }
 
+    const sendAuthMessage = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      if (userInfo && authToken) {
+        await sendWssMessage("edit_auth_user", {
+          publicKey: userInfo.solana_wallet,
+          token: localStorage.getItem("token"),
+        })
+      }
+    }
+
     if (userInfo && authToken) {
       fetchSignInInfo()
+      fetchPointsHistory()
+      // console.log("切换钱包了")
+      sendAuthMessage()
     }
   }, [userInfo, authToken, dispatch])
 
@@ -203,6 +233,7 @@ export default function PointsPage() {
           isClosable: true,
           position: "top",
         })
+        await sendWssMessage("get_user_info", {})
       } else {
         toast({
           title: t("签到失败"),
@@ -225,10 +256,17 @@ export default function PointsPage() {
     }
   }
 
+  // 获取活动描述
+  const getActivityDescription = (activity: string) => {
+    return t(activity)
+  }
+
   // 复制邀请链接
   const handleCopyInviteLink = () => {
-    if (!userInfo?.code) return
-    navigator.clipboard.writeText(userInfo.code).then(() => {
+    if (!WssUserData?.code) return
+    const baseUrl = window.location.origin
+    const inviteLink = `${baseUrl}/points?code=${WssUserData.code}`
+    navigator.clipboard.writeText(inviteLink).then(() => {
       toast({
         title: t("copySuccess"),
         status: "success",
@@ -239,18 +277,22 @@ export default function PointsPage() {
 
   // 分享到Telegram
   const handleShareToTelegram = () => {
-    if (!userInfo?.code) return
+    if (!WssUserData?.code) return
+    const baseUrl = window.location.origin
+    const inviteLink = `${baseUrl}/points?code=${WssUserData.code}`
     const text = encodeURIComponent(
-      `${t("inviteSuccessReward")}\n${userInfo.code}`
+      `${t("inviteSuccessReward")}\n${inviteLink}`
     )
     window.open(`https://t.me/share/url?url=${text}`, "_blank")
   }
 
   // 分享到Twitter/X
   const handleShareToX = () => {
-    if (!userInfo?.code) return
+    if (!WssUserData?.code) return
+    const baseUrl = window.location.origin
+    const inviteLink = `${baseUrl}?code=${WssUserData.code}`
     const text = encodeURIComponent(
-      `${t("inviteSuccessReward")}\n${userInfo.code}`
+      `${t("inviteSuccessReward")}\n${inviteLink}`
     )
     window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank")
   }
@@ -306,9 +348,10 @@ export default function PointsPage() {
       }
     }
 
-    if (userInfo && authToken) {
-      fetchRankList()
-    }
+    // if (userInfo && authToken) {
+    //   fetchRankList()
+    // }
+    fetchRankList()
   }, [userInfo, authToken, t])
 
   // 渲染排行榜
@@ -569,7 +612,7 @@ export default function PointsPage() {
                         lineHeight="1.2"
                         color="white"
                         textShadow="0 1px 3px rgba(0,0,0,0.3)">
-                        {userInfo.token}
+                        {WssUserData.token}
                       </Text>
                     </Box>
                   </HStack>
@@ -577,6 +620,7 @@ export default function PointsPage() {
                   <VStack spacing={2} w={{ base: "100%", sm: "auto" }}>
                     {/* 积分历史按钮 */}
                     <Button
+                      onClick={onOpen}
                       leftIcon={<Icon as={FaHistory} />}
                       size="sm"
                       colorScheme="yellow"
@@ -610,6 +654,84 @@ export default function PointsPage() {
                 </Flex>
               </GridItem>
 
+              {/* 积分历史模态框 */}
+              <Modal isOpen={isOpen} onClose={onClose} size="xl">
+                <ModalOverlay backdropFilter="blur(2px)" />
+                <ModalContent borderRadius="xl">
+                  <ModalHeader
+                    bg={accentColor}
+                    color="white"
+                    borderTopRadius="xl"
+                    py={4}>
+                    <HStack>
+                      <Icon as={FaHistory} mr={2} />
+                      <Text>{t("pointsHistory")}</Text>
+                    </HStack>
+                  </ModalHeader>
+                  <ModalCloseButton color="white" />
+                  <ModalBody p={4}>
+                    <Box overflowX="auto">
+                      <Table variant="simple">
+                        <Thead>
+                          <Tr>
+                            <Th>{t("activity")}</Th>
+                            <Th isNumeric>{t("pointsEarned")}</Th>
+                            <Th>{t("date")}</Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
+                          {pointsHistory.map((entry, index) => (
+                            <Tr key={index}>
+                              <Td>
+                                <HStack>
+                                  {entry.title === "SignIn Reward" && (
+                                    <Icon as={FaCheck} color="green.500" />
+                                  )}
+                                  {entry.title === "Create Reward" && (
+                                    <Icon as={FaLink} color="purple.500" />
+                                  )}
+                                  {/* {entry.activity === "inviteAccepted" && (
+                                    <Icon as={FaUserPlus} color="blue.500" />
+                                  )}
+                                  {entry.activity === "inviteSent" && (
+                                    <Icon as={FaLink} color="purple.500" />
+                                  )}
+                                  {entry.activity === "telegramConnected" && (
+                                    <Icon as={FaTelegram} color="blue.500" />
+                                  )}
+                                  {entry.activity === "twitterConnected" && (
+                                    <Icon as={FaTwitter} color="twitter.500" />
+                                  )} */}
+                                  <Text>
+                                    {getActivityDescription(entry.title)}
+                                  </Text>
+                                </HStack>
+                              </Td>
+                              <Td isNumeric>
+                                <Text
+                                  color={
+                                    entry.type === 1 ? "green.500" : "red.500"
+                                  }
+                                  fontWeight="bold">
+                                  +{entry.amount}
+                                </Text>
+                              </Td>
+                              <Td>{entry.time}</Td>
+                              {/* <Td>{formatDate(entry.time)}</Td> */}
+                            </Tr>
+                          ))}
+                        </Tbody>
+                      </Table>
+                    </Box>
+                  </ModalBody>
+                  <ModalFooter>
+                    <Button colorScheme="purple" onClick={onClose}>
+                      {t("close")}
+                    </Button>
+                  </ModalFooter>
+                </ModalContent>
+              </Modal>
+
               {/* 右侧：签到 */}
               <GridItem display="flex">
                 <VStack
@@ -634,7 +756,7 @@ export default function PointsPage() {
                       px={2}
                       borderRadius="full"
                       fontWeight="bold">
-                      +{REWARDS.dailyCheckin}
+                      +{Number(signInInfo?.Dailyrewards)}
                     </Badge>
                   </HStack>
 
@@ -723,7 +845,7 @@ export default function PointsPage() {
                                     m={0}
                                   />
                                 ) : (
-                                  "+" + itme.reward
+                                  "+" + Number(signInInfo?.Dailyrewards)
                                 )}
                               </Text>
                             </HStack>
@@ -757,90 +879,6 @@ export default function PointsPage() {
               </GridItem>
             </Grid>
           </Box>
-
-          {/* 代币数据展示卡片 */}
-          {tokenData.length > 0 && (
-            <Card
-              variant="outline"
-              borderRadius="xl"
-              overflow="hidden"
-              boxShadow="none"
-              bg={bgColor}>
-              <CardBody p={{ base: 0, sm: 6 }}>
-                <VStack spacing={5} align="stretch">
-                  <Flex
-                    justifyContent="space-between"
-                    alignItems={{ base: "flex-start", md: "center" }}
-                    flexDirection={{ base: "column", md: "row" }}>
-                    <HStack spacing={3} mb={{ base: 3, md: 0 }}>
-                      <Icon as={FaCoins} color={accentColor} boxSize={5} />
-                      <Heading size="md">{t("代币数据")}</Heading>
-                      <Badge
-                        colorScheme="purple"
-                        fontSize="sm"
-                        px={2}
-                        py={1}
-                        borderRadius="full">
-                        {tokenData.length}
-                      </Badge>
-                    </HStack>
-                  </Flex>
-
-                  <Box overflowX="auto">
-                    <Table variant="simple">
-                      <Thead bg={tableHeadBg}>
-                        <Tr>
-                          <Th>{t("代币地址")}</Th>
-                          <Th>{t("价格")}</Th>
-                          <Th>{t("24h变化")}</Th>
-                          <Th>{t("24h交易量")}</Th>
-                          <Th>{t("流动性")}</Th>
-                        </Tr>
-                      </Thead>
-                      <Tbody>
-                        {tokenData.map((token, index) => (
-                          <Tr key={index}>
-                            <Td>{formatSolAddress(token.tokenAddress)}</Td>
-                            <Td>${token.pairs?.[0]?.priceUsd || "N/A"}</Td>
-                            <Td>
-                              <Text
-                                color={
-                                  token.pairs?.[0]?.priceChange24h > 0
-                                    ? "green.500"
-                                    : "red.500"
-                                }>
-                                {token.pairs?.[0]?.priceChange24h
-                                  ? `${token.pairs[0].priceChange24h.toFixed(
-                                      2
-                                    )}%`
-                                  : "N/A"}
-                              </Text>
-                            </Td>
-                            <Td>
-                              $
-                              {token.pairs?.[0]?.volume24h
-                                ? Number(
-                                    token.pairs[0].volume24h
-                                  ).toLocaleString()
-                                : "N/A"}
-                            </Td>
-                            <Td>
-                              $
-                              {token.pairs?.[0]?.liquidity
-                                ? Number(
-                                    token.pairs[0].liquidity
-                                  ).toLocaleString()
-                                : "N/A"}
-                            </Td>
-                          </Tr>
-                        ))}
-                      </Tbody>
-                    </Table>
-                  </Box>
-                </VStack>
-              </CardBody>
-            </Card>
-          )}
 
           {/* 邀请好友卡片 - 重构设计 */}
           <Card
@@ -959,7 +997,11 @@ export default function PointsPage() {
                     {t("yourInviteLink")}
                   </Text>
                   <Input
-                    value={userInfo.code}
+                    value={`${
+                      WssUserData.code
+                        ? `${window.location.origin}/points?code=${WssUserData.code}`
+                        : "loading..."
+                    }`}
                     readOnly
                     bg="white"
                     borderColor={borderColor}

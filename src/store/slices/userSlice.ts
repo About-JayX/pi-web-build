@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { UserInfo as ApiUserInfo, SignInInfo } from '@/api/types'
 
-interface UserInfo extends ApiUserInfo {}
+interface UserInfo extends ApiUserInfo { }
 
 interface UserState {
   userInfo: UserInfo | null
@@ -34,6 +34,9 @@ export const userSlice = createSlice({
       // 保存token到localStorage
       localStorage.setItem('token', action.payload.authToken)
     },
+    setUserInfo: (state, action: PayloadAction<UserInfo>) => {
+      state.userInfo = action.payload
+    },
     clearUser: state => {
       state.userInfo = null
       state.authToken = null
@@ -48,6 +51,7 @@ export const userSlice = createSlice({
   },
 })
 
-export const { setUser, clearUser, setSignInInfo } = userSlice.actions
+export const { setUser, clearUser, setSignInInfo, setUserInfo } =
+  userSlice.actions
 
 export default userSlice.reducer

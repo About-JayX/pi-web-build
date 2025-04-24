@@ -114,6 +114,13 @@ export interface RankItem {
   solana_wallet?: string
 }
 
+export interface PointsItem {
+  title: string
+  amount: string
+  type: number
+  time: string
+}
+
 export interface RankResponse {
   success: boolean
   msg?: string
@@ -123,6 +130,16 @@ export interface RankResponse {
     userRank: number | null
   }
 }
+
+export interface HistoryResponse {
+  success: boolean
+  msg?: string
+  data: {
+    total: string
+    data: PointsItem[]
+  }
+}
+
 
 interface SignInReward {
   day: number
