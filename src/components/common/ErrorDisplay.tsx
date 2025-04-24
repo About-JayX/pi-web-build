@@ -91,7 +91,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
           _hover={{ bg: buttonHoverBgColor }}
           leftIcon={<Icon as={FaSync} boxSize={4} />}
           boxShadow="md"
-          py={6}
+          py={4}
           px={8}
           height="auto"
           minH="52px"

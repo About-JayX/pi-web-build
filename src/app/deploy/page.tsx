@@ -1095,7 +1095,7 @@ export default function DeployPage() {
           <CardFooter
             pt={0}
             p={4}
-            px={5}
+            px={{ base: 3, md: 5 }}
           >
             <Button
               onClick={handleCreateToken}
