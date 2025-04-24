@@ -368,6 +368,7 @@ export default function Navbar() {
           alignItems="center"
           height="100%"
           justify="space-between" // 确保两端对齐
+          position="relative" // 添加相对定位，作为绝对定位的基准
         >
           <Flex
             flex={{ base: 1, md: "auto" }}
@@ -397,10 +398,13 @@ export default function Navbar() {
               </Flex>
             </NextLink>
           </Flex>
+
+          {/* 左侧Logo */}
           <Flex
             flex={{ base: 1, xl: "auto" }}
             alignItems="center"
             justify={{ base: "space-between", xl: "start" }}
+            width={{ xl: "30%" }}
           >
             <NextLink href="/" passHref>
               <Flex
@@ -425,42 +429,44 @@ export default function Navbar() {
                 </ClientSideOnly>
               </Flex>
             </NextLink>
-
-            <Flex
-              display={{ base: "none", xl: "flex" }}
-              ml={{ base: 10, xl: 6 }}
-              flex="1"
-              position="absolute"
-              left="50%"
-              transform="translateX(-50%)"
-            >
-              <DesktopNav />
-            </Flex>
           </Flex>
 
-          {/* 确保语言选择器和钱包按钮始终在右侧，无论是否加载完成 */}
+          {/* 导航TAB组，作为一个整体居中 */}
+          <Flex
+            display={{ base: "none", xl: "flex" }}
+            position="absolute"
+            left="50%"
+            transform="translateX(-50%)"
+            width="auto"
+          >
+            <DesktopNav />
+          </Flex>
+
+          {/* 右侧语言选择器和钱包按钮 */}
           <ClientSideOnly fallback={<NavButtonsPlaceholder />}>
             <Stack
-              flex={{ base: 0, md: 0 }}
+              flex={{ base: 0, xl: 1 }}
               justify="flex-end"
               direction="row"
               spacing={{ base: 2, md: 1 }}
               align="center"
               ml={{ base: 2, md: 0 }}
+              width={{ xl: "30%" }}
             >
               {/* 语言选择 */}
               <Menu>
                 <MenuButton
                   as={Button}
                   variant="outline"
-                  color={isXpiPage ? "white" : "text."}
+                  color={isXpiPage ? "white" : useColorModeValue("gray.700", "white")}
                   size={{ base: "sm", md: "md" }}
                   fontWeight={600}
                   borderWidth="2px"
-                  borderColor={isXpiPage ? "whiteAlpha.400" : "gray.200"}
+                  borderColor={isXpiPage ? "whiteAlpha.400" : useColorModeValue("gray.200", "whiteAlpha.400")}
+                  bg={isXpiPage || useColorModeValue(false, true) ? "transparent" : "white"}
                   _hover={{
-                    borderColor: isXpiPage ? "whiteAlpha.500" : "gray.300",
-                    bg: isXpiPage ? "whiteAlpha.100" : undefined
+                    borderColor: isXpiPage ? "whiteAlpha.600" : useColorModeValue("gray.300", "whiteAlpha.500"),
+                    bg: isXpiPage ? "whiteAlpha.200" : useColorModeValue("gray.50", "whiteAlpha.100")
                   }}
                   h={{ base: "36px", md: "40px" }}
                   minW={{ base: "80px", md: "100px" }}
@@ -469,19 +475,21 @@ export default function Navbar() {
                 >
                   {t("language")}
                 </MenuButton>
-                <MenuList minW="140px" bg={isXpiPage ? "gray.800" : undefined} borderColor={isXpiPage ? "gray.700" : undefined}>
+                <MenuList minW="140px" bg={isXpiPage || useColorModeValue(false, true) ? "gray.800" : undefined} borderColor={isXpiPage || useColorModeValue(false, true) ? "gray.700" : undefined}>
                   <MenuItem
                     fontWeight="500"
                     onClick={() => changeLanguage("en")}
-                    bg={language === "en" ? (isXpiPage ? "purple.900" : "purple.50") : undefined}
-                    color={isXpiPage ? (language === "en" ? "brand.light" : "white") : undefined}
+                    bg={language === "en" ? (isXpiPage || useColorModeValue(false, true) ? "brand.primary" : "purple.50") : undefined}
+                    color={language === "en" 
+                      ? "white" 
+                      : (isXpiPage || useColorModeValue(false, true) ? "gray.200" : "gray.700")}
                     _hover={{ 
-                      bg: isXpiPage ? (language === "en" ? "purple.900" : "whiteAlpha.200") : "gray.100", 
-                      color: isXpiPage ? "white" : undefined 
+                      bg: isXpiPage || useColorModeValue(false, true) ? (language === "en" ? "brand.light" : "whiteAlpha.200") : "gray.100", 
+                      color: language === "en" ? "white" : (isXpiPage || useColorModeValue(false, true) ? "white" : "gray.800")
                     }}
                     _dark={{
-                      bg: language === "en" ? "purple.900" : undefined,
-                      color: language === "en" ? "brand.light" : undefined,
+                      bg: language === "en" ? "brand.primary" : undefined,
+                      color: language === "en" ? "white" : "gray.300",
                     }}
                   >
                     {t("english")}
@@ -489,15 +497,17 @@ export default function Navbar() {
                   <MenuItem
                     fontWeight="500"
                     onClick={() => changeLanguage("ko")}
-                    bg={language === "ko" ? (isXpiPage ? "purple.900" : "purple.50") : undefined}
-                    color={isXpiPage ? (language === "ko" ? "brand.light" : "white") : undefined}
+                    bg={language === "ko" ? (isXpiPage || useColorModeValue(false, true) ? "brand.primary" : "purple.50") : undefined}
+                    color={language === "ko" 
+                      ? "white" 
+                      : (isXpiPage || useColorModeValue(false, true) ? "gray.200" : "gray.700")}
                     _hover={{ 
-                      bg: isXpiPage ? (language === "ko" ? "purple.900" : "whiteAlpha.200") : "gray.100", 
-                      color: isXpiPage ? "white" : undefined 
+                      bg: isXpiPage || useColorModeValue(false, true) ? (language === "ko" ? "brand.light" : "whiteAlpha.200") : "gray.100", 
+                      color: language === "ko" ? "white" : (isXpiPage || useColorModeValue(false, true) ? "white" : "gray.800")
                     }}
                     _dark={{
-                      bg: language === "ko" ? "purple.900" : undefined,
-                      color: language === "ko" ? "brand.light" : undefined,
+                      bg: language === "ko" ? "brand.primary" : undefined,
+                      color: language === "ko" ? "white" : "gray.300",
                     }}
                   >
                     {t("korean")}
@@ -505,15 +515,17 @@ export default function Navbar() {
                   <MenuItem
                     fontWeight="500"
                     onClick={() => changeLanguage("zh")}
-                    bg={language === "zh" ? (isXpiPage ? "purple.900" : "purple.50") : undefined}
-                    color={isXpiPage ? (language === "zh" ? "brand.light" : "white") : undefined}
+                    bg={language === "zh" ? (isXpiPage || useColorModeValue(false, true) ? "brand.primary" : "purple.50") : undefined}
+                    color={language === "zh" 
+                      ? "white" 
+                      : (isXpiPage || useColorModeValue(false, true) ? "gray.200" : "gray.700")}
                     _hover={{ 
-                      bg: isXpiPage ? (language === "zh" ? "purple.900" : "whiteAlpha.200") : "gray.100", 
-                      color: isXpiPage ? "white" : undefined 
+                      bg: isXpiPage || useColorModeValue(false, true) ? (language === "zh" ? "brand.light" : "whiteAlpha.200") : "gray.100", 
+                      color: language === "zh" ? "white" : (isXpiPage || useColorModeValue(false, true) ? "white" : "gray.800")
                     }}
                     _dark={{
-                      bg: language === "zh" ? "purple.900" : undefined,
-                      color: language === "zh" ? "brand.light" : undefined,
+                      bg: language === "zh" ? "brand.primary" : undefined,
+                      color: language === "zh" ? "white" : "gray.300",
                     }}
                   >
                     {t("chinese")}
@@ -587,10 +599,10 @@ export default function Navbar() {
                     fontSize={{ base: "xs", md: "sm" }}
                     fontWeight={600}
                     variant="solid"
-                    bg={buttonBgColor}
-                    color={buttonTextColor}
-                    _hover={{ bg: buttonHoverBgColor }}
-                    _active={{ bg: buttonBgColor }}
+                    bg={isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark")}
+                    color="white"
+                    _hover={{ bg: isXpiPage ? "brand.light" : useColorModeValue("brand.light", "brand.primary") }}
+                    _active={{ bg: isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark") }}
                     h={{ base: "36px", md: "40px" }}
                     px={{ base: 3, md: 4 }}
                     size={{ base: "sm", md: "md" }}
@@ -598,7 +610,7 @@ export default function Navbar() {
                   >
                     {formatWalletAddress(publicKey)}
                   </MenuButton>
-                  <MenuList minW="120px">
+                  <MenuList minW="120px" bg={useColorModeValue("white", "gray.800")} borderColor={useColorModeValue("gray.200", "gray.700")}>
                     <MenuItem onClick={handleDisconnect} fontWeight="500">
                       {t("disconnect")}
                     </MenuItem>
@@ -607,10 +619,10 @@ export default function Navbar() {
               ) : (
                 <Button
                   variant="solid"
-                  bg={buttonBgColor}
-                  color={buttonTextColor}
-                  _hover={{ bg: buttonHoverBgColor }}
-                  _active={{ bg: buttonBgColor }}
+                  bg={isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark")}
+                  color="white"
+                  _hover={{ bg: isXpiPage ? "brand.light" : useColorModeValue("brand.light", "brand.primary") }}
+                  _active={{ bg: isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark") }}
                   size={{ base: "sm", md: "md" }}
                   fontWeight={600}
                   onClick={handleConnectButtonClick}
@@ -669,7 +681,7 @@ const DesktopNav = () => {
   const hoverBgColor = useColorModeValue("gray.50", "gray.700");
 
   return (
-    <HStack spacing={4}>
+    <HStack spacing={4} width="auto">
       {NAV_ITEMS.map((navItem) => {
         const isActive = pathname === navItem.href;
 
@@ -766,10 +778,10 @@ const MobileNav = ({
   const dispatch = useAppDispatch();
   const { isLoggedIn } = useAppSelector((state) => state.user);
 
-  const navBgColor = isXpiPage ? "rgba(0, 0, 0, 0.36)" : useColorModeValue("rgba(255,255,255,0.4)", "rgba(0, 0, 0, 0.36)");
-  const buttonBgColor = isXpiPage ? "white" : "brand.primary";
-  const buttonTextColor = isXpiPage ? "black" : "white";
-  const buttonHoverBgColor = isXpiPage ? "gray.200" : "brand.light";
+  const navBgColor = isXpiPage ? "gray.900" : useColorModeValue("white", "gray.900");
+  const buttonBgColor = isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark");
+  const buttonTextColor = "white";
+  const buttonHoverBgColor = isXpiPage ? "brand.light" : useColorModeValue("brand.light", "brand.primary");
 
   const handleDisconnect = async () => {
     try {
@@ -822,60 +834,93 @@ const MobileNav = ({
 
       {/* 移动端语言选择 */}
       <Box pt={4} pb={2}>
-        <Text fontWeight="600" mb={2} color={isXpiPage ? "gray.300" : "gray.500"} fontSize="sm">
+        <Text fontWeight="600" mb={2} color={isXpiPage ? "gray.300" : useColorModeValue("gray.500", "gray.300")} fontSize="sm">
           {t("language")}
         </Text>
         <Stack spacing={2}>
           <Button
             size="sm"
-            colorScheme={language === "en" ? "purple" : isXpiPage ? "whiteAlpha" : "gray"}
+            colorScheme={language === "en" ? "purple" : "gray"}
             variant={language === "en" ? "solid" : "outline"}
             justifyContent="flex-start"
             onClick={() => changeLanguage("en")}
             h="36px"
-            color={isXpiPage ? (language === "en" ? "white" : "gray.100") : undefined}
-            borderColor={isXpiPage && language !== "en" ? "whiteAlpha.400" : undefined}
-            bg={language === "en" && isXpiPage ? "purple.900" : undefined}
+            color={language === "en" 
+              ? "white" 
+              : isXpiPage 
+                ? "gray.200" 
+                : useColorModeValue("gray.700", "gray.300")}
+            borderColor={isXpiPage ? "whiteAlpha.400" : useColorModeValue(undefined, "whiteAlpha.400")}
+            bg={language === "en" 
+              ? (isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark")) 
+              : (isXpiPage ? "transparent" : useColorModeValue("white", "transparent"))}
             _hover={{
-              borderColor: isXpiPage && language !== "en" ? "whiteAlpha.500" : undefined,
-              bg: isXpiPage ? (language === "en" ? "purple.800" : "whiteAlpha.200") : undefined,
-              color: isXpiPage ? "white" : undefined
+              borderColor: isXpiPage ? "whiteAlpha.600" : useColorModeValue(undefined, "whiteAlpha.600"),
+              bg: language === "en"
+                ? (isXpiPage ? "brand.light" : useColorModeValue("brand.light", "brand.primary"))
+                : (isXpiPage ? "whiteAlpha.200" : useColorModeValue("gray.50", "whiteAlpha.200")),
+              color: language === "en" ? "white" : useColorModeValue("gray.700", "white")
+            }}
+            _dark={{
+              borderColor: language === "en" ? undefined : "whiteAlpha.400",
             }}
           >
             {t("english")}
           </Button>
           <Button
             size="sm"
-            colorScheme={language === "ko" ? "purple" : isXpiPage ? "whiteAlpha" : "gray"}
+            colorScheme={language === "ko" ? "purple" : "gray"}
             variant={language === "ko" ? "solid" : "outline"}
             justifyContent="flex-start"
             onClick={() => changeLanguage("ko")}
             h="36px"
-            color={isXpiPage ? (language === "ko" ? "white" : "gray.100") : undefined}
-            borderColor={isXpiPage && language !== "ko" ? "whiteAlpha.400" : undefined}
-            bg={language === "ko" && isXpiPage ? "purple.900" : undefined}
+            color={language === "ko" 
+              ? "white" 
+              : isXpiPage 
+                ? "gray.200" 
+                : useColorModeValue("gray.700", "gray.300")}
+            borderColor={isXpiPage ? "whiteAlpha.400" : useColorModeValue(undefined, "whiteAlpha.400")}
+            bg={language === "ko" 
+              ? (isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark")) 
+              : (isXpiPage ? "transparent" : useColorModeValue("white", "transparent"))}
             _hover={{
-              borderColor: isXpiPage && language !== "ko" ? "whiteAlpha.500" : undefined,
-              bg: isXpiPage ? (language === "ko" ? "purple.800" : "whiteAlpha.200") : undefined,
-              color: isXpiPage ? "white" : undefined
+              borderColor: isXpiPage ? "whiteAlpha.600" : useColorModeValue(undefined, "whiteAlpha.600"),
+              bg: language === "ko"
+                ? (isXpiPage ? "brand.light" : useColorModeValue("brand.light", "brand.primary"))
+                : (isXpiPage ? "whiteAlpha.200" : useColorModeValue("gray.50", "whiteAlpha.200")),
+              color: language === "ko" ? "white" : useColorModeValue("gray.700", "white")
+            }}
+            _dark={{
+              borderColor: language === "ko" ? undefined : "whiteAlpha.400",
             }}
           >
             {t("korean")}
           </Button>
           <Button
             size="sm"
-            colorScheme={language === "zh" ? "purple" : isXpiPage ? "whiteAlpha" : "gray"}
+            colorScheme={language === "zh" ? "purple" : "gray"}
             variant={language === "zh" ? "solid" : "outline"}
             justifyContent="flex-start"
             onClick={() => changeLanguage("zh")}
             h="36px"
-            color={isXpiPage ? (language === "zh" ? "white" : "gray.100") : undefined}
-            borderColor={isXpiPage && language !== "zh" ? "whiteAlpha.400" : undefined}
-            bg={language === "zh" && isXpiPage ? "purple.900" : undefined}
+            color={language === "zh" 
+              ? "white" 
+              : isXpiPage 
+                ? "gray.200" 
+                : useColorModeValue("gray.700", "gray.300")}
+            borderColor={isXpiPage ? "whiteAlpha.400" : useColorModeValue(undefined, "whiteAlpha.400")}
+            bg={language === "zh" 
+              ? (isXpiPage ? "brand.primary" : useColorModeValue("brand.primary", "brand.dark")) 
+              : (isXpiPage ? "transparent" : useColorModeValue("white", "transparent"))}
             _hover={{
-              borderColor: isXpiPage && language !== "zh" ? "whiteAlpha.500" : undefined,
-              bg: isXpiPage ? (language === "zh" ? "purple.800" : "whiteAlpha.200") : undefined,
-              color: isXpiPage ? "white" : undefined
+              borderColor: isXpiPage ? "whiteAlpha.600" : useColorModeValue(undefined, "whiteAlpha.600"),
+              bg: language === "zh"
+                ? (isXpiPage ? "brand.light" : useColorModeValue("brand.light", "brand.primary"))
+                : (isXpiPage ? "whiteAlpha.200" : useColorModeValue("gray.50", "whiteAlpha.200")),
+              color: language === "zh" ? "white" : useColorModeValue("gray.700", "white")
+            }}
+            _dark={{
+              borderColor: language === "zh" ? undefined : "whiteAlpha.400",
             }}
           >
             {t("chinese")}
@@ -892,11 +937,11 @@ const MobileNav = ({
           <Stack spacing={2}>
             <Button
               w="full"
-              bg={isXpiPage ? "gray.700" : "brand.background"}
-              color={isXpiPage ? "white" : "brand.primary"}
+              bg={isXpiPage ? "gray.700" : useColorModeValue("brand.background", "gray.700")}
+              color={isXpiPage ? "white" : useColorModeValue("brand.primary", "white")}
               borderWidth="1px"
-              borderColor={isXpiPage ? "gray.600" : "brand.primary"}
-              _hover={{ bg: isXpiPage ? "gray.600" : "brand.background" }}
+              borderColor={isXpiPage ? "gray.600" : useColorModeValue("brand.primary", "gray.600")}
+              _hover={{ bg: isXpiPage ? "gray.600" : useColorModeValue("brand.background", "gray.600") }}
               size="md"
             >
               {formatWalletAddress(publicKey)}
@@ -907,8 +952,8 @@ const MobileNav = ({
               colorScheme="red"
               onClick={handleDisconnect}
               size="md"
-              color={isXpiPage ? "red.300" : undefined}
-              borderColor={isXpiPage ? "red.300" : undefined}
+              color={isXpiPage || useColorModeValue(false, true) ? "red.300" : undefined}
+              borderColor={isXpiPage || useColorModeValue(false, true) ? "red.300" : undefined}
             >
               {t("disconnect")}
             </Button>
@@ -919,6 +964,7 @@ const MobileNav = ({
             bg={buttonBgColor}
             color={buttonTextColor}
             _hover={{ bg: buttonHoverBgColor }}
+            _active={{ bg: buttonBgColor }}
             size="md"
             onClick={() => {
               connectWallet(); // 打开钱包选择弹窗
@@ -953,8 +999,8 @@ const MobileNavItem = ({
     : useColorModeValue("gray.600", "gray.200");
   
   const submenuBgColor = isXpiPage
-    ? "rgba(18, 18, 18, 0.6)"
-    : useColorModeValue("rgba(255,255,255,0.2)", "rgba(0, 0, 0, 0.2)");
+    ? "gray.800"
+    : useColorModeValue("gray.50", "gray.800");
 
   const handleClick = () => {
     if (href && !children) {
