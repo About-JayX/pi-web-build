@@ -36,14 +36,18 @@ export const WssProvider = ({ children }: { children: ReactNode }) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null)
   const tokenAddressesRef = useRef<string[]>([])
   const pathname = usePathname()
-  
-  // 检查当前路径是否是/market或其子路径
-  const isMarketPage = pathname === "/market" || pathname?.startsWith("/market/")
 
-  // 使用useEffect管理WebSocket连接，只在Market页面初始化
+  // 检查当前路径是否是/market或其子路径
+  const isMarketPage =
+    pathname === "/market" || pathname?.startsWith("/market/")
+  // 检查是否是points页面
+  const isPointsPage =
+    pathname === "/points" || pathname?.startsWith("/points/")
+
+  // 使用useEffect管理WebSocket连接
   useEffect(() => {
-    // 如果不是Market页面，则不建立WebSocket连接
-    if (!isMarketPage) return
+    // 如果不是需要连接的页面，则不建立WebSocket连接
+    if (!isMarketPage && !isPointsPage) return
 
     const wsUrl = userApi.defaults.baseURL
       ? userApi.defaults.baseURL
@@ -72,24 +76,30 @@ export const WssProvider = ({ children }: { children: ReactNode }) => {
         if (response.message === "pong") {
           const data = response.data
           console.log("收到pong消息，代币地址列表:", data)
-          // 立即执行一次更新
-          data.forEach(async (item: string) => {
-            tokenAddressesRef.current.push(item)
-          })
+          // 只在market页面执行更新token操作
+          if (isMarketPage) {
+            // 立即执行一次更新
+            data.forEach(async (item: string) => {
+              tokenAddressesRef.current.push(item)
+            })
+          }
         }
 
         if (response.message === "go") {
-          // console.log("收到go消息，开始更新代币")
-          tokenAddressesRef.current.forEach(async (item: string) => {
-            const new_msg = await updateToken(item)
-            if (new_msg) {
-              ws.send(JSON.stringify(new_msg))
-            }
-          })
-          // Reset tokenAddressesRef
-          tokenAddressesRef.current = []
-          //Get Token Data again
-          ws.send(JSON.stringify({ mode: "ping", data: "ping" }))
+          // 只在market页面执行更新token操作
+          if (isMarketPage) {
+            // console.log("收到go消息，开始更新代币")
+            tokenAddressesRef.current.forEach(async (item: string) => {
+              const new_msg = await updateToken(item)
+              if (new_msg) {
+                ws.send(JSON.stringify(new_msg))
+              }
+            })
+            // Reset tokenAddressesRef
+            tokenAddressesRef.current = []
+            //Get Token Data again
+            ws.send(JSON.stringify({ mode: "ping", data: "ping" }))
+          }
         }
       } catch (error) {
         console.error("解析WebSocket消息失败:", error)
@@ -115,7 +125,7 @@ export const WssProvider = ({ children }: { children: ReactNode }) => {
         ws.close()
       }
     }
-  }, [isMarketPage, pathname]) // 添加pathname作为依赖，当路径改变时重新评估
+  }, [isMarketPage, isPointsPage, pathname]) // 添加pathname作为依赖，当路径改变时重新评估
 
   const updateToken = async (tokenAddress: string) => {
     try {
