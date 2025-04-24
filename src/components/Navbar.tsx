@@ -211,6 +211,22 @@ export default function Navbar() {
   const { isOpen, onToggle } = useDisclosure();
   const pathname = usePathname();
   
+  // 确保所有钩子都在顶部调用，避免条件渲染导致钩子顺序变化
+  const { t } = useTranslation();
+  const { network, handleNetworkChange } = useNetwork();
+  const {
+    publicKey,
+    setPublicKey,
+    disconnectWallet,
+    isConnecting,
+    reconnectWallet,
+    autoConnected,
+  } = useSolana();
+  const { language, changeLanguage } = useI18n();
+  const toast = useToast();
+  const dispatch = useAppDispatch();
+  const { isLoggedIn, userInfo } = useAppSelector((state) => state.user);
+  
   // 判断是否在 XPI 页面，如果是则使用深色模式
   const isXpiPage = pathname === "/xpi";
   const bgColor = useColorModeValue(
@@ -228,21 +244,6 @@ export default function Navbar() {
   const buttonHoverBgColor = isXpiPage ? "gray.200" : "brand.light";
   const iconButtonColor = isXpiPage ? "white" : "inherit";
   
-  const { network, handleNetworkChange } = useNetwork();
-  const {
-    publicKey,
-    setPublicKey,
-    disconnectWallet,
-    isConnecting,
-    reconnectWallet,
-    autoConnected,
-  } = useSolana();
-  const { t } = useTranslation();
-  const { language, changeLanguage } = useI18n();
-  const toast = useToast();
-  const dispatch = useAppDispatch();
-  const { isLoggedIn, userInfo } = useAppSelector((state) => state.user);
-
   // 添加钱包连接弹窗状态
   const {
     isOpen: isWalletModalOpen,
@@ -648,6 +649,8 @@ export default function Navbar() {
 
 const DesktopNav = () => {
   const pathname = usePathname();
+  const { t } = useTranslation();
+  
   // 判断是否在 XPI 页面，如果是则使用深色模式
   const isXpiPage = pathname === "/xpi";
   const linkColor = isXpiPage 
@@ -664,7 +667,6 @@ const DesktopNav = () => {
   
   const activeBgColor = useColorModeValue("brand.background", "gray.700");
   const hoverBgColor = useColorModeValue("gray.50", "gray.700");
-  const { t } = useTranslation();
 
   return (
     <HStack spacing={4}>
@@ -941,6 +943,7 @@ const MobileNavItem = ({
   isXpiPage = false,
 }: NavItem & { isActive?: boolean; onClose: () => void; isXpiPage?: boolean }) => {
   const { isOpen, onToggle } = useDisclosure();
+  const { t } = useTranslation();
   const activeLinkColor = isXpiPage 
     ? "brand.light" 
     : useColorModeValue("brand.primary", "brand.light");
@@ -952,8 +955,6 @@ const MobileNavItem = ({
   const submenuBgColor = isXpiPage
     ? "rgba(18, 18, 18, 0.6)"
     : useColorModeValue("rgba(255,255,255,0.2)", "rgba(0, 0, 0, 0.2)");
-  
-  const { t } = useTranslation();
 
   const handleClick = () => {
     if (href && !children) {
