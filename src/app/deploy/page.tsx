@@ -827,7 +827,9 @@ export default function DeployPage() {
         isClosable: true,
         position: 'top',
       })
-      router.push(`/sol/${mint}`)
+      setTimeout(() => {
+        router.push(`/sol/${mint}`)
+      }, 1000)
     } catch (error: any) {
       console.error('Token creation failed:', error)
 
