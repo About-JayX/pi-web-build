@@ -463,11 +463,7 @@ export default function PointsPage() {
                     name={
                       WssUserData.nickname ? WssUserData.nickname : "loading..."
                     }
-                    src={
-                      WssUserData.avatar_url
-                        ? WssUserData.avatar_url
-                        : "loading..."
-                    }
+                    src={WssUserData.avatar_url}
                     bg="white"
                     color="purple.500"
                     borderWidth="3px"
