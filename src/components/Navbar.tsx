@@ -133,7 +133,7 @@ const NavbarPlaceholder = () => {
     "rgba(255,255,255,0.4)",
     "rgba(0, 0, 0, 0.36)"
   )
-  const borderColor = useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)")
+  const borderColor = useColorModeValue("transparent", "rgba(255, 255, 255, 0.2)")
   const isXpiMode = isDarkPage // 根据ThemeContext判断
   const boxShadowValue = isXpiMode ? "none" : useColorModeValue("sm", "none") // 深色模式下不显示阴影
   const skeletonBg = isDarkPage 
@@ -150,7 +150,7 @@ const NavbarPlaceholder = () => {
       boxShadow={boxShadowValue}
       height="60px" // 与实际 Navbar 保持相同高度
       width="100%"
-      borderBottom="1px"
+      borderBottom={isDarkPage ? "1px" : "0px"}
       borderStyle="solid"
       borderColor={borderColor}
       style={{
@@ -352,8 +352,8 @@ export const Navbar = ({
   // 为XPI和SpacePi页面强制使用黑色半透明背景
   const bgColor = isDarkPage ? "rgba(0, 0, 0, 0.36)" : normalBgColorLight
   const textColor = isDarkPage ? "white" : normalTextColor
-  // 在XPI页面或深色模式下使用特定边框颜色
-  const borderColor = isDarkPage ? "rgba(255, 255, 255, 0.2)" : normalBorderColorLight
+  // 在XPI页面或深色模式下使用特定边框颜色，浅色模式下移除边框
+  const borderColor = isDarkPage ? "rgba(255, 255, 255, 0.2)" : "transparent"
   const buttonBgColor = isDarkPage ? "brand.primary" : "brand.primary"
   const buttonTextColor = isDarkPage ? "black" : "white"
   const buttonHoverBgColor = isDarkPage ? "brand.light" : "brand.light"
@@ -478,7 +478,7 @@ export const Navbar = ({
       top="0"
       zIndex="1000"
       bg={bgColor}
-      borderBottom="1px"
+      borderBottom={isDarkPage ? "1px" : "0px"}
       borderStyle="solid"
       borderColor={borderColor}
       boxShadow={boxShadowValue}

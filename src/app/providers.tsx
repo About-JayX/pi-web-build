@@ -52,7 +52,7 @@ function NavbarPlaceholder() {
   
   const borderColor = isDarkPage 
     ? "rgba(255, 255, 255, 0.2)" 
-    : useColorModeValue('gray.200', 'rgba(255, 255, 255, 0.2)');
+    : useColorModeValue('transparent', 'rgba(255, 255, 255, 0.2)');
   
   const boxShadowValue = isDarkPage 
     ? "none" 
@@ -71,7 +71,7 @@ function NavbarPlaceholder() {
       zIndex="1000"
       bg={bgColor}
       boxShadow={boxShadowValue}
-      borderBottom="1px"
+      borderBottom={isDarkPage ? "1px" : "0px"}
       borderStyle="solid"
       borderColor={borderColor}
       height="60px"
