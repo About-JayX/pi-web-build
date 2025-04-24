@@ -83,6 +83,8 @@ export default function PointsPage() {
   const [WssUserData, setWssUserData] = useState<any>({
     code: "",
     token: 0,
+    telegramId: "",
+    twitterId: "",
   })
 
   const [rankList, setRankList] = useState<RankItem[]>([])
@@ -138,6 +140,10 @@ export default function PointsPage() {
           //更新用户信息
           // dispatch(setUserInfo(response.data))
           setWssUserData(response.data)
+        }
+
+        if (response.mode === "bind_telegram_code") {
+          window.location.href = response.data.code
         }
       } catch (error) {
         console.error("解析WebSocket消息失败:", error)
@@ -301,14 +307,22 @@ export default function PointsPage() {
   const handleConnectSocial = (platform: "telegram" | "twitter") => {
     if (!userInfo) return
     const isConnected =
-      platform === "telegram" ? userInfo.telegramId : userInfo.twitterId
+      platform === "telegram" ? WssUserData.telegramId : WssUserData.twitterId
 
     if (isConnected) return
+
+    if (socket) {
+      socket.send(
+        JSON.stringify({
+          mode: "bind_telegram",
+        })
+      )
+    }
 
     toast({
       title: platform === "telegram" ? t("socialBound") : t("socialBound"),
       description: t("connectReward", { points: REWARDS.connectSocial }),
-      status: "success",
+      status: platform === "telegram" ? "success" : "error",
       duration: 3000,
       isClosable: true,
       position: "top",
@@ -446,8 +460,14 @@ export default function PointsPage() {
                   {/* 用户头像和名称 */}
                   <Avatar
                     size={{ base: "lg", md: "xl" }}
-                    name={userInfo.nickname}
-                    src={userInfo.avatar_url}
+                    name={
+                      WssUserData.nickname ? WssUserData.nickname : "loading..."
+                    }
+                    src={
+                      WssUserData.avatar_url
+                        ? WssUserData.avatar_url
+                        : "loading..."
+                    }
                     bg="white"
                     color="purple.500"
                     borderWidth="3px"
@@ -466,7 +486,9 @@ export default function PointsPage() {
                       color="white"
                       textShadow="0 1px 2px rgba(0,0,0,0.2)"
                       textAlign={{ base: "center", sm: "left" }}>
-                      {userInfo.nickname}
+                      {WssUserData.nickname
+                        ? WssUserData.nickname
+                        : "loading..."}
                     </Text>
 
                     {/* 钱包地址显示 - 调整颜色和格式 */}
@@ -504,23 +526,29 @@ export default function PointsPage() {
                         {/* 绑定电报按钮 */}
                         <HStack
                           bg={
-                            userInfo.telegramId ? "whiteAlpha.400" : "blue.600"
+                            WssUserData.telegramId
+                              ? "whiteAlpha.400"
+                              : "blue.600"
                           }
                           p={1.5}
                           px={3}
                           borderRadius="full"
                           borderWidth="1px"
                           borderColor={
-                            userInfo.telegramId ? "whiteAlpha.400" : "blue.500"
+                            WssUserData.telegramId
+                              ? "whiteAlpha.400"
+                              : "blue.500"
                           }
-                          cursor={userInfo.telegramId ? "default" : "pointer"}
+                          cursor={
+                            WssUserData.telegramId ? "default" : "pointer"
+                          }
                           onClick={() =>
-                            !userInfo.telegramId &&
+                            !WssUserData.telegramId &&
                             handleConnectSocial("telegram")
                           }
-                          opacity={userInfo.telegramId ? 0.8 : 1}
+                          opacity={WssUserData.telegramId ? 0.8 : 1}
                           _hover={
-                            !userInfo.telegramId
+                            !WssUserData.telegramId
                               ? {
                                   bg: "blue.500",
                                 }
@@ -528,9 +556,11 @@ export default function PointsPage() {
                           }>
                           <Icon as={FaTelegram} color="white" boxSize={4} />
                           <Text fontSize="sm" fontWeight="medium" color="white">
-                            {userInfo.telegramId ? t("socialBound") : t("bind")}
+                            {WssUserData.telegramId
+                              ? t("socialBound")
+                              : t("bind")}
                           </Text>
-                          {userInfo.telegramId && (
+                          {WssUserData.telegramId && (
                             <Icon
                               as={FaCheck}
                               color="green.300"
@@ -543,7 +573,7 @@ export default function PointsPage() {
                         {/* 绑定推特按钮 */}
                         <HStack
                           bg={
-                            userInfo.twitterId
+                            WssUserData.twitterId
                               ? "whiteAlpha.400"
                               : "twitter.600"
                           }
@@ -552,18 +582,18 @@ export default function PointsPage() {
                           borderRadius="full"
                           borderWidth="1px"
                           borderColor={
-                            userInfo.twitterId
+                            WssUserData.twitterId
                               ? "whiteAlpha.400"
                               : "twitter.500"
                           }
                           cursor={userInfo.twitterId ? "default" : "pointer"}
                           onClick={() =>
-                            !userInfo.twitterId &&
+                            !WssUserData.twitterId &&
                             handleConnectSocial("twitter")
                           }
-                          opacity={userInfo.twitterId ? 0.8 : 1}
+                          opacity={WssUserData.twitterId ? 0.8 : 1}
                           _hover={
-                            !userInfo.twitterId
+                            !WssUserData.twitterId
                               ? {
                                   bg: "twitter.500",
                                 }
