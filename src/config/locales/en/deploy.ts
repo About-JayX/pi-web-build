@@ -28,4 +28,5 @@ export default {
   'website': 'Website',
   'twitter': 'Twitter',
   'telegram': 'Telegram',
+  'description': 'Project Description',
 }; 

@@ -193,10 +193,13 @@ const TokenParametersSection = ({
       <SimpleGrid
         columns={2}
         spacing={4}
-        bg="gray.50"
+        bg={useColorModeValue('white', 'gray.800')}
         p={4}
         borderRadius="md"
         mt={2}
+        boxShadow="sm"
+        border="1px solid"
+        borderColor={useColorModeValue('gray.200', 'gray.700')}
       >
         <Box>
           <Text fontSize="sm" color="gray.600" mb={1}>
@@ -253,13 +256,16 @@ const TokenParametersSection = ({
           display={isTokenParamsOpen ? 'block' : 'none'}
           mt={4}
           pl={0}
-          bg="gray.50"
-          p={4}
+          bg={useColorModeValue('white', 'gray.800')}
+          p={5}
           borderRadius="md"
+          boxShadow="sm"
+          border="1px solid"
+          borderColor={useColorModeValue('gray.200', 'gray.700')}
         >
           <VStack spacing={5} align="stretch">
             <FormControl>
-              <FormLabel color={labelColor} fontSize="sm" fontWeight="semibold">
+              <FormLabel fontSize="sm" fontWeight="semibold">
                 {t('totalSupply')}
               </FormLabel>
               <Tabs
@@ -269,10 +275,11 @@ const TokenParametersSection = ({
                 onChange={setTotalSupplyTabIndex}
                 isFitted
               >
-                <TabList bg="gray.50" p={1} borderRadius="md">
+                <TabList bg="gray.50" p={2} borderRadius="lg">
                   {totalSupplyOptions.map((option, index) => (
                     <Tab
                       key={index}
+                      rounded="md"
                       _selected={{ color: 'white', bg: 'brand.primary' }}
                       fontWeight="semibold"
                     >
@@ -286,7 +293,7 @@ const TokenParametersSection = ({
             <Divider />
 
             <FormControl>
-              <FormLabel color={labelColor} fontSize="sm" fontWeight="semibold">
+              <FormLabel fontSize="sm" fontWeight="semibold">
                 {t('mintingAmount')}
               </FormLabel>
 
@@ -299,17 +306,23 @@ const TokenParametersSection = ({
               >
                 <TabList
                   bg="gray.50"
-                  p={1}
-                  borderRadius="md"
-                  justifyContent="start"
+                  p={2}
+                  borderRadius="lg"
+                  display="grid"
+                  gridTemplateColumns="repeat(3, 1fr)"
+                  gap={2}
+                  width="100%"
                 >
                   {targetAmountOptionsMap[
                     totalSupplyOptions[totalSupplyTabIndex]
                   ].map((option, index) => (
                     <Tab
                       key={index}
+                      rounded="md"
                       _selected={{ color: 'white', bg: 'brand.primary' }}
-                      mx={1}
+                      fontSize="xs"
+                      py={2}
+                      px={0}
                     >
                       {option}
                     </Tab>
@@ -318,11 +331,13 @@ const TokenParametersSection = ({
               </Tabs>
             </FormControl>
             <Button
-              colorScheme="purple"
-              mt={2}
+              mt={3}
               bg="brand.primary"
+              color="white"
               size="md"
               width="100%"
+              _hover={{ bg: 'brand.primary' }}
+              _active={{ bg: 'brand.primary' }}
               onClick={onTokenParamsToggle}
             >
               {t('confirm')}
@@ -406,6 +421,8 @@ const TokenParametersSection = ({
                           key={index}
                           rounded="md"
                           _selected={{ color: 'white', bg: 'brand.primary' }}
+                          mx={1}
+                          mb={1}
                         >
                           {option}
                         </Tab>

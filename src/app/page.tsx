@@ -123,10 +123,20 @@ export default function MintPage() {
     // 服务器端渲染时默认使用卡片视图
     return 'card'
   })
-  const [sortColumn, setSortColumn] = useState('')
+  const [sortColumn, setSortColumn] = useState('progress')
   const [sortDirection, setSortDirection] = useState<'ASC' | 'DESC'>('DESC')
   const [totalTokenCount, setTotalTokenCount] = useState(0)
   const [totalPages, setTotalPages] = useState(1)
+  const [tabChangeInProgress, setTabChangeInProgress] = useState(false)
+
+  // 创建滚动到顶部的通用功能函数，避免重复声明
+  const scrollToTop = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    }
+  }, []);
 
   // 获取token列表
   const getTokenList = async () => {
@@ -221,43 +231,230 @@ export default function MintPage() {
     }
   }, [tokenList, currentPage, pageSize])
 
-  // 监听页码变化获取数据
+  // 处理Tab切换处理函数，添加到组件中
+  const handleTabChange = (index: number) => {
+    // 如果已经是当前Tab，不做任何操作
+    if (index === tabIndex) return;
+    
+    // 滚动到顶部
+    scrollToTop();
+    
+    // 设置标志位，防止useEffect触发额外查询
+    setTabChangeInProgress(true);
+    
+    // 在sessionStorage中设置标记，表示Tab正在切换
+    // 这是为了防止其他useEffect触发重复请求
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem('tabJustChanged', 'true');
+    }
+    
+    // 更新Tab索引状态
+    setTabIndex(index);
+    setCurrentPage(1);
+    
+    // 根据Tab设置不同的排序条件
+    let newSortColumn = '';
+    let newSortDirection: 'ASC' | 'DESC' = 'DESC';
+    
+    switch (index) {
+      case 0: // 热门铸造 - 修改为默认使用进度排序
+        newSortColumn = 'progress';
+        break;
+      case 1: // 所有代币 - 默认按铸造进度排序
+        newSortColumn = 'progress';
+        break;
+      case 2: // 最新部署
+        newSortColumn = '';
+        break;
+      case 3: // 铸造结束
+        newSortColumn = '';
+        break;
+      default:
+        newSortColumn = '';
+        break;
+    }
+    
+    // 更新排序状态，但不触发额外的useEffect
+    setSortColumn(newSortColumn);
+    setSortDirection(newSortDirection);
+    
+    // 预先清除任何可能存在的上一次参数缓存
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.removeItem('lastTokenListParams');
+    }
+    
+    // 构建请求参数
+    const params: TokenListParams = {
+      page: 1, // 始终从第一页开始
+      limit: pageSize,
+      order: newSortDirection,
+      sort_by: newSortColumn,
+      ...(index === 0 && { category: 'hot' }),
+      ...(index === 2 && { category: 'latest' }),
+      ...(index === 3 && { category: 'completed' }),
+    };
+    
+    // 记录本次请求的参数以防重复请求
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem('lastTokenListParams', JSON.stringify({
+        page: 1,
+        limit: pageSize,
+        sort: newSortColumn,
+        direction: newSortDirection,
+        category: index === 0 ? 'hot' : index === 2 ? 'latest' : index === 3 ? 'completed' : '',
+      }));
+    }
+    
+    // 先清空数据，显示加载状态
+    store.dispatch({
+      type: 'token/fetchTokenList/pending',
+    });
+    
+    // 直接发起数据请求
+    store.dispatch(fetchTokenList(params)).finally(() => {
+      // 查询完成后重置标志位，不管请求成功还是失败
+      setTabChangeInProgress(false);
+      
+      // 延迟一点移除tabJustChanged标记，确保其他useEffect不会立即触发
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          window.sessionStorage.removeItem('tabJustChanged');
+        }, 300);
+      }
+    });
+  }
+
+  // 共享排序逻辑，优化为单一数据请求
+  const handleSort = (column: string) => {
+    // 如果正在进行其他操作，不处理排序
+    if (tabChangeInProgress) return;
+    
+    // 设置排序正在进行的标记，防止useEffect触发额外请求
+    if (typeof window !== 'undefined') {
+      window.sessionStorage.setItem('sortingInProgress', 'true');
+    }
+    
+    // 计算新的排序方向
+    const newDirection =
+      sortColumn === column && sortDirection === 'DESC' ? 'ASC' : 'DESC'
+    
+    // 更新排序状态
+    setSortColumn(column);
+    setSortDirection(newDirection);
+    
+    // 如果不是第1页，重置到第1页
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+    
+    // 构建请求参数
+    let category = '';
+    switch (tabIndex) {
+      case 0: // 热门铸造
+        category = 'hot';
+        break;
+      case 1: // 所有代币
+        // 不需要category
+        break;
+      case 2: // 最新部署
+        category = 'latest';
+        break;
+      case 3: // 铸造结束
+        category = 'completed';
+        break;
+    }
+    
+    // 直接构建一次请求参数
+    const params: TokenListParams = {
+      page: 1, // 总是从第一页开始
+      limit: pageSize,
+      order: newDirection.toUpperCase(),
+      sort_by: column,
+      ...(category && { category }),
+    };
+    
+    // 记录本次请求参数，防止重复请求
+    if (typeof window !== 'undefined') {
+      const currentParams = JSON.stringify({
+        page: 1,
+        limit: pageSize,
+        sort: column,
+        direction: newDirection,
+        category,
+      });
+      window.sessionStorage.setItem('lastTokenListParams', currentParams);
+      window.sessionStorage.setItem('lastSearchParams', currentParams);
+    }
+    
+    // 先清空数据，显示加载状态
+    store.dispatch({
+      type: 'token/fetchTokenList/pending',
+    });
+    
+    // 延迟执行，确保状态更新已完成
+    setTimeout(() => {
+      // 发起数据请求
+      store.dispatch(fetchTokenList(params)).finally(() => {
+        // 请求完成后清理标记
+        if (typeof window !== 'undefined') {
+          window.sessionStorage.removeItem('sortingInProgress');
+        }
+      });
+    }, 10);
+  }
+
+  // 修改第一个useEffect，添加对排序操作的检查
   useEffect(() => {
-    // 避免初始加载时的重复请求
-    if (isInitialLoad) return
+    // 避免初始加载时的重复请求和Tab切换过程中的重复请求
+    if (isInitialLoad || tabChangeInProgress) return;
+
+    // 如果Tab刚刚切换过或正在排序，也不触发请求
+    if (typeof window !== 'undefined' && 
+        (window.sessionStorage.getItem('tabJustChanged') === 'true' ||
+         window.sessionStorage.getItem('sortingInProgress') === 'true')) {
+      return;
+    }
+
+    // 构建请求参数
+    let category = '';
+    switch (tabIndex) {
+      case 0: // 热门铸造
+        category = 'hot';
+        break;
+      case 1: // 所有代币
+        // 不需要category
+        break;
+      case 2: // 最新部署
+        category = 'latest';
+        break;
+      case 3: // 铸造结束
+        category = 'completed';
+        break;
+    }
+
+    // 检查当前参数是否有变化，如果没有变化则不需要重新请求
+    const currentParams = JSON.stringify({
+      page: currentPage,
+      limit: pageSize,
+      sort: sortColumn,
+      direction: sortDirection,
+      category,
+    });
+
+    // 使用sessionStorage保存上一次的参数，如果和当前参数相同，则不重新请求
+    if (typeof window !== 'undefined') {
+      const lastParams = window.sessionStorage.getItem('lastTokenListParams');
+      if (lastParams === currentParams) return;
+      window.sessionStorage.setItem('lastTokenListParams', currentParams);
+    }
 
     // 先清空数据，显示加载状态，避免数据跳动
     store.dispatch({
       type: 'token/fetchTokenList/pending',
-    })
-
-    // 创建一个强制滚动到顶部的函数
-    const forceScrollToTop = () => {
-      window.scrollTo(0, 0)
-      document.documentElement.scrollTop = 0
-      document.body.scrollTop = 0
-    }
+    });
 
     // 首先强制滚动到顶部
-    forceScrollToTop()
-
-    // 根据标签索引选择不同的排序字段
-    let category = ''
-    switch (tabIndex) {
-      case 0: // 热门铸造
-        category = 'hot'
-        break
-      case 1: // 所有代币
-        break
-      case 2: // 最新部署
-        category = 'latest'
-        break
-      case 3: // 铸造结束
-        category = 'completed'
-        break
-      default:
-        break
-    }
+    scrollToTop();
 
     // 构建请求参数
     const params: TokenListParams = {
@@ -266,39 +463,92 @@ export default function MintPage() {
       order: sortDirection.toUpperCase(),
       sort_by: sortColumn,
       ...(category && { category }),
-    }
+    };
 
     // 添加短延迟，确保UI可以显示加载状态
-    setTimeout(() => {
+    const requestTimeoutId = setTimeout(() => {
       // 发起数据请求
-      store.dispatch(fetchTokenList(params))
-
+      store.dispatch(fetchTokenList(params));
+      
       // 添加延迟滚动，确保在渲染后保持在顶部
-      const scrollTimeouts: number[] = [
-        setTimeout(forceScrollToTop, 50) as unknown as number,
-        setTimeout(forceScrollToTop, 150) as unknown as number,
-        setTimeout(forceScrollToTop, 300) as unknown as number,
-        setTimeout(forceScrollToTop, 500) as unknown as number,
-      ]
+      const scrollTimeoutId = setTimeout(scrollToTop, 100);
+      return () => clearTimeout(scrollTimeoutId);
+    }, 50);
 
-      // 清理函数注册
-      const timeoutCleaner = setTimeout(() => {
-        scrollTimeouts.forEach(timeout => clearTimeout(timeout))
-      }, 600)
+    return () => clearTimeout(requestTimeoutId);
+  }, [currentPage, pageSize, tabIndex, isInitialLoad, scrollToTop, sortColumn, sortDirection, tabChangeInProgress]);
 
-      return () => {
-        clearTimeout(timeoutCleaner)
-        scrollTimeouts.forEach(timeout => clearTimeout(timeout))
-      }
-    }, 50)
-  }, [
-    currentPage,
-    pageSize,
-    tabIndex,
-    isInitialLoad,
-    sortColumn,
-    sortDirection,
-  ])
+  // 修改最后一个useEffect，避免排序和搜索条件变化时的重复请求
+  useEffect(() => {
+    // 增加tabChangeInProgress检查，避免Tab切换过程中的重复查询
+    if (isInitialLoad || tabChangeInProgress) return; 
+    
+    // 如果Tab刚刚切换过或正在排序，也不触发请求
+    if (typeof window !== 'undefined' && 
+        (window.sessionStorage.getItem('tabJustChanged') === 'true' ||
+         window.sessionStorage.getItem('sortingInProgress') === 'true')) {
+      return;
+    }
+    
+    // 重置到第一页
+    setCurrentPage(1);
+    
+    // 检查当前参数是否有变化
+    let category = '';
+    switch (tabIndex) {
+      case 0: // 热门铸造
+        category = 'hot';
+        break;
+      case 1: // 所有代币
+        // 不需要category
+        break;
+      case 2: // 最新部署
+        category = 'latest';
+        break;
+      case 3: // 铸造结束
+        category = 'completed';
+        break;
+    }
+    
+    // 构建当前参数
+    const currentParams = JSON.stringify({
+      page: 1, // 总是从第一页开始
+      limit: pageSize,
+      sort: sortColumn,
+      direction: sortDirection,
+      category,
+      search: searchQuery,
+    });
+    
+    // 使用sessionStorage保存上一次的参数，如果和当前参数相同，则不重新请求
+    if (typeof window !== 'undefined') {
+      const lastSearchParams = window.sessionStorage.getItem('lastSearchParams');
+      if (lastSearchParams === currentParams) return;
+      window.sessionStorage.setItem('lastSearchParams', currentParams);
+    }
+    
+    // 构建请求参数
+    const params: TokenListParams = {
+      page: 1,
+      limit: pageSize,
+      order: sortDirection.toUpperCase(),
+      sort_by: sortColumn,
+      ...(category && { category }),
+    };
+    
+    // 添加短延迟确保UI更新
+    const timeoutId = setTimeout(() => {
+      // 先清空数据
+      store.dispatch({
+        type: 'token/fetchTokenList/pending',
+      });
+      
+      // 发起请求
+      store.dispatch(fetchTokenList(params));
+    }, 50);
+    
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, sortColumn, sortDirection, isInitialLoad, pageSize, tabChangeInProgress]) // 注意移除了tabIndex依赖
 
   // 设置当前网络的计价单位
   const currencyUnit = useMemo(() => {
@@ -326,54 +576,27 @@ export default function MintPage() {
     }
   }, [pageSize])
 
-  // 修改切换tab时重置页码并获取数据的useEffect
+  // 添加初始加载处理
   useEffect(() => {
-    // 如果是初始加载，不触发重复请求
-    if (isInitialLoad) {
-      return
-    }
+    if (isInitialLoad && typeof window !== 'undefined') {
+      // 构建请求参数
+      const params: TokenListParams = {
+        page: currentPage,
+        limit: pageSize,
+        order: sortDirection.toUpperCase(),
+        sort_by: sortColumn,
+        ...(tabIndex === 0 && { category: 'hot' }),
+        ...(tabIndex === 2 && { category: 'latest' }),
+        ...(tabIndex === 3 && { category: 'completed' }),
+      };
 
-    // 注意：不需要重置页码，因为在handleTabChange中已经重置了
-    // 这里不再需要 setCurrentPage(1)
-
-    // 根据标签索引选择不同的排序字段
-    let category = ''
-    switch (tabIndex) {
-      case 0: // 热门铸造
-        category = 'hot'
-        break
-      case 1: // 所有代币
-        break
-      case 2: // 最新部署
-        category = 'latest'
-        break
-      case 3: // 铸造结束
-        category = 'completed'
-        break
-      default:
-        break
-    }
-
-    // 先清空数据，显示加载状态，避免数据跳动
-    store.dispatch({
-      type: 'token/fetchTokenList/pending',
-    })
-
-    // 构建请求参数
-    const params: TokenListParams = {
-      page: 1, // 始终从第一页开始
-      limit: pageSize,
-      order: sortDirection.toUpperCase(),
-      sort_by: sortColumn,
-      ...(category && { category }),
-    }
-
-    // 添加延迟，确保UI更新后再发起请求
-    setTimeout(() => {
       // 发起数据请求
-      store.dispatch(fetchTokenList(params))
-    }, 50)
-  }, [tabIndex, pageSize, isInitialLoad])
+      store.dispatch(fetchTokenList(params));
+      
+      // 将初始加载标志设置为false
+      setIsInitialLoad(false);
+    }
+  }, [isInitialLoad, currentPage, pageSize, tabIndex, sortDirection, sortColumn]);
 
   // 强制在移动设备上使用卡片视图
   useEffect(() => {
@@ -394,108 +617,6 @@ export default function MintPage() {
     }
   }, [viewMode])
 
-  // 当搜索条件、排序条件变化时，重置为第一页并重新请求数据
-  useEffect(() => {
-    setCurrentPage(1)
-    // 通过监听currentPage变化会自动触发getTokenList
-  }, [searchQuery, sortColumn, sortDirection])
-
-  // Tab切换处理函数，添加到组件中
-  const handleTabChange = (index: number) => {
-    // 使用多种滚动方法确保最大兼容性
-    if (typeof window !== 'undefined') {
-      // 强制滚动函数
-      const forceScrollToTop = () => {
-        // 方法1：使用window.scrollTo
-        window.scrollTo(0, 0)
-
-        // 方法2：使用document.documentElement
-        document.documentElement.scrollTop = 0
-
-        // 方法3：使用document.body
-        document.body.scrollTop = 0
-      }
-
-      // 立即执行滚动
-      forceScrollToTop()
-
-      // 先更新标签索引
-      setTabIndex(index)
-
-      // 重要：始终将页码重置为1，避免数据跳动
-      setCurrentPage(1)
-
-      // 添加多次延迟滚动，以覆盖各种可能的渲染时机
-      const scrollTimeouts: number[] = []
-
-      for (let delay of [10, 50, 100, 300, 500, 800]) {
-        scrollTimeouts.push(
-          setTimeout(forceScrollToTop, delay) as unknown as number
-        )
-      }
-
-      // 一段时间后清除所有定时器
-      setTimeout(() => {
-        scrollTimeouts.forEach(id => clearTimeout(id))
-      }, 1000)
-    } else {
-      // 直接更新标签索引
-      setTabIndex(index)
-      // 重置页码
-      setCurrentPage(1)
-    }
-  }
-
-  // 初始化时基于tabIndex加载正确的数据
-  useEffect(() => {
-    if (isInitialLoad && typeof window !== 'undefined') {
-      // 根据初始化的标签索引选择正确的排序字段
-      let category = ''
-      switch (tabIndex) {
-        case 0: // 热门铸造
-          category = 'hot'
-          break
-        case 1: // 所有代币
-          break
-        case 2: // 最新部署
-          category = 'latest'
-          break
-        case 3: // 铸造结束
-          category = 'completed'
-          break
-        default:
-          break
-      }
-      // 在初始化时基于本地存储中的tabIndex加载数据
-      const params: TokenListParams = {
-        page: 1,
-        limit: pageSize,
-        order: sortDirection.toUpperCase(),
-        sort_by: sortColumn,
-        ...(category && { category }),
-      }
-
-      // 清除tokenList，避免数据跳动
-      store.dispatch({
-        type: 'token/fetchTokenList/pending',
-      })
-
-      // 发起数据请求
-      store.dispatch(fetchTokenList(params))
-
-      // 标记初始加载已完成
-      setIsInitialLoad(false)
-    }
-  }, [isInitialLoad, tabIndex, pageSize])
-
-  // 共享排序逻辑
-  const handleSort = (column: string) => {
-    const newDirection =
-      sortColumn === column && sortDirection === 'DESC' ? 'ASC' : 'DESC'
-    setSortColumn(column)
-    setSortDirection(newDirection)
-  }
-
   const renderTabContent = (tokens: MintToken[]) => {
     // 显示加载状态
     if (loading || isInitialLoad) {
@@ -512,10 +633,27 @@ export default function MintPage() {
     }
 
     // 处理token列表
-    const processedTokens = tokens.map(token => ({
+    let processedTokens = tokens.map(token => ({
       ...token,
       image: token.logo || '/token-logo.png', // 使用token中的logo，如果没有则使用默认图片
     }))
+
+    // 只显示总供应量为 314M 和 1000M 的项目
+    processedTokens = processedTokens.filter(token => {
+      // 检查总供应量字段
+      const totalSupply = parseFloat(token.totalSupply);
+      // 如果不是有效数字，不保留该条目
+      if (isNaN(totalSupply)) return false;
+      // 只保留总供应量为 314M 或 1000M 的项目
+      return totalSupply === 314000000 || totalSupply === 1000000000;
+    });
+
+    // 在热门铸造标签页，筛选掉持有人小于2的项目
+    if (tabIndex === 0) {
+      processedTokens = processedTokens.filter(token => 
+        token.minterCounts >= 2
+      );
+    }
 
     // 显示空结果状态
     if (processedTokens.length === 0) {
@@ -669,7 +807,7 @@ export default function MintPage() {
                       tabIndex === index ? 'brand.light' : 'transparent'
                     }
                     borderWidth={tabIndex === index ? 2 : 0}
-                    onClick={() => setTabIndex(index)}
+                    onClick={() => handleTabChange(index)}
                   >
                     {item}
                   </Button>
@@ -689,25 +827,47 @@ export default function MintPage() {
                     fontSize="sm"
                     rightIcon={<ChevronDownIcon />}
                   >
-                    All coins
+                    {!sortColumn ? (
+                      // 当没有选择排序条件时，显示默认文本
+                      tabIndex === 0 ? t("progressColumn") :  // 修改热门铸造标签页的默认显示
+                      tabIndex === 1 ? t("progressColumn") : // 所有代币默认显示"铸造进度"
+                      tabIndex === 2 ? "部署时间" :
+                      tabIndex === 3 ? "默认排序" : "默认排序"
+                    ) : (
+                      // 当用户选择了排序条件时，显示所选排序条件
+                      sortColumn === 'progress' ? t("progressColumn") : 
+                      sortColumn === 'minter_counts' ? t("participantsColumn") : 
+                      sortColumn === 'target' ? "铸造总额" : 
+                      sortColumn === 'raised' ? "已铸额度" : 
+                      t("progressColumn")
+                    )}
                   </MenuButton>
                   <MenuList minW={{ base: "120px", md: "160px" }}>
                     {[
-                      t("totalSupplyColumn"),
-                      t("progressColumn"),
-                      t("participantsColumn"),
+                      { label: t("progressColumn"), value: "progress" },
+                      { label: "铸造总额", value: "target" },
+                      { label: "已铸额度", value: "raised" },
+                      { label: t("participantsColumn"), value: "minter_counts" }
                     ].map((item, index) => (
                       <MenuItem
                         key={index}
                         fontSize="sm"
-                        // 选中样式
-                        // bg="brand.primary"
-                        // fontWeight="bold"
-                        // color="white"
-                        // 未选中样式 opacity选中1 未选中0.8
-                        // opacity={0.8}
+                        bg={sortColumn === item.value ? "brand.light" : undefined}
+                        fontWeight={sortColumn === item.value ? "bold" : "normal"}
+                        color={sortColumn === item.value ? "brand.primary" : undefined}
+                        onClick={() => {
+                          // 修改为直接调用handleSort而不是多次设置状态
+                          handleSort(item.value);
+                        }}
                       >
-                        {item}
+                        {item.label}
+                        {sortColumn === item.value && (
+                          <Icon 
+                            as={sortDirection === 'ASC' ? ChevronUpIcon : ChevronDownIcon} 
+                            ml={2} 
+                            color="brand.primary"
+                          />
+                        )}
                       </MenuItem>
                     ))}
                   </MenuList>
@@ -735,9 +895,9 @@ export default function MintPage() {
               </Flex>
             </Flex>
             <FilterPanel
-              sortColumn={'progress'}
-              sortDirection={'desc'}
-              onSort={() => {}} // 禁用排序功能
+              sortColumn={sortColumn}
+              sortDirection={sortDirection.toLowerCase() as 'asc' | 'desc'}
+              onSort={handleSort}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
             />

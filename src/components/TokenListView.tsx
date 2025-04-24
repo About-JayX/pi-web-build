@@ -232,9 +232,9 @@ const TokenListView = ({
             <Th bg={thBg} width="15%">
               {t('contractAddressColumn')}
             </Th>
-            <ThSortable column="total_supply" width="12%">
+            <Th bg={thBg} textAlign="center" width="12%">
               {t('totalSupplyColumn')}
-            </ThSortable>
+            </Th>
             <ThSortable column="progress" width="25%">
               {t('progressColumn')}
             </ThSortable>

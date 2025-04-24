@@ -28,6 +28,7 @@ export default {
   'website': '网站',
   'twitter': '推特',
   'telegram': '电报',
+  'description': '项目描述',
   
   // 部署页面 - 错误和成功提示
   'error': '错误',

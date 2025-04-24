@@ -1,13 +1,15 @@
 import axios, { AxiosError } from 'axios'
 import { store } from '@/store'
+import apiConfig from './apiConfig'
 
-// API服务器配置
-const API_URL = 'https://fairmint.piweb3.xyz/api' //'https://fairmint.piweb3.xyz/api'  // 主服务器
+// API服务器配置 - 从apiConfig获取API URL
+const API_URL = apiConfig.baseUrl
+const USER_API_URL = apiConfig.userApiUrl
 
 // 创建主实例 (fair mint)
 const fairMintInstance = axios.create({
   baseURL: API_URL,
-  timeout: 10000,
+  timeout: apiConfig.timeout,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -15,8 +17,8 @@ const fairMintInstance = axios.create({
 
 // 创建用户API实例
 const userInstance = axios.create({
-  baseURL: 'https://memestestspace.dexcc.cc',
-  timeout: 15000,
+  baseURL: USER_API_URL,
+  timeout: apiConfig.userApiTimeout,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -34,6 +36,11 @@ fairMintInstance.interceptors.request.use(
   },
   error => Promise.reject(error)
 )
+
+// 添加环境信息到日志
+console.log(`API环境: ${apiConfig.currentEnv}`)
+console.log(`主API URL: ${API_URL}`)
+console.log(`用户API URL: ${USER_API_URL}`)
 
 // fairMint实例响应拦截器
 fairMintInstance.interceptors.response.use(

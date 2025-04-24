@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import apiConfig from '@/config/apiConfig'
 
 export const dynamic = 'force-dynamic' // 禁用路由缓存
+
+// 获取API基础URL，移除末尾的斜杠
+const API_BASE_URL = apiConfig.baseUrl.endsWith('/') 
+  ? apiConfig.baseUrl.slice(0, -1) 
+  : apiConfig.baseUrl
 
 // 处理路径的辅助函数
 function processPath(pathname: string): string {
@@ -17,12 +23,13 @@ function processPath(pathname: string): string {
 
 export async function GET(request: NextRequest) {
   console.log('=== API Route GET triggered ===')
+  console.log(`当前环境: ${apiConfig.currentEnv}, API基础URL: ${API_BASE_URL}`)
   const pathname = request.nextUrl.pathname
   console.log('Pathname:', pathname)
 
   const targetPath = processPath(pathname)
-  // 移除 /api 前缀
-  const targetUrl = `https://fairmint.piweb3.xyz${targetPath}`
+  // 使用配置的API基础URL
+  const targetUrl = `${API_BASE_URL}${targetPath}`
 
   console.log('Forwarding to:', targetUrl)
   console.log('Request headers:', Object.fromEntries(request.headers))
@@ -48,7 +55,7 @@ export async function GET(request: NextRequest) {
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       },
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Proxy error:', error)
     return new NextResponse(
       JSON.stringify({ error: 'Failed to fetch data', details: error.message }),
@@ -65,12 +72,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   console.log('=== API Route POST triggered ===')
+  console.log(`当前环境: ${apiConfig.currentEnv}, API基础URL: ${API_BASE_URL}`)
   const pathname = request.nextUrl.pathname
   console.log('Pathname:', pathname)
 
   const targetPath = processPath(pathname)
-  // 移除 /api 前缀
-  const targetUrl = `https://fairmint.piweb3.xyz${targetPath}`
+  // 使用配置的API基础URL
+  const targetUrl = `${API_BASE_URL}${targetPath}`
 
   console.log('Forwarding to:', targetUrl)
 
@@ -99,7 +107,7 @@ export async function POST(request: NextRequest) {
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       },
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Proxy error:', error)
     return new NextResponse(
       JSON.stringify({ error: 'Failed to fetch data', details: error.message }),
