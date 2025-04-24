@@ -579,12 +579,21 @@ export default function MintPage() {
   // 添加初始加载处理
   useEffect(() => {
     if (isInitialLoad && typeof window !== 'undefined') {
+      // 根据当前标签设置初始排序列
+      let initialSortColumn = 'progress';
+      
+      if (tabIndex === 2) { // 最新部署标签
+        initialSortColumn = '';
+      }
+      
+      setSortColumn(initialSortColumn);
+      
       // 构建请求参数
       const params: TokenListParams = {
         page: currentPage,
         limit: pageSize,
         order: sortDirection.toUpperCase(),
-        sort_by: sortColumn,
+        sort_by: initialSortColumn,
         ...(tabIndex === 0 && { category: 'hot' }),
         ...(tabIndex === 2 && { category: 'latest' }),
         ...(tabIndex === 3 && { category: 'completed' }),
@@ -596,7 +605,7 @@ export default function MintPage() {
       // 将初始加载标志设置为false
       setIsInitialLoad(false);
     }
-  }, [isInitialLoad, currentPage, pageSize, tabIndex, sortDirection, sortColumn]);
+  }, [isInitialLoad, currentPage, pageSize, tabIndex, sortDirection]);
 
   // 强制在移动设备上使用卡片视图
   useEffect(() => {
@@ -723,14 +732,29 @@ export default function MintPage() {
             spacing={{ base: 2, md: 0 }}
           >
             <Flex align="baseline">
-              <Heading as="h2" size="lg" m={0} w="100%">
+              <Heading as="h2" size="lg" m={0}>
                 {t("mintingTokens")}
               </Heading>
+              <Button
+                display={{ base: "flex", md: "none" }}
+                as={NextLink}
+                href="/deploy"
+                ml={2}
+                colorScheme="teal"
+                variant="solid"
+                size="sm"
+                bg="teal.400"
+                _hover={{ bg: 'teal.500' }}
+                leftIcon={<FaPlus />}
+                fontWeight="medium"
+              >
+                {t('deploy')}
+              </Button>
               <Button
                 display={{ base: "none", md: "flex" }}
                 as={NextLink}
                 href="/deploy"
-                ml={0}
+                ml={4}
                 mt={{ base: 0, md: 1 }}
                 colorScheme="teal"
                 variant="solid"
@@ -813,6 +837,7 @@ export default function MintPage() {
                   </Button>
                 ))}
               </Flex>
+              
               <Flex gap={2} w={{ base: "100%", md: "auto" }}>
                 {/* 排序 */}
                 <Menu>
@@ -839,6 +864,7 @@ export default function MintPage() {
                       sortColumn === 'minter_counts' ? t("participantsColumn") : 
                       sortColumn === 'target' ? "铸造总额" : 
                       sortColumn === 'raised' ? "已铸额度" : 
+                      tabIndex === 2 && sortColumn === '' ? "部署时间" : // 确保最新部署标签页空排序列显示为"部署时间"
                       t("progressColumn")
                     )}
                   </MenuButton>
