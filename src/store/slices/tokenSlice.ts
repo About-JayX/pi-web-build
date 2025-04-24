@@ -14,7 +14,7 @@ interface TokenParams {
   limit: number
   category?: string
   order: string
-  order_by: string
+  sort_by: string
 }
 
 interface TokenResponse {
