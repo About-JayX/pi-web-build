@@ -75,7 +75,7 @@ export const WssProvider = ({ children }: { children: ReactNode }) => {
 
         if (response.message === "pong") {
           const data = response.data
-          console.log("收到pong消息，代币地址列表:", data)
+          // console.log("收到pong消息，代币地址列表:", data)
           // 只在market页面执行更新token操作
           if (isMarketPage) {
             // 立即执行一次更新
@@ -85,7 +85,13 @@ export const WssProvider = ({ children }: { children: ReactNode }) => {
           }
         }
 
-        if (response.message === "go") {
+        if (response.mode === "auth_success") {
+          if (isPointsPage) {
+            ws.send(JSON.stringify({ mode: "get_user_info" }))
+          }
+        }
+
+        if (response.mode === "go") {
           // 只在market页面执行更新token操作
           if (isMarketPage) {
             // console.log("收到go消息，开始更新代币")
@@ -99,6 +105,10 @@ export const WssProvider = ({ children }: { children: ReactNode }) => {
             tokenAddressesRef.current = []
             //Get Token Data again
             ws.send(JSON.stringify({ mode: "ping", data: "ping" }))
+          }
+          if (isPointsPage) {
+            // 只在points页面执行更新token操作
+            ws.send(JSON.stringify({ mode: "get_user_info" }))
           }
         }
       } catch (error) {

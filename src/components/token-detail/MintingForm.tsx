@@ -733,7 +733,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
       }
 
       return (
-        <VStack spacing={{ base: 4, md: 6 }} align="stretch">
+        <VStack spacing={4} align="stretch">
           {/* 金额输入 */}
           <Box>
             <Text
@@ -754,8 +754,8 @@ const MintingForm: React.FC<MintingFormProps> = memo(
               <Flex
                 position="relative"
                 align="center"
-                px={{ base: 4, md: 6 }}
-                py={{ base: 4, md: 5 }}
+                px={4}
+                py={3}
                 borderRadius="lg"
               >
                 {/* 数字输入 */}
@@ -765,7 +765,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
                     value={amount}
                     onChange={handlePayAmountChange}
                     variant="unstyled"
-                    fontSize={{ base: '2xl', md: '4xl' }}
+                    fontSize={{ base: '2xl', md: '3xl' }}
                     fontWeight="bold"
                     placeholder="0"
                     min="0.01"
@@ -789,7 +789,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
                 >
                   <Text
                     fontWeight="bold"
-                    fontSize={{ base: 'md', md: 'lg' }}
+                    fontSize="md"
                     color="brand.primary"
                   >
                     {currencyUnit}
@@ -843,15 +843,11 @@ const MintingForm: React.FC<MintingFormProps> = memo(
               onClick={() => quickSelect(0.1)}
               flex="1"
               variant="outline"
-              borderColor="purple.200"
-              color="brand.primary"
-              size={{ base: 'md', md: 'lg' }}
+              size="sm"
               borderRadius="md"
-              fontWeight="medium"
-              _hover={{ bg: 'purple.50', borderColor: 'purple.300' }}
-              h={{ base: '40px', md: '52px' }}
+              fontWeight="bold"
+              h={{ base: '40px', md: '48px' }}
               boxShadow="sm"
-              fontSize={{ base: 'sm', md: 'md' }}
             >
               0.1 {currencyUnit}
             </Button>
@@ -859,15 +855,11 @@ const MintingForm: React.FC<MintingFormProps> = memo(
               onClick={() => quickSelect(0.2)}
               flex="1"
               variant="outline"
-              borderColor="purple.200"
-              color="brand.primary"
-              size={{ base: 'md', md: 'lg' }}
+              size="sm"
               borderRadius="md"
-              fontWeight="medium"
-              _hover={{ bg: 'purple.50', borderColor: 'purple.300' }}
-              h={{ base: '40px', md: '52px' }}
+              fontWeight="bold"
+              h={{ base: '40px', md: '48px' }}
               boxShadow="sm"
-              fontSize={{ base: 'sm', md: 'md' }}
             >
               0.2 {currencyUnit}
             </Button>
@@ -875,15 +867,11 @@ const MintingForm: React.FC<MintingFormProps> = memo(
               onClick={() => quickSelect(0.5)}
               flex="1"
               variant="outline"
-              borderColor="purple.200"
-              color="brand.primary"
-              size={{ base: 'md', md: 'lg' }}
+              size="sm"
               borderRadius="md"
-              fontWeight="medium"
-              _hover={{ bg: 'purple.50', borderColor: 'purple.300' }}
-              h={{ base: '40px', md: '52px' }}
+              fontWeight="bold"
+              h={{ base: '40px', md: '48px' }}
               boxShadow="sm"
-              fontSize={{ base: 'sm', md: 'md' }}
             >
               0.5 {currencyUnit}
             </Button>
@@ -891,22 +879,18 @@ const MintingForm: React.FC<MintingFormProps> = memo(
               onClick={() => quickSelect(1)}
               flex="1"
               variant="outline"
-              borderColor="purple.200"
-              color="brand.primary"
-              size={{ base: 'md', md: 'lg' }}
+              size="sm"
               borderRadius="md"
-              fontWeight="medium"
-              _hover={{ bg: 'purple.50', borderColor: 'purple.300' }}
-              h={{ base: '40px', md: '52px' }}
+              fontWeight="bold"
+              h={{ base: '40px', md: '48px' }}
               boxShadow="sm"
-              fontSize={{ base: 'sm', md: 'md' }}
             >
               1 {currencyUnit}
             </Button>
           </Flex>
 
           {/* 预估代币获取和历史铸造信息 */}
-          <Box my={{ base: 2, md: 4 }}>
+          <Box my={3}>
             <Flex
               justify="space-between"
               align="center"
@@ -932,7 +916,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
             color="white"
             size={{ base: 'md', md: 'lg' }}
             w="100%"
-            h={{ base: '50px', md: '64px' }}
+            h={{ base: '50px', md: '54px' }}
             fontSize={{ base: 'lg', md: 'xl' }}
             fontWeight="bold"
             isDisabled={!isAmountValid()}
@@ -942,7 +926,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
             borderRadius="md"
             transition="all 0.3s"
             _active={{ transform: 'translateY(2px)', boxShadow: 'none' }}
-            mt={{ base: 4, md: 6 }}
+            mt={0}
           >
             {t('mintToken')}
           </Button>
@@ -1270,7 +1254,8 @@ const MintingForm: React.FC<MintingFormProps> = memo(
         borderRadius={isModal ? 'xl' : 'lg'}
         overflow="hidden"
         bg={cardBg}
-        boxShadow={isModal ? 'none' : 'md'}
+        // boxShadow={isModal ? 'none' : 'md'}
+        p={0}
         width="100%"
         maxW="100%"
       >
@@ -1280,16 +1265,16 @@ const MintingForm: React.FC<MintingFormProps> = memo(
           colorScheme="purple"
           index={activeTab}
           onChange={setActiveTab}
-          pt={isModal ? 2 : { base: 4, md: 6 }}
-          px={isModal ? { base: 2, md: 4 } : { base: 4, md: 8 }}
-          pb={isModal ? 2 : { base: 4, md: 6 }}
+          pt={isModal ? 2 : 4}
+          px={isModal ? { base: 2, md: 4 } : 4}
+          pb={isModal ? 2 : 4}
           width="100%"
         >
           <TabList
             bg="gray.100"
-            p={1}
+            p={0}
             borderRadius="full"
-            mb={isModal ? 4 : { base: 6, md: 8 }}
+            mb={isModal ? 4 : 6}
             boxShadow="sm"
             width="100%"
           >

@@ -188,14 +188,14 @@ export default function MintingTokenCard({
   };
 
   return (
-    <Card 
-      p={4} 
-      rounded="2xl" 
+    <Card
+      p={4}
+      rounded="2xl"
       shadow="0px 0px 12px 0px rgba(82, 53, 232, 0.20)"
-      _hover={{ 
-        transform: "translateY(-4px)", 
+      _hover={{
+        transform: "translateY(-4px)",
         shadow: "0px 8px 20px 0px rgba(82, 53, 232, 0.25)",
-        cursor: "pointer" 
+        cursor: "pointer",
       }}
       _active={{
         transform: "translateY(-2px)",
@@ -239,9 +239,9 @@ export default function MintingTokenCard({
             justifyContent="space-between"
             alignItems="center"
           >
-            <Text 
-              as="span" 
-              fontSize="md" 
+            <Text
+              as="span"
+              fontSize="md"
               fontWeight="bold"
               color="gray.800"
               _groupHover={{ color: "brand.primary" }}
@@ -258,13 +258,20 @@ export default function MintingTokenCard({
               bg="#F7F6FE"
               _hover={{ bg: "brand.light" }}
               _active={{ bg: "#F7F6FE" }}
-              _groupHover={{ 
+              _groupHover={{
                 borderColor: "brand.primary",
-                bg: "#F0EDFF"
+                bg: "#F0EDFF",
               }}
               onClick={(e) => e.stopPropagation()}
               leftIcon={
-                <Icon as={FaUser} color="#fff" boxSize="16px" p="3px" bg="brand.primary" rounded="6px" />
+                <Icon
+                  as={FaUser}
+                  color="#fff"
+                  boxSize="16px"
+                  p="3px"
+                  bg="brand.primary"
+                  rounded="6px"
+                />
               }
               transition="all 0.2s"
             >
@@ -281,27 +288,24 @@ export default function MintingTokenCard({
                 borderRadius="full"
                 size="sm"
                 flex="1"
+                bg="#E7E3FC"
                 sx={{
-                  // 轨道颜色（背景色）
-                  '& > div:first-of-type': {
-                    bg: '#E7E3FC !important'
-                  },
                   // 进度条颜色
-                  '& > div:last-of-type': {
-                    bg: 'brand.primary !important',
-                    transition: 'width 0.5s ease-in-out'
-                  }
+                  "& > div:last-of-type": {
+                    bg: "brand.primary !important",
+                    transition: "width 0.5s ease-in-out",
+                  },
                 }}
                 _groupHover={{
-                  '& > div:last-of-type': {
-                    bg: 'brand.600 !important'
-                  }
+                  "& > div:last-of-type": {
+                    bg: "brand.600 !important",
+                  },
                 }}
               />
             </HStack>
             <Flex justifyContent="space-between" alignItems="center">
-            {/* 进度及进度了多少SOL */}
-            <Text
+              {/* 进度及进度了多少SOL */}
+              <Text
                 as="span"
                 fontSize="xs"
                 display="flex"
@@ -313,9 +317,9 @@ export default function MintingTokenCard({
               >
                 {(token.progress || 0).toFixed(2)}%
                 {token.progress > 0 && (
-                  <Text 
-                    as="span" 
-                    color="brand.primary" 
+                  <Text
+                    as="span"
+                    color="brand.primary"
                     fontSize="xs"
                     _groupHover={{ color: "brand.600" }}
                     transition="color 0.2s"
@@ -324,16 +328,15 @@ export default function MintingTokenCard({
                   </Text>
                 )}
               </Text>
-              <Text 
-                as="span" 
-                color="gray.500" 
+              <Text
+                as="span"
+                color="gray.500"
                 fontSize="xs"
                 transition="color 0.2s"
                 _groupHover={{ color: "gray.700" }}
               >
                 {token.target}
               </Text>
-              
             </Flex>
           </Grid>
           <Divider my={1.5} />
@@ -341,14 +344,24 @@ export default function MintingTokenCard({
             {/* 总供应量 */}
             <HStack spacing={1}>
               <Image src="/coins.png" alt="coins" boxSize="16px" />
-              <Text as="span" fontSize="xs" fontWeight="medium" color="gray.500">
+              <Text
+                as="span"
+                fontSize="xs"
+                fontWeight="medium"
+                color="gray.500"
+              >
                 {formatSupply(token.totalSupply)}
               </Text>
             </HStack>
             {/* 铸造价格 */}
             <HStack spacing={1}>
               <Image src="/exchange.png" alt="exchange" boxSize="16px" />
-              <Text as="span" fontSize="xs" fontWeight="medium" color="gray.500">
+              <Text
+                as="span"
+                fontSize="xs"
+                fontWeight="medium"
+                color="gray.500"
+              >
                 {formatMintRate()}
               </Text>
             </HStack>

@@ -349,15 +349,12 @@ const TokenListView = ({
                       borderRadius="full"
                       size="sm"
                       flex="1"
+                      bg="#E7E3FC"
                       sx={{
-                        // 轨道颜色（背景色）
-                        '& > div:first-of-type': {
-                          bg: '#E7E3FC !important',
-                        },
                         // 进度条颜色
-                        '& > div:last-of-type': {
-                          bg: 'brand.primary !important',
-                          transition: 'width 0.3s ease-in-out',
+                        "& > div:last-of-type": {
+                          bg: "brand.primary !important",
+                          transition: "width 0.3s ease-in-out",
                         },
                       }}
                     />

@@ -86,6 +86,7 @@ export default function TokenMintPage() {
 
   // 使用SOL作为货币单位
   const currencyUnit = 'SOL'
+  // 使用Solana网络
 
   // 添加状态
   const [tokenAccount, setTokenAccount] = useState<string | null>(null)
@@ -204,8 +205,12 @@ export default function TokenMintPage() {
       .toNumber(),
     logo: tokenInfo.logo,
     image: tokenInfo.logo,
-    target: `${new BigNumber(tokenInfo.liquidity_amount).div(1e9).toFixed(2)} SOL`,
-    raised: `${new BigNumber(tokenInfo.net_quote_amount).div(1e9).toFixed(2)} SOL`,
+    target: `${new BigNumber(tokenInfo.liquidity_amount)
+      .div(1e9)
+      .toFixed(2)} SOL`,
+    raised: `${new BigNumber(tokenInfo.net_quote_amount)
+      .div(1e9)
+      .toFixed(2)} SOL`,
     created_at: tokenInfo.created_at,
     minterCounts: tokenInfo.minter_counts,
     buyTransactions: tokenInfo.buy_transactions,
@@ -221,11 +226,11 @@ export default function TokenMintPage() {
     currencyUnit: 'SOL',
     total_transactions: tokenInfo.total_transactions,
     liquidity_amount: tokenInfo.liquidity_amount,
-    net_quote_amount: tokenInfo.net_quote_amount
+    net_quote_amount: tokenInfo.net_quote_amount,
   }
 
   return (
-    <Box bg={softBg} minH="100vh" w="100%" pb={10} overflowX="hidden">
+    <Box w="100%" pb={10} overflowX="hidden">
       <Container maxW="container.xl" py={12}>
         <VStack spacing={10} align="stretch">
           <Stack
@@ -245,7 +250,7 @@ export default function TokenMintPage() {
           <Grid templateColumns={{ base: '1fr', lg: '3fr 2fr' }} gap={8}>
             <GridItem width="100%" overflow="hidden">
               <Card bg={cardBg} borderWidth="1px" borderColor={borderColor}>
-                <CardBody p={{ base: 3, md: 5 }}>
+                <CardBody p={{ base: 3, md: 4 }}>
                   <VStack spacing={{ base: 4, md: 6 }} align="stretch">
                     {/* 代币标题部分 */}
                     <Box>
@@ -282,9 +287,16 @@ export default function TokenMintPage() {
                       <Progress
                         value={selectedToken.progress}
                         size="sm"
-                        colorScheme="purple"
                         borderRadius="full"
                         mb={3}
+                        bg="#E7E3FC"
+                        sx={{
+                          // 进度条颜色
+                          '& > div:last-of-type': {
+                            bg: 'brand.primary !important',
+                            transition: 'width 0.5s ease-in-out',
+                          },
+                        }}
                       />
                     </Box>
 
@@ -444,9 +456,11 @@ export default function TokenMintPage() {
               <VStack spacing={5} align="stretch">
                 {/* 先显示铸造表单 */}
                 <Card bg={cardBg} borderWidth="1px" borderColor={borderColor}>
-                  <CardBody>
-                    <Stack spacing={4}>
-                      <Heading size="md">{t('mintToken')}</Heading>
+                  <CardBody p={0} py={4} pb={0}>
+                    <Stack spacing={6}>
+                      <Heading size="md" textAlign="center">
+                        {t('mintToken')}
+                      </Heading>
                       <MintingForm
                         token={selectedToken}
                         tokenAccount={tokenAccount}

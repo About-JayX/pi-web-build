@@ -5,6 +5,7 @@ import type {
   UserInfo,
   RankResponse,
   SignInInfoResponse,
+  HistoryResponse
 } from './types'
 
 /**
@@ -25,7 +26,7 @@ export const UserAPI = {
    */
   getUserInfo: (): Promise<UserInfo> => {
     console.log('正在调用getUserInfo API，如果返回404错误可能是API未实现')
-    
+
     // 验证API是否可用：可以修改为一个已知有效的API端点
     return userApi.get('/web/user/info')
   },
@@ -56,6 +57,16 @@ export const UserAPI = {
    */
   getRank: (): Promise<RankResponse> => {
     return userApi.post('/web/wallet/UserPoints-Rank')
+  },
+
+  /**
+   * 获取积分历史
+   */
+  getPointsHistory: (page: number, limit: number): Promise<HistoryResponse> => {
+    return userApi.post('/web/wallet/UserPoints-Details', {
+      page,
+      pageSize: limit
+    })
   },
 }
 

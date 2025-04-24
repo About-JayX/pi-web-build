@@ -87,7 +87,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                         position="fixed"
                         top="60px"
                         left="0"
-                        right="0"
+                        right={1}
                         bottom="0"
                         bgImage="/bg.png"
                         bgSize="cover"
@@ -98,7 +98,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                         pointerEvents="none"
                       />
                       
-                      <Box position="relative" zIndex="1">
+                      <Box position="relative">
                         <AuthRestorer />
                         <Navbar />
                         <main style={{ minHeight: "calc(100vh - 60px)" }}>
