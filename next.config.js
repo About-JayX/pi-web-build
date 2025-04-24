@@ -17,6 +17,32 @@ const nextConfig = {
   //     },
   //   ]
   // },
+  
+  // 使用rewrites功能将未上线的路由重定向到"即将上线"页面
+  async rewrites() {
+    // 只在生产环境中应用重定向
+    if (process.env.NODE_ENV === 'production') {
+      // 需要排除的路由
+      const excludeRoutes = [
+        'market',
+        'home',
+        'swap',
+        'news',
+        'docs',
+        'points',
+      ];
+      
+      console.log(`[Build] 重定向的路由: ${excludeRoutes.join(', ')}`);
+      
+      // 将每个排除的路由重定向到即将上线页面
+      return excludeRoutes.map(route => ({
+        source: `/${route}/:path*`,
+        destination: '/coming',
+      }));
+    }
+    
+    return [];
+  },
 }
 
 module.exports = nextConfig

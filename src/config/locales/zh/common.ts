@@ -40,6 +40,14 @@ export default {
   'pageNotFoundMessage': '您访问的页面不存在或已被移除。',
   'backToHome': '返回首页',
   
+  // 即将上线页面
+  'common.coming_soon': '功能即将上线',
+  'common.coming_soon_message': '我们正在努力开发这项功能，敬请期待！',
+  'common.back_to_home': '返回首页',
+  'common.feature_unavailable': '该功能暂不可用',
+  'common.development_in_progress': '开发中',
+  'common.stay_tuned': '敬请期待',
+  
   // 文件上传相关错误
   'imageTooLarge': '图片文件过大，请上传小于 2MB 的图片',
   'imageUploadFailed': '图片上传失败，请重试',
