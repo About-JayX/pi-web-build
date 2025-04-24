@@ -6,6 +6,8 @@ import { Container } from '@chakra-ui/react'
 import { useNetwork } from '@/contexts/NetworkContext'
 import { useTranslation } from 'react-i18next'
 import { LoadingSpinner } from '@/components'
+import { isPossibleContractAddress } from '@/utils'
+import { notFound } from 'next/navigation'
 
 export default function TokenDetailRedirectPage() {
   const params = useParams()
@@ -15,6 +17,13 @@ export default function TokenDetailRedirectPage() {
   const { t } = useTranslation()
 
   useEffect(() => {
+    // 验证地址是否可能是合约地址
+    if (!isPossibleContractAddress(address)) {
+      // 如果不是有效的合约地址格式，显示404页面
+      notFound()
+      return
+    }
+
     // 根据当前网络自动重定向到对应网络的详情页
     if (network === 'SOL') {
       router.push(`/sol/${address}`)

@@ -535,3 +535,23 @@ export function calculatePiFromTokens(
     tokenDecimals
   )
 }
+
+/**
+ * 验证地址是否可能是有效的合约地址
+ * 注意：这只是一个基本的格式验证，不检查地址是否实际存在
+ * @param address 要验证的地址
+ * @returns 如果格式看起来像合约地址则返回true
+ */
+export function isPossibleContractAddress(address: string): boolean {
+  if (!address) return false;
+  
+  // Solana地址通常是base58编码的44个字符
+  // 这里使用简单的正则表达式验证基本格式
+  const solanaAddressRegex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+  
+  // Pi Network地址也有特定格式
+  // 这是一个宽松的验证，实际格式可能需要调整
+  const piAddressRegex = /^[0-9a-zA-Z]{30,50}$/;
+  
+  return solanaAddressRegex.test(address) || piAddressRegex.test(address);
+}

@@ -35,6 +35,11 @@ export default {
   'networkError': '网络错误，无法连接到服务器',
   'tokenNotFound': '未找到代币信息',
   
+  // 404页面
+  'pageNotFound': '页面未找到',
+  'pageNotFoundMessage': '您访问的页面不存在或已被移除。',
+  'backToHome': '返回首页',
+  
   // 文件上传相关错误
   'imageTooLarge': '图片文件过大，请上传小于 2MB 的图片',
   'imageUploadFailed': '图片上传失败，请重试',
