@@ -95,6 +95,7 @@ const components = {
   Heading: {
     baseStyle: {
       fontWeight: "bold",
+      fontFamily: "Inter, system-ui, sans-serif", // 使用系统默认字体
     },
   },
   Text: {
@@ -112,7 +113,7 @@ const components = {
 // 字体设置
 const fonts = {
   body: "Space-Grotesk, Inter, system-ui, sans-serif",
-  heading: "EDIX, Inter, system-ui, sans-serif",
+  heading: "Inter, system-ui, sans-serif", // 修改为系统默认字体
 };
 
 const styles = {

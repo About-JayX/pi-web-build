@@ -13,7 +13,7 @@ const LogoText = () => {
   return (
     <Box height="24px" width="80px" display="flex" alignItems="center" minWidth="80px" flexShrink={0}>
       <Text
-        fontFamily="EDIX, heading"
+        fontFamily="EDIX, sans-serif"
         fontWeight="bold"
         fontSize="xl"
         color={textColor}

@@ -1,10 +1,16 @@
 export interface CreateTokenParams {
-  name: string
-  symbol: string
   file: File
-  init_liquidity: number
-  total_supply: string
-  description?: string
+  Metadata: {
+    name: string
+    symbol: string
+    description: string
+    init_liquidity: number
+    total_supply: string | number
+    socials: Array<{
+      platform: string
+      url: string
+    }>
+  }
 }
 
 export interface TokenInfo {

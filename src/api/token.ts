@@ -27,12 +27,8 @@ export const TokenAPI = {
    */
   createToken: (data: CreateTokenParams): Promise<Token> => {
     const formData = new FormData()
-    formData.append('name', data.name)
-    formData.append('symbol', data.symbol)
-    formData.append('init_liquidity', String(50 * 1e9))
-    formData.append('total_supply', String(Number(data.total_supply) * 1e6))
     formData.append('file', data.file)
-    formData.append('description', data.description || '')
+    formData.append('metadata', JSON.stringify(data.Metadata))
     return request.post('/token/create', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
