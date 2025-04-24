@@ -41,90 +41,65 @@ export default function LanguageSelector({ isMobile = false, isXpiPage = false, 
   const { t } = useTranslation();
   const { language, changeLanguage } = useI18n();
 
+  // 将所有 useColorModeValue 调用移到组件顶部，确保无条件调用
+  const textColorNormal = useColorModeValue("gray.700", "white");
+  const borderColorNormal = useColorModeValue("gray.200", "whiteAlpha.400");
+  const bgColorNormal = useColorModeValue("transparent", "transparent");
+  const hoverBorderColorNormal = useColorModeValue("gray.300", "whiteAlpha.600");
+  const hoverBgColorNormal = useColorModeValue("gray.50", "whiteAlpha.100");
+  const activeBgColorNormal = useColorModeValue("gray.100", "whiteAlpha.200");
+  
+  const menuBgColor = useColorModeValue("white", "gray.800");
+  const menuBorderColor = useColorModeValue("gray.200", "gray.700");
+  
+  const menuItemActiveBg = useColorModeValue("purple.50", "brand.dark");
+  const menuItemActiveColor = useColorModeValue("brand.primary", "white");
+  const menuItemNormalColor = useColorModeValue("gray.700", "gray.300");
+  const menuItemHoverBgActive = useColorModeValue("purple.100", "brand.primary");
+  const menuItemHoverBgNormal = useColorModeValue("gray.100", "whiteAlpha.200");
+  const menuItemActiveBgActive = useColorModeValue("brand.primary", "white");
+  const menuItemActiveBgNormal = useColorModeValue("purple.100", "whiteAlpha.300");
+  const menuItemActiveColorActive = useColorModeValue("white", "brand.dark");
+  const menuItemActiveColorNormal = useColorModeValue("brand.primary", "white");
+  
+  const languageLabelColor = useColorModeValue("gray.500", "gray.300");
+  const inactiveTextColor = useColorModeValue("gray.700", "gray.300");
+  const inactiveBorderColor = useColorModeValue("gray.200", "whiteAlpha.400");
+  const inactiveBgColor = useColorModeValue("white", "transparent");
+  const hoverBorderColor = useColorModeValue("gray.300", "whiteAlpha.500");
+  const inactiveHoverBgColor = useColorModeValue("gray.50", "whiteAlpha.200");
+  const hoverTextColor = useColorModeValue("gray.800", "white");
+  const inactiveActiveBgColor = useColorModeValue("gray.100", "whiteAlpha.300");
+  const buttonHoverBgColor = useColorModeValue("brand.light", "brand.primary");
+
   // 桌面版语言选择按钮样式
   const languageButtonProps = {
-    color: isXpiPage ? "white" : useColorModeValue("gray.700", "white"),
+    color: isXpiPage ? "white" : textColorNormal,
     borderWidth: "2px",
-    borderColor: isXpiPage
-      ? "whiteAlpha.400"
-      : useColorModeValue("gray.200", "whiteAlpha.400"),
-    bg: isXpiPage
-      ? "transparent"
-      : useColorModeValue("transparent", "transparent"),
+    borderColor: isXpiPage ? "whiteAlpha.400" : borderColorNormal,
+    bg: isXpiPage ? "transparent" : bgColorNormal,
     _hover: {
-      borderColor: isXpiPage
-        ? "whiteAlpha.600"
-        : useColorModeValue("gray.300", "whiteAlpha.600"),
-      bg: isXpiPage
-        ? "whiteAlpha.200"
-        : useColorModeValue("gray.50", "whiteAlpha.100"),
+      borderColor: isXpiPage ? "whiteAlpha.600" : hoverBorderColorNormal,
+      bg: isXpiPage ? "whiteAlpha.200" : hoverBgColorNormal,
     },
     _active: {
-      bg: isXpiPage
-        ? "whiteAlpha.300"
-        : useColorModeValue("gray.100", "whiteAlpha.200"),
+      bg: isXpiPage ? "whiteAlpha.300" : activeBgColorNormal,
     },
   };
 
-  // 菜单样式
-  const menuBgColor = useColorModeValue("white", "gray.800");
-  const menuBorderColor = useColorModeValue("gray.200", "gray.700");
-
   // 各语言菜单项样式
   const getLanguageMenuItemProps = (lang: string) => ({
-    bg:
-      language === lang
-        ? useColorModeValue("purple.50", "brand.dark")
-        : undefined,
-    color:
-      language === lang
-        ? useColorModeValue("brand.primary", "white")
-        : useColorModeValue("gray.700", "gray.300"),
+    bg: language === lang ? menuItemActiveBg : undefined,
+    color: language === lang ? menuItemActiveColor : menuItemNormalColor,
     _hover: {
-      bg: useColorModeValue(
-        language === lang ? "purple.100" : "gray.100",
-        language === lang ? "brand.primary" : "whiteAlpha.200"
-      ),
+      bg: language === lang ? menuItemHoverBgActive : menuItemHoverBgNormal,
     },
     _active: {
-      bg:
-        language === lang
-          ? useColorModeValue("brand.primary", "white")
-          : useColorModeValue("purple.100", "whiteAlpha.300"),
-      color:
-        language === lang
-          ? useColorModeValue("white", "brand.dark")
-          : useColorModeValue("brand.primary", "white"),
+      bg: language === lang ? menuItemActiveBgActive : menuItemActiveBgNormal,
+      color: language === lang ? menuItemActiveColorActive : menuItemActiveColorNormal,
     },
   });
 
-  // 移动版样式
-  const languageLabelColor = isXpiPage
-    ? "gray.300"
-    : useColorModeValue("gray.500", "gray.300");
-  const inactiveTextColor = isXpiPage
-    ? "gray.200"
-    : useColorModeValue("gray.700", "gray.300");
-  const inactiveBorderColor = isXpiPage
-    ? "whiteAlpha.400"
-    : useColorModeValue("gray.200", "whiteAlpha.400");
-  const inactiveBgColor = isXpiPage
-    ? "transparent"
-    : useColorModeValue("white", "transparent");
-  const hoverBorderColor = isXpiPage
-    ? "whiteAlpha.600"
-    : useColorModeValue("gray.300", "whiteAlpha.500");
-  const inactiveHoverBgColor = isXpiPage
-    ? "whiteAlpha.200"
-    : useColorModeValue("gray.50", "whiteAlpha.200");
-  const hoverTextColor = useColorModeValue("gray.800", "white");
-  const inactiveActiveBgColor = isXpiPage
-    ? "whiteAlpha.300"
-    : useColorModeValue("gray.100", "whiteAlpha.300");
-  const buttonHoverBgColor = isXpiPage
-    ? "brand.light"
-    : useColorModeValue("brand.light", "brand.primary");
-  
   // 深色模式固定颜色值
   const darkModeActiveBg = "#5235E8"; // 手动设置为brand.primary的颜色值
   const activeButtonHexColor = "#5235E8"; // 固定为brand.primary的值
@@ -184,7 +159,7 @@ export default function LanguageSelector({ isMobile = false, isXpiPage = false, 
   // 移动版按钮组
   return (
     <Box pt={4} pb={2}>
-      <Text fontWeight="600" mb={2} color={languageLabelColor} fontSize="sm">
+      <Text fontWeight="600" mb={2} color={isXpiPage ? "gray.300" : languageLabelColor} fontSize="sm">
         {t("language")}
       </Text>
       <Stack spacing={2}>
@@ -194,23 +169,23 @@ export default function LanguageSelector({ isMobile = false, isXpiPage = false, 
           justifyContent="flex-start"
           onClick={() => handleLanguageChange("en")}
           h="36px"
-          color={language === "en" ? "white" : inactiveTextColor}
+          color={language === "en" ? "white" : isXpiPage ? "gray.200" : inactiveTextColor}
           borderColor={
-            language === "en" ? activeButtonHexColor : inactiveBorderColor
+            language === "en" ? activeButtonHexColor : isXpiPage ? "whiteAlpha.400" : inactiveBorderColor
           }
           borderWidth={language === "en" ? "1px" : "1px"}
-          bg={language === "en" ? activeButtonHexColor : inactiveBgColor}
+          bg={language === "en" ? activeButtonHexColor : isXpiPage ? "transparent" : inactiveBgColor}
           _hover={{
             borderColor:
-              language === "en" ? activeButtonHexColor : hoverBorderColor,
-            bg: language === "en" ? buttonHoverBgColor : inactiveHoverBgColor,
+              language === "en" ? activeButtonHexColor : isXpiPage ? "whiteAlpha.600" : hoverBorderColor,
+            bg: language === "en" ? buttonHoverBgColor : isXpiPage ? "whiteAlpha.200" : inactiveHoverBgColor,
             color: language === "en" ? "white" : hoverTextColor,
           }}
           _active={{
             bg:
               language === "en"
                 ? activeButtonHexColor
-                : inactiveActiveBgColor,
+                : isXpiPage ? "whiteAlpha.300" : inactiveActiveBgColor,
           }}
           _dark={{
             borderColor:
@@ -227,23 +202,23 @@ export default function LanguageSelector({ isMobile = false, isXpiPage = false, 
           justifyContent="flex-start"
           onClick={() => handleLanguageChange("ko")}
           h="36px"
-          color={language === "ko" ? "white" : inactiveTextColor}
+          color={language === "ko" ? "white" : isXpiPage ? "gray.200" : inactiveTextColor}
           borderColor={
-            language === "ko" ? activeButtonHexColor : inactiveBorderColor
+            language === "ko" ? activeButtonHexColor : isXpiPage ? "whiteAlpha.400" : inactiveBorderColor
           }
           borderWidth={language === "ko" ? "1px" : "1px"}
-          bg={language === "ko" ? activeButtonHexColor : inactiveBgColor}
+          bg={language === "ko" ? activeButtonHexColor : isXpiPage ? "transparent" : inactiveBgColor}
           _hover={{
             borderColor:
-              language === "ko" ? activeButtonHexColor : hoverBorderColor,
-            bg: language === "ko" ? buttonHoverBgColor : inactiveHoverBgColor,
+              language === "ko" ? activeButtonHexColor : isXpiPage ? "whiteAlpha.600" : hoverBorderColor,
+            bg: language === "ko" ? buttonHoverBgColor : isXpiPage ? "whiteAlpha.200" : inactiveHoverBgColor,
             color: language === "ko" ? "white" : hoverTextColor,
           }}
           _active={{
             bg:
               language === "ko"
                 ? activeButtonHexColor
-                : inactiveActiveBgColor,
+                : isXpiPage ? "whiteAlpha.300" : inactiveActiveBgColor,
           }}
           _dark={{
             borderColor:
@@ -260,23 +235,23 @@ export default function LanguageSelector({ isMobile = false, isXpiPage = false, 
           justifyContent="flex-start"
           onClick={() => handleLanguageChange("zh")}
           h="36px"
-          color={language === "zh" ? "white" : inactiveTextColor}
+          color={language === "zh" ? "white" : isXpiPage ? "gray.200" : inactiveTextColor}
           borderColor={
-            language === "zh" ? activeButtonHexColor : inactiveBorderColor
+            language === "zh" ? activeButtonHexColor : isXpiPage ? "whiteAlpha.400" : inactiveBorderColor
           }
           borderWidth={language === "zh" ? "1px" : "1px"}
-          bg={language === "zh" ? activeButtonHexColor : inactiveBgColor}
+          bg={language === "zh" ? activeButtonHexColor : isXpiPage ? "transparent" : inactiveBgColor}
           _hover={{
             borderColor:
-              language === "zh" ? activeButtonHexColor : hoverBorderColor,
-            bg: language === "zh" ? buttonHoverBgColor : inactiveHoverBgColor,
+              language === "zh" ? activeButtonHexColor : isXpiPage ? "whiteAlpha.600" : hoverBorderColor,
+            bg: language === "zh" ? buttonHoverBgColor : isXpiPage ? "whiteAlpha.200" : inactiveHoverBgColor,
             color: language === "zh" ? "white" : hoverTextColor,
           }}
           _active={{
             bg:
               language === "zh"
                 ? activeButtonHexColor
-                : inactiveActiveBgColor,
+                : isXpiPage ? "whiteAlpha.300" : inactiveActiveBgColor,
           }}
           _dark={{
             borderColor:

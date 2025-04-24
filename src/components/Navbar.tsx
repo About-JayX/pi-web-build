@@ -60,22 +60,33 @@ const ClientSideOnly = ({
   return isClient ? <>{children}</> : <>{fallback}</>
 }
 
-// 格式化钱包地址，显示前4位和后4位
+// 格式化钱包地址
 const formatWalletAddress = (address: string) => {
   if (!address) return ""
+  if (address.length < 10) return address
   return `${address.slice(0, 4)}...${address.slice(-4)}`
 }
 
-// 优化LogoSkeletonPlaceholder组件
+// 添加一个Logo骨架屏占位符
 const LogoSkeletonPlaceholder = () => {
+  const pathname = usePathname();
+  const isXpiPage = pathname === "/xpi";
+  
+  // 为XPI页面使用深色背景
+  const skeletonBg = isXpiPage 
+    ? "rgba(255, 255, 255, 0.2)" 
+    : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)");
+    
   return (
     <Flex align="center" width="auto" minWidth="120px">
       <Skeleton
         boxSize={{ base: "36px", xl: "40px" }}
         borderRadius="full"
         mr={2}
+        startColor={skeletonBg} 
+        endColor="rgba(255, 255, 255, 0.3)"
       />
-      <Skeleton height="24px" width="80px" borderRadius="md" />
+      <Box height="24px" width="80px" display="flex" alignItems="center" minWidth="80px" flexShrink={0} />
     </Flex>
   )
 }
@@ -100,18 +111,35 @@ const LogoWithName = () => {
 
 // 添加一个移动端Logo骨架占位符
 const MobileLogoSkeletonPlaceholder = () => {
-  return <Skeleton boxSize="32px" borderRadius="full" />
+  const pathname = usePathname();
+  const isXpiPage = pathname === "/xpi";
+  
+  // 为XPI页面使用深色背景
+  const skeletonBg = isXpiPage 
+    ? "rgba(255, 255, 255, 0.2)" 
+    : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)");
+    
+  return <Skeleton boxSize="32px" borderRadius="full" startColor={skeletonBg} endColor="rgba(255, 255, 255, 0.3)" />
 }
 
 // 添加一个在客户端渲染前显示的占位符组件
+// 注意：此NavbarPlaceholder仅在Navbar.tsx内部使用
+// providers.tsx中已经重新实现了一个功能类似的组件
+// 如果修改此组件，也需要同步修改providers.tsx中的版本
 const NavbarPlaceholder = () => {
+  const pathname = usePathname();
+  const isXpiPage = pathname === "/xpi";
+  
   const bgColor = useColorModeValue(
     "rgba(255,255,255,0.4)",
     "rgba(0, 0, 0, 0.36)"
   )
   const borderColor = useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)")
-  const isXpiMode = false // 因为是占位符，无法获取实际路径，假设非XPI页面
-  const boxShadowValue = useColorModeValue(isXpiMode ? "none" : "sm", "none") // 深色模式下不显示阴影
+  const isXpiMode = isXpiPage // 根据实际路径判断
+  const boxShadowValue = isXpiMode ? "none" : useColorModeValue("sm", "none") // 深色模式下不显示阴影
+  const skeletonBg = isXpiPage 
+    ? "rgba(255, 255, 255, 0.2)" 
+    : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)");
 
   return (
     <Box
@@ -139,41 +167,74 @@ const NavbarPlaceholder = () => {
           alignItems="center"
           height="100%"
           justify="space-between" // 确保两端对齐
+          position="relative" // 添加相对定位，作为绝对定位的基准
         >
-          {/* 移动端Logo占位符 */}
+          {/* 移动端Logo和汉堡菜单占位符 */}
           <Flex
             flex={{ base: 1, md: "auto" }}
             ml={{ base: -2 }}
             display={{ base: "flex", xl: "none" }}
             alignItems="center">
-            <Skeleton width="24px" height="24px" borderRadius="md" mr={2} />
-            <Skeleton boxSize="32px" borderRadius="full" ml={2} />
+            <Skeleton 
+              width="24px" 
+              height="24px" 
+              borderRadius="md" 
+              mr={2} 
+              startColor={skeletonBg} 
+              endColor="rgba(255, 255, 255, 0.3)"
+            />
+            <Skeleton 
+              boxSize="32px" 
+              borderRadius="full" 
+              ml={2} 
+              startColor={skeletonBg} 
+              endColor="rgba(255, 255, 255, 0.3)"
+            />
           </Flex>
 
-          {/* 桌面端Logo和导航占位符 */}
+          {/* 左侧Logo占位符 */}
           <Flex
             flex={{ base: 1, xl: "auto" }}
             alignItems="center"
             justify={{ base: "space-between", xl: "start" }}
-            width="100%">
-            {/* Logo占位符 */}
-            <Flex minWidth="120px">
-              <LogoSkeletonPlaceholder />
-            </Flex>
-
-            {/* 桌面导航占位符 */}
-            <Flex
+            width={{ xl: "30%" }}>
+            <Flex 
+              align="center" 
+              minWidth="120px"
               display={{ base: "none", xl: "flex" }}
-              ml={{ base: 10, xl: 6 }}
-              flex="1">
-              <Skeleton height="24px" width="300px" borderRadius="md" />
+            >
+              <Skeleton
+                boxSize={{ base: "36px", xl: "40px" }}
+                borderRadius="full"
+                mr={2}
+                startColor={skeletonBg} 
+                endColor="rgba(255, 255, 255, 0.3)"
+              />
+              <Box height="24px" minWidth="80px" flexShrink={0} />
             </Flex>
+          </Flex>
+
+          {/* 导航TAB组，作为一个整体居中 - 移除导航TAB骨架屏 */}
+          <Flex
+            display={{ base: "none", xl: "flex" }}
+            position="absolute"
+            left="50%"
+            transform="translateX(-50%)"
+            width="auto">
+            <Box height="24px" width="300px" />
           </Flex>
 
           {/* 右侧按钮占位符 */}
-          <Flex justify="flex-end" width="auto" flexShrink={0}>
+          <Stack
+            flex={{ base: 0, xl: 1 }}
+            justify="flex-end"
+            direction="row"
+            spacing={{ base: 2, md: 1 }}
+            align="center"
+            ml={{ base: 2, md: 0 }}
+            width={{ xl: "30%" }}>
             <NavButtonsPlaceholder />
-          </Flex>
+          </Stack>
         </Flex>
       </Container>
     </Box>
@@ -182,6 +243,19 @@ const NavbarPlaceholder = () => {
 
 // 添加完整的钱包和语言选择器占位符
 const NavButtonsPlaceholder = () => {
+  const pathname = usePathname();
+  const isXpiPage = pathname === "/xpi";
+  
+  // 为XPI页面使用深色背景
+  const skeletonBg = isXpiPage 
+    ? "rgba(255, 255, 255, 0.2)" 
+    : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)");
+  
+  // 骨架边框颜色
+  const borderColor = isXpiPage 
+    ? "rgba(255, 255, 255, 0.2)" 
+    : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)");
+    
   return (
     <Stack
       flex={{ base: 0, md: 0 }}
@@ -192,15 +266,19 @@ const NavButtonsPlaceholder = () => {
       ml={{ base: 2, md: 0 }}
       width="auto"
       flexShrink={0}>
-      {/* 语言选择器占位符 */}
-      <Skeleton width="36px" height="36px" borderRadius="md" flexShrink={0} />
+      <Box 
+        h={{ base: "36px", md: "40px" }}
+        minW={{ base: "80px", md: "100px" }}
+      />
 
       {/* 钱包连接按钮占位符 */}
       <Skeleton
         width={{ base: "80px", md: "100px" }}
-        height="40px"
+        height={{ base: "36px", md: "40px" }}
         borderRadius="md"
         flexShrink={0}
+        startColor={skeletonBg} 
+        endColor="rgba(255, 255, 255, 0.3)" 
       />
     </Stack>
   )
@@ -440,18 +518,7 @@ export default function Navbar() {
                 minWidth="120px" // 确保固定最小宽度，防止跳动
               >
                 <ClientSideOnly fallback={<LogoSkeletonPlaceholder />}>
-                  <Flex align="center" minWidth="120px">
-                    <Image
-                      src="/pis.png"
-                      alt="Pi Logo"
-                      boxSize={{ base: "36px", xl: "40px" }}
-                      display="flex"
-                      objectFit="contain"
-                      mr={2}
-                      borderRadius="full"
-                    />
-                    <LogoText />
-                  </Flex>
+                  <LogoWithName />
                 </ClientSideOnly>
               </Flex>
             </NextLink>
