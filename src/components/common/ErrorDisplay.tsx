@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Text, Button, Icon, VStack, useColorModeValue } from '@chakra-ui/react';
+import { Box, Text, Button, Icon, VStack, useColorModeValue, Alert, AlertIcon } from '@chakra-ui/react';
 import { IoMdRefresh } from 'react-icons/io';
 import { FaSync } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 interface ErrorDisplayProps {
   message?: string;
   onRetry?: () => void;
-  variant?: 'default' | 'compact';
+  variant?: 'default' | 'compact' | 'warning';
 }
 
 /**
@@ -20,8 +20,19 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 }) => {
   const { t } = useTranslation();
   const errorColor = useColorModeValue('red.500', 'red.300');
+  const warningColor = useColorModeValue('orange.500', 'orange.300');
   const buttonBgColor = useColorModeValue('purple.500', 'purple.400');
   const buttonHoverBgColor = useColorModeValue('purple.600', 'purple.500');
+  
+  // 警告模式 - 显示一个带有提示图标的警告框
+  if (variant === 'warning') {
+    return (
+      <Alert status="warning" borderRadius="md" my={4}>
+        <AlertIcon />
+        <Text>{message || t('usingCachedData')}</Text>
+      </Alert>
+    );
+  }
   
   if (variant === 'compact') {
     return (

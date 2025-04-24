@@ -1,3 +1,4 @@
+import React, { useState } from 'react'
 import {
   Box,
   Flex,
@@ -18,9 +19,10 @@ import {
   Button,
   Link,
   Tooltip,
+  IconButton,
 } from '@chakra-ui/react'
 import { FaSort, FaFileContract, FaShareAlt, FaUser, FaGlobe, FaTwitter, FaTelegram } from 'react-icons/fa'
-import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons'
+import { ChevronUpIcon, ChevronDownIcon, ChevronRightIcon } from '@chakra-ui/icons'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/navigation'
 import { formatTokenAmount } from '@/utils'
@@ -29,6 +31,7 @@ import { useMintingCalculations } from '@/hooks/useMintingCalculations'
 import { MintToken } from '@/api/types'
 import { useNetwork } from '@/contexts/NetworkContext'
 import { IconType } from 'react-icons'
+import { ShareModal } from './index'
 
 interface TokenListViewProps {
   tokens: MintToken[]
@@ -80,15 +83,20 @@ const TokenListView = ({
   currencyUnit,
 }: TokenListViewProps) => {
   const router = useRouter()
+  const toast = useToast()
+  const { t } = useTranslation()
+  const { network } = useNetwork()
+  
+  // 用于管理分享弹窗
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareToken, setShareToken] = useState<MintToken | null>(null);
+  
   const bg = useColorModeValue('white', 'gray.800')
   const hoverBg = useColorModeValue('gray.50', 'gray.700')
   const thBg = useColorModeValue('gray.50', 'gray.700')
   const thHoverBg = useColorModeValue('gray.100', 'gray.600')
   const iconColor = useColorModeValue('gray.600', 'gray.400')
   const iconHoverColor = useColorModeValue('brand.primary', 'brand.light')
-  const toast = useToast()
-  const { t } = useTranslation()
-  const { network } = useNetwork()
 
   // 将hook移到组件顶层，只初始化一次
   const { getFormattedMintRate } = useMintingCalculations({
@@ -131,34 +139,9 @@ const TokenListView = ({
 
   // 分享功能处理
   const handleShare = (token: MintToken) => {
-    if (navigator.share) {
-      navigator
-        .share({
-          title: `${token.name} (${token.symbol})`,
-          text: `${t('share')} ${token.name} ${t('token')}`,
-          url:
-            window.location.origin +
-            `/${network.toLowerCase()}/${token.address}`,
-        })
-        .catch(error => console.log(`${t('share')} ${t('failed')}:`, error))
-    } else {
-      // 如果浏览器不支持，可以复制链接到剪贴板
-      const url =
-        window.location.origin + `/${network.toLowerCase()}/${token.address}`
-      navigator.clipboard
-        .writeText(url)
-        .then(() =>
-          toast({
-            title: t('copySuccess'),
-            description: t('copyLinkSuccess'),
-            status: 'success',
-            duration: 2000,
-            isClosable: true,
-            position: 'top',
-          })
-        )
-        .catch(error => console.log(`${t('copy')} ${t('failed')}:`, error))
-    }
+    // 设置当前分享的代币并打开弹窗
+    setShareToken(token);
+    setIsShareModalOpen(true);
   }
 
   // 复制合约地址
@@ -319,219 +302,236 @@ const TokenListView = ({
   )
 
   return (
-    <TableContainer
-      bg={bg}
-      borderRadius="lg"
-      boxShadow="md"
-      width="100%"
-      maxWidth="100%"
-      overflowX="auto"
-    >
-      <Table variant="simple" width="100%" size="md" layout="fixed">
-        <Thead>
-          <Tr>
-            <Th bg={thBg} width="15%">
-              {t('tokenColumn')}
-            </Th>
-            <Th bg={thBg} width="15%">
-              {t('contractAddressColumn')}
-            </Th>
-            <Th bg={thBg} textAlign="center" width="12%">
-              {t('totalSupplyColumn')}
-            </Th>
-            <ThSortable column="progress" width="25%">
-              {t('progressColumn')}
-            </ThSortable>
-            <ThSortable column="minter_counts" width="10%">
-              {t('participantsColumn')}
-            </ThSortable>
-            <Th bg={thBg} textAlign="center" width="15%">
-              {t('mintingPrice')}
-            </Th>
-            <Th bg={thBg} width="8%">
-              {t('linksColumn')}
-            </Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          {tokens.map(token => (
-            <Tr
-              key={token.id}
-              _hover={{ bg: hoverBg, cursor: 'pointer' }}
-              onClick={e => {
-                if (
-                  (e.target as HTMLElement).tagName !== 'A' &&
-                  !(e.target as HTMLElement).closest('a') &&
-                  !(e.target as HTMLElement).closest('button')
-                ) {
-                  navigateToMintPage(token.address)
-                }
-              }}
-              sx={{
-                transition: 'all 0.2s',
-              }}
-            >
-              <Td>
-                <HStack spacing={3}>
-                  <Image
-                    src={token.image}
-                    alt={token.name}
-                    boxSize="40px"
-                    borderRadius="full"
-                    border="2px solid"
-                    borderColor="brand.light"
-                  />
-                  <Box>
-                    <Text
-                      fontSize="md"
+    <>
+      <TableContainer
+        bg={bg}
+        borderRadius="lg"
+        boxShadow="md"
+        width="100%"
+        maxWidth="100%"
+        overflowX="auto"
+      >
+        <Table variant="simple" width="100%" size="md" layout="fixed">
+          <Thead>
+            <Tr>
+              <Th bg={thBg} width="15%">
+                {t('tokenColumn')}
+              </Th>
+              <Th bg={thBg} width="15%">
+                {t('contractAddressColumn')}
+              </Th>
+              <Th bg={thBg} textAlign="center" width="12%">
+                {t('totalSupplyColumn')}
+              </Th>
+              <ThSortable column="progress" width="25%">
+                {t('progressColumn')}
+              </ThSortable>
+              <ThSortable column="minter_counts" width="10%">
+                {t('participantsColumn')}
+              </ThSortable>
+              <Th bg={thBg} textAlign="center" width="15%">
+                {t('mintingPrice')}
+              </Th>
+              <Th bg={thBg} width="8%">
+                {t('linksColumn')}
+              </Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {tokens.map(token => (
+              <Tr
+                key={token.id}
+                _hover={{ bg: hoverBg, cursor: 'pointer' }}
+                onClick={e => {
+                  if (
+                    (e.target as HTMLElement).tagName !== 'A' &&
+                    !(e.target as HTMLElement).closest('a') &&
+                    !(e.target as HTMLElement).closest('button')
+                  ) {
+                    navigateToMintPage(token.address)
+                  }
+                }}
+                sx={{
+                  transition: 'all 0.2s',
+                }}
+              >
+                <Td>
+                  <HStack spacing={3}>
+                    <Image
+                      src={token.image}
+                      alt={token.name}
+                      boxSize="40px"
+                      borderRadius="full"
+                      border="2px solid"
+                      borderColor="brand.light"
+                    />
+                    <Box>
+                      <Text
+                        fontSize="md"
+                        fontWeight="bold"
+                        color="brand.primary"
+                        lineHeight="1.2"
+                      >
+                        {token.symbol}
+                      </Text>
+                      <Text
+                        fontSize="xs"
+                        color="gray.500"
+                        noOfLines={1}
+                        maxW="120px"
+                      >
+                        {token.name}
+                      </Text>
+                    </Box>
+                  </HStack>
+                </Td>
+                <Td>
+                  {token.address && (
+                    <Box
+                      as="button"
+                      px={2}
+                      py={1}
+                      borderRadius="md"
+                      fontSize="xs"
+                      fontFamily="mono"
                       fontWeight="bold"
                       color="brand.primary"
-                      lineHeight="1.2"
+                      border="1px solid"
+                      borderColor="brand.light"
+                      title={token.address}
+                      cursor="pointer"
+                      width="fit-content"
+                      onClick={() => copyContractAddress(token.address)}
+                      bg="#F7F6FE"
+                      _hover={{ bg: 'brand.light' }}
+                      _active={{ bg: '#F7F6FE' }}
+                      transition="all 0.2s"
                     >
-                      {token.symbol}
-                    </Text>
-                    <Text
-                      fontSize="xs"
-                      color="gray.500"
-                      noOfLines={1}
-                      maxW="120px"
-                    >
-                      {token.name}
-                    </Text>
+                      <Icon as={FaFileContract} mr={1} fontSize="10px" />
+                      {formatContractAddress(token.address)}
+                    </Box>
+                  )}
+                </Td>
+                <Td textAlign="center">
+                  {formatTokenAmount(token.totalSupply, { abbreviate: true })}
+                </Td>
+                <Td>
+                  <Box py={1} width="100%">
+                    <HStack mb={1}>
+                      <Text fontWeight="bold" fontSize="sm" color="brand.primary">
+                        {token.progress.toFixed(2)}%
+                      </Text>
+                      {token.progress > 0 && (
+                        <Text fontWeight="medium" fontSize="sm" color="brand.600">
+                          ({getCollectedAmount(token)})
+                        </Text>
+                      )}
+                      <Text fontWeight="medium" fontSize="sm" ml="auto">
+                        / {token.target}
+                      </Text>
+                    </HStack>
+                    <HStack spacing={2} align="center">
+                      <Progress
+                        value={token.progress}
+                        variant="subtle"
+                        borderRadius="full"
+                        size="sm"
+                        flex="1"
+                        bg="#E7E3FC"
+                        sx={{
+                          // 进度条颜色
+                          "& > div:last-of-type": {
+                            bg: "brand.primary !important",
+                            transition: "width 0.3s ease-in-out",
+                          },
+                        }}
+                      />
+                    </HStack>
                   </Box>
-                </HStack>
-              </Td>
-              <Td>
-                {token.address && (
-                  <Box
-                    as="button"
+                </Td>
+                <Td textAlign="center">
+                  <Button
+                    h="26px"
+                    size="sm"
                     px={2}
-                    py={1}
-                    borderRadius="md"
-                    fontSize="xs"
-                    fontFamily="mono"
-                    fontWeight="bold"
-                    color="brand.primary"
-                    border="1px solid"
-                    borderColor="brand.light"
-                    title={token.address}
-                    cursor="pointer"
-                    width="fit-content"
-                    onClick={() => copyContractAddress(token.address)}
+                    variant="outline"
+                    colorScheme="brand"
                     bg="#F7F6FE"
                     _hover={{ bg: 'brand.light' }}
                     _active={{ bg: '#F7F6FE' }}
-                    transition="all 0.2s"
+                    leftIcon={
+                      <Icon
+                        as={FaUser}
+                        color="#fff"
+                        boxSize="16px"
+                        p="3px"
+                        bg="brand.primary"
+                        rounded="6px"
+                      />
+                    }
                   >
-                    <Icon as={FaFileContract} mr={1} fontSize="10px" />
-                    {formatContractAddress(token.address)}
-                  </Box>
-                )}
-              </Td>
-              <Td textAlign="center">
-                {formatTokenAmount(token.totalSupply, { abbreviate: true })}
-              </Td>
-              <Td>
-                <Box py={1} width="100%">
-                  <HStack mb={1}>
-                    <Text fontWeight="bold" fontSize="sm" color="brand.primary">
-                      {token.progress.toFixed(2)}%
-                    </Text>
-                    {token.progress > 0 && (
-                      <Text fontWeight="medium" fontSize="sm" color="brand.600">
-                        ({getCollectedAmount(token)})
-                      </Text>
-                    )}
-                    <Text fontWeight="medium" fontSize="sm" ml="auto">
-                      / {token.target}
-                    </Text>
-                  </HStack>
-                  <HStack spacing={2} align="center">
-                    <Progress
-                      value={token.progress}
-                      variant="subtle"
-                      borderRadius="full"
-                      size="sm"
-                      flex="1"
-                      bg="#E7E3FC"
-                      sx={{
-                        // 进度条颜色
-                        "& > div:last-of-type": {
-                          bg: "brand.primary !important",
-                          transition: "width 0.3s ease-in-out",
-                        },
-                      }}
-                    />
-                  </HStack>
-                </Box>
-              </Td>
-              <Td textAlign="center">
-                <Button
-                  h="26px"
-                  size="sm"
-                  px={2}
-                  variant="outline"
-                  colorScheme="brand"
-                  bg="#F7F6FE"
-                  _hover={{ bg: 'brand.light' }}
-                  _active={{ bg: '#F7F6FE' }}
-                  leftIcon={
-                    <Icon
-                      as={FaUser}
-                      color="#fff"
-                      boxSize="16px"
-                      p="3px"
-                      bg="brand.primary"
-                      rounded="6px"
-                    />
-                  }
-                >
-                  {token.minterCounts}
-                </Button>
-              </Td>
-              <Td textAlign="center">
-                <Text
-                  fontWeight="medium"
-                  textAlign="center"
-                  width="100%"
-                  display="block"
-                >
-                  {formatMintRateForToken(token)}
-                </Text>
-              </Td>
-              <Td>
-                <HStack spacing={3} justify="center">
-                  {/* 社交媒体图标 */}
-                  {getSocials(token).map((social, index) => (
-                    <Tooltip key={index} label={social.platform} placement="top">
-                      <Link 
-                        href={social.link}
-                        isExternal
-                        onClick={(e) => e.stopPropagation()}
-                        color={iconColor}
-                        _hover={{ color: "brand.primary" }}
-                        transition="color 0.2s"
-                      >
-                        <Icon as={social.icon} boxSize="16px" />
-                      </Link>
-                    </Tooltip>
-                  ))}
-                  <Box
-                    as="button"
-                    onClick={() => handleShare(token)}
-                    color={iconColor}
-                    _hover={{ color: iconHoverColor }}
-                    transition="color 0.2s"
+                    {token.minterCounts}
+                  </Button>
+                </Td>
+                <Td textAlign="center">
+                  <Text
+                    fontWeight="medium"
+                    textAlign="center"
+                    width="100%"
+                    display="block"
                   >
-                    <Icon as={FaShareAlt} boxSize="16px" />
-                  </Box>
-                </HStack>
-              </Td>
-            </Tr>
-          ))}
-        </Tbody>
-      </Table>
-    </TableContainer>
+                    {formatMintRateForToken(token)}
+                  </Text>
+                </Td>
+                <Td>
+                  <HStack spacing={3} justify="center">
+                    {/* 社交媒体图标 */}
+                    {getSocials(token).map((social, index) => (
+                      <Tooltip key={index} label={social.platform} placement="top">
+                        <Link 
+                          href={social.link}
+                          isExternal
+                          onClick={(e) => e.stopPropagation()}
+                          color={iconColor}
+                          _hover={{ color: "brand.primary" }}
+                          transition="color 0.2s"
+                        >
+                          <Icon as={social.icon} boxSize="16px" />
+                        </Link>
+                      </Tooltip>
+                    ))}
+                    <Box
+                      as="button"
+                      onClick={() => handleShare(token)}
+                      color={iconColor}
+                      _hover={{ color: iconHoverColor }}
+                      transition="color 0.2s"
+                    >
+                      <Icon as={FaShareAlt} boxSize="16px" />
+                    </Box>
+                  </HStack>
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </TableContainer>
+      
+      {/* 添加分享模态框 */}
+      {shareToken && (
+        <ShareModal 
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          title={`分享 ${shareToken.name} (${shareToken.symbol})`}
+          content={""}
+          url={`${typeof window !== 'undefined' ? window.location.origin : ''}/${network.toLowerCase()}/${shareToken.address}`}
+          tokenTicker={shareToken.symbol}
+          tokenName={shareToken.name}
+          contractAddress={shareToken.address}
+          hashtags={["PIS", "PI", "Web3", shareToken.symbol]}
+        />
+      )}
+    </>
   )
 }
 

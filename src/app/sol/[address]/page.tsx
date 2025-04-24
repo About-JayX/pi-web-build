@@ -24,7 +24,7 @@ import {
 } from '@chakra-ui/react'
 import { useParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { FaCoins, FaUsers, FaChartPie, FaArrowLeft } from 'react-icons/fa'
+import { FaCoins, FaUsers, FaChartPie, FaArrowLeft, FaExclamationTriangle } from 'react-icons/fa'
 import MintingForm from '@/components/token-detail/MintingForm'
 import { useSolana } from '@/contexts/solanaProvider'
 import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
@@ -161,31 +161,165 @@ export default function TokenMintPage() {
 
   if (loading || fairCurveLoading) {
     return (
-      <Center minH="60vh">
-        <LoadingSpinner />
-      </Center>
+      <Box
+        minH="70vh"
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        textAlign="center"
+        px={4}
+      >
+        <Box
+          bg={useColorModeValue('white', 'gray.800')}
+          p={8}
+          borderRadius="xl"
+          boxShadow="xl"
+          borderWidth="1px"
+          borderColor={useColorModeValue('purple.100', 'purple.900')}
+          maxW="md"
+          w="100%"
+        >
+          <Text
+            color="brand.primary"
+            fontSize={{base: "2xl", md: "3xl"}}
+            fontWeight="bold"
+            mb={6}
+          >
+            {t('loading')}
+          </Text>
+          
+          <LoadingSpinner 
+            spinnerSize="xl" 
+            spinnerColor="brand.primary"
+            thickness="4px"
+            speed="0.7s"
+            py={6}
+            textSize="md"
+            textKey="loadingTokenData"
+          />
+        </Box>
+      </Box>
     )
   }
 
   if (error || fairCurveError) {
     return (
-      <Center minH="60vh">
-        <VStack spacing={4}>
-          <Text color="red.500">{error || fairCurveError}</Text>
-          <BackButton />
-        </VStack>
-      </Center>
+      <Box
+        minH="70vh"
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        textAlign="center"
+        px={4}
+      >
+        <Box
+          bg={useColorModeValue('white', 'gray.800')}
+          p={8}
+          borderRadius="xl"
+          boxShadow="xl"
+          borderWidth="1px"
+          borderColor={useColorModeValue('red.100', 'red.900')}
+          maxW="md"
+          w="100%"
+        >
+          <Text
+            color="red.500"
+            fontSize={{base: "2xl", md: "3xl"}}
+            fontWeight="bold"
+            mb={4}
+          >
+            {t('loadingError')}
+          </Text>
+          
+          <Box mb={6}>
+            <Icon
+              as={FaExclamationTriangle}
+              color="red.500"
+              boxSize={{base: "50px", md: "70px"}}
+              mb={4}
+            />
+            <Text color="gray.500" mb={4}>
+              {error || fairCurveError}
+            </Text>
+          </Box>
+          
+          <Button
+            as={Link}
+            href="/"
+            leftIcon={<FaArrowLeft />}
+            colorScheme="purple"
+            size="lg"
+            width="full"
+            fontWeight="bold"
+            _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg' }}
+            transition="all 0.2s"
+          >
+            {t('backToMintingHome')}
+          </Button>
+        </Box>
+      </Box>
     )
   }
 
   if (!tokenInfo || !formattedData) {
     return (
-      <Center minH="60vh">
-        <VStack spacing={4}>
-          <Text>{t('tokenNotFound')}</Text>
-          <BackButton />
-        </VStack>
-      </Center>
+      <Box
+        minH="70vh"
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        textAlign="center"
+        px={4}
+      >
+        <Box
+          bg={useColorModeValue('white', 'gray.800')}
+          p={8}
+          borderRadius="xl"
+          boxShadow="xl"
+          borderWidth="1px"
+          borderColor={useColorModeValue('red.100', 'red.900')}
+          maxW="md"
+          w="100%"
+        >
+          <Text
+            color="red.500"
+            fontSize={{base: "2xl", md: "3xl"}}
+            fontWeight="bold"
+            mb={4}
+          >
+            {t('tokenNotFound')}
+          </Text>
+          
+          <Box mb={6}>
+            <Icon
+              as={FaExclamationTriangle}
+              color="red.500"
+              boxSize={{base: "50px", md: "70px"}}
+              mb={4}
+            />
+            <Text color="gray.500" mb={4}>
+              {t('tokenErrorHint')}
+            </Text>
+          </Box>
+          
+          <Button
+            as={Link}
+            href="/"
+            leftIcon={<FaArrowLeft />}
+            colorScheme="purple"
+            size="lg"
+            width="full"
+            fontWeight="bold"
+            _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg' }}
+            transition="all 0.2s"
+          >
+            {t('backToMintingHome')}
+          </Button>
+        </Box>
+      </Box>
     )
   }
 

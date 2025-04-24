@@ -51,6 +51,10 @@ export default {
   
   // 代币详情页 - 错误状态
   'tokenNotFound': '无法找到代币',
+  'loadingError': '加载错误',
+  'loading': '加载中',
+  'loadingTokenData': '正在获取代币数据，请稍候...',
+  'tokenErrorHint': '请检查您输入的代币地址是否正确，或者该代币可能已被删除。',
   
   // 代币详情页 - TokenInfo组件
   'mintToken': '铸造代币',

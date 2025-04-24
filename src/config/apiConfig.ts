@@ -26,15 +26,15 @@ export const API_ENVIRONMENTS = {
   development: {
     baseUrl: 'https://fairmint.piweb3.xyz/api',
     userApiUrl: 'https://memestestspace.dexcc.cc',
-    timeout: 10000,
-    userApiTimeout: 15000,
+    timeout: 20000,
+    userApiTimeout: 25000,
   },
   // 生产环境
   production: {
     baseUrl: 'https://mint.pi.sale/api',
     userApiUrl: 'https://market.pi.sale', // 默认与开发环境相同，可以在.env.production中覆盖
-    timeout: 15000,
-    userApiTimeout: 15000,
+    timeout: 30000,
+    userApiTimeout: 30000,
   },
 };
 

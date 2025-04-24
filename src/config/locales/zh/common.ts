@@ -26,6 +26,8 @@ export default {
   'operationFailedTryAgain': '操作失败，请重试',
   'tryAgain': '重试',
   'rejected': '已拒绝',
+  'networkError': '网络错误，无法连接到服务器',
+  'tokenNotFound': '未找到代币信息',
   
   // 文件上传相关错误
   'imageTooLarge': '图片文件过大，请上传小于 2MB 的图片',
