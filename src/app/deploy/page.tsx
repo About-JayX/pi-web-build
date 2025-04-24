@@ -602,6 +602,7 @@ export default function DeployPage() {
   const [tokenName, setTokenName] = useState('')
   const [isCheckingSymbol, setIsCheckingSymbol] = useState(false)
   const [isSymbolValid, setIsSymbolValid] = useState<boolean | null>(null)
+  const [errorType, setErrorType] = useState<'exists' | 'invalid' | null>(null)
 
   // 折叠面板状态
   const { isOpen: isSocialOpen, onToggle: onSocialToggle } = useDisclosure()
@@ -679,21 +680,40 @@ export default function DeployPage() {
     }
   }
 
+  // 使用 useRef 来存储定时器
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+
   // 检查代币符号
   const checkTokenSymbol = useCallback(
     async (symbol: string) => {
       if (!symbol) {
-        setIsSymbolValid(null)
+        return
+      }
+
+      console.log("checkTokenSymbol被调用:", symbol); // 调试日志
+
+      // 再次检查非法代币符号列表 - 应该在handleSymbolChange中完成，这里是双重保险
+      const invalidSymbols = ["XPI", "PIS", "PiSale", "SpacePi", "Xijinpin"];
+      if (invalidSymbols.some(invalid => symbol.toUpperCase() === invalid.toUpperCase())) {
+        // 非法符号直接设置错误状态并返回，不需要进行网络请求
+        setIsSymbolValid(false)
+        setErrorType('invalid')
+        setIsCheckingSymbol(false) // 确保检查状态被关闭
         return
       }
 
       try {
+        // 开始检查符号可用性
         setIsCheckingSymbol(true)
+        console.log("开始API请求检查符号:", symbol); // 调试日志
+        
         const response = await TokenAPI.checkSymbol(symbol)
+        console.log("API响应:", response); // 调试日志
+        
         // 如果 exists 为 true 表示已注册，则不可用
-        setIsSymbolValid(!response.exists)
-
         if (response.exists) {
+          setIsSymbolValid(false)
+          setErrorType('exists')
           toast({
             title: t('error'),
             description: t('symbolAlreadyExists'),
@@ -702,23 +722,31 @@ export default function DeployPage() {
             isClosable: true,
             position: 'top',
           })
+        } else {
+          // 符号可用，设置为有效状态
+          setIsSymbolValid(true)
+          setErrorType(null)
         }
       } catch (error) {
         console.error('Failed to check token symbol:', error)
-        setIsSymbolValid(null)
+        // 发生错误时保持之前的验证状态不变
       } finally {
+        // 完成检查，无论结果如何
         setIsCheckingSymbol(false)
       }
     },
     [toast, t]
   )
 
-  // 使用 useRef 来存储定时器
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
-
   // 处理代币符号输入
   const handleSymbolChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
+      // 清除之前的定时器，避免任何情况下的竞态条件
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null;
+      }
+
       // 1. 移除空格
       // 2. 过滤掉中文字符，只保留英文字母、数字和特殊符号
       // 使用正则表达式匹配非中文字符
@@ -728,23 +756,45 @@ export default function DeployPage() {
 
       // 限制最大长度为10个字符
       const truncatedValue = value.slice(0, 10)
-
-      // 只在值不同时更新状态，避免不必要的重新渲染
-      if (truncatedValue !== tokenSymbol) {
-        setTokenSymbol(truncatedValue)
-
-        // 清除之前的定时器
-        if (timerRef.current) {
-          clearTimeout(timerRef.current)
-        }
-
-        // 设置新的定时器，1500ms 后检查
-        timerRef.current = setTimeout(() => {
-          checkTokenSymbol(truncatedValue)
-        }, 1500)
+      
+      // 更新符号值
+      setTokenSymbol(truncatedValue)
+      
+      // 如果输入为空，不进行验证
+      if (!truncatedValue) {
+        setIsSymbolValid(null)
+        setErrorType(null)
+        return
       }
+        
+      // 步骤1: 快速检查非法代币符号
+      const invalidSymbols = ["XPI", "PIS", "PiSale", "SpacePi", "Xijinpin"];
+      if (invalidSymbols.some(invalid => truncatedValue.toUpperCase() === invalid.toUpperCase())) {
+        // 设置错误状态
+        setIsSymbolValid(false)
+        setErrorType('invalid')
+        // 确保isCheckingSymbol为false，防止显示"正在检查符号可用性"
+        setIsCheckingSymbol(false)
+        // 非法符号直接返回，不进行后续符号可用性检查
+        return
+      }
+
+      // 步骤2: 如果不是非法符号，继续处理
+      
+      // 如果之前是任何错误，都重置状态，准备进行新的检查
+      setIsSymbolValid(null)
+      setErrorType(null)
+
+      // 步骤3: 为非非法符号设置定时器，延迟检查可用性
+      console.log("准备检查符号可用性:", truncatedValue); // 调试日志
+      // 设置新的定时器，1500ms 后检查
+      timerRef.current = setTimeout(() => {
+        console.log("正在执行符号可用性检查:", truncatedValue); // 调试日志
+        // 调用API检查符号是否已被注册
+        checkTokenSymbol(truncatedValue)
+      }, 1500)
     },
-    [checkTokenSymbol, tokenSymbol]
+    [checkTokenSymbol, setIsCheckingSymbol]
   )
 
   // 组件卸载时清除定时器
@@ -784,6 +834,7 @@ export default function DeployPage() {
       return
     }
 
+    // 检查表单填写完整性
     if (!tokenIcon || !tokenName || !tokenSymbol) {
       toast({
         title: t('error'),
@@ -796,16 +847,51 @@ export default function DeployPage() {
       return
     }
 
-    // 检查代币符号是否可用
-    if (!isSymbolValid) {
+    // 最终检查非法代币符号
+    const invalidSymbols = ["XPI", "PIS", "PiSale", "SpacePi", "Xijinpin"];
+    if (invalidSymbols.some(invalid => tokenSymbol.toUpperCase() === invalid.toUpperCase())) {
+      // 更新状态，确保错误信息在页面上显示
+      if (!(isSymbolValid === false && errorType === 'invalid')) {
+        setIsSymbolValid(false)
+        setErrorType('invalid')
+      }
+      
       toast({
         title: t('error'),
-        description: t('symbolAlreadyExists'),
+        description: t('invalidSymbol'),
         status: 'error',
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
         position: 'top',
       })
+      
+      // 滚动到符号输入框
+      const symbolInput = document.querySelector('[name="tokenSymbol"]');
+      if (symbolInput) {
+        symbolInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
+      return
+    }
+
+    // 检查代币符号是否可用
+    if (!isSymbolValid) {
+      // 根据错误类型显示不同的错误消息
+      toast({
+        title: t('error'),
+        description: errorType === 'invalid' ? t('invalidSymbol') : t('symbolAlreadyExists'),
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'top',
+      })
+      
+      // 滚动到符号输入框
+      const symbolInput = document.querySelector('[name="tokenSymbol"]');
+      if (symbolInput) {
+        symbolInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      
       return
     }
 
@@ -1067,6 +1153,7 @@ export default function DeployPage() {
                         onChange={handleSymbolChange}
                         placeholder={t('enterSymbol')}
                         bg={inputBg}
+                        name="tokenSymbol"
                         borderColor={
                           isSymbolValid === false
                             ? 'red.500'
@@ -1075,6 +1162,12 @@ export default function DeployPage() {
                             : borderColor
                         }
                         _placeholder={{ color: 'gray.400' }}
+                        _focus={{
+                          borderColor: isSymbolValid === false ? 'red.500' : 'brand.primary',
+                          boxShadow: isSymbolValid === false 
+                            ? '0 0 0 1px #E53E3E'
+                            : '0 0 0 1px var(--chakra-colors-brand-primary)'
+                        }}
                         size="md"
                         isInvalid={isSymbolValid === false}
                         disabled={isCheckingSymbol}
@@ -1087,15 +1180,41 @@ export default function DeployPage() {
                           {t('symbolMaxLength')}
                         </Text>
                       )}
-                      {isCheckingSymbol && (
+                      {/* 只有当不是错误状态时，才显示"正在检查符号可用性" */}
+                      {isCheckingSymbol && isSymbolValid !== false && (
                         <Text fontSize="sm" color="gray.500" mt={1}>
                           {t('checkingSymbol')}...
                         </Text>
                       )}
+                      {/* 无论是否在检查中，只要是错误状态就显示错误提示 */}
                       {isSymbolValid === false && (
-                        <Text fontSize="sm" color="red.500" mt={1}>
-                          {t('symbolAlreadyExists')}
-                        </Text>
+                        <Box 
+                          mt={1} 
+                          p={2} 
+                          bg="red.50" 
+                          borderRadius="md" 
+                          borderWidth="1px" 
+                          borderColor="red.200"
+                        >
+                          <Text fontSize="sm" color="red.500" fontWeight="medium">
+                            {errorType === 'invalid' ? t('invalidSymbol') : t('symbolAlreadyExists')}
+                          </Text>
+                        </Box>
+                      )}
+                      {/* 添加成功验证提示 */}
+                      {isSymbolValid === true && !isCheckingSymbol && tokenSymbol && (
+                        <Box 
+                          mt={1} 
+                          p={2} 
+                          bg="green.50" 
+                          borderRadius="md" 
+                          borderWidth="1px" 
+                          borderColor="green.200"
+                        >
+                          <Text fontSize="sm" color="green.500" fontWeight="medium">
+                            {t('symbolValidSuccess')}
+                          </Text>
+                        </Box>
                       )}
                     </FormControl>
 
@@ -1161,6 +1280,13 @@ export default function DeployPage() {
               width="full"
               isLoading={isSubmitting || isConnecting}
               loadingText={publicKey ? t('creating') : t('connecting')}
+              isDisabled={!publicKey || isSubmitting || isConnecting || !tokenIcon || !tokenName || !tokenSymbol || isSymbolValid !== true}
+              _disabled={{
+                bg: 'gray.400',
+                cursor: 'not-allowed',
+                opacity: 0.6,
+                _hover: { bg: 'gray.400' }
+              }}
             >
               {publicKey ? t('createToken') : t('connectWallet')}
             </Button>

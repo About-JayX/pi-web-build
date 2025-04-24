@@ -327,19 +327,47 @@ export default function MintingTokenCard({
           gap={4}
           alignItems="center"
         >
-          <Image
-            src={token.image}
-            alt={token.name}
-            boxSize="94px"
-            borderRadius="2xl"
-            objectFit="cover"
-            border="2px solid"
-            borderColor="brand.light"
-            transition="transform 0.3s ease"
-            _groupHover={{
-              transform: "scale(1.05)",
-            }}
-          />
+          <Flex direction="column" alignItems="center">
+            <Image
+              src={token.image}
+              alt={token.name}
+              boxSize="80px"
+              borderRadius="2xl"
+              objectFit="cover"
+              border="2px solid"
+              borderColor="brand.light"
+              transition="transform 0.3s ease"
+              _groupHover={{
+                transform: "scale(1.05)",
+              }}
+            />
+            {/* 社交媒体图标移到这里 */}
+            {socialLinks.length > 0 && (
+              <HStack spacing={1} mt={2} justify="center">
+                {socialLinks.map((social, index) => (
+                  <Box
+                    key={`${social.platform}-${index}`}
+                    as="button"
+                    p={2}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    borderRadius="md"
+                    _hover={{ color: "brand.primary" }}
+                    _active={{ bg: "gray.50" }}
+                    transition="color 0.2s"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(social.link, "_blank");
+                    }}
+                    color={iconColor}
+                  >
+                    <Icon as={social.icon} boxSize="16px" />
+                  </Box>
+                ))}
+              </HStack>
+            )}
+          </Flex>
           <Flex flex={1} flexDirection="column" gap={0}>
             <Flex
               flexDirection="row"
@@ -390,23 +418,7 @@ export default function MintingTokenCard({
                 {token.name}
               </Text>
               
-              {/* 社交媒体图标，如果没有也保持高度一致 */}
-              <HStack spacing={2} ml={2} minH="24px">
-                {socialLinks.length > 0 && socialLinks.map((social, index) => (
-                  <Link 
-                    key={`${social.platform}-${index}`}
-                    href={social.link}
-                    isExternal
-                    onClick={(e) => e.stopPropagation()}
-                    color={iconColor}
-                    _hover={{ color: "brand.primary" }}
-                    transition="color 0.2s"
-                    p={1}
-                  >
-                    <Icon as={social.icon} boxSize="14px" />
-                  </Link>
-                ))}
-              </HStack>
+              {/* 社交媒体图标已移至logo下方 */}
             </Flex>
             
             <Grid mt={1} gap={0.5}>
@@ -505,7 +517,12 @@ export default function MintingTokenCard({
                 _hover={{ color: "brand.primary" }}
                 transition="color 0.2s"
                 ml={1}
-                display={{ base: "block", sm: "block" }}
+                p={2}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                borderRadius="md"
+                _active={{ bg: "gray.50" }}
               >
                 <Icon as={FaShareAlt} boxSize="16px" />
               </Box>

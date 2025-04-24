@@ -28,4 +28,19 @@ export default {
   'website': '웹사이트',
   'twitter': '트위터',
   'telegram': '텔레그램',
+  'description': '프로젝트 설명',
+  
+  // Deploy Page - Error and Success Messages
+  'error': '오류',
+  'pleaseCompleteForm': '모든 필수 필드를 완성해주세요',
+  'symbolAlreadyExists': '이 토큰 심볼은 이미 사용 중입니다',
+  'invalidSymbol': '유효하지 않은 토큰 심볼입니다. 다른 심볼을 사용해주세요',
+  'success': '성공',
+  'tokenCreated': '토큰이 성공적으로 생성되었습니다',
+  'createTokenFailed': '토큰 생성에 실패했습니다',
+  
+  // Deploy Page - Button States
+  'creating': '생성 중...',
+  'createToken': '토큰 배포',
+  'connectWallet': '지갑 연결',
 }; 

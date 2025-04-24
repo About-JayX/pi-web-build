@@ -11,6 +11,7 @@ export default {
   'symbolMaxLength': '符号最多10个字符',
   'enterSymbol': '输入代币符号',
   'checkingSymbol': '正在检查符号可用性',
+  'symbolValidSuccess': '此代币符号可用',
   
   // 部署页面 - 代币参数
   'tokenParameters': '代币参数',
@@ -34,6 +35,7 @@ export default {
   'error': '错误',
   'pleaseCompleteForm': '请完成所有必填项',
   'symbolAlreadyExists': '此代币符号已被使用',
+  'invalidSymbol': '非法代币符号，请使用其他符号',
   'success': '成功',
   'tokenCreated': '代币创建成功',
   'createTokenFailed': '代币创建失败',
