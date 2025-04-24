@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 import {
   Box,
@@ -34,30 +34,31 @@ import {
   useToast,
   Image,
   Grid,
-} from "@chakra-ui/react";
-import { FaUpload, FaChevronDown, FaChevronUp, FaEdit } from "react-icons/fa";
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { useNetwork } from "@/contexts/NetworkContext";
-import { useTranslation } from "react-i18next";
-import { useSolana } from "@/contexts/solanaProvider";
-import { TokenAPI } from "@/api/token";
-import type { CreateTokenParams } from "@/api/types";
-import WalletConnectModal from "@/components/WalletConnectModal";
-import ErrorModal from "@/components/ErrorModal";
-
+} from '@chakra-ui/react'
+import { FaUpload, FaChevronDown, FaChevronUp, FaEdit } from 'react-icons/fa'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useNetwork } from '@/contexts/NetworkContext'
+import { useTranslation } from 'react-i18next'
+import { useSolana } from '@/contexts/solanaProvider'
+import { TokenAPI } from '@/api/token'
+import type { CreateTokenParams } from '@/api/types'
+import WalletConnectModal from '@/components/WalletConnectModal'
+import ErrorModal from '@/components/ErrorModal'
+import BigNumber from 'bignumber.js'
+import { useRouter } from 'next/navigation'
 // 定义代币参数组件的属性接口
 interface TokenParametersSectionProps {
-  totalSupplyTabIndex: number;
-  setTotalSupplyTabIndex: (index: number) => void;
-  targetAmountTabIndex: number;
-  setTargetAmountTabIndex: (index: number) => void;
-  totalSupplyOptions: string[];
-  targetAmountOptionsMap: Record<string, string[]>;
-  labelColor: string;
+  totalSupplyTabIndex: number
+  setTotalSupplyTabIndex: (index: number) => void
+  targetAmountTabIndex: number
+  setTargetAmountTabIndex: (index: number) => void
+  totalSupplyOptions: string[]
+  targetAmountOptionsMap: Record<string, string[]>
+  labelColor: string
   onValuesChange?: (values: {
-    totalSupply: string;
-    targetAmount: string;
-  }) => void;
+    totalSupply: string
+    targetAmount: string
+  }) => void
 }
 
 // 代币参数响应式组件
@@ -71,83 +72,83 @@ const TokenParametersSection = ({
   labelColor,
   onValuesChange,
 }: TokenParametersSectionProps) => {
-  const isMobile = useBreakpointValue({ base: true, md: false });
+  const isMobile = useBreakpointValue({ base: true, md: false })
   const {
     isOpen: isModalOpen,
     onOpen: onModalOpen,
     onClose: onModalClose,
-  } = useDisclosure();
+  } = useDisclosure()
 
   const { isOpen: isTokenParamsOpen, onToggle: onTokenParamsToggle } =
-    useDisclosure();
+    useDisclosure()
 
-  const { t } = useTranslation();
+  const { t } = useTranslation()
 
   // 当选项改变时通知父组件
   const currentTotalSupply =
-    totalSupplyOptions[totalSupplyTabIndex] || totalSupplyOptions[0];
+    totalSupplyOptions[totalSupplyTabIndex] || totalSupplyOptions[0]
   const currentTargetAmountWithUnit =
     targetAmountOptionsMap[currentTotalSupply]?.[targetAmountTabIndex] ||
-    targetAmountOptionsMap[currentTotalSupply]?.[0];
+    targetAmountOptionsMap[currentTotalSupply]?.[0]
 
   // 安全地提取数字部分
   const currentTargetAmount = currentTargetAmountWithUnit
-    ? currentTargetAmountWithUnit.split(" ")[0]
-    : "0";
+    ? currentTargetAmountWithUnit.split(' ')[0]
+    : '0'
 
   useEffect(() => {
     if (onValuesChange) {
       onValuesChange({
         totalSupply: currentTotalSupply,
         targetAmount: currentTargetAmount,
-      });
+      })
     }
-  }, [currentTotalSupply, currentTargetAmount, onValuesChange]);
+  }, [currentTotalSupply, currentTargetAmount, onValuesChange])
 
   const handleParamsClick = () => {
     if (isMobile) {
-      onTokenParamsToggle();
+      onTokenParamsToggle()
     } else {
-      onModalOpen();
+      onModalOpen()
     }
-  };
+  }
 
   // 计算代币价格
   const getTokenPrice = (totalSupply: string, targetAmount: string) => {
-    if (!totalSupply || !targetAmount) return "0";
+    if (!totalSupply || !targetAmount) return '0'
 
-    const supply = parseFloat(totalSupply);
-    const amountParts = targetAmount.split(" ");
-    const amount = parseFloat(amountParts[0]);
+    const supply = parseFloat(totalSupply)
+    const amountParts = targetAmount.split(' ')
+    const amount = parseFloat(amountParts[0])
 
     if (isNaN(supply) || isNaN(amount) || amount === 0) {
-      return "0";
+      return '0'
     }
 
-    return (supply / 2 / amount).toLocaleString("en-US", {
+    return (supply / 2 / amount).toLocaleString('en-US', {
       maximumFractionDigits: 8,
-    });
-  };
+    })
+  }
 
   // 添加函数计算单个代币的价格
   const getSingleTokenPrice = (totalSupply: string, targetAmount: string) => {
-    if (!totalSupply || !targetAmount) return "0";
+    if (!totalSupply || !targetAmount) return '0'
 
-    const supply = parseFloat(totalSupply);
-    const amountParts = targetAmount.split(" ");
-    const amount = parseFloat(amountParts[0]);
-    const unit = amountParts[1] || "";
+    const supply = parseFloat(totalSupply)
+    const amountParts = targetAmount.split(' ')
+    const amount = parseFloat(amountParts[0])
+    const unit = amountParts[1] || ''
 
     if (isNaN(supply) || isNaN(amount) || amount === 0) {
-      return "0";
+      return '0'
     }
 
     // 单个代币价格 = 铸造金额 / (总量/2)
-    const singlePrice = amount / (supply / 2);
-    return `${singlePrice.toLocaleString("en-US", {
+    const singlePrice = amount / (supply / 2)
+    return `${singlePrice.toLocaleString('en-US', {
       maximumFractionDigits: 8,
-    })} ${unit}`;
-  };
+    })} ${unit}`
+  }
 
   return (
     <Box>
@@ -159,24 +160,24 @@ const TokenParametersSection = ({
         cursor="pointer"
         p={2}
         pl={0}
-        _hover={{ bg: "transparent" }}
+        _hover={{ bg: 'transparent' }}
         borderRadius="md"
       >
         <Heading size="sm" color={labelColor} fontWeight="semibold">
-          {t("tokenParameters")}
+          {t('tokenParameters')}
         </Heading>
         <Box display="flex">
           {/* PC版显示编辑按钮 */}
           {!isMobile ? (
             <IconButton
-              aria-label={t("settings")}
+              aria-label={t('settings')}
               icon={<FaEdit />}
               size="sm"
               variant="ghost"
               colorScheme="purple"
-              onClick={(e) => {
-                e.stopPropagation();
-                onModalOpen();
+              onClick={e => {
+                e.stopPropagation()
+                onModalOpen()
               }}
             />
           ) : (
@@ -199,7 +200,7 @@ const TokenParametersSection = ({
       >
         <Box>
           <Text fontSize="sm" color="gray.600" mb={1}>
-            {t("totalSupply")}
+            {t('totalSupply')}
           </Text>
           <Text fontWeight="bold" color={labelColor}>
             {totalSupplyOptions[totalSupplyTabIndex]}
@@ -207,7 +208,7 @@ const TokenParametersSection = ({
         </Box>
         <Box>
           <Text fontSize="sm" color="gray.600" mb={1}>
-            {t("mintingAmount")}
+            {t('mintingAmount')}
           </Text>
           <Text fontWeight="bold" color={labelColor}>
             {
@@ -219,10 +220,10 @@ const TokenParametersSection = ({
         </Box>
         <Box>
           <Text fontSize="sm" color="gray.600" mb={1}>
-            {t("exchangeRate")}
+            {t('exchangeRate')}
           </Text>
           <Text fontWeight="bold" color={labelColor}>
-            1 :{" "}
+            1 :{' '}
             {getTokenPrice(
               totalSupplyOptions[totalSupplyTabIndex],
               targetAmountOptionsMap[totalSupplyOptions[totalSupplyTabIndex]][
@@ -233,7 +234,7 @@ const TokenParametersSection = ({
         </Box>
         <Box>
           <Text fontSize="sm" color="gray.600" mb={1}>
-            {t("tokenPrice")}
+            {t('tokenPrice')}
           </Text>
           <Text fontWeight="bold" color={labelColor}>
             {getSingleTokenPrice(
@@ -249,7 +250,7 @@ const TokenParametersSection = ({
       {/* 移动端折叠区域参数设置 */}
       {isMobile && (
         <Box
-          display={isTokenParamsOpen ? "block" : "none"}
+          display={isTokenParamsOpen ? 'block' : 'none'}
           mt={4}
           pl={0}
           bg="gray.50"
@@ -259,7 +260,7 @@ const TokenParametersSection = ({
           <VStack spacing={5} align="stretch">
             <FormControl>
               <FormLabel color={labelColor} fontSize="sm" fontWeight="semibold">
-                {t("totalSupply")}
+                {t('totalSupply')}
               </FormLabel>
               <Tabs
                 variant="soft-rounded"
@@ -272,7 +273,7 @@ const TokenParametersSection = ({
                   {totalSupplyOptions.map((option, index) => (
                     <Tab
                       key={index}
-                      _selected={{ color: "white", bg: "brand.primary" }}
+                      _selected={{ color: 'white', bg: 'brand.primary' }}
                       fontWeight="semibold"
                     >
                       {option}
@@ -286,7 +287,7 @@ const TokenParametersSection = ({
 
             <FormControl>
               <FormLabel color={labelColor} fontSize="sm" fontWeight="semibold">
-                {t("mintingAmount")}
+                {t('mintingAmount')}
               </FormLabel>
 
               <Tabs
@@ -307,7 +308,7 @@ const TokenParametersSection = ({
                   ].map((option, index) => (
                     <Tab
                       key={index}
-                      _selected={{ color: "white", bg: "brand.primary" }}
+                      _selected={{ color: 'white', bg: 'brand.primary' }}
                       mx={1}
                     >
                       {option}
@@ -324,7 +325,7 @@ const TokenParametersSection = ({
               width="100%"
               onClick={onTokenParamsToggle}
             >
-              {t("confirm")}
+              {t('confirm')}
             </Button>
           </VStack>
         </Box>
@@ -335,12 +336,12 @@ const TokenParametersSection = ({
         <Modal
           isOpen={isModalOpen}
           onClose={onModalClose}
-          size={{ base: "full", md: "lg" }}
+          size={{ base: 'full', md: 'lg' }}
           isCentered
         >
           <ModalOverlay />
-          <ModalContent borderRadius={{ base: 0, md: "md" }}>
-            <ModalHeader >{t("settings")}</ModalHeader>
+          <ModalContent borderRadius={{ base: 0, md: 'md' }}>
+            <ModalHeader>{t('settings')}</ModalHeader>
             <ModalCloseButton />
             <ModalBody px={{ base: 4, md: 6 }} py={{ base: 5, md: 6 }}>
               <VStack spacing={5} align="stretch">
@@ -350,7 +351,7 @@ const TokenParametersSection = ({
                     fontSize="sm"
                     fontWeight="semibold"
                   >
-                    {t("totalSupply")}
+                    {t('totalSupply')}
                   </FormLabel>
                   <Tabs
                     variant="soft-rounded"
@@ -359,14 +360,13 @@ const TokenParametersSection = ({
                     onChange={setTotalSupplyTabIndex}
                     isFitted
                   >
-                    <TabList bg="gray.50" p={1} borderRadius="lg" >
+                    <TabList bg="gray.50" p={1} borderRadius="lg">
                       {totalSupplyOptions.map((option, index) => (
                         <Tab
                           key={index}
                           rounded="md"
-                          _selected={{ color: "white", bg: "brand.primary" }}
+                          _selected={{ color: 'white', bg: 'brand.primary' }}
                           fontWeight="semibold"
-                          
                         >
                           {option}
                         </Tab>
@@ -383,7 +383,7 @@ const TokenParametersSection = ({
                     fontSize="sm"
                     fontWeight="semibold"
                   >
-                    {t("mintingAmount")}
+                    {t('mintingAmount')}
                   </FormLabel>
 
                   <Tabs
@@ -405,7 +405,7 @@ const TokenParametersSection = ({
                         <Tab
                           key={index}
                           rounded="md"
-                          _selected={{ color: "white", bg: "brand.primary" }}
+                          _selected={{ color: 'white', bg: 'brand.primary' }}
                         >
                           {option}
                         </Tab>
@@ -422,34 +422,36 @@ const TokenParametersSection = ({
                 onClick={onModalClose}
                 bg="brand.primary"
                 color="white"
-                size={{ base: "lg", md: "md" }}
-                width={{ base: "full", md: "auto" }}
-                _hover={{ bg: "brand.primary" }}
-                _active={{ bg: "brand.primary" }}
+                size={{ base: 'lg', md: 'md' }}
+                width={{ base: 'full', md: 'auto' }}
+                _hover={{ bg: 'brand.primary' }}
+                _active={{ bg: 'brand.primary' }}
               >
-                {t("confirm")}
+                {t('confirm')}
               </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
       )}
     </Box>
-  );
-};
+  )
+}
 
 // 社媒链接组件属性接口
 interface SocialLinksSectionProps {
-  isSocialOpen: boolean;
-  onSocialToggle: () => void;
-  labelColor: string;
-  inputBg: string;
-  borderColor: string;
-  onWebsiteChange?: (value: string) => void;
-  onTwitterChange?: (value: string) => void;
-  onTelegramChange?: (value: string) => void;
-  website?: string;
-  twitter?: string;
-  telegram?: string;
+  isSocialOpen: boolean
+  onSocialToggle: () => void
+  labelColor: string
+  inputBg: string
+  borderColor: string
+  onWebsiteChange?: (value: string) => void
+  onTwitterChange?: (value: string) => void
+  onTelegramChange?: (value: string) => void
+  onDescriptionChange?: (value: string) => void
+  website?: string
+  twitter?: string
+  telegram?: string
+  description?: string
 }
 
 // 社媒链接响应式组件
@@ -462,11 +464,13 @@ const SocialLinksSection = ({
   onWebsiteChange,
   onTwitterChange,
   onTelegramChange,
-  website = "",
-  twitter = "",
-  telegram = "",
+  onDescriptionChange,
+  website = '',
+  twitter = '',
+  telegram = '',
+  description = '',
 }: SocialLinksSectionProps) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
 
   return (
     <Box>
@@ -477,11 +481,11 @@ const SocialLinksSection = ({
         cursor="pointer"
         p={2}
         pl={0}
-        _hover={{ bg: "transparent" }}
+        _hover={{ bg: 'transparent' }}
         borderRadius="md"
       >
         <Heading size="sm" color={labelColor} fontWeight="semibold">
-          {t("socialLinks")}
+          {t('socialLinks')}
         </Heading>
         <Icon
           as={isSocialOpen ? FaChevronUp : FaChevronDown}
@@ -490,109 +494,125 @@ const SocialLinksSection = ({
       </Flex>
 
       <Box
-        display={isSocialOpen ? "block" : "none"}
+        display={isSocialOpen ? 'block' : 'none'}
         mt={4}
         pl={{ base: 0, md: 2 }}
       >
         <FormControl mb={4}>
           <FormLabel color="gray.600" fontSize="sm">
-            {t("website")}
+            {t('description')}
           </FormLabel>
           <Input
-            value={website}
-            onChange={(e) => onWebsiteChange?.(e.target.value)}
+            value={description}
+            onChange={e => onDescriptionChange?.(e.target.value)}
             placeholder=""
             bg={inputBg}
             borderColor={borderColor}
-            _placeholder={{ color: "gray.400" }}
+            _placeholder={{ color: 'gray.400' }}
             size="md"
           />
         </FormControl>
 
         <FormControl mb={4}>
           <FormLabel color="gray.600" fontSize="sm">
-            {t("twitter")}
+            {t('website')}
           </FormLabel>
           <Input
-            value={twitter}
-            onChange={(e) => onTwitterChange?.(e.target.value)}
+            value={website}
+            onChange={e => onWebsiteChange?.(e.target.value)}
             placeholder=""
             bg={inputBg}
             borderColor={borderColor}
-            _placeholder={{ color: "gray.400" }}
+            _placeholder={{ color: 'gray.400' }}
+            size="md"
+          />
+        </FormControl>
+
+        <FormControl mb={4}>
+          <FormLabel color="gray.600" fontSize="sm">
+            {t('twitter')}
+          </FormLabel>
+          <Input
+            value={twitter}
+            onChange={e => onTwitterChange?.(e.target.value)}
+            placeholder=""
+            bg={inputBg}
+            borderColor={borderColor}
+            _placeholder={{ color: 'gray.400' }}
             size="md"
           />
         </FormControl>
 
         <FormControl>
           <FormLabel color="gray.600" fontSize="sm">
-            {t("telegram")}
+            {t('telegram')}
           </FormLabel>
           <Input
             value={telegram}
-            onChange={(e) => onTelegramChange?.(e.target.value)}
+            onChange={e => onTelegramChange?.(e.target.value)}
             placeholder=""
             bg={inputBg}
             borderColor={borderColor}
-            _placeholder={{ color: "gray.400" }}
+            _placeholder={{ color: 'gray.400' }}
             size="md"
           />
         </FormControl>
       </Box>
     </Box>
-  );
-};
+  )
+}
 
 export default function DeployPage() {
-  const { publicKey, setPublicKey, isConnecting } = useSolana();
-  const { network } = useNetwork();
-  const { t } = useTranslation();
-  const toast = useToast();
+  const router = useRouter()
+  const { publicKey, setPublicKey, isConnecting } = useSolana()
+  const { network } = useNetwork()
+  const { t } = useTranslation()
+  const toast = useToast()
 
   // Theme colors
-  const cardBg = useColorModeValue("white", "gray.800");
-  const inputBg = useColorModeValue("gray.50", "whiteAlpha.100");
-  const textColor = useColorModeValue("gray.700", "gray.200");
-  const borderColor = useColorModeValue("gray.200", "gray.600");
-  const labelColor = useColorModeValue("brand.primary", "brand.light");
+  const cardBg = useColorModeValue('white', 'gray.800')
+  const inputBg = useColorModeValue('gray.50', 'whiteAlpha.100')
+  const textColor = useColorModeValue('gray.700', 'gray.200')
+  const borderColor = useColorModeValue('gray.200', 'gray.600')
+  const labelColor = useColorModeValue('brand.primary', 'brand.light')
 
   // 组件状态
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [tokenIcon, setTokenIcon] = useState<File | null>(null);
-  const [totalSupplyTabIndex, setTotalSupplyTabIndex] = useState(0);
-  const [targetAmountTabIndex, setTargetAmountTabIndex] = useState(0);
-  const [tokenSymbol, setTokenSymbol] = useState("");
-  const [tokenName, setTokenName] = useState("");
-  const [isCheckingSymbol, setIsCheckingSymbol] = useState(false);
-  const [isSymbolValid, setIsSymbolValid] = useState<boolean | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [tokenIcon, setTokenIcon] = useState<File | null>(null)
+  const [totalSupplyTabIndex, setTotalSupplyTabIndex] = useState(0)
+  const [targetAmountTabIndex, setTargetAmountTabIndex] = useState(0)
+  const [tokenSymbol, setTokenSymbol] = useState('')
+  const [tokenName, setTokenName] = useState('')
+  const [isCheckingSymbol, setIsCheckingSymbol] = useState(false)
+  const [isSymbolValid, setIsSymbolValid] = useState<boolean | null>(null)
 
   // 折叠面板状态
-  const { isOpen: isSocialOpen, onToggle: onSocialToggle } = useDisclosure();
+  const { isOpen: isSocialOpen, onToggle: onSocialToggle } = useDisclosure()
 
   // 添加钱包连接弹窗状态
   const {
     isOpen: isWalletModalOpen,
     onOpen: onWalletModalOpen,
     onClose: onWalletModalClose,
-  } = useDisclosure();
+  } = useDisclosure()
 
   // 定义当前网络的计价单位
   const currencyUnit = useMemo(() => {
-    return network === "SOL" ? "SOL" : "PI";
-  }, [network]);
+    return network === 'SOL' ? 'SOL' : 'PI'
+  }, [network])
 
   // 定义代币发行总量选项
-  const totalSupplyOptions = ["314000000", "1000000000"];
+  const totalSupplyOptions = ['314000000', '1000000000']
 
   // 定义目标铸造金额选项映射（带单位的值）
   const targetAmountOptionsMap = useMemo(
     () => ({
-      "314000000": [
+      '314000000': [
         `314 ${currencyUnit}`,
         `157 ${currencyUnit}`,
         `78.5 ${currencyUnit}`,
       ],
-      "1000000000": [
+      '1000000000': [
         `100 ${currencyUnit}`,
         `200 ${currencyUnit}`,
         `250 ${currencyUnit}`,
@@ -601,83 +621,83 @@ export default function DeployPage() {
       ],
     }),
     [currencyUnit]
-  );
+  )
 
   // 当前选中的值
   const [selectedValues, setSelectedValues] = useState<{
-    totalSupply: string;
-    targetAmount: string;
+    totalSupply: string
+    targetAmount: string
   }>({
     totalSupply: totalSupplyOptions[0],
-    targetAmount: "314", // 初始值不带单位
-  });
+    targetAmount: '314', // 初始值不带单位
+  })
 
   const handleValuesChange = useCallback(
     (values: { totalSupply: string; targetAmount: string }) => {
-      setSelectedValues(values);
+      setSelectedValues(values)
     },
     []
-  );
+  )
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
+      const file = e.target.files[0]
 
       // 检查文件大小，限制为 2MB
-      const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+      const maxSizeInBytes = 2 * 1024 * 1024 // 2MB
 
       if (file.size > maxSizeInBytes) {
         toast({
-          title: t("error"),
-          description: t("imageTooLarge"),
-          status: "error",
+          title: t('error'),
+          description: t('imageTooLarge'),
+          status: 'error',
           duration: 3000,
           isClosable: true,
-          position: "top",
-        });
-        return;
+          position: 'top',
+        })
+        return
       }
 
-      setTokenIcon(file);
+      setTokenIcon(file)
     }
-  };
+  }
 
   // 检查代币符号
   const checkTokenSymbol = useCallback(
     async (symbol: string) => {
       if (!symbol) {
-        setIsSymbolValid(null);
-        return;
+        setIsSymbolValid(null)
+        return
       }
 
       try {
-        setIsCheckingSymbol(true);
-        const response = await TokenAPI.checkSymbol(symbol);
+        setIsCheckingSymbol(true)
+        const response = await TokenAPI.checkSymbol(symbol)
         // 如果 exists 为 true 表示已注册，则不可用
-        setIsSymbolValid(!response.exists);
+        setIsSymbolValid(!response.exists)
 
         if (response.exists) {
           toast({
-            title: t("error"),
-            description: t("symbolAlreadyExists"),
-            status: "error",
+            title: t('error'),
+            description: t('symbolAlreadyExists'),
+            status: 'error',
             duration: 3000,
             isClosable: true,
-            position: "top",
-          });
+            position: 'top',
+          })
         }
       } catch (error) {
-        console.error("Failed to check token symbol:", error);
-        setIsSymbolValid(null);
+        console.error('Failed to check token symbol:', error)
+        setIsSymbolValid(null)
       } finally {
-        setIsCheckingSymbol(false);
+        setIsCheckingSymbol(false)
       }
     },
     [toast, t]
-  );
+  )
 
   // 使用 useRef 来存储定时器
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   // 处理代币符号输入
   const handleSymbolChange = useCallback(
@@ -686,161 +706,177 @@ export default function DeployPage() {
       // 2. 过滤掉中文字符，只保留英文字母、数字和特殊符号
       // 使用正则表达式匹配非中文字符
       const value = e.target.value
-        .replace(/\s/g, "")
-        .replace(/[\u4e00-\u9fa5]/g, "");
+        .replace(/\s/g, '')
+        .replace(/[\u4e00-\u9fa5]/g, '')
 
       // 限制最大长度为10个字符
-      const truncatedValue = value.slice(0, 10);
+      const truncatedValue = value.slice(0, 10)
 
       // 只在值不同时更新状态，避免不必要的重新渲染
       if (truncatedValue !== tokenSymbol) {
-        setTokenSymbol(truncatedValue);
+        setTokenSymbol(truncatedValue)
 
         // 清除之前的定时器
         if (timerRef.current) {
-          clearTimeout(timerRef.current);
+          clearTimeout(timerRef.current)
         }
 
         // 设置新的定时器，1500ms 后检查
         timerRef.current = setTimeout(() => {
-          checkTokenSymbol(truncatedValue);
-        }, 1500);
+          checkTokenSymbol(truncatedValue)
+        }, 1500)
       }
     },
     [checkTokenSymbol, tokenSymbol]
-  );
+  )
 
   // 组件卸载时清除定时器
   useEffect(() => {
     return () => {
       if (timerRef.current) {
-        clearTimeout(timerRef.current);
+        clearTimeout(timerRef.current)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   // 处理连接按钮点击事件
   const handleConnectButtonClick = () => {
     // 打开钱包选择弹窗
-    onWalletModalOpen();
-  };
+    onWalletModalOpen()
+  }
 
   // 处理钱包连接成功
   const handleWalletConnected = (newPublicKey: string) => {
     // 设置公钥
-    setPublicKey(newPublicKey);
-  };
+    setPublicKey(newPublicKey)
+  }
 
   const [error, setError] = useState<{ message: string; details: any } | null>(
     null
-  );
+  )
   const {
     isOpen: isErrorModalOpen,
     onOpen: onErrorModalOpen,
     onClose: onErrorModalClose,
-  } = useDisclosure();
+  } = useDisclosure()
 
   const handleCreateToken = async () => {
     // 如果未连接钱包，则打开钱包连接弹窗
     if (!publicKey) {
-      handleConnectButtonClick();
-      return;
+      handleConnectButtonClick()
+      return
     }
 
     if (!tokenIcon || !tokenName || !tokenSymbol) {
       toast({
-        title: t("error"),
-        description: t("pleaseCompleteForm"),
-        status: "error",
+        title: t('error'),
+        description: t('pleaseCompleteForm'),
+        status: 'error',
         duration: 3000,
         isClosable: true,
-        position: "top",
-      });
-      return;
+        position: 'top',
+      })
+      return
     }
 
     // 检查代币符号是否可用
     if (!isSymbolValid) {
       toast({
-        title: t("error"),
-        description: t("symbolAlreadyExists"),
-        status: "error",
+        title: t('error'),
+        description: t('symbolAlreadyExists'),
+        status: 'error',
         duration: 3000,
         isClosable: true,
-        position: "top",
-      });
-      return;
+        position: 'top',
+      })
+      return
     }
 
     try {
-      setIsSubmitting(true);
+      setIsSubmitting(true)
 
       const params: CreateTokenParams = {
-        name: tokenName,
-        symbol: tokenSymbol,
         file: tokenIcon,
-        init_liquidity: Number(selectedValues.targetAmount),
-        total_supply: selectedValues.totalSupply,
-        description: "测试",
-      };
+        Metadata: {
+          name: tokenName,
+          symbol: tokenSymbol,
+          description,
+          init_liquidity: new BigNumber(selectedValues.targetAmount)
+            .times(1e9)
+            .toNumber(),
+          total_supply: new BigNumber(selectedValues.totalSupply)
+            .times(1e6)
+            .toNumber(),
+          socials: [
+            ...(telegram ? [{ platform: 'telegram', url: telegram }] : []),
+            ...(twitter ? [{ platform: 'twitter', url: twitter }] : []),
+            ...(website ? [{ platform: 'website', url: website }] : []),
+          ],
+        },
+      }
 
-      const result = await TokenAPI.createToken(params);
-      console.log("Token created successfully:", result);
+      console.log(params, 'params_')
+
+      const { mint } = (await TokenAPI.createToken(params)) as any
 
       toast({
-        title: t("success"),
-        description: t("tokenCreated"),
-        status: "success",
+        title: t('success'),
+        description: t('tokenCreated'),
+        status: 'success',
         duration: 3000,
         isClosable: true,
-        position: "top",
-      });
+        position: 'top',
+      })
+      setTimeout(() => {
+        router.push(`/sol/${mint}`)
+      }, 1000)
     } catch (error: any) {
-      console.error("Token creation failed:", error);
+      console.error('Token creation failed:', error)
 
       // 存储错误信息并打开错误弹窗
-      let errorMessage = t("createTokenFailed");
+      let errorMessage = t('createTokenFailed')
 
       // 处理特定类型的错误
       if (error.response && error.response.status === 413) {
-        errorMessage = t("imageTooLarge");
+        errorMessage = t('imageTooLarge')
       } else if (error.response && error.response.status === 500) {
-        errorMessage = t("serverError");
+        errorMessage = t('serverError')
       } else if (error instanceof Error) {
-        errorMessage = error.message || errorMessage;
-      } else if (typeof error === "string") {
-        errorMessage = error;
+        errorMessage = error.message || errorMessage
+      } else if (typeof error === 'string') {
+        errorMessage = error
       }
 
       // 设置错误详情
       setError({
         message: errorMessage,
         details: error,
-      });
+      })
 
       // 显示标准的toast提示
       toast({
-        title: t("error"),
+        title: t('error'),
         description: errorMessage,
-        status: "error",
+        status: 'error',
         duration: 3000,
         isClosable: true,
-        position: "top",
-      });
+        position: 'top',
+      })
 
       // 在开发环境中打开详细错误弹窗
-      if (process.env.NODE_ENV === "development") {
-        onErrorModalOpen();
+      if (process.env.NODE_ENV === 'development') {
+        onErrorModalOpen()
       }
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   // 社交媒体链接状态
-  const [website, setWebsite] = useState("");
-  const [twitter, setTwitter] = useState("");
-  const [telegram, setTelegram] = useState("");
+  const [website, setWebsite] = useState('')
+  const [twitter, setTwitter] = useState('')
+  const [telegram, setTelegram] = useState('')
+  const [description, setDescription] = useState('')
 
   // 监听部署代币所需的所有参数
   useEffect(() => {
@@ -848,6 +884,7 @@ export default function DeployPage() {
       // 基本信息
       name: tokenName,
       symbol: tokenSymbol,
+      description,
       file: tokenIcon
         ? {
             name: tokenIcon.name,
@@ -869,25 +906,25 @@ export default function DeployPage() {
       network,
       currencyUnit,
       publicKey: publicKey?.toString() || null,
-    };
+    }
 
-    console.log("Token creation parameters:", params);
+    console.log('Token creation parameters:', params)
 
     // 验证必填参数
     const requiredFields = {
-      name: "Token Name",
-      symbol: "Token Symbol",
-      file: "Token Icon",
-      total_supply: "Total Supply",
-      init_liquidity: "Minting Amount",
-    };
+      name: 'Token Name',
+      symbol: 'Token Symbol',
+      file: 'Token Icon',
+      total_supply: 'Total Supply',
+      init_liquidity: 'Minting Amount',
+    }
 
     const missingFields = Object.entries(requiredFields)
       .filter(([fieldName]) => !params[fieldName])
-      .map(([, label]) => label);
+      .map(([, label]) => label)
 
     if (missingFields.length > 0) {
-      console.warn("Missing required fields:", missingFields.join(", "));
+      console.warn('Missing required fields:', missingFields.join(', '))
     }
   }, [
     tokenName,
@@ -900,14 +937,14 @@ export default function DeployPage() {
     network,
     currencyUnit,
     publicKey,
-  ]);
+  ])
 
   return (
     <Box color={textColor}>
-      <Box bg={useColorModeValue("brand.50", "gray.800")} py={8} mb={6}>
-        <Container maxW={"container.xl"} textAlign="center">
+      <Box bg={useColorModeValue('brand.50', 'gray.800')} py={8} mb={6}>
+        <Container maxW={'container.xl'} textAlign="center">
           <Heading as="h1" size="xl" mb={4} color="brand.primary">
-            {t("deployTitle")}
+            {t('deployTitle')}
           </Heading>
         </Container>
       </Box>
@@ -936,11 +973,11 @@ export default function DeployPage() {
                 ></SimpleGrid>
                 <Flex
                   gap={{ base: 4, md: 6 }}
-                  flexDirection={{ base: "column-reverse", md: "row" }}
+                  flexDirection={{ base: 'column-reverse', md: 'row' }}
                 >
                   <FormControl flex={0} isRequired>
                     <FormLabel color={labelColor} fontWeight="semibold">
-                      {t("tokenIcon")}
+                      {t('tokenIcon')}
                     </FormLabel>
                     <Box
                       as="label"
@@ -952,15 +989,15 @@ export default function DeployPage() {
                       p={4}
                       textAlign="center"
                       bg={inputBg}
-                      width={{ base: "200px", sm: "200px" }}
-                      height={{ base: "200px", sm: "200px" }}
+                      width={{ base: '200px', sm: '200px' }}
+                      height={{ base: '200px', sm: '200px' }}
                       display="flex"
                       flexDirection="column"
                       justifyContent="center"
                       alignItems="center"
                       cursor="pointer"
                       transition="all 0.2s"
-                      _hover={{ bg: "gray.100", borderColor: "brand.primary" }}
+                      _hover={{ bg: 'gray.100', borderColor: 'brand.primary' }}
                       mx="0"
                       position="relative"
                     >
@@ -987,16 +1024,16 @@ export default function DeployPage() {
                             color="brand.primary"
                           />
                           <Text fontSize="sm" color="gray.500">
-                            {t("uploadIcon")}
+                            {t('uploadIcon')}
                             <br />
                             <span
                               dangerouslySetInnerHTML={{
-                                __html: t("iconRequirements"),
+                                __html: t('iconRequirements'),
                               }}
                             />
                             <br />
-                            <span style={{ color: "red.400" }}>
-                              {t("fileSizeLimit")}
+                            <span style={{ color: 'red.400' }}>
+                              {t('fileSizeLimit')}
                             </span>
                           </Text>
                         </>
@@ -1006,21 +1043,21 @@ export default function DeployPage() {
                   <Grid flex={1} h="fit-content" gap={{ base: 4, md: 6 }}>
                     <FormControl isRequired>
                       <FormLabel color={labelColor} fontWeight="semibold">
-                        {t("tokenSymbol")}
+                        {t('tokenSymbol')}
                       </FormLabel>
                       <Input
                         value={tokenSymbol}
                         onChange={handleSymbolChange}
-                        placeholder={t("enterSymbol")}
+                        placeholder={t('enterSymbol')}
                         bg={inputBg}
                         borderColor={
                           isSymbolValid === false
-                            ? "red.500"
+                            ? 'red.500'
                             : isSymbolValid === true
-                            ? "green.500"
+                            ? 'green.500'
                             : borderColor
                         }
-                        _placeholder={{ color: "gray.400" }}
+                        _placeholder={{ color: 'gray.400' }}
                         size="md"
                         isInvalid={isSymbolValid === false}
                         disabled={isCheckingSymbol}
@@ -1030,32 +1067,32 @@ export default function DeployPage() {
                       />
                       {tokenSymbol && tokenSymbol.length >= 10 && (
                         <Text fontSize="sm" color="orange.500" mt={1}>
-                          {t("symbolMaxLength")}
+                          {t('symbolMaxLength')}
                         </Text>
                       )}
                       {isCheckingSymbol && (
                         <Text fontSize="sm" color="gray.500" mt={1}>
-                          {t("checkingSymbol")}...
+                          {t('checkingSymbol')}...
                         </Text>
                       )}
                       {isSymbolValid === false && (
                         <Text fontSize="sm" color="red.500" mt={1}>
-                          {t("symbolAlreadyExists")}
+                          {t('symbolAlreadyExists')}
                         </Text>
                       )}
                     </FormControl>
 
                     <FormControl isRequired>
                       <FormLabel color={labelColor} fontWeight="semibold">
-                        {t("tokenName")}
+                        {t('tokenName')}
                       </FormLabel>
                       <Input
                         value={tokenName}
-                        onChange={(e) => setTokenName(e.target.value)}
+                        onChange={e => setTokenName(e.target.value)}
                         placeholder=""
                         bg={inputBg}
                         borderColor={borderColor}
-                        _placeholder={{ color: "gray.400" }}
+                        _placeholder={{ color: 'gray.400' }}
                         size="md"
                       />
                     </FormControl>
@@ -1084,33 +1121,31 @@ export default function DeployPage() {
                   website={website}
                   twitter={twitter}
                   telegram={telegram}
+                  description={description}
                   onWebsiteChange={setWebsite}
                   onTwitterChange={setTwitter}
                   onTelegramChange={setTelegram}
+                  onDescriptionChange={setDescription}
                 />
               </VStack>
             </Box>
           </CardBody>
 
-          <CardFooter
-            pt={0}
-            p={4}
-            px={{ base: 3, md: 5 }}
-          >
+          <CardFooter pt={0} p={4} px={5}>
             <Button
               onClick={handleCreateToken}
               colorScheme="purple"
               bg="brand.primary"
               color="white"
-              _hover={{ bg: "brand.light" }}
-              size={{ base: "lg", md: "lg" }}
-              height={{ base: "54px", md: "48px" }}
-              fontSize={{ base: "md", md: "md" }}
+              _hover={{ bg: 'brand.light' }}
+              size={{ base: 'lg', md: 'lg' }}
+              height={{ base: '54px', md: '48px' }}
+              fontSize={{ base: 'md', md: 'md' }}
               width="full"
               isLoading={isSubmitting || isConnecting}
-              loadingText={publicKey ? t("creating") : t("connecting")}
+              loadingText={publicKey ? t('creating') : t('connecting')}
             >
-              {publicKey ? t("createToken") : t("connectWallet")}
+              {publicKey ? t('createToken') : t('connectWallet')}
             </Button>
           </CardFooter>
         </Card>
@@ -1127,9 +1162,9 @@ export default function DeployPage() {
       <ErrorModal
         isOpen={isErrorModalOpen}
         onClose={onErrorModalClose}
-        errorMessage={error?.message || t("createTokenFailed")}
+        errorMessage={error?.message || t('createTokenFailed')}
         errorDetails={error?.details}
       />
     </Box>
-  );
+  )
 }

@@ -76,7 +76,7 @@ interface TokenListParams {
   limit: number
   category?: string
   order: string
-  order_by: string
+  sort_by: string
 }
 
 export default function MintPage() {
@@ -159,7 +159,7 @@ export default function MintPage() {
         page: currentPage,
         limit: pageSize,
         order: sortDirection.toUpperCase(),
-        order_by: sortColumn,
+        sort_by: sortColumn,
         ...(category && { category }),
       }
 
@@ -264,7 +264,7 @@ export default function MintPage() {
       page: currentPage,
       limit: pageSize,
       order: sortDirection.toUpperCase(),
-      order_by: sortColumn,
+      sort_by: sortColumn,
       ...(category && { category }),
     }
 
@@ -364,7 +364,7 @@ export default function MintPage() {
       page: 1, // 始终从第一页开始
       limit: pageSize,
       order: sortDirection.toUpperCase(),
-      order_by: sortColumn,
+      sort_by: sortColumn,
       ...(category && { category }),
     }
 
@@ -471,7 +471,7 @@ export default function MintPage() {
         page: 1,
         limit: pageSize,
         order: sortDirection.toUpperCase(),
-        order_by: sortColumn,
+        sort_by: sortColumn,
         ...(category && { category }),
       }
 
