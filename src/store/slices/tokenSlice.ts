@@ -12,7 +12,9 @@ import {
 interface TokenParams {
   page: number
   limit: number
-  sort: string
+  category?: string
+  order: string
+  order_by: string
 }
 
 interface TokenResponse {

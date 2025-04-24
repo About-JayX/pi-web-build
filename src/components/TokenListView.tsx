@@ -16,22 +16,22 @@ import {
   useToast,
   Progress,
   Button,
-} from "@chakra-ui/react";
-import { FaSort, FaFileContract, FaShareAlt, FaUser } from "react-icons/fa";
-import { ChevronUpIcon, ChevronDownIcon } from "@chakra-ui/icons";
-import { useTranslation } from "react-i18next";
-import { useRouter } from "next/navigation";
-import { formatTokenAmount } from "@/utils";
-import { useCallback } from "react";
-import { useMintingCalculations } from "@/hooks/useMintingCalculations";
-import { MintToken } from "@/api/types";
-import { useNetwork } from "@/contexts/NetworkContext";
+} from '@chakra-ui/react'
+import { FaSort, FaFileContract, FaShareAlt, FaUser } from 'react-icons/fa'
+import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons'
+import { useTranslation } from 'react-i18next'
+import { useRouter } from 'next/navigation'
+import { formatTokenAmount } from '@/utils'
+import { useCallback } from 'react'
+import { useMintingCalculations } from '@/hooks/useMintingCalculations'
+import { MintToken } from '@/api/types'
+import { useNetwork } from '@/contexts/NetworkContext'
 interface TokenListViewProps {
-  tokens: MintToken[];
-  sortColumn: string;
-  sortDirection: "asc" | "desc";
-  onSort: (column: string) => void;
-  currencyUnit: string;
+  tokens: MintToken[]
+  sortColumn: string
+  sortDirection: 'ASC' | 'DESC'
+  onSort: (column: string) => void
+  currencyUnit: string
 }
 
 // 排序指示器组件
@@ -40,25 +40,25 @@ function SortIndicator({
   sortColumn,
   sortDirection,
 }: {
-  column: string;
-  sortColumn: string;
-  sortDirection: "asc" | "desc";
+  column: string
+  sortColumn: string
+  sortDirection: 'ASC' | 'DESC'
 }) {
   if (sortColumn !== column) {
     return (
       <Box as="span" ml={1} color="gray.400" opacity={0.6}>
         <Icon as={FaSort} fontSize="xs" />
       </Box>
-    );
+    )
   }
   return (
     <Box as="span" ml={1} color="brand.primary">
       <Icon
-        as={sortDirection === "asc" ? ChevronUpIcon : ChevronDownIcon}
+        as={sortDirection === 'ASC' ? ChevronUpIcon : ChevronDownIcon}
         fontSize="sm"
       />
     </Box>
-  );
+  )
 }
 
 const TokenListView = ({
@@ -68,24 +68,24 @@ const TokenListView = ({
   onSort,
   currencyUnit,
 }: TokenListViewProps) => {
-  const router = useRouter();
-  const bg = useColorModeValue("white", "gray.800");
-  const hoverBg = useColorModeValue("gray.50", "gray.700");
-  const thBg = useColorModeValue("gray.50", "gray.700");
-  const thHoverBg = useColorModeValue("gray.100", "gray.600");
-  const iconColor = useColorModeValue("gray.600", "gray.400");
-  const iconHoverColor = useColorModeValue("brand.primary", "brand.light");
-  const toast = useToast();
-  const { t } = useTranslation();
-  const { network } = useNetwork();
+  const router = useRouter()
+  const bg = useColorModeValue('white', 'gray.800')
+  const hoverBg = useColorModeValue('gray.50', 'gray.700')
+  const thBg = useColorModeValue('gray.50', 'gray.700')
+  const thHoverBg = useColorModeValue('gray.100', 'gray.600')
+  const iconColor = useColorModeValue('gray.600', 'gray.400')
+  const iconHoverColor = useColorModeValue('brand.primary', 'brand.light')
+  const toast = useToast()
+  const { t } = useTranslation()
+  const { network } = useNetwork()
 
   // 将hook移到组件顶层，只初始化一次
   const { getFormattedMintRate } = useMintingCalculations({
-    totalSupply: "", // 这里不提供具体值，只是初始化hook
-    target: "",
+    totalSupply: '', // 这里不提供具体值，只是初始化hook
+    target: '',
     currencyUnit,
     tokenDecimals: 6,
-  });
+  })
 
   // 修改格式化铸造比率函数，不在内部调用Hook
   const formatMintRateForToken = useCallback(
@@ -97,26 +97,26 @@ const TokenListView = ({
         target: token.target,
         currencyUnit,
         tokenDecimals: token.tokenDecimal || 6,
-      });
+      })
 
       // 移除数字中的千分号（逗号）
-      return rate ? rate.replace(/,/g, "") : rate;
+      return rate ? rate.replace(/,/g, '') : rate
     },
     [getFormattedMintRate, currencyUnit]
-  );
+  )
 
   // 跳转到代币铸造页面
   const navigateToMintPage = (contractAddress: string) => {
-    router.push(`/${network.toLowerCase()}/${contractAddress}`);
-  };
+    router.push(`/${network.toLowerCase()}/${contractAddress}`)
+  }
 
   // 缩略显示合约地址
   const formatContractAddress = (address: string) => {
-    if (!address) return "";
-    const start = address.substring(0, 4);
-    const end = address.substring(address.length - 4);
-    return `${start}...${end}`;
-  };
+    if (!address) return ''
+    const start = address.substring(0, 4)
+    const end = address.substring(address.length - 4)
+    return `${start}...${end}`
+  }
 
   // 分享功能处理
   const handleShare = (token: MintToken) => {
@@ -124,31 +124,31 @@ const TokenListView = ({
       navigator
         .share({
           title: `${token.name} (${token.symbol})`,
-          text: `${t("share")} ${token.name} ${t("token")}`,
+          text: `${t('share')} ${token.name} ${t('token')}`,
           url:
             window.location.origin +
             `/${network.toLowerCase()}/${token.address}`,
         })
-        .catch((error) => console.log(`${t("share")} ${t("failed")}:`, error));
+        .catch(error => console.log(`${t('share')} ${t('failed')}:`, error))
     } else {
       // 如果浏览器不支持，可以复制链接到剪贴板
       const url =
-        window.location.origin + `/${network.toLowerCase()}/${token.address}`;
+        window.location.origin + `/${network.toLowerCase()}/${token.address}`
       navigator.clipboard
         .writeText(url)
         .then(() =>
           toast({
-            title: t("copySuccess"),
-            description: t("copyLinkSuccess"),
-            status: "success",
+            title: t('copySuccess'),
+            description: t('copyLinkSuccess'),
+            status: 'success',
             duration: 2000,
             isClosable: true,
-            position: "top",
+            position: 'top',
           })
         )
-        .catch((error) => console.log(`${t("copy")} ${t("failed")}:`, error));
+        .catch(error => console.log(`${t('copy')} ${t('failed')}:`, error))
     }
-  };
+  }
 
   // 复制合约地址
   const copyContractAddress = (address: string) => {
@@ -157,40 +157,40 @@ const TokenListView = ({
         .writeText(address)
         .then(() =>
           toast({
-            title: t("copySuccess"),
-            description: t("copyAddressSuccess"),
-            status: "success",
+            title: t('copySuccess'),
+            description: t('copyAddressSuccess'),
+            status: 'success',
             duration: 2000,
             isClosable: true,
-            position: "top",
+            position: 'top',
           })
         )
-        .catch((err) => console.error(`${t("copy")} ${t("failed")}:`, err));
+        .catch(err => console.error(`${t('copy')} ${t('failed')}:`, err))
     }
-  };
+  }
 
   // 计算已筹集的金额
   const getCollectedAmount = (token: MintToken) => {
-    if (!token.target || !token.progress) return "0";
+    if (!token.target || !token.progress) return '0'
     // 从target中提取数字部分
-    const targetMatch = token.target.match(/[0-9.]+/);
-    if (!targetMatch) return "0";
-    const targetAmount = parseFloat(targetMatch[0]);
+    const targetMatch = token.target.match(/[0-9.]+/)
+    if (!targetMatch) return '0'
+    const targetAmount = parseFloat(targetMatch[0])
     // 计算已筹集金额 = 目标金额 * 进度百分比
-    const collected = targetAmount * (token.progress / 100);
+    const collected = targetAmount * (token.progress / 100)
     // 保留2位小数，并添加币种单位
-    const unit = token.target.replace(/[0-9.]+/g, "").trim();
-    return collected.toFixed(2) + " " + unit;
-  };
+    const unit = token.target.replace(/[0-9.]+/g, '').trim()
+    return collected.toFixed(2) + ' ' + unit
+  }
 
   const ThSortable = ({
     column,
     children,
     width,
   }: {
-    column: string;
-    children: React.ReactNode;
-    width?: string;
+    column: string
+    children: React.ReactNode
+    width?: string
   }) => (
     <Th
       onClick={() => onSort(column)}
@@ -212,7 +212,7 @@ const TokenListView = ({
         />
       </Flex>
     </Th>
-  );
+  )
 
   return (
     <TableContainer
@@ -227,44 +227,44 @@ const TokenListView = ({
         <Thead>
           <Tr>
             <Th bg={thBg} width="15%">
-              {t("tokenColumn")}
+              {t('tokenColumn')}
             </Th>
             <Th bg={thBg} width="15%">
-              {t("contractAddressColumn")}
+              {t('contractAddressColumn')}
             </Th>
-            <ThSortable column="totalSupply" width="12%">
-              {t("totalSupplyColumn")}
+            <ThSortable column="total_supply" width="12%">
+              {t('totalSupplyColumn')}
             </ThSortable>
-            <ThSortable column="raised" width="25%">
-              {t("progressColumn")}
+            <ThSortable column="progress" width="25%">
+              {t('progressColumn')}
             </ThSortable>
-            <ThSortable column="participants" width="10%">
-              {t("participantsColumn")}
+            <ThSortable column="minter_counts" width="10%">
+              {t('participantsColumn')}
             </ThSortable>
             <Th bg={thBg} textAlign="center" width="15%">
-              {t("mintingPrice")}
+              {t('mintingPrice')}
             </Th>
             <Th bg={thBg} width="8%">
-              {t("linksColumn")}
+              {t('linksColumn')}
             </Th>
           </Tr>
         </Thead>
         <Tbody>
-          {tokens.map((token) => (
+          {tokens.map(token => (
             <Tr
               key={token.id}
-              _hover={{ bg: hoverBg, cursor: "pointer" }}
-              onClick={(e) => {
+              _hover={{ bg: hoverBg, cursor: 'pointer' }}
+              onClick={e => {
                 if (
-                  (e.target as HTMLElement).tagName !== "A" &&
-                  !(e.target as HTMLElement).closest("a") &&
-                  !(e.target as HTMLElement).closest("button")
+                  (e.target as HTMLElement).tagName !== 'A' &&
+                  !(e.target as HTMLElement).closest('a') &&
+                  !(e.target as HTMLElement).closest('button')
                 ) {
-                  navigateToMintPage(token.address);
+                  navigateToMintPage(token.address)
                 }
               }}
               sx={{
-                transition: "all 0.2s",
+                transition: 'all 0.2s',
               }}
             >
               <Td>
@@ -315,8 +315,8 @@ const TokenListView = ({
                     width="fit-content"
                     onClick={() => copyContractAddress(token.address)}
                     bg="#F7F6FE"
-                    _hover={{ bg: "brand.light" }}
-                    _active={{ bg: "#F7F6FE" }}
+                    _hover={{ bg: 'brand.light' }}
+                    _active={{ bg: '#F7F6FE' }}
                     transition="all 0.2s"
                   >
                     <Icon as={FaFileContract} mr={1} fontSize="10px" />
@@ -349,16 +349,13 @@ const TokenListView = ({
                       borderRadius="full"
                       size="sm"
                       flex="1"
+                      bg="#E7E3FC"
                       sx={{
-                        // 轨道颜色（背景色）
-                        '& > div:first-of-type': {
-                          bg: '#E7E3FC !important'
-                        },
                         // 进度条颜色
-                        '& > div:last-of-type': {
-                          bg: 'brand.primary !important',
-                          transition: 'width 0.3s ease-in-out'
-                        }
+                        "& > div:last-of-type": {
+                          bg: "brand.primary !important",
+                          transition: "width 0.3s ease-in-out",
+                        },
                       }}
                     />
                   </HStack>
@@ -372,8 +369,8 @@ const TokenListView = ({
                   variant="outline"
                   colorScheme="brand"
                   bg="#F7F6FE"
-                  _hover={{ bg: "brand.light" }}
-                  _active={{ bg: "#F7F6FE" }}
+                  _hover={{ bg: 'brand.light' }}
+                  _active={{ bg: '#F7F6FE' }}
                   leftIcon={
                     <Icon
                       as={FaUser}
@@ -416,7 +413,7 @@ const TokenListView = ({
         </Tbody>
       </Table>
     </TableContainer>
-  );
-};
+  )
+}
 
-export default TokenListView;
+export default TokenListView
