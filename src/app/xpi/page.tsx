@@ -5,7 +5,6 @@ import {
   Container,
   Heading,
   Text,
-  Button,
   useColorModeValue,
   Flex,
   HStack,
@@ -20,6 +19,53 @@ import Head from "next/head";
 import { useEffect, useState } from "react";
 import { css, Global } from "@emotion/react";
 import dynamic from "next/dynamic";
+
+// 自定义按钮组件
+interface ButtonProps {
+  children?: React.ReactNode;
+  type?: 'primary' | 'border';
+  onClick?: () => void;
+}
+
+const Button = ({ children, type = 'primary', onClick }: ButtonProps) => {
+  const buttonClass = type === 'border' ? 'pi-border-button' : 'pi-primary-button';
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  
+  return (
+    <button 
+      className={`pi-button ${buttonClass}`} 
+      onClick={onClick}
+      style={{
+        transition: "all 0.5s ease-in-out",
+        cursor: "pointer",
+        minWidth: isMobile ? "120px" : "196px",
+        fontSize: isMobile ? "16px" : "18px",
+        color: type === 'primary' ? "#fff" : "#fff",
+        fontFamily: "Space-Grotesk, sans-serif",
+        textTransform: "uppercase",
+        borderRadius: "10px",
+        height: isMobile ? "46px" : "56px",
+        width: "100%",
+        ...(type === 'primary' 
+          ? { 
+              background: "linear-gradient(90deg, #9747FE 0%, #1973FB 100%)",
+              padding: isMobile ? "10px 0" : "14px 0",
+              border: "none"
+            } 
+          : {
+              borderTop: "1px solid #1D71FA",
+              borderRight: "3px solid #1D71FA",
+              borderBottom: "1px solid #1D71FA",
+              borderLeft: "3px solid #1D71FA",
+              background: "rgba(0, 0, 0, 0.30)",
+              backdropFilter: "blur(5px)"
+            })
+      }}
+    >
+      {children}
+    </button>
+  );
+};
 
 // 动态导入 Lottie 组件
 const Lottie = dynamic(() => import("lottie-react"), {
@@ -75,7 +121,7 @@ const HomeBgBox = chakra(Box, {
         backgroundImage: "url('/xpi/bg/bg.png')",
         backgroundRepeat: "no-repeat",
         backgroundSize: "cover",
-        backgroundPosition: "center -550px",
+        backgroundPosition: "center",
         width: "100%",
         height: "100vh",
         position: "absolute",
@@ -99,6 +145,8 @@ const HomeBox = chakra(Flex, {
       lineHeight: "1.2em",
       letterSpacing: "0px",
       textShadow: "0px 1px 2px rgba(0, 0, 0, 0.7)",
+      fontFamily: "EDIX, sans-serif !important",
+      color: "#fff",
       "@media screen and (max-width: 768px)": {
         fontSize: "60px",
       },
@@ -178,10 +226,11 @@ const HomeBntBox = chakra(Flex, {
     justifyContent: "center",
     alignItems: "center",
     "@media screen and (max-width: 768px)": {
-      gap: "22px",
+      gap: "12px",
       "& a": {
-        flex: 1,
-        gap: "8px",
+        flex: "1 1 auto",
+        minWidth: "140px",
+        maxWidth: "48%",
         marginTop: "8px",
       },
     },
@@ -324,6 +373,22 @@ const globalStyles = `
     -webkit-text-fill-color: transparent;
     text-shadow: none;
   }
+
+  .pi-war-color {
+    background: linear-gradient(90deg, #18acde 0%, #ef45b8 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .pi-color{
+    background-image: linear-gradient(90deg, #336bfe 0%, #0ebafd 100%);
+    background-size: cover;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-fill-color: transparent;
+  }
   
   button, input, select, textarea {
     font-family: Space-Grotesk, sans-serif !important;
@@ -354,33 +419,56 @@ const globalStyles = `
     border-radius: 100px;
   }
 
-  a {
-    color: #fff !important;
+  /* 修改链接样式，排除页脚中的链接 */
+  a:not(footer a) {
+    color: #fff;
     text-decoration: none;
+  }
+  
+  /* 确保页脚文本颜色正确 */
+  footer, footer * {
+    color: inherit;
   }
 `;
 
 // 合作伙伴数据
 const partners = [
-  { img: "/xpi/partners/dexscreener.png", url: "https://dexscreener.com" },
-  { img: "/xpi/partners/gmgn.png", url: "https://gmgn.io" },
-  { img: "/xpi/partners/pump.png", url: "https://pump.fun" },
-  { img: "/xpi/partners/BMX.png", url: "https://bmx.io" },
-  { img: "/xpi/partners/avedex.png", url: "https://ave.ai" },
-  { img: "/xpi/partners/coingecko.svg", url: "https://coingecko.com" },
-  { img: "/xpi/partners/coinmarketcap.svg", url: "https://coinmarketcap.com" },
+  {
+    img: '/xpi/partners/BMX.png',
+    url: 'https://www.bitmart.com/invite/VSACBD/en-US',
+  },
+  {
+    img: '/xpi/partners/coinmarketcap.svg',
+    url: 'https://coinmarketcap.com/currencies/xpi/',
+  },
+  {
+    img: '/xpi/partners/dexscreener.png',
+    url: 'https://dexscreener.com/solana/6st2zwhtvs38r34n3iawbs8bv6b8ee5uicjq3btkywxa',
+  },
+  // {
+  //   img: '/xpi/partners/gmgn.png',
+  //   url: 'https://gmgn.ai/sol/token/BoMbSn3KcWsUe1dgz5ddJrRaM6v44fpeARNA9t7Dpump',
+  // },
+  {
+    img: '/xpi/partners/coingecko.svg',
+    url: 'https://www.coingecko.com/en/coins/xpi',
+  },
+  {
+    img: '/xpi/partners/pump.png',
+    url: 'https://pump.fun/coin/BoMbSn3KcWsUe1dgz5ddJrRaM6v44fpeARNA9t7Dpump',
+  }
 ];
 
 // 工具函数和链接
 const utils = {
-  contractAddress: "0x1234567890123456789012345678901234567890", 
+  contractAddress: "BoMbSn3KcWsUe1dgz5ddJrRaM6v44fpeARNA9t7Dpump", 
   x: {
-    name: "Twitter",
-    url: "https://twitter.com/xpi_official",
+    name: "𝕏",
+    url: "https://x.com/X_Pi_S",
   },
   tg: {
-    name: "Telegram",
-    url: "https://t.me/xpi_official",
+    name: "✈️",
+    url: "https://t.me/XPi_S",
   },
   shows: {
     home: {
@@ -392,72 +480,108 @@ const utils = {
 
 // 合约地址组件
 function ContractAddress({ address }: { address?: string }) {
+  const [isMobile, setIsMobile] = useState(false);
+  const [copied, setCopied] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const truncatedAddress = address 
+    ? `${address.substring(0, 12)}...${address.substring(address.length - 16)}`
+    : '';
+    
+  const handleCopy = () => {
+    if (address) {
+      navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
-    <Box 
-      className="contract-address"
-      width="-webkit-fill-available"
-      display="flex"
-      justifyContent="center"
-    >
-      <Box
-        className="container"
-        display="grid"
-        gridTemplateColumns="1fr 30px"
-        alignItems="center"
-        width={{ base: "-webkit-fill-available", md: "400px" }}
-        borderRadius="6px"
-        borderTop="0.5px solid #6366f1"
-        borderRight="2px solid #6366f1"
-        borderBottom="0.5px solid #6366f1"
-        borderLeft="2px solid #6366f1"
-        background="rgba(0, 0, 0, 0.4)"
-        backdropFilter="blur(5px)"
-        padding="10px 16px"
-        paddingRight="12px"
-        fontSize="18px"
-        fontWeight={600}
-        color="#fff"
-        cursor="pointer"
-        onClick={() => navigator.clipboard.writeText(address || '')}
-        _hover={{
-          opacity: 0.95
+    <div className="contract-address" style={{
+      width: "-webkit-fill-available",
+      display: "flex",
+      justifyContent: "center"
+    }}>
+      <div 
+        className="container" 
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 30px",
+          alignItems: "center",
+          width: isMobile ? "calc(100% - 20px)" : "400px",
+          borderTop: "0.5px solid #6366f1",
+          borderRight: "2px solid #6366f1",
+          borderBottom: "0.5px solid #6366f1",
+          borderLeft: "2px solid #6366f1",
+          background: "rgba(0, 0, 0, 0.5)",
+          backdropFilter: "blur(5px)",
+          padding: isMobile ? "8px 12px 8px 12px" : "10px 16px",
+          paddingRight: isMobile ? "8px" : "12px",
+          backgroundColor: "rgba(0, 0, 0, 0.4)",
+          fontSize: isMobile ? "14px" : "18px",
+          fontWeight: 600,
+          color: "#fff",
+          cursor: "pointer",
+          borderRadius: "6px"
         }}
+        onClick={handleCopy}
       >
-        <Text 
-          fontFamily="Space-Grotesk, monospace" 
-          isTruncated 
-          flex="1"
-          width="100%"
-          textAlign="left"
-          wordBreak="keep-all"
-        >
-          {address}
-        </Text>
-        <Box 
-          className="copy-icon" 
-          background="linear-gradient(90deg, #9747FE 0%, #1973FB 100%)"
-          color="white"
-          borderRadius="6px"
-          padding="4px"
-          width="30px"
-          height="30px"
-          transition="all 0.5s ease-in-out"
-          _hover={{
-            transform: "scale(1.1)"
+        <div 
+          style={{ 
+            flex: 1, 
+            width: "100%",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap"
           }}
         >
-          <svg viewBox="0 0 16 16" fill="#fff" width="100%" height="100%">
-            <path d="M4.00029 12.6667H12.0003V4.66667H4.00029V12.6667ZM4.00029 14C3.26696 14 2.66696 13.4 2.66696 12.6667V4.66667C2.66696 3.93333 3.26696 3.33333 4.00029 3.33333H12.0003C12.7336 3.33333 13.3336 3.93333 13.3336 4.66667V12.6667C13.3336 13.4 12.7336 14 12.0003 14H4.00029ZM6.00029 2H13.3336C14.0703 2 14.6703 2.6 14.6703 3.33333V10.6667H13.3336V3.33333H6.00029V2Z"/>
-          </svg>
-        </Box>
-      </Box>
-    </Box>
+          {truncatedAddress}
+        </div>
+        <div 
+          className="copy-icon" 
+          style={{
+            background: copied 
+              ? "linear-gradient(90deg, #22c55e, #16a34a)" 
+              : "linear-gradient(90deg, #9747FE 0%, #1973FB 100%)",
+            color: "white",
+            borderRadius: "6px",
+            padding: "4px",
+            width: "30px",
+            height: "30px",
+            transition: "all 0.5s ease-in-out",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}
+        >
+          {copied ? (
+            <svg viewBox="0 0 24 24" fill="#fff" width="16px" height="16px">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+            </svg>
+          ) : (
+            <svg viewBox="0 0 16 16" fill="#fff" width="100%" height="100%">
+              <path d="M4.00029 12.6667H12.0003V4.66667H4.00029V12.6667ZM4.00029 14C3.26696 14 2.66696 13.4 2.66696 12.6667V4.66667C2.66696 3.93333 3.26696 3.33333 4.00029 3.33333H12.0003C12.7336 3.33333 13.3336 3.93333 13.3336 4.66667V12.6667C13.3336 13.4 12.7336 14 12.0003 14H4.00029ZM6.00029 2H13.3336C14.0703 2 14.6703 2.6 14.6703 3.33333V10.6667H13.3336V3.33333H6.00029V2Z"/>
+            </svg>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
 export default function XpiPage() {
   const { t } = useTranslation();
   const [animationData, setAnimationData] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     // 动态导入 JSON 数据
@@ -467,17 +591,20 @@ export default function XpiPage() {
         setAnimationData(data);
       })
       .catch(err => console.error("Error loading animation data:", err));
+      
+    // 检测设备是否为移动设备
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   return (
     <>
-      <Head>
-        <style>{globalStyles}</style>
-        <title>xPI</title>
-        <meta name="description" content="xPI - Next Generation Protocol" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#000000" />
-      </Head>
+      <Global styles={css`${globalStyles}`} />
       <Box bg="#000" minH="100vh" color="white" position="relative">
         <HomeBgBox>
           <Box className="pi-war-bg" position="relative" w="100%" h="100%">
@@ -518,11 +645,7 @@ export default function XpiPage() {
                       x<Box as="span" className="sol-color">PI</Box>
                     </Box>
 
-                    <Image 
-                      src="/xpi/pisol.png" 
-                      style={{ width: '100%', maxWidth: '420px' }} 
-                      alt="xPI" 
-                    />
+                    <img src="/xpi/pisol.png" style={{ width: '100%' }} />
 
                     <AddressTextBox
                       style={{
@@ -531,103 +654,66 @@ export default function XpiPage() {
                         color: '#CEDAFF'
                       }}
                     >
-                      {t('合约地址')}
+                      {t(`𝕏ℙ𝕚 - X + Pi
+                   SPACE - AI - WEB3 - DESCI`)}
                     </AddressTextBox>
                     <ContractAddress address={utils.contractAddress} />
                   </HomeBntBox>
-                  <HomeBntBox style={{ marginTop: 0, gap: 12 }}>
-                    <Box as="a" href={utils.x.url} target="_blank" rel="noopener noreferrer">
-                      <Button 
-                        colorScheme="twitter" 
-                        variant="solid"
-                        fontWeight="normal"
-                        height="40px"
-                        borderRadius="4px"
-                        px={6}
-                        py={4}
-                        fontFamily="Space-Grotesk, sans-serif"
-                        _hover={{ opacity: 0.9, transform: "translateY(-2px)" }}
-                        transition="all 0.3s ease"
-                        className="primary-button"
-                        sx={{
-                          background: "linear-gradient(90deg, #336BFE 0%, #0EBAFD 100%)",
-                          boxShadow: "0 0 10px rgba(51, 107, 254, 0.5)",
-                          border: "none",
-                          color: "#fff"
-                        }}
-                      >{utils.x.name}</Button>
-                    </Box>
-                    <Box as="a" href={utils.tg.url} target="_blank" rel="noopener noreferrer">
-                      <Button 
-                        variant="outline" 
-                        colorScheme="blue"
-                        fontWeight="normal"
-                        height="40px"
-                        borderRadius="4px"
-                        px={6}
-                        py={4}
-                        fontFamily="Space-Grotesk, sans-serif"
-                        _hover={{ opacity: 0.9, transform: "translateY(-2px)" }}
-                        transition="all 0.3s ease"
-                        className="border-button"
-                        sx={{
-                          borderColor: "#336BFE",
-                          color: "#fff",
-                          boxShadow: "0 0 10px rgba(51, 107, 254, 0.3)"
-                        }}
-                      >{utils.tg.name}</Button>
-                    </Box>
+                  <HomeBntBox style={{ marginTop: 0, gap: isMobile ? 8 : 12 }}>
+                    <a href={utils.x.url} target="_blank" style={{ width: isMobile ? "calc(50% - 4px)" : "auto" }}>
+                      <Button type="primary">{utils.x.name}</Button>
+                    </a>
+                    <a href={utils.tg.url} target="_blank" style={{ width: isMobile ? "calc(50% - 4px)" : "auto" }}>
+                      <Button type="border">{utils.tg.name}</Button>
+                    </a>
                   </HomeBntBox>
-                  <Flex 
-                    gap={3} 
-                    flexWrap="wrap" 
-                    justifyContent="center" 
-                    mt={2} 
-                    className="partners-container"
-                    sx={{
-                      marginTop: "16px"
-                    }}
-                  >
-                    {partners.map((partner, index) => (
-                      <Box
-                        key={index}
-                        as="a"
+                  <div style={{
+                    display: "flex",
+                    gap: isMobile ? "8px" : "12px",
+                    flexWrap: "wrap",
+                    justifyContent: "center",
+                    marginTop: "16px",
+                    width: "100%",
+                    padding: isMobile ? "0 10px" : "0"
+                  }}>
+                    {partners.map((partner) => (
+                      <a
+                        key={partner.img}
                         href={partner.url}
                         target="_blank"
-                        rel="noopener noreferrer"
-                        className="partner-item"
-                        sx={{
-                          width: "56px",
-                          height: "56px",
+                        style={{
+                          transition: "all 0.5s ease",
+                          width: isMobile ? "48px" : "56px",
+                          height: isMobile ? "48px" : "56px",
+                          backgroundColor: "rgba(255, 255, 255, 0.1)",
+                          borderRadius: "8px",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           backdropFilter: "blur(8px)",
-                          backgroundColor: "rgba(255, 255, 255, 0.1)",
-                          borderRadius: "8px",
-                          padding: "8px",
-                          borderWidth: "2px 2px 0.5px 0.5px",
-                          borderColor: "#6366f1",
-                          transition: "all 0.5s ease",
-                          _hover: { transform: "scale(1.1)" }
+                          padding: isMobile ? "6px" : "8px",
+                          borderTop: "0.5px solid #6366f1",
+                          borderRight: "2px solid #6366f1",
+                          borderBottom: "0.5px solid #6366f1",
+                          borderLeft: "2px solid #6366f1"
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.transform = "scale(1.1)";
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.transform = "scale(1)";
                         }}
                       >
-                        <Image 
-                          src={partner.img} 
-                          alt={`Partner ${index + 1}`}
-                          className="aspect-square" 
-                          width="100%"
-                          height="100%"
-                          objectFit="contain"
-                        />
-                      </Box>
+                        <img src={partner.img} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                      </a>
                     ))}
-                  </Flex>
+                  </div>
                 </HomeContainerBox>
               </HomeBox>
             </P166>
           </W1400>
         </IndexBox>
+        <IndexBox />
       </Box>
     </>
   );
