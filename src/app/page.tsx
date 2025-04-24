@@ -254,7 +254,7 @@ export default function MintPage() {
     
     // 根据Tab设置不同的排序条件
     let newSortColumn = '';
-    let newSortDirection: 'ASC' | 'DESC' = 'DESC';
+    let newDirection: 'ASC' | 'DESC' = 'DESC';
     
     switch (index) {
       case 0: // 热门铸造 - 修改为默认使用进度排序
@@ -267,7 +267,7 @@ export default function MintPage() {
         newSortColumn = '';
         break;
       case 3: // 铸造结束
-        newSortColumn = '';
+        newSortColumn = 'deployAt';
         break;
       default:
         newSortColumn = '';
@@ -276,7 +276,7 @@ export default function MintPage() {
     
     // 更新排序状态，但不触发额外的useEffect
     setSortColumn(newSortColumn);
-    setSortDirection(newSortDirection);
+    setSortDirection(newDirection);
     
     // 预先清除任何可能存在的上一次参数缓存
     if (typeof window !== 'undefined') {
@@ -287,7 +287,7 @@ export default function MintPage() {
     const params: TokenListParams = {
       page: 1, // 始终从第一页开始
       limit: pageSize,
-      order: newSortDirection,
+      order: newDirection.toUpperCase(),
       sort_by: newSortColumn,
       ...(index === 0 && { category: 'hot' }),
       ...(index === 2 && { category: 'latest' }),
@@ -300,7 +300,7 @@ export default function MintPage() {
         page: 1,
         limit: pageSize,
         sort: newSortColumn,
-        direction: newSortDirection,
+        direction: newDirection,
         category: index === 0 ? 'hot' : index === 2 ? 'latest' : index === 3 ? 'completed' : '',
       }));
     }
@@ -584,6 +584,8 @@ export default function MintPage() {
       
       if (tabIndex === 2) { // 最新部署标签
         initialSortColumn = '';
+      } else if (tabIndex === 3) { // 铸造结束标签
+        initialSortColumn = 'deployAt';
       }
       
       setSortColumn(initialSortColumn);
@@ -857,13 +859,14 @@ export default function MintPage() {
                       tabIndex === 0 ? t("progressColumn") :  // 修改热门铸造标签页的默认显示
                       tabIndex === 1 ? t("progressColumn") : // 所有代币默认显示"铸造进度"
                       tabIndex === 2 ? "部署时间" :
-                      tabIndex === 3 ? "默认排序" : "默认排序"
+                      tabIndex === 3 ? "部署时间" : "默认排序"
                     ) : (
                       // 当用户选择了排序条件时，显示所选排序条件
                       sortColumn === 'progress' ? t("progressColumn") : 
                       sortColumn === 'minter_counts' ? t("participantsColumn") : 
                       sortColumn === 'target' ? "铸造总额" : 
                       sortColumn === 'raised' ? "已铸额度" : 
+                      sortColumn === 'deployAt' ? "部署时间" :
                       tabIndex === 2 && sortColumn === '' ? "部署时间" : // 确保最新部署标签页空排序列显示为"部署时间"
                       t("progressColumn")
                     )}
@@ -873,7 +876,8 @@ export default function MintPage() {
                       { label: t("progressColumn"), value: "progress" },
                       { label: "铸造总额", value: "target" },
                       { label: "已铸额度", value: "raised" },
-                      { label: t("participantsColumn"), value: "minter_counts" }
+                      { label: t("participantsColumn"), value: "minter_counts" },
+                      { label: "部署时间", value: "deployAt" }
                     ].map((item, index) => (
                       <MenuItem
                         key={index}

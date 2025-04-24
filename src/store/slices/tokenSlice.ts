@@ -38,6 +38,7 @@ interface TokenResponse {
   total_sell_amount: number
   net_quote_amount: number
   liquidity_amount: number
+  socials?: any[]
 }
 
 interface TokenState {
@@ -124,6 +125,7 @@ export const fetchTokenList = createAsyncThunk(
           firstTradeTime: token.first_trade_time,
           lastTradeTime: token.last_trade_time,
           currencyUnit: networkCurrency,
+          socials: token.socials || [],
         } as MintToken
       })
     } catch (error: any) {

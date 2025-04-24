@@ -34,6 +34,7 @@ export interface TokenInfo {
   progress: number
   liquidity_amount: number
   net_quote_amount: number
+  socials?: Array<{id: number, link: string, platform: string}>
 }
 
 export interface MintToken
@@ -70,6 +71,7 @@ export interface MintToken
   target: string // formatted from liquidity_amount
   raised: string // formatted from net_quote_amount
   currencyUnit?: string
+  socials?: Array<{id: number, link: string, platform: string}>
 }
 
 export type TokenList = TokenInfo[]

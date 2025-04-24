@@ -16,8 +16,10 @@ import {
   useToast,
   Progress,
   Button,
+  Link,
+  Tooltip,
 } from '@chakra-ui/react'
-import { FaSort, FaFileContract, FaShareAlt, FaUser } from 'react-icons/fa'
+import { FaSort, FaFileContract, FaShareAlt, FaUser, FaGlobe, FaTwitter, FaTelegram } from 'react-icons/fa'
 import { ChevronUpIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/navigation'
@@ -26,12 +28,21 @@ import { useCallback } from 'react'
 import { useMintingCalculations } from '@/hooks/useMintingCalculations'
 import { MintToken } from '@/api/types'
 import { useNetwork } from '@/contexts/NetworkContext'
+import { IconType } from 'react-icons'
+
 interface TokenListViewProps {
   tokens: MintToken[]
   sortColumn: string
   sortDirection: 'ASC' | 'DESC'
   onSort: (column: string) => void
   currencyUnit: string
+}
+
+// 定义UI中使用的社交媒体链接类型
+interface SocialLinkDisplay {
+  platform: string;
+  link: string;
+  icon: IconType;
 }
 
 // 排序指示器组件
@@ -183,6 +194,99 @@ const TokenListView = ({
     return collected.toFixed(2) + ' ' + unit
   }
 
+  // 获取社交媒体链接
+  const getSocials = (token: MintToken) => {
+    const links: SocialLinkDisplay[] = [];
+    
+    // 如果存在 socials 数组，从中提取链接
+    if (token.socials && token.socials.length > 0) {
+      // 查找网站链接 - 匹配多种可能的平台名称，忽略大小写
+      const website = token.socials.find(s => 
+        s.platform && (
+          s.platform.toLowerCase() === "website" || 
+          s.platform.toLowerCase() === "web" || 
+          s.platform.toLowerCase() === "site" ||
+          s.platform.toLowerCase() === "homepage"
+        )
+      );
+      if (website) {
+        const url = website.link; // API返回的链接
+        if (url) {
+          links.push({
+            platform: "website",
+            link: url,
+            icon: FaGlobe
+          });
+        }
+      }
+      
+      // 查找推特链接 - 匹配多种可能的平台名称，忽略大小写
+      const twitter = token.socials.find(s => 
+        s.platform && (
+          s.platform.toLowerCase() === "twitter" || 
+          s.platform.toLowerCase() === "x" || 
+          s.platform.toLowerCase() === "tweet"
+        )
+      );
+      if (twitter) {
+        const url = twitter.link;
+        if (url) {
+          links.push({
+            platform: "twitter",
+            link: url,
+            icon: FaTwitter
+          });
+        }
+      }
+      
+      // 查找电报链接 - 匹配多种可能的平台名称，忽略大小写
+      const telegram = token.socials.find(s => 
+        s.platform && (
+          s.platform.toLowerCase() === "telegram" || 
+          s.platform.toLowerCase() === "tg" || 
+          s.platform.toLowerCase() === "tele"
+        )
+      );
+      if (telegram) {
+        const url = telegram.link;
+        if (url) {
+          links.push({
+            platform: "telegram",
+            link: url,
+            icon: FaTelegram
+          });
+        }
+      }
+    } else {
+      // 兼容旧数据格式，使用旧的独立属性
+      if (token.website) {
+        links.push({
+          platform: "website",
+          link: token.website,
+          icon: FaGlobe
+        });
+      }
+      
+      if (token.twitter) {
+        links.push({
+          platform: "twitter",
+          link: token.twitter,
+          icon: FaTwitter
+        });
+      }
+      
+      if (token.telegram) {
+        links.push({
+          platform: "telegram",
+          link: token.telegram,
+          icon: FaTelegram
+        });
+      }
+    }
+    
+    return links;
+  };
+
   const ThSortable = ({
     column,
     children,
@@ -290,7 +394,7 @@ const TokenListView = ({
                       fontSize="xs"
                       color="gray.500"
                       noOfLines={1}
-                      maxW="180px"
+                      maxW="120px"
                     >
                       {token.name}
                     </Text>
@@ -397,6 +501,21 @@ const TokenListView = ({
               </Td>
               <Td>
                 <HStack spacing={3} justify="center">
+                  {/* 社交媒体图标 */}
+                  {getSocials(token).map((social, index) => (
+                    <Tooltip key={index} label={social.platform} placement="top">
+                      <Link 
+                        href={social.link}
+                        isExternal
+                        onClick={(e) => e.stopPropagation()}
+                        color={iconColor}
+                        _hover={{ color: "brand.primary" }}
+                        transition="color 0.2s"
+                      >
+                        <Icon as={social.icon} boxSize="16px" />
+                      </Link>
+                    </Tooltip>
+                  ))}
                   <Box
                     as="button"
                     onClick={() => handleShare(token)}

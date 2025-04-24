@@ -17,6 +17,7 @@ import {
   useToast,
   Flex,
   Grid,
+  Link,
 } from "@chakra-ui/react";
 import {
   FaGlobe,
@@ -30,6 +31,7 @@ import {
   FaExchangeAlt,
 } from "react-icons/fa";
 import { FaUser } from "react-icons/fa6";
+import { IconType } from "react-icons";
 import NextLink from "next/link";
 import { useTranslation } from "react-i18next";
 import { formatTokenAmount } from "@/utils";
@@ -37,6 +39,21 @@ import { useMemo } from "react";
 import { useMintingCalculations } from "@/hooks/useMintingCalculations";
 import { useNetwork } from "@/contexts/NetworkContext";
 import { useRouter } from "next/navigation";
+
+// 定义社交媒体链接类型
+interface SocialLink {
+  id?: number;
+  link?: string; // API可能返回link
+  url?: string;  // 或者返回url
+  platform?: string;
+}
+
+// 定义UI中使用的社交媒体链接类型
+interface SocialLinkDisplay {
+  platform: string;
+  link: string;
+  icon: IconType;
+}
 
 interface MintingTokenCardProps {
   token: {
@@ -55,6 +72,7 @@ interface MintingTokenCardProps {
     website?: string;
     twitter?: string;
     telegram?: string;
+    socials?: SocialLink[]; // 添加社交媒体链接数组
   };
   currencyUnit?: string;
 }
@@ -187,6 +205,105 @@ export default function MintingTokenCard({
     }
   };
 
+  // 获取社交媒体链接，优先使用 socials 数组，如果没有则回退到旧的属性
+  const getSocials = () => {
+    const links: SocialLinkDisplay[] = [];
+    
+    // 如果存在 socials 数组，从中提取链接
+    if (token.socials && token.socials.length > 0) {
+      console.log("代币社交媒体信息:", token.socials); // 调试输出
+      
+      // 查找网站链接 - 匹配多种可能的平台名称，忽略大小写
+      const website = token.socials.find(s => 
+        s.platform && (
+          s.platform.toLowerCase() === "website" || 
+          s.platform.toLowerCase() === "web" || 
+          s.platform.toLowerCase() === "site" ||
+          s.platform.toLowerCase() === "homepage"
+        )
+      );
+      if (website) {
+        const url = website.link || website.url; // 兼容两种属性名
+        if (url) {
+          links.push({
+            platform: "website",
+            link: url,
+            icon: FaGlobe
+          });
+        }
+      }
+      
+      // 查找推特链接 - 匹配多种可能的平台名称，忽略大小写
+      const twitter = token.socials.find(s => 
+        s.platform && (
+          s.platform.toLowerCase() === "twitter" || 
+          s.platform.toLowerCase() === "x" || 
+          s.platform.toLowerCase() === "tweet"
+        )
+      );
+      if (twitter) {
+        const url = twitter.link || twitter.url;
+        if (url) {
+          links.push({
+            platform: "twitter",
+            link: url,
+            icon: FaTwitter
+          });
+        }
+      }
+      
+      // 查找电报链接 - 匹配多种可能的平台名称，忽略大小写
+      const telegram = token.socials.find(s => 
+        s.platform && (
+          s.platform.toLowerCase() === "telegram" || 
+          s.platform.toLowerCase() === "tg" || 
+          s.platform.toLowerCase() === "tele"
+        )
+      );
+      if (telegram) {
+        const url = telegram.link || telegram.url;
+        if (url) {
+          links.push({
+            platform: "telegram",
+            link: url,
+            icon: FaTelegram
+          });
+        }
+      }
+    } else {
+      // 兼容旧数据格式，使用旧的独立属性
+      if (token.website) {
+        links.push({
+          platform: "website",
+          link: token.website,
+          icon: FaGlobe
+        });
+      }
+      
+      if (token.twitter) {
+        links.push({
+          platform: "twitter",
+          link: token.twitter,
+          icon: FaTwitter
+        });
+      }
+      
+      if (token.telegram) {
+        links.push({
+          platform: "telegram",
+          link: token.telegram,
+          icon: FaTelegram
+        });
+      }
+    }
+    
+    console.log("处理后的社交媒体链接:", links); // 调试输出
+    return links;
+  };
+
+  // 获取社交媒体链接
+  const socialLinks = getSocials();
+
   return (
     <Card
       p={4}
@@ -207,7 +324,8 @@ export default function MintingTokenCard({
         // 确保点击按钮或其他交互元素时不触发整个卡片的跳转
         if (
           (e.target as HTMLElement).tagName !== "BUTTON" &&
-          !(e.target as HTMLElement).closest("button")
+          !(e.target as HTMLElement).closest("button") &&
+          !(e.target as HTMLElement).closest("a")
         ) {
           navigateToMintPage();
         }
@@ -278,9 +396,30 @@ export default function MintingTokenCard({
               {token.minterCounts}
             </Button>
           </Flex>
-          <Text as="span" fontSize="xs" color="gray.500" mt={-1}>
-            {token.name}
-          </Text>
+          <Flex justifyContent="space-between" alignItems="center">
+            <Text as="span" fontSize="xs" color="gray.500" mt={-1}>
+              {token.name}
+            </Text>
+            
+            {/* 社交媒体图标，如果没有也保持高度一致 */}
+            <HStack spacing={2} ml={2} minH="24px">
+              {socialLinks.length > 0 && socialLinks.map((social, index) => (
+                <Link 
+                  key={`${social.platform}-${index}`}
+                  href={social.link}
+                  isExternal
+                  onClick={(e) => e.stopPropagation()}
+                  color={iconColor}
+                  _hover={{ color: "brand.primary" }}
+                  transition="color 0.2s"
+                  p={1}
+                >
+                  <Icon as={social.icon} boxSize="14px" />
+                </Link>
+              ))}
+            </HStack>
+          </Flex>
+          
           <Grid mt={1} gap={0.5}>
             <HStack spacing={2} align="center">
               <Progress
@@ -340,6 +479,7 @@ export default function MintingTokenCard({
             </Flex>
           </Grid>
           <Divider my={1.5} />
+          
           <Flex justifyContent="space-between" alignItems="center">
             {/* 总供应量 */}
             <HStack spacing={1}>
