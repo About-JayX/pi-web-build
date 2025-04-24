@@ -56,6 +56,7 @@ interface TokenParametersSectionProps {
   totalSupplyOptions: string[]
   targetAmountOptionsMap: Record<string, string[]>
   labelColor: string
+  isTestEnv: boolean
   onValuesChange?: (values: {
     totalSupply: string
     targetAmount: string
@@ -71,6 +72,7 @@ const TokenParametersSection = ({
   totalSupplyOptions,
   targetAmountOptionsMap,
   labelColor,
+  isTestEnv,
   onValuesChange,
 }: TokenParametersSectionProps) => {
   const isMobile = useBreakpointValue({ base: true, md: false })
@@ -208,6 +210,11 @@ const TokenParametersSection = ({
           </Text>
           <Text fontWeight="bold" color={labelColor}>
             {totalSupplyOptions[totalSupplyTabIndex]}
+            {isTestEnv && totalSupplyOptions[totalSupplyTabIndex] === '1000000' && (
+              <Text as="span" ml={2} fontSize="xs" color="orange.500" bg="orange.100" px={1} py={0.5} borderRadius="sm">
+                测试
+              </Text>
+            )}
           </Text>
         </Box>
         <Box>
@@ -220,6 +227,11 @@ const TokenParametersSection = ({
                 targetAmountTabIndex
               ]
             }
+            {isTestEnv && totalSupplyOptions[totalSupplyTabIndex] === '1000000' && (
+              <Text as="span" ml={2} fontSize="xs" color="orange.500" bg="orange.100" px={1} py={0.5} borderRadius="sm">
+                测试
+              </Text>
+            )}
           </Text>
         </Box>
         <Box>
@@ -620,26 +632,54 @@ export default function DeployPage() {
     return network === 'SOL' ? 'SOL' : 'PI'
   }, [network])
 
+  // 判断是否为测试环境
+  const isTestEnv = process.env.NODE_ENV === 'development'
+
+  // 在开发环境下输出测试模式提示
+  useEffect(() => {
+    if (isTestEnv) {
+      console.info('🧪 测试模式已启用 - 额外测试选项可用: 10000000代币 / 0.1 SOL');
+    }
+  }, [isTestEnv]);
+
   // 定义代币发行总量选项
-  const totalSupplyOptions = ['314000000', '1000000000']
+  const totalSupplyOptions = useMemo(() => {
+    // 测试环境下额外添加一个小型供应量选项
+    if (isTestEnv) {
+      return ['1000000', '314000000', '1000000000']
+    }
+    return ['314000000', '1000000000']
+  }, [isTestEnv])
 
   // 定义目标铸造金额选项映射（带单位的值）
   const targetAmountOptionsMap = useMemo(
-    () => ({
-      '314000000': [
-        `314 ${currencyUnit}`,
-        `157 ${currencyUnit}`,
-        `78.5 ${currencyUnit}`,
-      ],
-      '1000000000': [
-        `100 ${currencyUnit}`,
-        `200 ${currencyUnit}`,
-        `250 ${currencyUnit}`,
-        // `400 ${currencyUnit}`,
-        `500 ${currencyUnit}`,
-      ],
-    }),
-    [currencyUnit]
+    () => {
+      const baseOptions = {
+        '314000000': [
+          `314 ${currencyUnit}`,
+          `157 ${currencyUnit}`,
+          `78.5 ${currencyUnit}`,
+        ],
+        '1000000000': [
+          `100 ${currencyUnit}`,
+          `200 ${currencyUnit}`,
+          `250 ${currencyUnit}`,
+          // `400 ${currencyUnit}`,
+          `500 ${currencyUnit}`,
+        ],
+      }
+      
+      // 测试环境下添加小金额测试选项
+      if (isTestEnv) {
+        return {
+          '1000000': [`0.1 ${currencyUnit}`],
+          ...baseOptions
+        }
+      }
+      
+      return baseOptions
+    },
+    [currencyUnit, isTestEnv]
   )
 
   // 当前选中的值
@@ -648,8 +688,17 @@ export default function DeployPage() {
     targetAmount: string
   }>({
     totalSupply: totalSupplyOptions[0],
-    targetAmount: '314', // 初始值不带单位
+    targetAmount: isTestEnv ? '0.1' : '314', // 根据环境选择默认值
   })
+
+  // 设置默认选项
+  useEffect(() => {
+    // 如果环境变化导致选项变化，需要更新初始选择
+    setSelectedValues({
+      totalSupply: totalSupplyOptions[0],
+      targetAmount: isTestEnv ? '0.1' : '314',
+    });
+  }, [isTestEnv, totalSupplyOptions]);
 
   const handleValuesChange = useCallback(
     (values: { totalSupply: string; targetAmount: string }) => {
@@ -1278,6 +1327,7 @@ export default function DeployPage() {
                   totalSupplyOptions={totalSupplyOptions}
                   targetAmountOptionsMap={targetAmountOptionsMap}
                   labelColor={labelColor}
+                  isTestEnv={isTestEnv}
                   onValuesChange={handleValuesChange}
                 />
 

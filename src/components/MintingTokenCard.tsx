@@ -41,6 +41,9 @@ import { useNetwork } from "@/contexts/NetworkContext";
 import { useRouter } from "next/navigation";
 import { ShareModal } from "./index";
 
+// 判断是否为测试环境
+const isTestEnv = process.env.NODE_ENV === 'development';
+
 // 定义社交媒体链接类型
 interface SocialLink {
   id?: number;
@@ -384,34 +387,52 @@ export default function MintingTokenCard({
               >
                 {token.symbol}
               </Text>
-              <Button
-                h="26px"
-                size="sm"
-                px={2}
-                variant="outline"
-                colorScheme="brand"
-                bg="#F7F6FE"
-                _hover={{ bg: "brand.light" }}
-                _active={{ bg: "#F7F6FE" }}
-                _groupHover={{
-                  borderColor: "brand.primary",
-                  bg: "#F0EDFF",
-                }}
-                onClick={(e) => e.stopPropagation()}
-                leftIcon={
-                  <Icon
-                    as={FaUser}
-                    color="#fff"
-                    boxSize="16px"
-                    p="3px"
-                    bg="brand.primary"
-                    rounded="6px"
-                  />
-                }
-                transition="all 0.2s"
-              >
-                {token.minterCounts}
-              </Button>
+              <Flex>
+                {/* 测试标识 - 只在测试环境且总供应量为1000000时显示 */}
+                {isTestEnv && parseFloat(token.totalSupply) === 1000000 && (
+                  <Text
+                    as="span"
+                    fontSize="xs"
+                    mr={2}
+                    color="orange.500"
+                    bg="orange.100"
+                    px={1}
+                    py={0.5}
+                    borderRadius="sm"
+                    fontWeight="medium"
+                  >
+                    测试
+                  </Text>
+                )}
+                <Button
+                  h="26px"
+                  size="sm"
+                  px={2}
+                  variant="outline"
+                  colorScheme="brand"
+                  bg="#F7F6FE"
+                  _hover={{ bg: "brand.light" }}
+                  _active={{ bg: "#F7F6FE" }}
+                  _groupHover={{
+                    borderColor: "brand.primary",
+                    bg: "#F0EDFF",
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  leftIcon={
+                    <Icon
+                      as={FaUser}
+                      color="#fff"
+                      boxSize="16px"
+                      p="3px"
+                      bg="brand.primary"
+                      rounded="6px"
+                    />
+                  }
+                  transition="all 0.2s"
+                >
+                  {token.minterCounts}
+                </Button>
+              </Flex>
             </Flex>
             <Flex justifyContent="space-between" alignItems="center">
               <Text as="span" fontSize="xs" color="gray.500" mt={-1}>

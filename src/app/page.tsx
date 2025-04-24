@@ -650,12 +650,21 @@ export default function MintPage() {
       image: token.logo || '/token-logo.png', // 使用token中的logo，如果没有则使用默认图片
     }))
 
-    // 只显示总供应量为 314M 和 1000M 的项目
+    // 判断是否为测试环境
+    const isTestEnv = process.env.NODE_ENV === 'development';
+
+    // 只显示总供应量为 314M 和 1000M 的项目，在测试环境中还会显示 1M 的测试代币
     processedTokens = processedTokens.filter(token => {
       // 检查总供应量字段
       const totalSupply = parseFloat(token.totalSupply);
       // 如果不是有效数字，不保留该条目
       if (isNaN(totalSupply)) return false;
+      
+      // 在测试环境中，接受测试用的小型代币
+      if (isTestEnv && totalSupply === 1000000) {
+        return true;
+      }
+      
       // 只保留总供应量为 314M 或 1000M 的项目
       return totalSupply === 314000000 || totalSupply === 1000000000;
     });

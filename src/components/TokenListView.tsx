@@ -33,6 +33,9 @@ import { useNetwork } from '@/contexts/NetworkContext'
 import { IconType } from 'react-icons'
 import { ShareModal } from './index'
 
+// 判断是否为测试环境
+const isTestEnv = process.env.NODE_ENV === 'development';
+
 interface TokenListViewProps {
   tokens: MintToken[]
   sortColumn: string
@@ -373,6 +376,22 @@ const TokenListView = ({
                         lineHeight="1.2"
                       >
                         {token.symbol}
+                        {/* 测试标识 - 只在测试环境且总供应量为1000000时显示 */}
+                        {isTestEnv && parseFloat(token.totalSupply) === 1000000 && (
+                          <Text
+                            as="span"
+                            ml={2}
+                            fontSize="xs"
+                            color="orange.500"
+                            bg="orange.100"
+                            px={1}
+                            py={0.5}
+                            borderRadius="sm"
+                            fontWeight="medium"
+                          >
+                            测试
+                          </Text>
+                        )}
                       </Text>
                       <Text
                         fontSize="xs"
