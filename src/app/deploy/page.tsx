@@ -43,7 +43,7 @@ import { TokenAPI } from '@/api/token'
 import type { CreateTokenParams } from '@/api/types'
 import WalletConnectModal from '@/components/WalletConnectModal'
 import ErrorModal from '@/components/ErrorModal'
-
+import BigNumber from 'bignumber.js'
 // 定义代币参数组件的属性接口
 interface TokenParametersSectionProps {
   totalSupplyTabIndex: number
@@ -441,9 +441,11 @@ interface SocialLinksSectionProps {
   onWebsiteChange?: (value: string) => void
   onTwitterChange?: (value: string) => void
   onTelegramChange?: (value: string) => void
+  onDescriptionChange?: (value: string) => void
   website?: string
   twitter?: string
   telegram?: string
+  description?: string
 }
 
 // 社媒链接响应式组件
@@ -456,9 +458,11 @@ const SocialLinksSection = ({
   onWebsiteChange,
   onTwitterChange,
   onTelegramChange,
+  onDescriptionChange,
   website = '',
   twitter = '',
   telegram = '',
+  description = '',
 }: SocialLinksSectionProps) => {
   const { t } = useTranslation()
 
@@ -488,6 +492,20 @@ const SocialLinksSection = ({
         mt={4}
         pl={{ base: 0, md: 2 }}
       >
+        <FormControl mb={4}>
+          <FormLabel color="gray.600" fontSize="sm">
+            {t('description')}
+          </FormLabel>
+          <Input
+            value={description}
+            onChange={e => onDescriptionChange?.(e.target.value)}
+            bg={inputBg}
+            borderColor={borderColor}
+            _placeholder={{ color: 'gray.400' }}
+            size="md"
+          />
+        </FormControl>
+
         <FormControl mb={4}>
           <FormLabel color="gray.600" fontSize="sm">
             {t('website')}
@@ -568,7 +586,7 @@ export default function DeployPage() {
     isOpen: isWalletModalOpen,
     onOpen: onWalletModalOpen,
     onClose: onWalletModalClose,
-  } = useDisclosure();
+  } = useDisclosure()
 
   // 定义当前网络的计价单位
   const currencyUnit = useMemo(() => {
@@ -615,11 +633,11 @@ export default function DeployPage() {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      
+      const file = e.target.files[0]
+
       // 检查文件大小，限制为 2MB
-      const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
-      
+      const maxSizeInBytes = 2 * 1024 * 1024 // 2MB
+
       if (file.size > maxSizeInBytes) {
         toast({
           title: t('error'),
@@ -627,74 +645,82 @@ export default function DeployPage() {
           status: 'error',
           duration: 3000,
           isClosable: true,
-          position: "top",
-        });
-        return;
+          position: 'top',
+        })
+        return
       }
-      
-      setTokenIcon(file);
+
+      setTokenIcon(file)
     }
   }
 
   // 检查代币符号
-  const checkTokenSymbol = useCallback(async (symbol: string) => {
-    if (!symbol) {
-      setIsSymbolValid(null)
-      return
-    }
-    
-    try {
-      setIsCheckingSymbol(true)
-      const response = await TokenAPI.checkSymbol(symbol)
-      // 如果 exists 为 true 表示已注册，则不可用
-      setIsSymbolValid(!response.exists)
-      
-      if (response.exists) {
-        toast({
-          title: t('error'),
-          description: t('symbolAlreadyExists'),
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-          position: "top",
-        })
+  const checkTokenSymbol = useCallback(
+    async (symbol: string) => {
+      if (!symbol) {
+        setIsSymbolValid(null)
+        return
       }
-    } catch (error) {
-      console.error('Failed to check token symbol:', error)
-      setIsSymbolValid(null)
-    } finally {
-      setIsCheckingSymbol(false)
-    }
-  }, [toast, t])
+
+      try {
+        setIsCheckingSymbol(true)
+        const response = await TokenAPI.checkSymbol(symbol)
+        // 如果 exists 为 true 表示已注册，则不可用
+        setIsSymbolValid(!response.exists)
+
+        if (response.exists) {
+          toast({
+            title: t('error'),
+            description: t('symbolAlreadyExists'),
+            status: 'error',
+            duration: 3000,
+            isClosable: true,
+            position: 'top',
+          })
+        }
+      } catch (error) {
+        console.error('Failed to check token symbol:', error)
+        setIsSymbolValid(null)
+      } finally {
+        setIsCheckingSymbol(false)
+      }
+    },
+    [toast, t]
+  )
 
   // 使用 useRef 来存储定时器
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   // 处理代币符号输入
-  const handleSymbolChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    // 1. 移除空格
-    // 2. 过滤掉中文字符，只保留英文字母、数字和特殊符号
-    // 使用正则表达式匹配非中文字符
-    const value = e.target.value.replace(/\s/g, '').replace(/[\u4e00-\u9fa5]/g, '')
-    
-    // 限制最大长度为10个字符
-    const truncatedValue = value.slice(0, 10)
-    
-    // 只在值不同时更新状态，避免不必要的重新渲染
-    if (truncatedValue !== tokenSymbol) {
-      setTokenSymbol(truncatedValue)
-      
-      // 清除之前的定时器
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
+  const handleSymbolChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      // 1. 移除空格
+      // 2. 过滤掉中文字符，只保留英文字母、数字和特殊符号
+      // 使用正则表达式匹配非中文字符
+      const value = e.target.value
+        .replace(/\s/g, '')
+        .replace(/[\u4e00-\u9fa5]/g, '')
+
+      // 限制最大长度为10个字符
+      const truncatedValue = value.slice(0, 10)
+
+      // 只在值不同时更新状态，避免不必要的重新渲染
+      if (truncatedValue !== tokenSymbol) {
+        setTokenSymbol(truncatedValue)
+
+        // 清除之前的定时器
+        if (timerRef.current) {
+          clearTimeout(timerRef.current)
+        }
+
+        // 设置新的定时器，1500ms 后检查
+        timerRef.current = setTimeout(() => {
+          checkTokenSymbol(truncatedValue)
+        }, 1500)
       }
-      
-      // 设置新的定时器，1500ms 后检查
-      timerRef.current = setTimeout(() => {
-        checkTokenSymbol(truncatedValue)
-      }, 1500)
-    }
-  }, [checkTokenSymbol, tokenSymbol])
+    },
+    [checkTokenSymbol, tokenSymbol]
+  )
 
   // 组件卸载时清除定时器
   useEffect(() => {
@@ -708,29 +734,31 @@ export default function DeployPage() {
   // 处理连接按钮点击事件
   const handleConnectButtonClick = () => {
     // 打开钱包选择弹窗
-    onWalletModalOpen();
-  };
+    onWalletModalOpen()
+  }
 
   // 处理钱包连接成功
   const handleWalletConnected = (newPublicKey: string) => {
     // 设置公钥
-    setPublicKey(newPublicKey);
-  };
+    setPublicKey(newPublicKey)
+  }
 
-  const [error, setError] = useState<{ message: string; details: any } | null>(null);
-  const { 
-    isOpen: isErrorModalOpen, 
-    onOpen: onErrorModalOpen, 
-    onClose: onErrorModalClose 
-  } = useDisclosure();
+  const [error, setError] = useState<{ message: string; details: any } | null>(
+    null
+  )
+  const {
+    isOpen: isErrorModalOpen,
+    onOpen: onErrorModalOpen,
+    onClose: onErrorModalClose,
+  } = useDisclosure()
 
   const handleCreateToken = async () => {
     // 如果未连接钱包，则打开钱包连接弹窗
     if (!publicKey) {
-      handleConnectButtonClick();
-      return;
+      handleConnectButtonClick()
+      return
     }
-    
+
     if (!tokenIcon || !tokenName || !tokenSymbol) {
       toast({
         title: t('error'),
@@ -738,7 +766,7 @@ export default function DeployPage() {
         status: 'error',
         duration: 3000,
         isClosable: true,
-        position: "top",
+        position: 'top',
       })
       return
     }
@@ -751,7 +779,7 @@ export default function DeployPage() {
         status: 'error',
         duration: 3000,
         isClosable: true,
-        position: "top",
+        position: 'top',
       })
       return
     }
@@ -760,12 +788,23 @@ export default function DeployPage() {
       setIsSubmitting(true)
 
       const params: CreateTokenParams = {
-        name: tokenName,
-        symbol: tokenSymbol,
         file: tokenIcon,
-        init_liquidity: Number(selectedValues.targetAmount),
-        total_supply: selectedValues.totalSupply,
-        description: '测试',
+        Metadata: {
+          name: tokenName,
+          symbol: tokenSymbol,
+          description: description,
+          init_liquidity: new BigNumber(selectedValues.targetAmount)
+            .times(1e9)
+            .toNumber(),
+          total_supply: new BigNumber(selectedValues.totalSupply)
+            .times(1e6)
+            .toNumber(),
+          socials: [
+            ...(telegram ? [{ platform: 'telegram', url: telegram }] : []),
+            ...(twitter ? [{ platform: 'twitter', url: twitter }] : []),
+            ...(website ? [{ platform: 'website', url: website }] : []),
+          ],
+        },
       }
 
       const result = await TokenAPI.createToken(params)
@@ -777,31 +816,31 @@ export default function DeployPage() {
         status: 'success',
         duration: 3000,
         isClosable: true,
-        position: "top",
+        position: 'top',
       })
     } catch (error: any) {
       console.error('Token creation failed:', error)
-      
+
       // 存储错误信息并打开错误弹窗
-      let errorMessage = t('createTokenFailed');
-      
+      let errorMessage = t('createTokenFailed')
+
       // 处理特定类型的错误
       if (error.response && error.response.status === 413) {
-        errorMessage = t('imageTooLarge');
+        errorMessage = t('imageTooLarge')
       } else if (error.response && error.response.status === 500) {
-        errorMessage = t('serverError');
+        errorMessage = t('serverError')
       } else if (error instanceof Error) {
-        errorMessage = error.message || errorMessage;
+        errorMessage = error.message || errorMessage
       } else if (typeof error === 'string') {
-        errorMessage = error;
+        errorMessage = error
       }
-      
+
       // 设置错误详情
       setError({
         message: errorMessage,
-        details: error
-      });
-      
+        details: error,
+      })
+
       // 显示标准的toast提示
       toast({
         title: t('error'),
@@ -809,12 +848,12 @@ export default function DeployPage() {
         status: 'error',
         duration: 3000,
         isClosable: true,
-        position: "top",
-      });
-      
+        position: 'top',
+      })
+
       // 在开发环境中打开详细错误弹窗
       if (process.env.NODE_ENV === 'development') {
-        onErrorModalOpen();
+        onErrorModalOpen()
       }
     } finally {
       setIsSubmitting(false)
@@ -825,6 +864,7 @@ export default function DeployPage() {
   const [website, setWebsite] = useState('')
   const [twitter, setTwitter] = useState('')
   const [telegram, setTelegram] = useState('')
+  const [description, setDescription] = useState('')
 
   // 监听部署代币所需的所有参数
   useEffect(() => {
@@ -924,12 +964,18 @@ export default function DeployPage() {
                       onChange={handleSymbolChange}
                       placeholder={t('enterSymbol')}
                       bg={inputBg}
-                      borderColor={isSymbolValid === false ? 'red.500' : isSymbolValid === true ? 'green.500' : borderColor}
+                      borderColor={
+                        isSymbolValid === false
+                          ? 'red.500'
+                          : isSymbolValid === true
+                          ? 'green.500'
+                          : borderColor
+                      }
                       _placeholder={{ color: 'gray.400' }}
                       size="md"
                       isInvalid={isSymbolValid === false}
                       disabled={isCheckingSymbol}
-                      maxLength={10}  // 添加最大长度限制为10
+                      maxLength={10} // 添加最大长度限制为10
                       type="text"
                       inputMode="text"
                     />
@@ -1051,12 +1097,14 @@ export default function DeployPage() {
                   labelColor={labelColor}
                   inputBg={inputBg}
                   borderColor={borderColor}
-                  website={website}
-                  twitter={twitter}
-                  telegram={telegram}
                   onWebsiteChange={setWebsite}
                   onTwitterChange={setTwitter}
                   onTelegramChange={setTelegram}
+                  onDescriptionChange={setDescription}
+                  website={website}
+                  twitter={twitter}
+                  telegram={telegram}
+                  description={description}
                 />
               </VStack>
             </Box>
@@ -1087,14 +1135,14 @@ export default function DeployPage() {
           </CardFooter>
         </Card>
       </Container>
-      
+
       {/* 钱包连接弹窗 */}
       <WalletConnectModal
         isOpen={isWalletModalOpen}
         onClose={onWalletModalClose}
         onConnect={handleWalletConnected}
       />
-      
+
       {/* 错误弹窗组件 */}
       <ErrorModal
         isOpen={isErrorModalOpen}

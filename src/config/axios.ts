@@ -2,7 +2,7 @@ import axios, { AxiosError } from 'axios'
 import { store } from '@/store'
 
 // API服务器配置
-const API_URL = 'https://fairmint.piweb3.xyz/api'  // 主服务器
+const API_URL = '/api' //'https://fairmint.piweb3.xyz/api'  // 主服务器
 
 // 创建主实例 (fair mint)
 const fairMintInstance = axios.create({
@@ -88,13 +88,18 @@ const handleAxiosError = (error: AxiosError) => {
   if (error.response) {
     const url = error.config?.url || '未知URL'
     const method = error.config?.method?.toUpperCase() || 'UNKNOWN'
-    const params = error.config?.params ? JSON.stringify(error.config.params) : '{}'
+    const params = error.config?.params
+      ? JSON.stringify(error.config.params)
+      : '{}'
     const status = error.response.status
     const statusText = error.response.statusText || '未知错误'
     const data = error.response.data
 
-    console.error(`API错误 [${status} ${statusText}] ${method} ${url} ${params}`, data)
-    
+    console.error(
+      `API错误 [${status} ${statusText}] ${method} ${url} ${params}`,
+      data
+    )
+
     switch (error.response.status) {
       case 401:
         console.log('未授权，请重新登录')
@@ -117,7 +122,10 @@ const handleAxiosError = (error: AxiosError) => {
     console.error('网络错误，请检查您的网络连接', error.request)
     console.log('请求URL:', error.config?.url)
     console.log('请求方法:', error.config?.method?.toUpperCase())
-    console.log('请求参数:', error.config?.params ? JSON.stringify(error.config.params) : '{}')
+    console.log(
+      '请求参数:',
+      error.config?.params ? JSON.stringify(error.config.params) : '{}'
+    )
   } else {
     console.error('请求配置错误:', error.message)
     console.log('请求配置:', error.config)
