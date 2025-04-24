@@ -31,6 +31,9 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  -webkit-tap-highlight-color: transparent;
+  -moz-tap-highlight-color: transparent;
+  -ms-tap-highlight-color: transparent;
 }
 
 html,
@@ -59,17 +62,18 @@ a {
 }
 
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
   height: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--brand-background);
+  background-color: #222;
+  margin: 6px 0;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--brand-primary-50);
-  border-radius: 4px;
+  background-color: #4BB4C2;
+  border-radius: 6px;
   opacity: 0.1;
 }
 

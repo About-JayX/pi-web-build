@@ -1,0 +1,13 @@
+@font-face {
+    font-family: 'EDIX';
+    src: url('./EDIX.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Space-Grotesk';
+    src: url('./Space-Grotesk.woff2');
+    font-weight: normal;
+    font-style: normal;
+}

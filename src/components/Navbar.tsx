@@ -25,6 +25,7 @@ import {
   useToast,
   Avatar,
   Skeleton,
+  VStack,
 } from "@chakra-ui/react"
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons"
 import NextLink from "next/link"
@@ -42,6 +43,7 @@ import { setUser, clearUser } from "@/store/slices/userSlice"
 import LogoText from "./LogoText"
 import WalletConnectModal from "./WalletConnectModal"
 import LanguageSelector from "@/components/LanguageSelector"
+import { useTheme } from "@/contexts/ThemeContext"
 
 // 客户端专用组件，防止服务器端渲染不匹配
 const ClientSideOnly = ({
@@ -69,11 +71,10 @@ const formatWalletAddress = (address: string) => {
 
 // 添加一个Logo骨架屏占位符
 const LogoSkeletonPlaceholder = () => {
-  const pathname = usePathname();
-  const isXpiPage = pathname === "/xpi";
+  const { isDarkPage } = useTheme();
   
-  // 为XPI页面使用深色背景
-  const skeletonBg = isXpiPage 
+  // 为特殊页面使用深色背景
+  const skeletonBg = isDarkPage 
     ? "rgba(255, 255, 255, 0.2)" 
     : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)");
     
@@ -111,11 +112,10 @@ const LogoWithName = () => {
 
 // 添加一个移动端Logo骨架占位符
 const MobileLogoSkeletonPlaceholder = () => {
-  const pathname = usePathname();
-  const isXpiPage = pathname === "/xpi";
+  const { isDarkPage } = useTheme();
   
-  // 为XPI页面使用深色背景
-  const skeletonBg = isXpiPage 
+  // 为特殊页面使用深色背景
+  const skeletonBg = isDarkPage 
     ? "rgba(255, 255, 255, 0.2)" 
     : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)");
     
@@ -127,17 +127,16 @@ const MobileLogoSkeletonPlaceholder = () => {
 // providers.tsx中已经重新实现了一个功能类似的组件
 // 如果修改此组件，也需要同步修改providers.tsx中的版本
 const NavbarPlaceholder = () => {
-  const pathname = usePathname();
-  const isXpiPage = pathname === "/xpi";
+  const { isDarkPage } = useTheme();
   
   const bgColor = useColorModeValue(
     "rgba(255,255,255,0.4)",
     "rgba(0, 0, 0, 0.36)"
   )
   const borderColor = useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)")
-  const isXpiMode = isXpiPage // 根据实际路径判断
+  const isXpiMode = isDarkPage // 根据ThemeContext判断
   const boxShadowValue = isXpiMode ? "none" : useColorModeValue("sm", "none") // 深色模式下不显示阴影
-  const skeletonBg = isXpiPage 
+  const skeletonBg = isDarkPage 
     ? "rgba(255, 255, 255, 0.2)" 
     : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)");
 
@@ -243,16 +242,15 @@ const NavbarPlaceholder = () => {
 
 // 添加完整的钱包和语言选择器占位符
 const NavButtonsPlaceholder = () => {
-  const pathname = usePathname();
-  const isXpiPage = pathname === "/xpi";
+  const { isDarkPage } = useTheme();
   
-  // 为XPI页面使用深色背景
-  const skeletonBg = isXpiPage 
+  // 为特殊页面使用深色背景
+  const skeletonBg = isDarkPage 
     ? "rgba(255, 255, 255, 0.2)" 
     : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)");
   
   // 骨架边框颜色
-  const borderColor = isXpiPage 
+  const borderColor = isDarkPage 
     ? "rgba(255, 255, 255, 0.2)" 
     : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)");
     
@@ -284,10 +282,25 @@ const NavButtonsPlaceholder = () => {
   )
 }
 
-export default function Navbar() {
+export const Navbar = ({
+  needAuth = false,
+  shouldShowWalletHeader = false,
+  isXpiPage = false,
+  isSpacePiPage = false,
+  menuScrollable = true,
+}: {
+  needAuth?: boolean
+  shouldShowWalletHeader?: boolean
+  isXpiPage?: boolean
+  isSpacePiPage?: boolean
+  menuScrollable?: boolean
+}) => {
   const { isOpen, onToggle } = useDisclosure()
   const pathname = usePathname()
-
+  
+  // 使用ThemeContext获取页面类型信息
+  const { isDarkPage: contextIsDarkPage, isXpiPage: contextIsXpiPage, isSpacePiPage: contextIsSpacePiPage } = useTheme()
+  
   // 确保所有钩子都在顶部调用，避免条件渲染导致钩子顺序变化
   const { t } = useTranslation()
   const { network, handleNetworkChange } = useNetwork()
@@ -304,8 +317,17 @@ export default function Navbar() {
   const dispatch = useAppDispatch()
   const { isLoggedIn, userInfo } = useAppSelector((state) => state.user)
 
-  // 判断是否在 XPI 页面，如果是则使用深色模式
-  const isXpiPage = pathname === "/xpi"
+  // 使用属性传入的值优先，如果没有传入则使用ThemeContext提供的值
+  const finalIsXpiPage = isXpiPage || contextIsXpiPage
+  const finalIsSpacePiPage = isSpacePiPage || contextIsSpacePiPage
+  
+  // 统一深色页面判断
+  const isDarkPage = finalIsXpiPage || finalIsSpacePiPage
+  
+  // 输出调试信息以验证路径和页面类型检测是否正确
+  console.log('当前路径:', pathname);
+  console.log('是XPI页面?', finalIsXpiPage);
+  console.log('是SpacePi页面?', finalIsSpacePiPage);
   
   // 所有useColorModeValue调用都放在这里，不要在下面的逻辑中调用
   const xpiBgColorLight = useColorModeValue("rgba(0, 0, 0, 0.36)", "rgba(0, 0, 0, 0.36)")
@@ -327,25 +349,26 @@ export default function Navbar() {
   const walletButtonActiveBgColor = useColorModeValue("brand.primary", "brand.dark")
 
   // 提前计算所有颜色值，避免在条件渲染中使用useColorModeValue
-  const bgColor = isXpiPage ? xpiBgColorLight : normalBgColorLight
-  const textColor = isXpiPage ? "white" : normalTextColor
-  // 在XPI页面或深色模式下使用更接近xpi-web-frontend的边框颜色
-  const borderColor = isXpiPage ? xpiBorderColorLight : normalBorderColorLight
-  const buttonBgColor = isXpiPage ? "brand.primary" : "brand.primary"
-  const buttonTextColor = isXpiPage ? "black" : "white"
-  const buttonHoverBgColor = isXpiPage ? "brand.light" : "brand.light"
-  const iconButtonColor = isXpiPage ? "white" : "inherit"
-  const boxShadowValue = isXpiPage ? boxShadowNone : boxShadowSm
+  // 为XPI和SpacePi页面强制使用黑色半透明背景
+  const bgColor = isDarkPage ? "rgba(0, 0, 0, 0.36)" : normalBgColorLight
+  const textColor = isDarkPage ? "white" : normalTextColor
+  // 在XPI页面或深色模式下使用特定边框颜色
+  const borderColor = isDarkPage ? "rgba(255, 255, 255, 0.2)" : normalBorderColorLight
+  const buttonBgColor = isDarkPage ? "brand.primary" : "brand.primary"
+  const buttonTextColor = isDarkPage ? "black" : "white"
+  const buttonHoverBgColor = isDarkPage ? "brand.light" : "brand.light"
+  const iconButtonColor = isDarkPage ? "white" : "inherit"
+  const boxShadowValue = isDarkPage ? "none" : boxShadowSm
   const menuBgColor = menuBgColorValue
   const menuBorderColor = menuBorderColorValue
   const buttonColorProps = {
-    bg: isXpiPage ? "brand.primary" : buttonBgColorValue,
+    bg: isDarkPage ? "brand.primary" : buttonBgColorValue,
     color: buttonTextColor,
     _hover: {
-      bg: isXpiPage ? "brand.light" : buttonHoverBgColorValue,
+      bg: isDarkPage ? "brand.light" : buttonHoverBgColorValue,
     },
     _active: {
-      bg: isXpiPage ? "brand.primary" : buttonActiveBgColorValue,
+      bg: isDarkPage ? "brand.primary" : buttonActiveBgColorValue,
     },
   }
 
@@ -531,7 +554,10 @@ export default function Navbar() {
             left="50%"
             transform="translateX(-50%)"
             width="auto">
-            <DesktopNav />
+            <DesktopNav 
+              isXpiPage={finalIsXpiPage} 
+              isSpacePiPage={finalIsSpacePiPage} 
+            />
           </Flex>
 
           {/* 右侧语言选择器和钱包按钮 */}
@@ -545,7 +571,7 @@ export default function Navbar() {
               ml={{ base: 2, md: 0 }}
               width={{ xl: "30%" }}>
               {/* 语言选择 */}
-              <LanguageSelector isXpiPage={isXpiPage} />
+              <LanguageSelector />
 
               {/* 网络选择 */}
               <Box display="none">
@@ -607,13 +633,13 @@ export default function Navbar() {
                 <Button
                   display={{ base: "inline-flex", md: "inline-flex" }}
                   variant="solid"
-                  bg={isXpiPage ? "brand.primary" : walletButtonBgColor}
+                  bg={finalIsXpiPage ? "brand.primary" : walletButtonBgColor}
                   color="white"
                   _hover={{
-                    bg: isXpiPage ? "brand.light" : walletButtonHoverBgColor,
+                    bg: finalIsXpiPage ? "brand.light" : walletButtonHoverBgColor,
                   }}
                   _active={{
-                    bg: isXpiPage ? "brand.primary" : walletButtonActiveBgColor,
+                    bg: finalIsXpiPage ? "brand.primary" : walletButtonActiveBgColor,
                   }}
                   size={{ base: "sm", md: "md" }}
                   fontWeight={600}
@@ -634,13 +660,13 @@ export default function Navbar() {
                     fontSize={{ base: "xs", md: "sm" }}
                     fontWeight={600}
                     variant="solid"
-                    bg={isXpiPage ? "brand.primary" : walletButtonBgColor}
+                    bg={finalIsXpiPage ? "brand.primary" : walletButtonBgColor}
                     color="white"
                     _hover={{
-                      bg: isXpiPage ? "brand.light" : walletButtonHoverBgColor,
+                      bg: finalIsXpiPage ? "brand.light" : walletButtonHoverBgColor,
                     }}
                     _active={{
-                      bg: isXpiPage ? "brand.primary" : walletButtonActiveBgColor,
+                      bg: finalIsXpiPage ? "brand.primary" : walletButtonActiveBgColor,
                     }}
                     h={{ base: "36px", md: "40px" }}
                     px={{ base: 3, md: 4 }}
@@ -664,13 +690,13 @@ export default function Navbar() {
                 <Button
                   display={{ base: "inline-flex", md: "inline-flex" }}
                   variant="solid"
-                  bg={isXpiPage ? "brand.primary" : walletButtonBgColor}
+                  bg={finalIsXpiPage ? "brand.primary" : walletButtonBgColor}
                   color="white"
                   _hover={{
-                    bg: isXpiPage ? "brand.light" : walletButtonHoverBgColor,
+                    bg: finalIsXpiPage ? "brand.light" : walletButtonHoverBgColor,
                   }}
                   _active={{
-                    bg: isXpiPage ? "brand.primary" : walletButtonActiveBgColor,
+                    bg: finalIsXpiPage ? "brand.primary" : walletButtonActiveBgColor,
                   }}
                   size={{ base: "sm", md: "md" }}
                   fontWeight={600}
@@ -689,9 +715,10 @@ export default function Navbar() {
         <Box>
           {isOpen && (
             <MobileNav
+              isOpen={isOpen}
               onClose={onToggle}
-              connectWallet={handleConnectButtonClick}
-              isXpiPage={isXpiPage}
+              isXpiPage={finalIsXpiPage}
+              isSpacePiPage={finalIsSpacePiPage}
             />
           )}
         </Box>
@@ -707,12 +734,23 @@ export default function Navbar() {
   )
 }
 
-const DesktopNav = () => {
+const DesktopNav = ({
+  isXpiPage = false,
+  isSpacePiPage = false,
+}: {
+  isXpiPage?: boolean
+  isSpacePiPage?: boolean
+}) => {
   const pathname = usePathname()
   const { t } = useTranslation()
-
-  // 判断是否在 XPI 页面，如果是则使用深色模式
-  const isXpiPage = pathname === "/xpi"
+  
+  // 使用ThemeContext获取页面类型，并与属性传入的值组合
+  const { isXpiPage: contextIsXpiPage, isSpacePiPage: contextIsSpacePiPage } = useTheme()
+  
+  // 判断是否在深色主题页面，优先使用属性传入的值
+  const finalIsXpiPage = isXpiPage || contextIsXpiPage
+  const finalIsSpacePiPage = isSpacePiPage || contextIsSpacePiPage
+  const isDarkPage = finalIsXpiPage || finalIsSpacePiPage
   
   // 所有useColorModeValue调用移到顶部
   const desktopLinkColorValue = useColorModeValue("gray.600", "gray.200")
@@ -721,9 +759,9 @@ const DesktopNav = () => {
   const desktopActiveBgColorValue = useColorModeValue("brand.background", "gray.700")
   const desktopHoverBgColorValue = useColorModeValue("gray.50", "gray.700")
   
-  const linkColor = isXpiPage ? "gray.200" : desktopLinkColorValue
-  const linkHoverColor = isXpiPage ? "white" : desktopLinkHoverColorValue
-  const activeLinkColor = isXpiPage ? "brand.light" : desktopActiveLinkColorValue
+  const linkColor = isDarkPage ? "gray.200" : desktopLinkColorValue
+  const linkHoverColor = isDarkPage ? "white" : desktopLinkHoverColorValue
+  const activeLinkColor = isDarkPage ? "brand.light" : desktopActiveLinkColorValue
   const activeBgColor = desktopActiveBgColorValue
   const hoverBgColor = desktopHoverBgColorValue
 
@@ -805,13 +843,15 @@ const DesktopNav = () => {
 }
 
 const MobileNav = ({
+  isOpen,
   onClose,
-  connectWallet,
   isXpiPage = false,
+  isSpacePiPage = false,
 }: {
+  isOpen: boolean
   onClose: () => void
-  connectWallet: () => void
   isXpiPage?: boolean
+  isSpacePiPage?: boolean
 }) => {
   const pathname = usePathname()
   const { network, handleNetworkChange } = useNetwork()
@@ -821,6 +861,10 @@ const MobileNav = ({
   const toast = useToast()
   const dispatch = useAppDispatch()
   const { isLoggedIn } = useAppSelector((state) => state.user)
+  
+  // 使用ThemeContext获取页面类型，并与属性传入的值组合
+  const { isXpiPage: contextIsXpiPage, isSpacePiPage: contextIsSpacePiPage } = useTheme()
+  
   // 确保所有useColorModeValue调用都在这里，而不是在条件逻辑中
   const whiteBgColor = useColorModeValue("white", "gray.900")
   const primaryBgColor = useColorModeValue("brand.primary", "brand.dark")
@@ -832,21 +876,26 @@ const MobileNav = ({
   const disconnectUndefinedColor = useColorModeValue(undefined, "red.300") 
   const grayBorderColor = useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)")
 
+  // 为特殊页面切换颜色模式
+  const finalIsXpiPage = isXpiPage || contextIsXpiPage
+  const finalIsSpacePiPage = isSpacePiPage || contextIsSpacePiPage
+  const isDarkPage = finalIsXpiPage || finalIsSpacePiPage
+  
   // 提前计算所有颜色值，避免在条件渲染中使用useColorModeValue
-  const navBgColor = isXpiPage ? "gray.900" : whiteBgColor
-  const buttonBgColor = isXpiPage ? "brand.primary" : primaryBgColor
+  const navBgColor = isDarkPage ? "gray.900" : whiteBgColor
+  const buttonBgColor = isDarkPage ? "brand.primary" : primaryBgColor
   // 定义一个统一的按钮选中背景色，确保在所有模式下一致
-  const activeButtonBgColor = "brand.primary" // 始终使用品牌主色，无论XPI模式与否
+  const activeButtonBgColor = "brand.primary" // 始终使用品牌主色，无论模式与否
   const buttonTextColor = "white"
-  const buttonHoverBgColor = isXpiPage ? "brand.light" : lightHoverBgColor
+  const buttonHoverBgColor = isDarkPage ? "brand.light" : lightHoverBgColor
 
-  const walletBgColor = isXpiPage ? "gray.700" : brandBgColor
-  const walletTextColor = isXpiPage ? "white" : primaryColor
-  const walletBorderColor = isXpiPage ? "gray.600" : primaryBorderColor
-  const walletHoverBgColor = isXpiPage ? "gray.600" : brandHoverBgColor
+  const walletBgColor = isDarkPage ? "gray.700" : brandBgColor
+  const walletTextColor = isDarkPage ? "white" : primaryColor
+  const walletBorderColor = isDarkPage ? "gray.600" : primaryBorderColor
+  const walletHoverBgColor = isDarkPage ? "gray.600" : brandHoverBgColor
 
-  const disconnectColor = isXpiPage ? "red.300" : disconnectUndefinedColor
-  const disconnectBorderColor = isXpiPage ? "red.300" : disconnectUndefinedColor
+  const disconnectColor = isDarkPage ? "red.300" : disconnectUndefinedColor
+  const disconnectBorderColor = isDarkPage ? "red.300" : disconnectUndefinedColor
 
   const handleDisconnect = async () => {
     try {
@@ -886,18 +935,24 @@ const MobileNav = ({
         WebkitBackdropFilter: "saturate(180%) blur(8px)",
         transition: "all 0.3s ease-out",
       }}>
-      {NAV_ITEMS.map((navItem) => (
-        <MobileNavItem
-          key={navItem.label}
-          {...navItem}
-          isActive={pathname === navItem.href}
-          onClose={onClose}
-          isXpiPage={isXpiPage}
-        />
-      ))}
+      <VStack spacing={4} pt={6} alignItems="flex-start">
+        {NAV_ITEMS.map((navItem) => {
+          const isActive = pathname === navItem.href
+          return (
+            <MobileNavItem
+              key={navItem.label}
+              {...navItem}
+              onClose={onClose}
+              isActive={isActive}
+              isXpiPage={finalIsXpiPage}
+              isSpacePiPage={finalIsSpacePiPage}
+            />
+          )
+        })}
+      </VStack>
 
       {/* 移动端语言选择 */}
-      <LanguageSelector isMobile onClose={onClose} isXpiPage={isXpiPage} />
+      <LanguageSelector isMobile onClose={onClose} />
 
       {/* 移动端网络选择 */}
       <Box pt={4} pb={2} display="none"></Box>
@@ -936,7 +991,6 @@ const MobileNav = ({
             _active={{ bg: buttonBgColor }}
             size="md"
             onClick={() => {
-              connectWallet() // 打开钱包选择弹窗
               onClose() // 关闭移动菜单
             }}
             isLoading={isConnecting}>
@@ -955,13 +1009,24 @@ const MobileNavItem = ({
   isActive,
   onClose,
   isXpiPage = false,
+  isSpacePiPage = false,
 }: NavItem & {
   isActive?: boolean
   onClose: () => void
   isXpiPage?: boolean
+  isSpacePiPage?: boolean
 }) => {
   const { isOpen, onToggle } = useDisclosure()
   const { t } = useTranslation()
+  
+  // 使用ThemeContext获取页面类型，并与属性传入的值组合
+  const { isXpiPage: contextIsXpiPage, isSpacePiPage: contextIsSpacePiPage } = useTheme()
+  
+  // 优先使用属性传入的值
+  const finalIsXpiPage = isXpiPage || contextIsXpiPage
+  const finalIsSpacePiPage = isSpacePiPage || contextIsSpacePiPage
+  const isDarkPage = finalIsXpiPage || finalIsSpacePiPage
+  
   // 确保所有useColorModeValue调用都在这里
   const primaryLightColor = useColorModeValue("brand.primary", "brand.light")
   const grayTextColor = useColorModeValue("gray.600", "gray.200")
@@ -969,10 +1034,10 @@ const MobileNavItem = ({
   const lightBorderColor = useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)")
 
   // 提前计算所有颜色值
-  const activeLinkColor = isXpiPage ? "brand.light" : primaryLightColor
-  const linkColor = isXpiPage ? "gray.200" : grayTextColor
-  const submenuBgColor = isXpiPage ? "gray.800" : lightBgColor
-  const submenuBorderColor = isXpiPage ? "rgba(255, 255, 255, 0.2)" : lightBorderColor
+  const activeLinkColor = isDarkPage ? "brand.light" : primaryLightColor
+  const linkColor = isDarkPage ? "gray.200" : grayTextColor
+  const submenuBgColor = isDarkPage ? "gray.800" : lightBgColor
+  const submenuBorderColor = isDarkPage ? "rgba(255, 255, 255, 0.2)" : lightBorderColor
 
   const handleClick = () => {
     if (href && !children) {
@@ -1007,7 +1072,7 @@ const MobileNavItem = ({
                   left: "-10px",
                   width: "4px",
                   height: "100%",
-                  bg: isXpiPage ? "brand.light" : "brand.primary",
+                  bg: isDarkPage ? "brand.light" : "brand.primary",
                   borderRadius: "sm",
                 }
               : {}
@@ -1097,7 +1162,12 @@ const NAV_ITEMS: Array<NavItem> = [
     label: "nav.XPI",
     href: "/xpi",
   },
+
   /* 暂时隐藏入口
+  {
+    label: "nav.spacePi",
+    href: "/spacepi",
+  },
   {
     label: 'nav.market',
     href: '/market',

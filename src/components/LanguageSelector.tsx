@@ -14,6 +14,7 @@ import {
   Box
 } from '@chakra-ui/react';
 import { ChevronDownIcon } from '@chakra-ui/icons';
+import { useTheme } from '@/contexts/ThemeContext';
 
 // 语言选择器属性接口
 interface LanguageSelectorProps {
@@ -21,11 +22,6 @@ interface LanguageSelectorProps {
    * 是否为移动版布局
    */
   isMobile?: boolean;
-  
-  /**
-   * 是否在XPI页面
-   */
-  isXpiPage?: boolean;
   
   /**
    * 移动版关闭侧边栏函数
@@ -37,9 +33,11 @@ interface LanguageSelectorProps {
  * 语言选择器组件
  * 提供桌面版下拉菜单和移动版按钮组两种布局
  */
-export default function LanguageSelector({ isMobile = false, isXpiPage = false, onClose }: LanguageSelectorProps) {
+export default function LanguageSelector({ isMobile = false, onClose }: LanguageSelectorProps) {
   const { t } = useTranslation();
   const { language, changeLanguage } = useI18n();
+  // 使用 ThemeContext 代替直接属性传递
+  const { isDarkPage } = useTheme();
 
   // 将所有 useColorModeValue 调用移到组件顶部，确保无条件调用
   const textColorNormal = useColorModeValue("gray.700", "white");
@@ -74,16 +72,16 @@ export default function LanguageSelector({ isMobile = false, isXpiPage = false, 
 
   // 桌面版语言选择按钮样式
   const languageButtonProps = {
-    color: isXpiPage ? "white" : textColorNormal,
+    color: isDarkPage ? "white" : textColorNormal,
     borderWidth: "2px",
-    borderColor: isXpiPage ? "whiteAlpha.400" : borderColorNormal,
-    bg: isXpiPage ? "transparent" : bgColorNormal,
+    borderColor: isDarkPage ? "whiteAlpha.400" : borderColorNormal,
+    bg: isDarkPage ? "transparent" : bgColorNormal,
     _hover: {
-      borderColor: isXpiPage ? "whiteAlpha.600" : hoverBorderColorNormal,
-      bg: isXpiPage ? "whiteAlpha.200" : hoverBgColorNormal,
+      borderColor: isDarkPage ? "whiteAlpha.600" : hoverBorderColorNormal,
+      bg: isDarkPage ? "whiteAlpha.200" : hoverBgColorNormal,
     },
     _active: {
-      bg: isXpiPage ? "whiteAlpha.300" : activeBgColorNormal,
+      bg: isDarkPage ? "whiteAlpha.300" : activeBgColorNormal,
     },
   };
 
@@ -159,7 +157,7 @@ export default function LanguageSelector({ isMobile = false, isXpiPage = false, 
   // 移动版按钮组
   return (
     <Box pt={4} pb={2}>
-      <Text fontWeight="600" mb={2} color={isXpiPage ? "gray.300" : languageLabelColor} fontSize="sm">
+      <Text fontWeight="600" mb={2} color={isDarkPage ? "gray.300" : languageLabelColor} fontSize="sm">
         {t("language")}
       </Text>
       <Stack spacing={2}>
@@ -169,23 +167,23 @@ export default function LanguageSelector({ isMobile = false, isXpiPage = false, 
           justifyContent="flex-start"
           onClick={() => handleLanguageChange("en")}
           h="36px"
-          color={language === "en" ? "white" : isXpiPage ? "gray.200" : inactiveTextColor}
+          color={language === "en" ? "white" : isDarkPage ? "gray.200" : inactiveTextColor}
           borderColor={
-            language === "en" ? activeButtonHexColor : isXpiPage ? "whiteAlpha.400" : inactiveBorderColor
+            language === "en" ? activeButtonHexColor : isDarkPage ? "whiteAlpha.400" : inactiveBorderColor
           }
           borderWidth={language === "en" ? "1px" : "1px"}
-          bg={language === "en" ? activeButtonHexColor : isXpiPage ? "transparent" : inactiveBgColor}
+          bg={language === "en" ? activeButtonHexColor : isDarkPage ? "transparent" : inactiveBgColor}
           _hover={{
             borderColor:
-              language === "en" ? activeButtonHexColor : isXpiPage ? "whiteAlpha.600" : hoverBorderColor,
-            bg: language === "en" ? buttonHoverBgColor : isXpiPage ? "whiteAlpha.200" : inactiveHoverBgColor,
+              language === "en" ? activeButtonHexColor : isDarkPage ? "whiteAlpha.600" : hoverBorderColor,
+            bg: language === "en" ? buttonHoverBgColor : isDarkPage ? "whiteAlpha.200" : inactiveHoverBgColor,
             color: language === "en" ? "white" : hoverTextColor,
           }}
           _active={{
             bg:
               language === "en"
                 ? activeButtonHexColor
-                : isXpiPage ? "whiteAlpha.300" : inactiveActiveBgColor,
+                : isDarkPage ? "whiteAlpha.300" : inactiveActiveBgColor,
           }}
           _dark={{
             borderColor:
@@ -202,23 +200,23 @@ export default function LanguageSelector({ isMobile = false, isXpiPage = false, 
           justifyContent="flex-start"
           onClick={() => handleLanguageChange("ko")}
           h="36px"
-          color={language === "ko" ? "white" : isXpiPage ? "gray.200" : inactiveTextColor}
+          color={language === "ko" ? "white" : isDarkPage ? "gray.200" : inactiveTextColor}
           borderColor={
-            language === "ko" ? activeButtonHexColor : isXpiPage ? "whiteAlpha.400" : inactiveBorderColor
+            language === "ko" ? activeButtonHexColor : isDarkPage ? "whiteAlpha.400" : inactiveBorderColor
           }
           borderWidth={language === "ko" ? "1px" : "1px"}
-          bg={language === "ko" ? activeButtonHexColor : isXpiPage ? "transparent" : inactiveBgColor}
+          bg={language === "ko" ? activeButtonHexColor : isDarkPage ? "transparent" : inactiveBgColor}
           _hover={{
             borderColor:
-              language === "ko" ? activeButtonHexColor : isXpiPage ? "whiteAlpha.600" : hoverBorderColor,
-            bg: language === "ko" ? buttonHoverBgColor : isXpiPage ? "whiteAlpha.200" : inactiveHoverBgColor,
+              language === "ko" ? activeButtonHexColor : isDarkPage ? "whiteAlpha.600" : hoverBorderColor,
+            bg: language === "ko" ? buttonHoverBgColor : isDarkPage ? "whiteAlpha.200" : inactiveHoverBgColor,
             color: language === "ko" ? "white" : hoverTextColor,
           }}
           _active={{
             bg:
               language === "ko"
                 ? activeButtonHexColor
-                : isXpiPage ? "whiteAlpha.300" : inactiveActiveBgColor,
+                : isDarkPage ? "whiteAlpha.300" : inactiveActiveBgColor,
           }}
           _dark={{
             borderColor:
@@ -235,23 +233,23 @@ export default function LanguageSelector({ isMobile = false, isXpiPage = false, 
           justifyContent="flex-start"
           onClick={() => handleLanguageChange("zh")}
           h="36px"
-          color={language === "zh" ? "white" : isXpiPage ? "gray.200" : inactiveTextColor}
+          color={language === "zh" ? "white" : isDarkPage ? "gray.200" : inactiveTextColor}
           borderColor={
-            language === "zh" ? activeButtonHexColor : isXpiPage ? "whiteAlpha.400" : inactiveBorderColor
+            language === "zh" ? activeButtonHexColor : isDarkPage ? "whiteAlpha.400" : inactiveBorderColor
           }
           borderWidth={language === "zh" ? "1px" : "1px"}
-          bg={language === "zh" ? activeButtonHexColor : isXpiPage ? "transparent" : inactiveBgColor}
+          bg={language === "zh" ? activeButtonHexColor : isDarkPage ? "transparent" : inactiveBgColor}
           _hover={{
             borderColor:
-              language === "zh" ? activeButtonHexColor : isXpiPage ? "whiteAlpha.600" : hoverBorderColor,
-            bg: language === "zh" ? buttonHoverBgColor : isXpiPage ? "whiteAlpha.200" : inactiveHoverBgColor,
+              language === "zh" ? activeButtonHexColor : isDarkPage ? "whiteAlpha.600" : hoverBorderColor,
+            bg: language === "zh" ? buttonHoverBgColor : isDarkPage ? "whiteAlpha.200" : inactiveHoverBgColor,
             color: language === "zh" ? "white" : hoverTextColor,
           }}
           _active={{
             bg:
               language === "zh"
                 ? activeButtonHexColor
-                : isXpiPage ? "whiteAlpha.300" : inactiveActiveBgColor,
+                : isDarkPage ? "whiteAlpha.300" : inactiveActiveBgColor,
           }}
           _dark={{
             borderColor:

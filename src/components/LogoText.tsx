@@ -1,14 +1,15 @@
 'use client';
 
 import { Text, Box, useColorModeValue } from '@chakra-ui/react';
-import { usePathname } from 'next/navigation';
+import { useTheme } from '@/contexts/ThemeContext';
 
-// 简化LogoText组件，去掉不必要的客户端检测
+// 简化LogoText组件，去掉不必要的客户端检测和属性传递
 const LogoText = () => {
-  const pathname = usePathname();
-  // 判断是否在 XPI 页面，如果是则使用白色文本
-  const isXpiPage = pathname === "/xpi";
-  const textColor = isXpiPage ? "white" : "brand.primary";
+  // 使用ThemeContext获取页面主题状态
+  const { isDarkPage } = useTheme();
+  
+  // 深色页面强制使用白色
+  const textColor = isDarkPage ? "white" : "brand.primary";
 
   return (
     <Box height="24px" width="80px" display="flex" alignItems="center" minWidth="80px" flexShrink={0}>

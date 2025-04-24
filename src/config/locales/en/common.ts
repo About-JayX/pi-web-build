@@ -9,6 +9,7 @@ export default {
   'points': 'Points',
   'deploy': 'Deploy',
   'XPI': 'XPI',
+  'spacePi': 'SpacePi',
   
   // Navigation with prefix (to avoid conflicts)
   'nav.home': 'Home',
@@ -20,6 +21,7 @@ export default {
   'nav.points': 'Points',
   'nav.deploy': 'Deploy',
   'nav.XPI': 'XPI',
+  'nav.spacePi': 'SpacePi',
   
   'connectWallet': 'Connect',
   'selectNetwork': 'Select Network',

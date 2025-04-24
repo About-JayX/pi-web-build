@@ -24,38 +24,42 @@ import { store } from "../store";
 import { WssProvider } from "@/contexts/WssContext";
 import AuthRestorer from "@/contexts/AuthRestorer";
 import { usePathname } from "next/navigation";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 // 动态导入Navbar，避免SSR
-const Navbar = dynamic(() => import("@/components/Navbar"), { 
+const Navbar = dynamic(() => import("@/components/Navbar").then(mod => mod.Navbar), { 
   ssr: false,
   loading: NavbarPlaceholder,
 });
 // 动态导入公告组件，避免SSR
-const Announcement = dynamic(() => import("@/components/Announcement"), {
+const Announcement = dynamic(() => import("@/components/Announcement").then(mod => mod.default || mod), {
   ssr: false,
 });
 
 // Navbar占位符，在Navbar加载前显示
 function NavbarPlaceholder() {
-  // 检测当前路径，确定是否在XPI页面
+  // 检测当前路径，确定是否在XPI页面或SpacePi页面
   const pathname = usePathname();
   const isXpiPage = pathname === "/xpi";
+  const isSpacePiPage = pathname === "/spacepi";
+  const isDarkPage = isXpiPage || isSpacePiPage;
   
-  // 为XPI页面使用深色背景，避免闪烁白色背景
-  const bgColor = isXpiPage 
+  // 为深色页面使用完全相同的深色背景，确保XPi和SpacePi页面导航栏一致
+  // 强制使用与XPi相同的背景色，避免样式差异
+  const bgColor = isDarkPage 
     ? "rgba(0, 0, 0, 0.36)" 
     : useColorModeValue('rgba(255,255,255,0.4)', 'rgba(0, 0, 0, 0.36)');
   
-  const borderColor = isXpiPage 
+  const borderColor = isDarkPage 
     ? "rgba(255, 255, 255, 0.2)" 
     : useColorModeValue('gray.200', 'rgba(255, 255, 255, 0.2)');
   
-  const boxShadowValue = isXpiPage 
+  const boxShadowValue = isDarkPage 
     ? "none" 
     : "sm";
     
-  // 骨架屏颜色
-  const skeletonBg = isXpiPage 
+  // 骨架屏颜色 - 确保深色页面完全一致
+  const skeletonBg = isDarkPage 
     ? "rgba(255, 255, 255, 0.2)" 
     : useColorModeValue("gray.200", "rgba(255, 255, 255, 0.2)");
 
@@ -186,12 +190,15 @@ const localStorageManager = createLocalStorageManager("pi-sale-color-mode");
 function ClientOnly({ children }: { children: React.ReactNode }) {
   const [hasMounted, setHasMounted] = useState(false);
   const pathname = usePathname();
+  const isXpiPage = pathname === "/xpi";
+  const isSpacePiPage = pathname === "/spacepi";
+  const isDarkPage = isXpiPage || isSpacePiPage;
 
   useEffect(() => {
     setHasMounted(true);
   }, []);
 
-  // 在服务器端或者客户端首次渲染前不显示Navbar占位符
+  // 在服务器端或者客户端首次渲染前显示Navbar占位符
   if (!hasMounted) {
     return (
       <>
@@ -215,32 +222,34 @@ export function Providers({ children }: { children: React.ReactNode }) {
               <NetworkProvider>
                 <SolanaProvider>
                   <I18nProvider>
-                    <Box position="relative" minHeight="100vh">
-                      <Box
-                        position="fixed"
-                        top="60px"
-                        left="0"
-                        right={1}
-                        bottom="0"
-                        bgImage="/bg.png"
-                        bgSize="cover"
-                        bgPosition="center"
-                        bgRepeat="no-repeat"
-                        opacity="0.8"
-                        zIndex="0"
-                        pointerEvents="none"
-                      />
-                      
-                      <Box position="relative">
-                        <AuthRestorer />
-                        <Navbar />
-                        <main style={{ minHeight: "calc(100vh - 60px)" }}>
-                          {children}
-                        </main>
-                        <Footer />
-                        <Announcement />
+                    <ThemeProvider>
+                      <Box position="relative" minHeight="100vh">
+                        <Box
+                          position="fixed"
+                          top="60px"
+                          left="0"
+                          right={1}
+                          bottom="0"
+                          bgImage="/bg.png"
+                          bgSize="cover"
+                          bgPosition="center"
+                          bgRepeat="no-repeat"
+                          opacity="0.8"
+                          zIndex="0"
+                          pointerEvents="none"
+                        />
+                        
+                        <Box position="relative">
+                          <AuthRestorer />
+                          <Navbar />
+                          <main style={{ minHeight: "calc(100vh - 60px)" }}>
+                            {children}
+                          </main>
+                          <Footer />
+                          <Announcement />
+                        </Box>
                       </Box>
-                    </Box>
+                    </ThemeProvider>
                   </I18nProvider>
                 </SolanaProvider>
               </NetworkProvider>

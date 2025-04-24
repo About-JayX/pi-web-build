@@ -9,7 +9,9 @@ export default {
   'nav.points': '积分',
   'nav.deploy': '部署',
   'nav.XPI': '𝕏ℙ𝕚',
+  'nav.spacePi': 'SpacePi',
   'XPI': '𝕏ℙ𝕚',
+  'spacePi': 'SpacePi',
   
   'connectWallet': '连接',
   'selectNetwork': '选择网络',
