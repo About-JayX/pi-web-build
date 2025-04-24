@@ -16,6 +16,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { FaExclamationTriangle } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 interface ErrorModalProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
   errorMessage,
   errorDetails
 }) => {
+  const { t } = useTranslation();
   // 仅在开发环境中显示
   const isDevelopment = process.env.NODE_ENV === 'development';
   
@@ -74,7 +76,7 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
           pb={3}
         >
           <Icon as={FaExclamationTriangle} mr={2} />
-          <Heading size="md">严重错误</Heading>
+          <Heading size="md">{t('criticalError')}</Heading>
         </ModalHeader>
         <ModalCloseButton />
         
@@ -85,7 +87,7 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
           
           {errorDetailsText && (
             <Box mt={4}>
-              <Text fontWeight="semibold" mb={2}>详细错误信息：</Text>
+              <Text fontWeight="semibold" mb={2}>{t('errorDetails')}</Text>
               <Code p={3} borderRadius="md" whiteSpace="pre-wrap" display="block" overflowX="auto" width="100%">
                 {errorDetailsText}
               </Code>
@@ -94,14 +96,14 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
           
           <Box mt={6} p={3} bg="blackAlpha.200" borderRadius="md">
             <Text fontSize="sm" color="gray.600">
-              注意：此错误提示仅在开发环境中可见。请修复此问题以确保应用程序正常运行。
+              {t('devModeErrorNote')}
             </Text>
           </Box>
         </ModalBody>
 
         <ModalFooter>
           <Button colorScheme="red" onClick={onClose}>
-            关闭
+            {t('close')}
           </Button>
         </ModalFooter>
       </ModalContent>

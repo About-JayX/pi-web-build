@@ -109,4 +109,15 @@ export default {
   'cancelFeeNote': '取消铸造将收取2%手续费，退还98%的{currency}',
   'tokenDeliveryNote': '铸造成功后，代币将自动发送到您的钱包地址',
   'tradingNote': '铸造结束后，代币将可转账且可在DEX自由交易',
+  
+  // ShareModal组件
+  'shareToken': '分享 ${{ticker}}',
+  'contentCopiedToClipboard': '内容已复制到剪贴板',
+  'pleaseManualCopyContent': '请手动复制内容',
+  'pleaseManualCopyLink': '请手动复制链接',
+  'caCopiedToClipboard': 'CA已复制到剪贴板',
+  'pleaseManualCopyCA': '请手动复制CA',
+  'copyContent': '复制内容：',
+  'tokenLink': '代币链接：',
+  'shareTo': '分享到：',
 }; 

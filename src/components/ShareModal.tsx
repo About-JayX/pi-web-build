@@ -21,6 +21,7 @@ import {
   Icon,
 } from '@chakra-ui/react';
 import { FaTwitter, FaTelegram, FaCopy, FaLink } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -37,7 +38,7 @@ interface ShareModalProps {
 const ShareModal = ({
   isOpen,
   onClose,
-  title = '分享',
+  title,
   content,
   url,
   tokenTicker,
@@ -46,6 +47,7 @@ const ShareModal = ({
   hashtags = [],
 }: ShareModalProps) => {
   const toast = useToast();
+  const { t } = useTranslation();
   const bgColor = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const textColor = useColorModeValue('gray.700', 'gray.300');
@@ -205,8 +207,8 @@ const ShareModal = ({
     navigator.clipboard.writeText(fullContent)
       .then(() => {
         toast({
-          title: '复制成功',
-          description: '内容已复制到剪贴板',
+          title: t('copySuccess'),
+          description: t('contentCopiedToClipboard'),
           status: 'success',
           duration: 2000,
           isClosable: true,
@@ -215,8 +217,8 @@ const ShareModal = ({
       })
       .catch(() => {
         toast({
-          title: '复制失败',
-          description: '请手动复制内容',
+          title: t('copyFailed'),
+          description: t('pleaseManualCopyContent'),
           status: 'error',
           duration: 2000,
           isClosable: true,
@@ -230,8 +232,8 @@ const ShareModal = ({
     navigator.clipboard.writeText(url)
       .then(() => {
         toast({
-          title: '复制成功',
-          description: '链接已复制到剪贴板',
+          title: t('copySuccess'),
+          description: t('linkCopied'),
           status: 'success',
           duration: 2000,
           isClosable: true,
@@ -240,8 +242,8 @@ const ShareModal = ({
       })
       .catch(() => {
         toast({
-          title: '复制失败',
-          description: '请手动复制链接',
+          title: t('copyFailed'),
+          description: t('pleaseManualCopyLink'),
           status: 'error',
           duration: 2000,
           isClosable: true,
@@ -257,8 +259,8 @@ const ShareModal = ({
     navigator.clipboard.writeText(contractAddress)
       .then(() => {
         toast({
-          title: '复制成功',
-          description: 'CA已复制到剪贴板',
+          title: t('copySuccess'),
+          description: t('caCopiedToClipboard'),
           status: 'success',
           duration: 2000,
           isClosable: true,
@@ -267,8 +269,8 @@ const ShareModal = ({
       })
       .catch(() => {
         toast({
-          title: '复制失败',
-          description: '请手动复制CA',
+          title: t('copyFailed'),
+          description: t('pleaseManualCopyCA'),
           status: 'error',
           duration: 2000,
           isClosable: true,
@@ -293,7 +295,7 @@ const ShareModal = ({
           borderBottom="1px solid"
           borderColor={borderColor}
         >
-          {tokenTicker ? `分享 $${tokenTicker}` : '分享'}
+          {tokenTicker ? t('shareToken', {ticker: tokenTicker}) : t('share')}
         </ModalHeader>
         <ModalCloseButton top={4} />
         
@@ -302,7 +304,7 @@ const ShareModal = ({
             
             <Box>
               <Text fontWeight="medium" fontSize="md" mb={2} color={textColor}>
-                复制内容：
+                {t('copyContent')}
               </Text>
               <Flex>
                 <Input 
@@ -315,7 +317,7 @@ const ShareModal = ({
                   fontSize="sm"
                 />
                 <IconButton
-                  aria-label="复制内容"
+                  aria-label={t('copy')}
                   icon={<FaCopy />}
                   borderLeftRadius="0"
                   bg="brand.primary"
@@ -328,7 +330,7 @@ const ShareModal = ({
             
             <Box>
               <Text fontWeight="medium" fontSize="md" mb={2} color={textColor}>
-                代币链接：
+                {t('tokenLink')}
               </Text>
               <Flex>
                 <Input 
@@ -341,7 +343,7 @@ const ShareModal = ({
                   fontSize="sm"
                 />
                 <IconButton
-                  aria-label="复制链接"
+                  aria-label={t('copy')}
                   icon={<FaLink />}
                   borderLeftRadius="0"
                   bg="brand.primary"
@@ -356,7 +358,7 @@ const ShareModal = ({
             
             <Box>
               <Text fontWeight="medium" fontSize="md" mb={3} color={textColor}>
-                分享到：
+                {t('shareTo')}
               </Text>
               <HStack spacing={3} justify="center">
                 <Button 
@@ -370,7 +372,7 @@ const ShareModal = ({
                   px={6}
                   minW="120px"
                 >
-                  推特
+                  {t('twitter')}
                 </Button>
                 <Button 
                   leftIcon={<Icon as={FaTelegram} />} 
@@ -383,7 +385,7 @@ const ShareModal = ({
                   px={6}
                   minW="120px"
                 >
-                  电报
+                  {t('telegram')}
                 </Button>
               </HStack>
             </Box>

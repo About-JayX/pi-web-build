@@ -868,26 +868,26 @@ export default function MintPage() {
                       // 当没有选择排序条件时，显示默认文本
                       tabIndex === 0 ? t("progressColumn") :  // 修改热门铸造标签页的默认显示
                       tabIndex === 1 ? t("progressColumn") : // 所有代币默认显示"铸造进度"
-                      tabIndex === 2 ? "部署时间" :
-                      tabIndex === 3 ? "部署时间" : "默认排序"
+                      tabIndex === 2 ? t("deployed") :
+                      tabIndex === 3 ? t("deployed") : t("sortBy")
                     ) : (
                       // 当用户选择了排序条件时，显示所选排序条件
                       sortColumn === 'progress' ? t("progressColumn") : 
                       sortColumn === 'minter_counts' ? t("participantsColumn") : 
-                      sortColumn === 'target' ? "铸造总额" : 
-                      sortColumn === 'raised' ? "已铸额度" : 
-                      sortColumn === 'deployAt' ? "部署时间" :
-                      tabIndex === 2 && sortColumn === '' ? "部署时间" : // 确保最新部署标签页空排序列显示为"部署时间"
+                      sortColumn === 'target' ? t("targetSort") : 
+                      sortColumn === 'raised' ? t("raisedSort") : 
+                      sortColumn === 'deployAt' ? t("deployed") :
+                      tabIndex === 2 && sortColumn === '' ? t("deployed") : // 确保最新部署标签页空排序列显示为"部署时间"
                       t("progressColumn")
                     )}
                   </MenuButton>
                   <MenuList minW={{ base: "120px", md: "160px" }}>
                     {[
                       { label: t("progressColumn"), value: "progress" },
-                      { label: "铸造总额", value: "target" },
-                      { label: "已铸额度", value: "raised" },
+                      { label: t("targetSort"), value: "target" },
+                      { label: t("raisedSort"), value: "raised" },
                       { label: t("participantsColumn"), value: "minter_counts" },
-                      { label: "部署时间", value: "deployAt" }
+                      { label: t("deployed"), value: "deployAt" }
                     ].map((item, index) => (
                       <MenuItem
                         key={index}

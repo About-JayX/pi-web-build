@@ -19,6 +19,10 @@ export default {
   
   // 错误和提示信息
   'error': '错误',
+  'criticalError': '严重错误',
+  'errorDetails': '详细错误信息：',
+  'devModeErrorNote': '注意：此错误提示仅在开发环境中可见。请修复此问题以确保应用程序正常运行。',
+  'close': '关闭',
   'installPhantomWallet': '请安装Phantom钱包插件',
   'loginSuccess': '登录成功',
   'connectSuccess': '连接成功',
