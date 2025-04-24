@@ -17,7 +17,6 @@ import { keyframes } from "@emotion/react";
 import NextLink from "next/link";
 import { useTranslation } from "react-i18next";
 import Head from "next/head";
-import Lottie from "lottie-react";
 import { useEffect, useState } from "react";
 import { css, Global } from "@emotion/react";
 import dynamic from "next/dynamic";
@@ -76,7 +75,7 @@ const HomeBgBox = chakra(Box, {
         backgroundImage: "url('/xpi/bg/bg.png')",
         backgroundRepeat: "no-repeat",
         backgroundSize: "cover",
-        backgroundPosition: "center",
+        backgroundPosition: "center -550px",
         width: "100%",
         height: "100vh",
         position: "absolute",
