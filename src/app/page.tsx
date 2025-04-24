@@ -33,6 +33,10 @@ import {
   Grid,
   Card,
   CardBody,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from "@chakra-ui/react";
 import {
   FaThLarge,
@@ -559,10 +563,7 @@ export default function MintPage() {
     return (
       <>
         {viewMode === "card" ? (
-          <SimpleGrid
-            columns={{ base: 1, md: 2, lg: 2, xl: 3 }}
-            spacing={{ base: 6, md: 5, lg: 4, xl: 3 }}
-          >
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 2, xl: 3 }} spacing={4}>
             {processedTokens.map((token) => (
               <MintingTokenCard
                 key={token.id}
@@ -605,18 +606,15 @@ export default function MintPage() {
             mb={{ base: 2, md: 0 }}
             spacing={{ base: 2, md: 0 }}
           >
-            <Flex
-              align="baseline"
-              width={{ base: "100%", md: "auto" }}
-              mb={{ base: 0, md: 0 }}
-            >
-              <Heading as="h2" size="lg" m={0}>
+            <Flex align="baseline">
+              <Heading as="h2" size="lg" m={0} w="100%">
                 {t("mintingTokens")}
               </Heading>
               <Button
+                display={{ base: "none", md: "flex" }}
                 as={NextLink}
                 href="/deploy"
-                ml={4}
+                ml={0}
                 mt={{ base: 0, md: 1 }}
                 colorScheme="teal"
                 variant="solid"
@@ -659,8 +657,9 @@ export default function MintPage() {
           <Grid gap={2}>
             <Flex
               justifyContent="space-between"
-              alignItems="center"
+              alignItems={{ base: "flex-start", md: "center" }}
               flexWrap="wrap"
+              flexDirection={{ base: "column", md: "row" }}
               gap={4}
               overflow="hidden"
             >
@@ -698,29 +697,64 @@ export default function MintPage() {
                   </Button>
                 ))}
               </Flex>
-              <InputGroup
-                maxW={{ base: "100%", md: "300px" }}
-                mb={{ base: 2, md: 0 }}
-              >
-                <InputLeftElement pointerEvents="none" flexShrink={1}>
-                  <Icon as={FaSearch} color="gray.400" />
-                </InputLeftElement>
-                <Input
-                  placeholder={t("searchPlaceholder")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  bg={inputBg}
-                  borderColor="gray.200"
-                  borderRadius="md"
-                  _hover={{ borderColor: "brand.primary" }}
-                  _focus={{
-                    borderColor: "brand.primary",
-                    boxShadow: "0 0 0 1px var(--chakra-colors-brand-primary)",
-                  }}
-                  size="md"
-                  fontSize="sm"
-                />
-              </InputGroup>
+              <Flex gap={2} w={{ base: "100%", md: "auto" }}>
+                {/* 排序 */}
+                <Menu>
+                  <MenuButton
+                    minW={{ base: "120px", md: "160px" }}
+                    as={Button}
+                    variant="solid"
+                    bg="white"
+                    _hover={{ bg: "white" }}
+                    _active={{ bg: "white" }}
+                    borderWidth={1}
+                    fontSize="sm"
+                    rightIcon={<ChevronDownIcon />}
+                  >
+                    All coins
+                  </MenuButton>
+                  <MenuList minW={{ base: "120px", md: "160px" }}>
+                    {[
+                      t("totalSupplyColumn"),
+                      t("progressColumn"),
+                      t("participantsColumn"),
+                    ].map((item, index) => (
+                      <MenuItem
+                        key={index}
+                        fontSize="sm"
+                        // 选中样式
+                        // bg="brand.primary"
+                        // fontWeight="bold"
+                        // color="white"
+                        // 未选中样式 opacity选中1 未选中0.8
+                        // opacity={0.8}
+                      >
+                        {item}
+                      </MenuItem>
+                    ))}
+                  </MenuList>
+                </Menu>
+                <InputGroup maxW={{ base: "100%", md: "300px" }} mb={0}>
+                  <InputLeftElement pointerEvents="none" flexShrink={1}>
+                    <Icon as={FaSearch} color="gray.400" />
+                  </InputLeftElement>
+                  <Input
+                    placeholder={t("searchPlaceholder")}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    bg={inputBg}
+                    borderColor="gray.200"
+                    borderRadius="md"
+                    _hover={{ borderColor: "brand.primary" }}
+                    _focus={{
+                      borderColor: "brand.primary",
+                      boxShadow: "0 0 0 1px var(--chakra-colors-brand-primary)",
+                    }}
+                    size="md"
+                    fontSize="sm"
+                  />
+                </InputGroup>
+              </Flex>
             </Flex>
             <FilterPanel
               sortColumn={"progress"}
@@ -729,7 +763,12 @@ export default function MintPage() {
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
             />
-            <Card p={0} bg="transparent" shadow="none" mt={{ base: -5, sm:-4 }}>
+            <Card
+              p={0}
+              bg="transparent"
+              shadow="none"
+              mt={{ base: -5, sm: -4 }}
+            >
               <CardBody p={0}>{renderTabContent(tokenList)}</CardBody>
             </Card>
           </Grid>
