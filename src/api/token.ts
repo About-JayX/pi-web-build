@@ -37,6 +37,15 @@ export const TokenAPI = {
   },
 
   /**
+   * 获取token详情
+   * @param address token地址
+   * @returns Promise<Token> 返回token详情
+   */
+  getTokenDetail: (address: string): Promise<TokenInfo> => {
+    return request.get(`/token/${address}`)
+  },
+
+  /**
    * 获取平台数据
    * @returns Promise<PlatformMetrics> 返回平台统计数据
    */

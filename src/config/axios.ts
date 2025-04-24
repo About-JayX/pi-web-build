@@ -2,7 +2,7 @@ import axios, { AxiosError } from 'axios'
 import { store } from '@/store'
 
 // API服务器配置
-const API_URL = '/api' //'https://fairmint.piweb3.xyz/api'  // 主服务器
+const API_URL = 'https://fairmint.piweb3.xyz/api' //'https://fairmint.piweb3.xyz/api'  // 主服务器
 
 // 创建主实例 (fair mint)
 const fairMintInstance = axios.create({
