@@ -8,16 +8,16 @@ const USER_API_URL = apiConfig.userApiUrl
 
 // 创建主实例 (fair mint)
 const fairMintInstance = axios.create({
-  baseURL: "/api",
+  baseURL: API_URL,
   timeout: apiConfig.timeout,
   headers: {
     'Content-Type': 'application/json',
-  }
+  },
 })
 
 // 添加自定义配置到请求对象
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 2000; // 固定2秒重试
+const MAX_RETRIES = 3
+const RETRY_DELAY = 2000 // 固定2秒重试
 
 // 创建用户API实例
 const userInstance = axios.create({
@@ -52,84 +52,95 @@ fairMintInstance.interceptors.response.use(
     // 成功时缓存响应
     if (response.config.method === 'get') {
       try {
-        const cacheKey = `api_cache_${response.config.url}`;
+        const cacheKey = `api_cache_${response.config.url}`
         const dataToCache = {
           data: response.data,
           timestamp: new Date().getTime(),
-        };
-        localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+        }
+        localStorage.setItem(cacheKey, JSON.stringify(dataToCache))
       } catch (err) {
-        console.warn('Failed to cache API response:', err);
+        console.warn('Failed to cache API response:', err)
       }
     }
-    return response.data;
+    return response.data
   },
   async error => {
-    const originalRequest = error.config;
-    
+    const originalRequest = error.config
+
     // 为请求添加重试计数器
     if (originalRequest._retryCount === undefined) {
-      originalRequest._retryCount = 0;
+      originalRequest._retryCount = 0
     }
-    
+
     // 如果是502错误且重试次数未超过限制
     if (
-      error.response && 
-      error.response.status === 502 && 
+      error.response &&
+      error.response.status === 502 &&
       originalRequest._retryCount < MAX_RETRIES
     ) {
-      originalRequest._retryCount += 1;
-      console.log(`Retrying request (${originalRequest._retryCount}/${MAX_RETRIES}): ${originalRequest.url}`);
-      
+      originalRequest._retryCount += 1
+      console.log(
+        `Retrying request (${originalRequest._retryCount}/${MAX_RETRIES}): ${originalRequest.url}`
+      )
+
       // 使用固定2秒间隔重试
-      console.log(`Retrying in 2s...`);
-      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-      
+      console.log(`Retrying in 2s...`)
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY))
+
       // 尝试从缓存获取数据
       if (originalRequest.method === 'get') {
         try {
-          const cacheKey = `api_cache_${originalRequest.url}`;
-          const cachedData = localStorage.getItem(cacheKey);
+          const cacheKey = `api_cache_${originalRequest.url}`
+          const cachedData = localStorage.getItem(cacheKey)
           if (cachedData) {
-            const parsedCache = JSON.parse(cachedData);
+            const parsedCache = JSON.parse(cachedData)
             // 检查缓存是否过期 (24小时)
-            const now = new Date().getTime();
+            const now = new Date().getTime()
             if (now - parsedCache.timestamp < 24 * 60 * 60 * 1000) {
-              console.log('Using cached API response:', originalRequest.url);
-              return parsedCache.data;
+              console.log('Using cached API response:', originalRequest.url)
+              return parsedCache.data
             }
           }
         } catch (cacheErr) {
-          console.warn('Failed to read cache data:', cacheErr);
+          console.warn('Failed to read cache data:', cacheErr)
         }
       }
-      
+
       // 如果没有缓存或缓存已过期，重新请求
-      return fairMintInstance(originalRequest);
-    } else if (error.response && error.response.status === 502 && originalRequest._retryCount >= MAX_RETRIES) {
-      console.error(`Max retries (${MAX_RETRIES}) reached, request failed: ${originalRequest.url}`);
+      return fairMintInstance(originalRequest)
+    } else if (
+      error.response &&
+      error.response.status === 502 &&
+      originalRequest._retryCount >= MAX_RETRIES
+    ) {
+      console.error(
+        `Max retries (${MAX_RETRIES}) reached, request failed: ${originalRequest.url}`
+      )
     }
-    
+
     // 记录请求错误
-    handleAxiosError(error);
-    
+    handleAxiosError(error)
+
     // 对于GET请求，尝试从缓存获取数据
     if (error.config && error.config.method === 'get') {
       try {
-        const cacheKey = `api_cache_${error.config.url}`;
-        const cachedData = localStorage.getItem(cacheKey);
+        const cacheKey = `api_cache_${error.config.url}`
+        const cachedData = localStorage.getItem(cacheKey)
         if (cachedData) {
-          const parsedCache = JSON.parse(cachedData);
-          console.log('API request failed, using cached data:', error.config.url);
-          return parsedCache.data;
+          const parsedCache = JSON.parse(cachedData)
+          console.log(
+            'API request failed, using cached data:',
+            error.config.url
+          )
+          return parsedCache.data
         }
       } catch (cacheErr) {
-        console.warn('Failed to retrieve cached data:', cacheErr);
+        console.warn('Failed to retrieve cached data:', cacheErr)
       }
     }
-    
+
     // 如果没有缓存或不是GET请求，则抛出错误
-    return Promise.reject(error);
+    return Promise.reject(error)
   }
 )
 
@@ -148,7 +159,9 @@ userInstance.interceptors.request.use(
         config.headers.Authorization = storeToken
         console.log(`Token from Redux added to user API request: ${config.url}`)
       } else {
-        console.log(`No token found, sending unauthenticated request: ${config.url}`)
+        console.log(
+          `No token found, sending unauthenticated request: ${config.url}`
+        )
       }
     }
     return config
@@ -206,7 +219,9 @@ const handleAxiosError = (error: AxiosError) => {
         break
       case 502:
         console.log('Gateway error (502 Bad Gateway):', url)
-        console.log('This may be due to temporary server overload or maintenance')
+        console.log(
+          'This may be due to temporary server overload or maintenance'
+        )
         console.log('Request params:', params)
         console.log('Response data:', data)
         break
