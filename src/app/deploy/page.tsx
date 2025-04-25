@@ -1364,7 +1364,7 @@ export default function DeployPage() {
               width="full"
               isLoading={isSubmitting || isConnecting}
               loadingText={publicKey ? t('creating') : t('connecting')}
-              isDisabled={!publicKey || isSubmitting || isConnecting || !tokenIcon || !tokenName || !tokenSymbol || isSymbolValid !== true}
+              isDisabled={publicKey ? (isSubmitting || !tokenIcon || !tokenName || !tokenSymbol || isSymbolValid !== true) : false}
               _disabled={{
                 bg: 'gray.400',
                 cursor: 'not-allowed',
