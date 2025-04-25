@@ -1,3 +1,5 @@
+import webpack from 'webpack'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   /* config options here */
@@ -14,9 +16,27 @@ const nextConfig = {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
-        stream: require.resolve('stream-browserify'),
+        fs: false,
+        net: false,
+        tls: false,
         crypto: require.resolve('crypto-browserify'),
+        stream: require.resolve('stream-browserify'),
+        path: require.resolve('path-browserify'),
+        zlib: require.resolve('browserify-zlib'),
+        http: require.resolve('stream-http'),
+        https: require.resolve('https-browserify'),
+        assert: require.resolve('assert/'),
+        os: require.resolve('os-browserify/browser'),
+        buffer: require.resolve('buffer/'),
+        events: require.resolve('events/'),
       }
+
+      config.plugins.push(
+        new webpack.ProvidePlugin({
+          process: 'process/browser',
+          Buffer: ['buffer', 'Buffer'],
+        })
+      )
     }
     return config
   },
