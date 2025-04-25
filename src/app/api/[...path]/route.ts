@@ -133,3 +133,4 @@ export async function OPTIONS(_request: NextRequest) {
     },
   })
 }
+export const runtime = 'edge';

@@ -39,3 +39,4 @@ export default function TokenDetailRedirectPage() {
     </Container>
   )
 }
+export const runtime = 'edge';

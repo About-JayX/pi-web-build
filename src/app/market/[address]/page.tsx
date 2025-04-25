@@ -548,3 +548,4 @@ export default function MarketDetailPage() {
     </Box>
   );
 }
+export const runtime = 'edge';
