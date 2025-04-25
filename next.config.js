@@ -1,5 +1,3 @@
-const webpack = require('webpack')
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   /* config options here */
@@ -11,33 +9,18 @@ const nextConfig = {
     // 在构建时忽略 TypeScript 错误
     ignoreBuildErrors: true,
   },
-
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-        crypto: require.resolve('crypto-browserify'),
-        stream: require.resolve('stream-browserify'),
-        path: require.resolve('path-browserify'),
-        zlib: require.resolve('browserify-zlib'),
-        http: require.resolve('stream-http'),
-        https: require.resolve('https-browserify'),
-        assert: require.resolve('assert/'),
-        os: require.resolve('os-browserify/browser'),
-        buffer: require.resolve('buffer/'),
-        events: require.resolve('events/'),
-      }
-
-      config.plugins.push(
-        new webpack.ProvidePlugin({
-          process: 'process/browser',
-          Buffer: ['buffer', 'Buffer'],
-        })
-      )
+  webpack5: true,
+  webpack: config => {
+    config.resolve.fallback = {
+      fs: false,
+      stream: false,
+      crypto: false,
+      // You might also need these fallbacks
+      path: false,
+      os: false,
+      buffer: false,
     }
+
     return config
   },
   // async rewrites() {
