@@ -6,7 +6,6 @@ import BigNumber from 'bignumber.js'
 import {
   formatTokenAmountByDecimals,
   calculateMintingPrice,
-  formatTokenAmount,
 } from '@/utils'
 
 interface TokenParams {
@@ -70,7 +69,7 @@ export const fetchTokenList = createAsyncThunk(
       console.log(data, 'data_')
 
       if (!data || !Array.isArray(data)) {
-        return rejectWithValue('服务器返回的数据格式无效，请稍后再试')
+        return rejectWithValue('Server returned invalid data format, please try again later')
       }
 
       return data.map(token => {
@@ -130,27 +129,27 @@ export const fetchTokenList = createAsyncThunk(
         } as MintToken
       })
     } catch (error: any) {
-      console.error('获取代币列表失败:', error)
+      console.error('Failed to fetch token list:', error)
 
       if (error.response) {
         // 服务器响应错误
         const status = error.response.status
 
         if (status === 500) {
-          return rejectWithValue('服务器内部错误，请稍后重试')
+          return rejectWithValue('Server internal error, please try again later')
         } else if (status === 404) {
-          return rejectWithValue('请求的资源不存在')
+          return rejectWithValue('Requested resource does not exist')
         } else if (status === 401) {
-          return rejectWithValue('未授权，请重新登录')
+          return rejectWithValue('Unauthorized, please log in again')
         } else {
-          return rejectWithValue(`服务器返回错误: ${status}`)
+          return rejectWithValue(`Server returned error: ${status}`)
         }
       } else if (error.request) {
         // 网络错误
-        return rejectWithValue('网络连接失败，请检查您的网络连接并重试')
+        return rejectWithValue('Network connection failed, please check your network connection and try again')
       } else {
         // 请求配置错误
-        return rejectWithValue('请求配置错误: ' + (error.message || '未知错误'))
+        return rejectWithValue('Request configuration error: ' + (error.message || 'Unknown error'))
       }
     }
   }

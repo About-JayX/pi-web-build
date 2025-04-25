@@ -48,7 +48,7 @@ export const NetworkProvider = ({ children }: { children: ReactNode }) => {
     setNetwork(newNetwork);
     // 保存用户选择到localStorage
     localStorage.setItem('selectedNetwork', newNetwork);
-    console.log(`网络已切换到: ${newNetwork}`);
+    console.log(`Network switched to: ${newNetwork}`);
   };
 
   return (

@@ -20,7 +20,7 @@ import {
   TabPanel,
   TabPanels,
 } from "@chakra-ui/react";
-import { FaFileContract, FaGlobe, FaTelegram, FaTwitter } from "react-icons/fa";
+import { FaFileContract, FaGlobe, FaTelegram, FaXTwitter } from "react-icons/fa";
 import { IoIosArrowBack } from "react-icons/io";
 import { useTranslation } from "react-i18next";
 import { useParams,useSearchParams } from "next/navigation";
@@ -152,7 +152,7 @@ const Right = ({
               _hover={{ color: iconHoverColor }}
               transition="color 0.2s"
             >
-              <Icon as={FaTwitter} boxSize="22px" />
+              <Icon as={FaXTwitter} boxSize="22px" />
             </Box>
           )}
           {/* 电报 */}

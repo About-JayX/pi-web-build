@@ -34,7 +34,7 @@ fairMintInstance.interceptors.request.use(
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = token
-      console.log(`添加token到fairMint请求:`, config.url)
+      console.log(`Token added to fairMint request:`, config.url)
     }
     return config
   },
@@ -42,9 +42,9 @@ fairMintInstance.interceptors.request.use(
 )
 
 // 添加环境信息到日志
-console.log(`API环境: ${apiConfig.currentEnv}`)
-console.log(`主API URL: ${API_URL}`)
-console.log(`用户API URL: ${USER_API_URL}`)
+console.log(`API environment: ${apiConfig.currentEnv}`)
+console.log(`Main API URL: ${API_URL}`)
+console.log(`User API URL: ${USER_API_URL}`)
 
 // fairMint实例响应拦截器
 fairMintInstance.interceptors.response.use(
@@ -59,7 +59,7 @@ fairMintInstance.interceptors.response.use(
         };
         localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
       } catch (err) {
-        console.warn('缓存API响应失败:', err);
+        console.warn('Failed to cache API response:', err);
       }
     }
     return response.data;
@@ -79,10 +79,10 @@ fairMintInstance.interceptors.response.use(
       originalRequest._retryCount < MAX_RETRIES
     ) {
       originalRequest._retryCount += 1;
-      console.log(`正在重试请求 (${originalRequest._retryCount}/${MAX_RETRIES}): ${originalRequest.url}`);
+      console.log(`Retrying request (${originalRequest._retryCount}/${MAX_RETRIES}): ${originalRequest.url}`);
       
       // 使用固定2秒间隔重试
-      console.log(`将在2秒后重试...`);
+      console.log(`Retrying in 2s...`);
       await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
       
       // 尝试从缓存获取数据
@@ -95,19 +95,19 @@ fairMintInstance.interceptors.response.use(
             // 检查缓存是否过期 (24小时)
             const now = new Date().getTime();
             if (now - parsedCache.timestamp < 24 * 60 * 60 * 1000) {
-              console.log('使用缓存的API响应:', originalRequest.url);
+              console.log('Using cached API response:', originalRequest.url);
               return parsedCache.data;
             }
           }
         } catch (cacheErr) {
-          console.warn('读取缓存数据失败:', cacheErr);
+          console.warn('Failed to read cache data:', cacheErr);
         }
       }
       
       // 如果没有缓存或缓存已过期，重新请求
       return fairMintInstance(originalRequest);
     } else if (error.response && error.response.status === 502 && originalRequest._retryCount >= MAX_RETRIES) {
-      console.error(`达到最大重试次数 (${MAX_RETRIES})，请求失败: ${originalRequest.url}`);
+      console.error(`Max retries (${MAX_RETRIES}) reached, request failed: ${originalRequest.url}`);
     }
     
     // 记录请求错误
@@ -120,11 +120,11 @@ fairMintInstance.interceptors.response.use(
         const cachedData = localStorage.getItem(cacheKey);
         if (cachedData) {
           const parsedCache = JSON.parse(cachedData);
-          console.log('API请求失败，使用缓存数据:', error.config.url);
+          console.log('API request failed, using cached data:', error.config.url);
           return parsedCache.data;
         }
       } catch (cacheErr) {
-        console.warn('获取缓存数据失败:', cacheErr);
+        console.warn('Failed to retrieve cached data:', cacheErr);
       }
     }
     
@@ -140,15 +140,15 @@ userInstance.interceptors.request.use(
     const token = localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = token
-      console.log(`添加token到用户API请求: ${config.url}`)
+      console.log(`Token added to user API request: ${config.url}`)
     } else {
       // 如果localStorage中没有token，尝试从Redux store中获取
       const storeToken = store.getState().user.authToken
       if (storeToken) {
         config.headers.Authorization = storeToken
-        console.log(`从Redux添加token到用户API请求: ${config.url}`)
+        console.log(`Token from Redux added to user API request: ${config.url}`)
       } else {
-        console.log(`未找到token, 发送无认证请求: ${config.url}`)
+        console.log(`No token found, sending unauthenticated request: ${config.url}`)
       }
     }
     return config
@@ -160,9 +160,9 @@ userInstance.interceptors.request.use(
 userInstance.interceptors.response.use(
   response => {
     const { data } = response
-    console.log(`API响应成功: ${response.config.url}`, data)
+    console.log(`API response successful: ${response.config.url}`, data)
     if (!data.success) {
-      throw new Error(data.msg || '请求失败')
+      throw new Error(data.msg || 'Request failed')
     }
     return data
   },
@@ -175,55 +175,55 @@ userInstance.interceptors.response.use(
 // 统一的错误处理函数
 const handleAxiosError = (error: AxiosError) => {
   if (error.response) {
-    const url = error.config?.url || '未知URL'
+    const url = error.config?.url || 'Unknown URL'
     const method = error.config?.method?.toUpperCase() || 'UNKNOWN'
     const params = error.config?.params
       ? JSON.stringify(error.config.params)
       : '{}'
     const status = error.response.status
-    const statusText = error.response.statusText || '未知错误'
+    const statusText = error.response.statusText || 'Unknown error'
     const data = error.response.data
 
     console.error(
-      `API错误 [${status} ${statusText}] ${method} ${url} ${params}`,
+      `API error [${status} ${statusText}] ${method} ${url} ${params}`,
       data
     )
 
     switch (error.response.status) {
       case 401:
-        console.log('未授权，请重新登录')
+        console.log('Unauthorized, please login again')
         localStorage.removeItem('token')
         break
       case 403:
-        console.log('没有权限访问该资源')
+        console.log('Access forbidden')
         break
       case 404:
-        console.log('请求的资源不存在:', url)
+        console.log('Resource not found:', url)
         break
       case 500:
-        console.log('服务器内部错误:', url)
-        console.log('请求参数:', params)
+        console.log('Internal server error:', url)
+        console.log('Request params:', params)
         break
       case 502:
-        console.log('网关错误 (502 Bad Gateway):', url)
-        console.log('这可能是由于服务器暂时过载或维护引起的')
-        console.log('请求参数:', params)
-        console.log('响应数据:', data)
+        console.log('Gateway error (502 Bad Gateway):', url)
+        console.log('This may be due to temporary server overload or maintenance')
+        console.log('Request params:', params)
+        console.log('Response data:', data)
         break
       default:
-        console.log(`HTTP错误 ${status}:`, statusText)
+        console.log(`HTTP error ${status}:`, statusText)
     }
   } else if (error.request) {
-    console.error('网络错误，请检查您的网络连接', error.request)
-    console.log('请求URL:', error.config?.url)
-    console.log('请求方法:', error.config?.method?.toUpperCase())
+    console.error('Network error, please check your connection', error.request)
+    console.log('Request URL:', error.config?.url)
+    console.log('Request method:', error.config?.method?.toUpperCase())
     console.log(
-      '请求参数:',
+      'Request params:',
       error.config?.params ? JSON.stringify(error.config.params) : '{}'
     )
   } else {
-    console.error('请求配置错误:', error.message)
-    console.log('请求配置:', error.config)
+    console.error('Request configuration error:', error.message)
+    console.log('Request config:', error.config)
   }
 }
 

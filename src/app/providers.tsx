@@ -228,7 +228,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
                           position="fixed"
                           top="60px"
                           left="0"
-                          right={1}
+                          right={1.5}
                           bottom="0"
                           bgImage="/bg.png"
                           bgSize="cover"

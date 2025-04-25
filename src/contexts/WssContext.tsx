@@ -71,11 +71,11 @@ export const WssProvider = ({ children }: { children: ReactNode }) => {
     ws.onmessage = (event) => {
       try {
         const response = JSON.parse(event.data)
-        // console.log("收到WebSocket消息:", response)
+        // console.log("Received WebSocket message:", response)
 
         if (response.message === "pong") {
           const data = response.data
-          // console.log("收到pong消息，代币地址列表:", data)
+          // console.log("Received pong message, token address list:", data)
           // 只在market页面执行更新token操作
           if (isMarketPage) {
             // 立即执行一次更新
@@ -94,7 +94,7 @@ export const WssProvider = ({ children }: { children: ReactNode }) => {
         if (response.mode === "go") {
           // 只在market页面执行更新token操作
           if (isMarketPage) {
-            // console.log("收到go消息，开始更新代币")
+            // console.log("Received go message, starting token update")
             tokenAddressesRef.current.forEach(async (item: string) => {
               const new_msg = await updateToken(item)
               if (new_msg) {
@@ -112,17 +112,17 @@ export const WssProvider = ({ children }: { children: ReactNode }) => {
           }
         }
       } catch (error) {
-        console.error("解析WebSocket消息失败:", error)
+        console.error("Failed to parse WebSocket message:", error)
       }
     }
 
     ws.onclose = () => {
-      console.log("WebSocket连接关闭")
+      console.log("WebSocket connection closed")
       setStatus(false)
     }
 
     ws.onerror = (error) => {
-      console.error("WebSocket错误:", error)
+      console.error("WebSocket error:", error)
       setStatus(false)
     }
 

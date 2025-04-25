@@ -64,24 +64,27 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
   
   // 确保连接始终可用，如果初始化失败则重试
   useEffect(() => {
-    console.log('确保Solana RPC连接可用...')
-    
     // 如果连接对象已存在，可以选择刷新或验证连接
     const validateConnection = async () => {
       try {
         // 简单验证连接是否工作 - 例如获取最新区块高度
         const blockHeight = await conn.getBlockHeight()
-        console.log(`${t('solana.connectionValid')} ${blockHeight}`)
+        
+        // 仅在开发环境中输出连接状态日志
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`Solana connection valid, block height: ${blockHeight}`)
+        }
       } catch (error) {
-        console.error(`${t('solana.connectionFailed')} ${error}`)
+        // 保留错误日志，这是重要的
+        console.error(`Solana connection failed: ${error}`)
         
         // 如果验证失败，重新创建连接
         try {
           const newConnection = new Connection(DEFAULT_NETWORK, CONNECTION_COMMITMENT)
           setConn(newConnection)
-          console.log(t('solana.connectionReestablished'))
+          console.log('Solana connection reestablished')
         } catch (retryError) {
-          console.error(`${t('solana.connectionRecreationFailed')} ${retryError}`)
+          console.error(`Connection recreation failed: ${retryError}`)
         }
       }
     }
@@ -121,7 +124,10 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
   // 保存连接状态到localStorage
   useEffect(() => {
     if (publicKey) {
-      console.log(`${t('solana.savingWalletAddress')} ${publicKey}`)
+      // 仅在开发环境下输出日志
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Saving wallet address: ${publicKey}`)
+      }
       localStorage.setItem('walletConnected', 'true')
       localStorage.setItem('walletAddress', publicKey)
     }
@@ -148,7 +154,7 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem('walletConnected')
       localStorage.removeItem('walletAddress')
     } catch (error) {
-      console.error(`${t('solana.disconnectFailed')} ${error}`)
+      console.error(`Disconnect wallet failed: ${error}`)
       throw error
     } finally {
       setIsConnecting(false)
@@ -162,7 +168,7 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
       // 检查是否有保存的钱包类型
       const savedWalletType = localStorage.getItem('wallet_type')
       if (!savedWalletType) {
-        throw new Error(t('solana.walletTypeNotFound'))
+        throw new Error('Previous wallet type not found')
       }
       
       // 获取对应的钱包实例
@@ -181,12 +187,12 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
           wallet = window.bitkeep
           break
         default:
-          throw new Error(t('solana.unsupportedWalletType'))
+          throw new Error('Unsupported wallet type')
       }
       
       // 检查钱包是否已安装
       if (!wallet) {
-        throw new Error(t('solana.walletNotInstalled'))
+        throw new Error('Wallet not installed')
       }
       
       // 重新连接
@@ -199,7 +205,7 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
       
       return result
     } catch (error) {
-      console.error(`${t('solana.reconnectFailed')} ${error}`)
+      console.error(`Wallet reconnection failed: ${error}`)
       throw error
     } finally {
       setIsConnecting(false)
@@ -209,16 +215,18 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
   // 监听钱包连接状态变化
   useEffect(() => {
     if (typeof window !== 'undefined' && window.solana) {
-      console.log(t('solana.addingWalletListener'))
       
       const handleAccountsChanged = () => {
-        console.log(t('solana.walletAccountChanged'))
         if (window.solana.publicKey) {
           const newKey = window.solana.publicKey.toString()
-          console.log(`${t('solana.newWalletAddress')} ${newKey}`)
+          
+          // 保留简洁的连接成功日志，但仅在开发环境显示
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Wallet connected:', newKey.slice(0, 6) + '...' + newKey.slice(-4))
+          }
+          
           setPublicKey(newKey)
         } else {
-          console.log(t('solana.walletDisconnected'))
           setPublicKey(null)
           localStorage.removeItem('walletConnected')
           localStorage.removeItem('walletAddress')
@@ -226,7 +234,6 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
       }
       
       const handleDisconnect = () => {
-        console.log(t('solana.walletDisconnectEvent'))
         setPublicKey(null)
         localStorage.removeItem('walletConnected')
         localStorage.removeItem('walletAddress')
@@ -236,7 +243,6 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
       window.solana.on('disconnect', handleDisconnect)
 
       return () => {
-        console.log(t('solana.removingWalletListener'))
         if (window.solana) {
           window.solana.removeListener('accountChanged', handleAccountsChanged)
           window.solana.removeListener('disconnect', handleDisconnect)
@@ -247,56 +253,66 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
 
   const checkWalletConnection = async () => {
     if (typeof window === 'undefined' || !window.solana) {
-      console.log(t('solana.phantomNotInstalled'))
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Wallet not installed or non-browser environment')
+      }
       return
     }
     
     setIsConnecting(true)
     
     try {
-      // 钱包连接检查不再负责初始化Solana连接
-      
       // 检查钱包是否已连接
       const isPhantomConnected = window.solana.isConnected
-      console.log(`${t('solana.phantomConnectionStatus')} ${isPhantomConnected}`)
-      
-      // 获取上次保存的钱包地址
       const savedWalletAddress = localStorage.getItem('walletAddress')
-      console.log(`${t('solana.savedWalletAddress')} ${savedWalletAddress}`)
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`Wallet status: ${isPhantomConnected ? 'Connected' : 'Disconnected'}`)
+      }
       
       // 如果钱包已连接，直接使用当前公钥
       if (isPhantomConnected && window.solana.publicKey) {
         const currentKey = window.solana.publicKey.toString()
-        console.log(`${t('solana.currentWalletAddress')} ${currentKey}`)
+        
+        // 重要的连接状态变更，仅在开发环境输出
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`User already logged in, no restoration needed`)
+        }
+        
         setPublicKey(currentKey)
         return
       }
       
       // 如果有保存的连接记录，尝试恢复连接
       if (localStorage.getItem('walletConnected') === 'true') {
-        console.log(t('solana.attemptingReconnect'))
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Found saved token and wallet address, attempting to restore session')
+        }
         
         try {
-          // 首先尝试静默连接 - 不需要用户确认
-          console.log(t('solana.attemptingSilentConnect'))
+          // 尝试静默连接 - 不需要用户确认
           const result = await window.solana.connect({ onlyIfTrusted: true })
           if (result.publicKey) {
             const newPublicKey = result.publicKey.toString()
-            console.log(`${t('solana.silentConnectSuccess')} ${newPublicKey}`)
+            
+            // 重要的状态变更，但简化输出
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`User session restored via saved token and wallet address`)
+            }
+            
             setPublicKey(newPublicKey)
             setAutoConnected(true)
             return
           }
         } catch (error) {
-          console.log(`${t('solana.silentConnectFailed')} ${error}`)
-          
-          // 如果静默连接失败，且我们处于页面加载初期，暂时不弹出连接请求
-          // 用户可以通过点击"连接"按钮来手动连接
-          console.log(t('solana.waitingForUserConnect'))
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`Silent connection failed: ${error}`)
+          }
         }
       }
     } catch (error) {
-      console.error(`${t('solana.checkWalletStatusFailed')} ${error}`)
+      // 保留错误日志
+      console.error(`Wallet connection check failed: ${error}`)
     } finally {
       setIsConnecting(false)
     }
@@ -304,7 +320,9 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
   
   // 初始化时检查钱包状态
   useEffect(() => {
-    console.log(t('solana.initializingWalletCheck'))
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Initializing wallet connection check')
+    }
     checkWalletConnection()
   }, [t])
 
@@ -337,28 +355,6 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem('wallet_type')
     }
   }, [walletType])
-
-  // 如果有重新连接尝试导致验证失败，可以添加更换 RPC 节点的逻辑
-  /*
-  const tryAlternativeRPC = async () => {
-    try {
-      // 尝试使用备用 RPC 节点
-      const backupRpcUrl = 'https://solana-mainnet.g.alchemy.com/v2/your-api-key' // 替换为您的备用节点
-      const newConnection = new Connection(backupRpcUrl, CONNECTION_COMMITMENT)
-      
-      // 测试新连接
-      await newConnection.getBlockHeight()
-      
-      // 如果成功，更新当前连接
-      setConn(newConnection)
-      console.log('已切换到备用 RPC 节点')
-      return true
-    } catch (error) {
-      console.error('备用 RPC 节点连接失败:', error)
-      return false
-    }
-  }
-  */
 
   return (
     <SolanaContext.Provider

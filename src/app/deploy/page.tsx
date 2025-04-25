@@ -659,7 +659,7 @@ export default function DeployPage() {
   useEffect(() => {
     if (isTestEnv) {
       console.info(
-        '🧪 测试模式已启用 - 额外测试选项可用: 10000000代币 / 0.1 SOL'
+        '🧪 Test mode enabled - Additional test options available: 10000000 tokens / 0.1 SOL'
       )
     }
   }, [isTestEnv])
@@ -759,10 +759,10 @@ export default function DeployPage() {
         return
       }
 
-      console.log('checkTokenSymbol被调用:', symbol) // 调试日志
+      console.log('Symbol check initiated:', symbol)
 
       // 再次检查非法代币符号列表 - 应该在handleSymbolChange中完成，这里是双重保险
-      const invalidSymbols = ['XPI', 'PIS', 'PiSale', 'SpacePi', 'Xijinpin']
+      const invaFlidSymbols = ['XPI', 'PIS', 'PiSale', 'SpacePi', 'Xijinpin']
       if (
         invalidSymbols.some(
           invalid => symbol.toUpperCase() === invalid.toUpperCase()
@@ -778,10 +778,10 @@ export default function DeployPage() {
       try {
         // 开始检查符号可用性
         setIsCheckingSymbol(true)
-        console.log('开始API请求检查符号:', symbol) // 调试日志
+        console.log('API request for symbol check:', symbol)
 
         const response = await TokenAPI.checkSymbol(symbol)
-        console.log('API响应:', response) // 调试日志
+        console.log('API response:', response)
 
         // 如果 exists 为 true 表示已注册，则不可用
         if (response.exists) {
@@ -863,10 +863,10 @@ export default function DeployPage() {
       setErrorType(null)
 
       // 步骤3: 为非非法符号设置定时器，延迟检查可用性
-      console.log('准备检查符号可用性:', truncatedValue) // 调试日志
+      console.log('Symbol availability check scheduled:', truncatedValue)
       // 设置新的定时器，1500ms 后检查
       timerRef.current = setTimeout(() => {
-        console.log('正在执行符号可用性检查:', truncatedValue) // 调试日志
+        console.log('Executing symbol availability check:', truncatedValue)
         // 调用API检查符号是否已被注册
         checkTokenSymbol(truncatedValue)
       }, 1500)
@@ -1024,7 +1024,7 @@ export default function DeployPage() {
         },
       }
 
-      console.log(params, 'params_')
+      console.log('Token creation request:', params)
 
       const { mint } = (await TokenAPI.createToken(params)) as any
 
@@ -1128,7 +1128,7 @@ export default function DeployPage() {
       publicKey: publicKey?.toString() || null,
     }
 
-    console.log('Token creation parameters:', params)
+    console.log('Token parameters updated:', params)
 
     // 验证必填参数
     const requiredFields = {
@@ -1144,7 +1144,7 @@ export default function DeployPage() {
       .map(([, label]) => label)
 
     if (missingFields.length > 0) {
-      console.warn('Missing required fields:', missingFields.join(', '))
+      console.warn('Required fields missing:', missingFields.join(', '))
     }
   }, [
     tokenName,
@@ -1415,13 +1415,13 @@ export default function DeployPage() {
               isLoading={isSubmitting || isConnecting}
               loadingText={publicKey ? t('creating') : t('connecting')}
               isDisabled={
-                !publicKey ||
-                isSubmitting ||
-                isConnecting ||
-                !tokenIcon ||
-                !tokenName ||
-                !tokenSymbol ||
-                isSymbolValid !== true
+                publicKey
+                  ? isSubmitting ||
+                    !tokenIcon ||
+                    !tokenName ||
+                    !tokenSymbol ||
+                    isSymbolValid !== true
+                  : false
               }
               _disabled={{
                 bg: 'gray.400',

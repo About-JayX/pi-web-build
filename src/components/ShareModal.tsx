@@ -20,7 +20,8 @@ import {
   Flex,
   Icon,
 } from '@chakra-ui/react';
-import { FaTwitter, FaTelegram, FaCopy, FaLink } from 'react-icons/fa';
+import { FaTelegram, FaCopy, FaLink } from 'react-icons/fa';
+import { FaXTwitter  } from 'react-icons/fa6';
 import { useTranslation } from 'react-i18next';
 
 interface ShareModalProps {
@@ -218,7 +219,6 @@ const ShareModal = ({
       .catch(() => {
         toast({
           title: t('copyFailed'),
-          description: t('pleaseManualCopyContent'),
           status: 'error',
           duration: 2000,
           isClosable: true,
@@ -243,7 +243,6 @@ const ShareModal = ({
       .catch(() => {
         toast({
           title: t('copyFailed'),
-          description: t('pleaseManualCopyLink'),
           status: 'error',
           duration: 2000,
           isClosable: true,
@@ -252,7 +251,7 @@ const ShareModal = ({
       });
   };
   
-  // 复制CA
+  // 复制合约地址
   const copyContractAddress = () => {
     if (!contractAddress) return;
     
@@ -260,7 +259,7 @@ const ShareModal = ({
       .then(() => {
         toast({
           title: t('copySuccess'),
-          description: t('caCopiedToClipboard'),
+          description: t('addressCopied'),
           status: 'success',
           duration: 2000,
           isClosable: true,
@@ -270,7 +269,6 @@ const ShareModal = ({
       .catch(() => {
         toast({
           title: t('copyFailed'),
-          description: t('pleaseManualCopyCA'),
           status: 'error',
           duration: 2000,
           isClosable: true,
@@ -362,7 +360,7 @@ const ShareModal = ({
               </Text>
               <HStack spacing={3} justify="center">
                 <Button 
-                  leftIcon={<Icon as={FaTwitter} />}
+                  leftIcon={<Icon as={FaXTwitter} />}
                   bg="#1DA1F2"
                   color="white"
                   _hover={{ bg: "#0d8bd9" }}

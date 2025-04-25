@@ -26,7 +26,7 @@ export default {
   'progress': 'Progress',
   'participants': 'Holders',
   'totalSupply': 'Total Supply',
-  'mintingPrice': 'Minting Price',
+  'mintingPrice': 'Minting Rate',
   'contractAddress': 'CA',
   'joinMinting': 'Join Minting',
   'moreMintingProjects': 'More Tokens in Minting',
