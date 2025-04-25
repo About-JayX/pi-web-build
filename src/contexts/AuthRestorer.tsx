@@ -19,29 +19,42 @@ const AuthRestorer = () => {
     const restoreAuth = async () => {
       // 如果已经登录，不需要恢复
       if (isLoggedIn) {
-        console.log('User already logged in, no restoration needed')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('User already logged in, no restoration needed')
+        }
         return
       }
       
       // 检查是否有钱包地址和保存的token
       const savedToken = localStorage.getItem('token')
-      console.log('Checking token and wallet status', { 
-        'token': !!savedToken, 
-        'wallet_connected': !!publicKey,
-        'wallet_address': publicKey
-      })
+      
+      // 只在开发环境下输出详细的状态日志
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Checking token and wallet status', { 
+          'token': !!savedToken, 
+          'wallet_connected': !!publicKey,
+          'wallet_address': publicKey
+        })
+      }
       
       if (!savedToken) {
-        console.log('No saved token found, cannot restore login state')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('No saved token found, cannot restore login state')
+        }
         return
       }
       
       if (!publicKey) {
-        console.log('Wallet not connected, cannot restore login state')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Wallet not connected, cannot restore login state')
+        }
         return
       }
       
-      console.log('Found saved token and wallet address, attempting to restore session')
+      // 保留关键流程日志，但不在生产环境中显示详细信息
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Found saved token and wallet address, attempting to restore session')
+      }
       
       try {
         // 不调用API验证token，直接假设token有效并恢复登录状态
@@ -74,9 +87,11 @@ const AuthRestorer = () => {
           })
         )
         
+        // 仅保留重要的状态变更日志
         console.log('User session restored via saved token and wallet address')
         
       } catch (error) {
+        // 保留错误日志，这是重要的
         console.error('Error restoring session:', error)
         // 出错时清除token
         localStorage.removeItem('token')

@@ -25,7 +25,11 @@ i18n
       }
     },
     fallbackLng: 'en',
-    debug: process.env.NODE_ENV === 'development',
+    // debug: process.env.NODE_ENV === 'development',
+    debug: false, // 关闭debug模式，减少日志输出
+    // 添加日志级别配置，禁用所有日志
+    saveMissing: false,
+    silent: true, // 完全静默模式
     interpolation: {
       escapeValue: false, // 不需要转义 React 已处理
     },

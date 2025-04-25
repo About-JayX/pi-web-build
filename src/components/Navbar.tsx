@@ -30,7 +30,7 @@ import {
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons"
 import NextLink from "next/link"
 import { usePathname } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import dynamic from "next/dynamic"
 import { useNetwork } from "@/contexts/NetworkContext"
 import { useI18n } from "@/contexts/I18nProvider"
@@ -326,12 +326,20 @@ export const Navbar = ({
   
   // 仅在开发环境下输出调试信息
   if (process.env.NODE_ENV === 'development') {
-    // 使用 useEffect 确保只在组件挂载和更新特定依赖时才打印一次
+    // 使用 useRef 来跟踪是否已经打印过日志
+    const hasLoggedRef = useRef(false);
+    
     useEffect(() => {
-      console.log('Current path:', pathname);
-      console.log('Is XPI page?', finalIsXpiPage);
-      console.log('Is SpacePi page?', finalIsSpacePiPage);
-    }, [pathname, finalIsXpiPage, finalIsSpacePiPage]);
+      // 只有当尚未打印过日志时才打印
+      if (!hasLoggedRef.current) {
+        console.log('Current path:', pathname);
+        console.log('Is XPI page?', finalIsXpiPage);
+        console.log('Is SpacePi page?', finalIsSpacePiPage);
+        
+        // 标记已经打印过
+        hasLoggedRef.current = true;
+      }
+    }, []); // 保持空依赖数组
   }
   
   // 所有useColorModeValue调用都放在这里，不要在下面的逻辑中调用
