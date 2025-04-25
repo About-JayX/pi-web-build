@@ -638,7 +638,7 @@ export default function DeployPage() {
   // 在开发环境下输出测试模式提示
   useEffect(() => {
     if (isTestEnv) {
-      console.info('🧪 测试模式已启用 - 额外测试选项可用: 10000000代币 / 0.1 SOL');
+      console.info('🧪 Test mode enabled - Additional test options available: 10000000 tokens / 0.1 SOL');
     }
   }, [isTestEnv]);
 

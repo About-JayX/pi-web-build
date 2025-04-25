@@ -25,7 +25,7 @@ export const UserAPI = {
    * 注意：某些API可能未实现或有变化，请检查控制台错误
    */
   getUserInfo: (): Promise<UserInfo> => {
-    console.log('正在调用getUserInfo API，如果返回404错误可能是API未实现')
+    console.log("Calling getUserInfo API, may return 404 if not implemented")
 
     // 验证API是否可用：可以修改为一个已知有效的API端点
     return userApi.get('/web/user/info')

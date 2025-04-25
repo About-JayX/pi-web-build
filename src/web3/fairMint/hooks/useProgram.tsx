@@ -210,7 +210,7 @@ export const useProgram = () => {
         message: `代币返还成功! 数量: ${amount / 1_000_000}`,
       }
     } catch (error) {
-      console.error('代币返还失败:', error)
+      console.error('Token refund failed:', error)
       return {
         success: false,
         error: error instanceof Error ? error.message : String(error),

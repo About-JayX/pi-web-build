@@ -325,9 +325,9 @@ export const Navbar = ({
   const isDarkPage = finalIsXpiPage || finalIsSpacePiPage
   
   // 输出调试信息以验证路径和页面类型检测是否正确
-  console.log('当前路径:', pathname);
-  console.log('是XPI页面?', finalIsXpiPage);
-  console.log('是SpacePi页面?', finalIsSpacePiPage);
+  console.log('Current path:', pathname);
+  console.log('Is XPI page?', finalIsXpiPage);
+  console.log('Is SpacePi page?', finalIsSpacePiPage);
   
   // 所有useColorModeValue调用都放在这里，不要在下面的逻辑中调用
   const xpiBgColorLight = useColorModeValue("rgba(0, 0, 0, 0.36)", "rgba(0, 0, 0, 0.36)")
@@ -413,7 +413,7 @@ export const Navbar = ({
         position: "top",
       })
     } catch (error) {
-      console.error("断开连接失败:", error)
+      console.error("Disconnect failed:", error)
       toast({
         title: t("error"),
         description: t("disconnectFailed"),
@@ -437,7 +437,7 @@ export const Navbar = ({
         position: "top",
       })
     } catch (error) {
-      console.error("重新连接失败:", error)
+      console.error("Reconnect failed:", error)
       toast({
         title: t("error"),
         description: t("reconnectFailed"),
@@ -911,7 +911,7 @@ const MobileNav = ({
       })
       onClose() // 关闭移动菜单
     } catch (error) {
-      console.error("断开连接失败:", error)
+      console.error("Disconnect failed:", error)
       toast({
         title: t("error"),
         description: t("disconnectFailed"),

@@ -142,7 +142,7 @@ const formatFairCurveState = (
       }
     }
   } catch (error) {
-    console.error('计算进度时出错:', error)
+    console.error('Error calculating progress:', error)
     progress = 0
   }
 
@@ -168,7 +168,7 @@ const formatFairCurveState = (
       }
       return '0'
     } catch (error) {
-      console.error('转换数值时出错:', error, value)
+      console.error('Error converting value:', error, value)
       return '0'
     }
   }
@@ -205,7 +205,7 @@ const safeToNumber = (bn: BN): number => {
     // 如果数值太大，则使用BigNumber处理
     return new BigNumber(str).toNumber()
   } catch (error) {
-    console.error('转换BN到数字时出错:', error)
+    console.error('Error converting BN to number:', error)
     return 0
   }
 }
@@ -228,7 +228,7 @@ const safeCompareBN = (
         return false
     }
   } catch (error) {
-    console.error('BN比较时出错:', error)
+    console.error('Error comparing BN:', error)
     return false
   }
 }
@@ -248,7 +248,7 @@ export function useFairCurve(
 
       // 确保mintAddress是可用的
       if (!mintAddress || mintAddress.trim() === '') {
-        console.warn('尝试获取FairCurve状态，但mint地址未提供')
+        console.warn('Attempting to get FairCurve state, but mint address not provided')
         setError('未提供 mint 地址')
         setData(null)
         return
@@ -259,7 +259,7 @@ export function useFairCurve(
       try {
         mintPubkey = new PublicKey(mintAddress)
       } catch (err) {
-        console.error('无效的mint地址:', mintAddress, err)
+        console.error('Invalid mint address:', mintAddress, err)
         setError('无效的 mint 地址')
         setData(null)
         return
@@ -274,21 +274,21 @@ export function useFairCurve(
         programId
       )
 
-      console.log('正在获取账户信息:', fairCurvePda.toString())
+      console.log('Getting account info:', fairCurvePda.toString())
 
       // 获取账户信息
       const accountInfo = await connection.getAccountInfo(fairCurvePda)
 
       if (!accountInfo) {
-        console.warn('未找到FairCurve账户:', fairCurvePda.toString())
+        console.warn('FairCurve account not found:', fairCurvePda.toString())
         setError('找不到该代币的铸造信息')
         setData(null)
         setLoading(false)
         return
       }
 
-      console.log('账户数据长度:', accountInfo.data.length)
-      console.log('账户数据:', Buffer.from(accountInfo.data).toString('hex'))
+      console.log('Account data length:', accountInfo.data.length)
+      console.log('Account data:', Buffer.from(accountInfo.data).toString('hex'))
 
       // 检查数据长度
       if (accountInfo.data.length !== FAIR_CURVE_LEN) {
@@ -317,7 +317,7 @@ export function useFairCurve(
           fee: new BN(rawData.fee.toString()),
         }
 
-        console.log('解码后的数据:', {
+        console.log('Decoded data:', {
           discriminator: decodedData.discriminator,
           liquidityAdded: decodedData.liquidityAdded,
           feeRate: decodedData.feeRate,
@@ -341,7 +341,7 @@ export function useFairCurve(
             (byte, i) => byte === FAIR_CURVE_DISCRIMINATOR[i]
           )
         ) {
-          console.error('Discriminator 不匹配:', {
+          console.error('Discriminator mismatch:', {
             期望: FAIR_CURVE_DISCRIMINATOR,
             实际: decodedData.discriminator,
           })
@@ -366,16 +366,16 @@ export function useFairCurve(
           fee: decodedData.fee,
         }
 
-        console.log('转换后的状态:', fairCurveState)
+        console.log('Converted state:', fairCurveState)
 
         // 格式化数据
         const formattedState = formatFairCurveState(fairCurveState)
-        console.log('格式化后的状态:', formattedState)
+        console.log('Formatted state:', formattedState)
 
         setData(formattedState)
         setError(null)
       } catch (decodeError: unknown) {
-        console.error('解码错误:', decodeError)
+        console.error('Decoding error:', decodeError)
         throw new Error(
           `解码失败: ${
             decodeError instanceof Error ? decodeError.message : '未知错误'
@@ -383,7 +383,7 @@ export function useFairCurve(
         )
       }
     } catch (err) {
-      console.error('获取 FairCurve 状态失败:', err)
+      console.error('Failed to get FairCurve state:', err)
       setError(err instanceof Error ? err.message : '未知错误')
       setData(null)
     } finally {

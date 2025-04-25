@@ -23,7 +23,7 @@ function processPath(pathname: string): string {
 
 export async function GET(request: NextRequest) {
   console.log('=== API Route GET triggered ===')
-  console.log(`当前环境: ${apiConfig.currentEnv}, API基础URL: ${API_BASE_URL}`)
+  console.log(`Current environment: ${apiConfig.currentEnv}, API base URL: ${API_BASE_URL}`)
   const pathname = request.nextUrl.pathname
   console.log('Pathname:', pathname)
 
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   console.log('=== API Route POST triggered ===')
-  console.log(`当前环境: ${apiConfig.currentEnv}, API基础URL: ${API_BASE_URL}`)
+  console.log(`Current environment: ${apiConfig.currentEnv}, API base URL: ${API_BASE_URL}`)
   const pathname = request.nextUrl.pathname
   console.log('Pathname:', pathname)
 

@@ -102,9 +102,9 @@ export default function PointsPage() {
     if (socket && socket.readyState === WebSocket.OPEN) {
       const message = JSON.stringify({ mode, data: data })
       socket.send(message)
-      console.log("发送WebSocket消息:", message)
+      console.log("Sending WebSocket message:", message)
     } else {
-      console.warn("WebSocket未连接")
+      console.warn("WebSocket not connected")
     }
   }
 
@@ -120,7 +120,7 @@ export default function PointsPage() {
       pointsLimit
     )) as HistoryResponse
     if (result.success) {
-      console.log("历史记录", result.data.data)
+      console.log("History records", result.data.data)
       setPointsTotal(Number(result.data.total))
       setPointsPage(pointsPage + 1)
       setPointsHistory(result.data.data)
@@ -134,7 +134,7 @@ export default function PointsPage() {
     const handleMessage = async (event: MessageEvent) => {
       try {
         const response = JSON.parse(event.data)
-        console.log("收到WebSocket消息:", response)
+        console.log("Received WebSocket message:", response)
 
         if (response.mode === "user_info") {
           //更新用户信息
@@ -146,7 +146,7 @@ export default function PointsPage() {
           window.location.href = response.data.code
         }
       } catch (error) {
-        console.error("解析WebSocket消息失败:", error)
+        console.error("Failed to parse WebSocket message:", error)
       }
     }
 
@@ -185,7 +185,7 @@ export default function PointsPage() {
           dispatch(setSignInInfo(result.data))
         }
       } catch (error) {
-        console.error("获取签到信息失败:", error)
+        console.error("Failed to get sign-in info:", error)
       }
     }
 
@@ -354,7 +354,7 @@ export default function PointsPage() {
           setRankList([])
         }
       } catch (error) {
-        console.error("获取排行榜失败:", error)
+        console.error("Failed to get leaderboard:", error)
         setError(t("获取排行榜失败"))
         setRankList([])
       } finally {

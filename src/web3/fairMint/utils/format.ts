@@ -56,7 +56,7 @@ export function formatFairCurveState(state: FairCurveState | null): FormattedFai
   const { supply, remaining, supplied, solReceived, feeRate } = state
 
   // 调试日志
-  console.log('原始数据:', {
+  console.log('Original data:', {
     supply,
     remaining,
     supplied,
@@ -80,7 +80,7 @@ export function formatFairCurveState(state: FairCurveState | null): FormattedFai
         return new BN(value)
       }
     } catch (err) {
-      console.error('转换BN失败:', err)
+      console.error('Failed to convert BN:', err)
     }
     return new BN(0)
   }
@@ -100,13 +100,13 @@ export function formatFairCurveState(state: FairCurveState | null): FormattedFai
       // 使用公式: 1 - remaining/supplied
       progress = (1 - remainingNum/suppliedNum) * 100
     } catch (err) {
-      console.error('计算进度时出错:', err)
+      console.error('Error calculating progress:', err)
       progress = 0
     }
   }
 
   // 调试日志
-  console.log('转换后的数据:', {
+  console.log('Converted data:', {
     supplyBN: supplyBN.toString(),
     suppliedBN: suppliedBN.toString(),
     remainingBN: remainingBN.toString(),

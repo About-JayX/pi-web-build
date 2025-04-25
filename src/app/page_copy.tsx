@@ -105,7 +105,7 @@ export default function TokenMintPage() {
           });
         })
         .catch((error) => {
-          console.error("复制失败:", error);
+          console.error("Copy failed:", error);
           toast({
             title: t("copyFailed"),
             description: t("pleaseTryAgain"),
@@ -127,7 +127,7 @@ export default function TokenMintPage() {
           duration: 2000,
         });
       } catch (error) {
-        console.error("复制失败:", error);
+        console.error("Copy failed:", error);
         toast({
           title: t("copyFailed"),
           description: t("pleaseTryAgain"),
@@ -180,7 +180,7 @@ export default function TokenMintPage() {
                         </Flex>
                         {/* 代币符号 */}
                         <Text fontSize="xs" color="gray.500" mt={-1}>
-                          Deployed: 2024-02-06 23:54
+                          Deployed: 2024-02-06 23:54
                         </Text>
                       </Grid>
                     </Flex>

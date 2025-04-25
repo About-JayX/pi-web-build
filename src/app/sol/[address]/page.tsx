@@ -142,7 +142,7 @@ export default function TokenMintPage() {
           setTokenBalance(null)
         }
       } catch (error) {
-        console.error('查询代币账户失败:', error)
+        console.error('Failed to query token account:', error)
         setTokenAccount(null)
         setTokenBalance(null)
       }

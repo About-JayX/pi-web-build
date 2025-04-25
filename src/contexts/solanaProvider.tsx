@@ -64,7 +64,7 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
   
   // 确保连接始终可用，如果初始化失败则重试
   useEffect(() => {
-    console.log('确保Solana RPC连接可用...')
+    console.log('Ensuring Solana RPC connection is available...')
     
     // 如果连接对象已存在，可以选择刷新或验证连接
     const validateConnection = async () => {
