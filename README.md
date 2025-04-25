@@ -4,18 +4,23 @@ Pi.Sale是一个专注于Pi Network社区生态的MEME代币发射平台，旨�
 
 ## 技术栈
 
-- **前端框架**: Next.js 14+
-- **语言**: TypeScript
-- **UI组件库**: Chakra UI
+- **前端框架**: Next.js 15.2.4+
+- **语言**: TypeScript 5+
+- **UI组件库**: Chakra UI 2.8.0+
+- **状态管理**: Redux Toolkit 2.6.1+
 - **包管理工具**: Yarn
-- **样式解决方案**: Tailwind CSS
+- **样式解决方案**: Tailwind CSS 4+
+- **区块链集成**: Solana Web3.js 1.98.0+, SPL Token
 
 ## 功能特性
 
-- 代币铸造管理
-- 铸造代币展示
+- 代币铸造管理与部署
+- 多种代币发行模式（FairMint）
 - 代币市场浏览与搜索
+- 代币交换功能 (Swap)
 - 多种部署模式选择（快速模式/标准模式）
+- 国际化支持 (i18n)
+- 多链支持 (Pi Network, Solana)
 - 响应式设计，适配多种设备
 
 ## 安装步骤
@@ -23,8 +28,8 @@ Pi.Sale是一个专注于Pi Network社区生态的MEME代币发射平台，旨�
 1. 克隆仓库
 
 ```bash
-git clone https://github.com/your-username/pi-sale-web.git
-cd pi-sale-web
+git clone https://github.com/your-username/pis-web-v2.git
+cd pis-web-v2
 ```
 
 2. 安装依赖
@@ -33,19 +38,22 @@ cd pi-sale-web
 yarn install
 ```
 
-3. 运行开发服务器
+3. 配置环境变量
+   复制 `.env.development` 为 `.env.local` 并根据需要进行修改
+
+4. 运行开发服务器
 
 ```bash
 yarn dev
 ```
 
-4. 构建生产版本
+5. 构建生产版本
 
 ```bash
 yarn build
 ```
 
-5. 启动生产服务器
+6. 启动生产服务器
 
 ```bash
 yarn start
@@ -54,41 +62,50 @@ yarn start
 ## 项目结构
 
 ```
-pi-sale-web/
+pis-web-v2/
 ├── src/
-│   ├── app/         # 页面路由
-│   ├── components/  # 可复用组件
-│   ├── theme/       # 主题配置
-│   ├── mock/        # 模拟数据
-│   ├── utils/       # 工具函数
-│   └── types/       # TypeScript类型定义
-├── public/          # 静态资源
+│   ├── app/          # 页面路由和布局
+│   │   ├── api/      # API 路由
+│   │   ├── market/   # 市场页面
+│   │   ├── mint/     # 铸造页面
+│   │   ├── swap/     # 交换页面
+│   │   ├── deploy/   # 部署页面
+│   │   └── [address]/# 代币详情页面
+│   ├── components/   # 可复用组件
+│   ├── contexts/     # React上下文
+│   ├── hooks/        # 自定义React钩子
+│   ├── store/        # Redux状态管理
+│   ├── theme/        # 主题配置
+│   ├── mock/         # 模拟数据
+│   ├── utils/        # 工具函数
+│   ├── types/        # TypeScript类型定义
+│   └── web3/         # 区块链交互
+│       └── fairMint/ # 公平铸造相关功能
+├── public/           # 静态资源
 └── ...
 ```
 
-## 模拟数据
+## 区块链集成
 
-项目中的模拟数据位于 `src/mock` 目录，结构如下：
+项目支持多个区块链网络：
 
-```
-mock/
-├── index.ts        # 导出所有模拟数据
-├── tokens.ts       # 代币基本信息
-├── market.ts       # 市场相关数据
-├── minting.ts      # 铸造代币数据
-├── stats.ts        # 平台统计数据
-└── types.ts        # 数据类型定义
-```
+1. **Pi Network** - 主要针对Pi Network生态系统
+2. **Solana** - 利用Solana网络进行代币发行和交互
 
-要替换模拟数据为真实的API数据，可以：
+相关代码位于 `src/web3` 目录中，包含：
+- 智能合约接口定义 (IDL)
+- 交易构建和签名
+- 链上数据读取和状态管理
 
-1. 保持相同的数据结构
-2. 创建API服务，替换对应的模拟数据文件
-3. 更新导入路径，从API服务获取数据
+## 国际化支持
+
+项目使用i18next实现国际化，支持多语言切换功能。相关配置位于 `src/app/i18n` 目录。
 
 ## 部署说明
 
-此项目可以部署在任何支持Node.js的环境中，如Vercel、Netlify、AWS、Digital Ocean等。
+此项目可以部署在任何支持Node.js的环境中：
+- **推荐**: Vercel, Netlify
+- **其他选项**: AWS, Digital Ocean, Azure等
 
 ## 贡献指南
 
