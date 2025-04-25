@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build --no-lint",
     "export": "next export",
+    "pages:build": "npx @cloudflare/next-on-pages",
+    "pages:deploy": "npx wrangler pages deploy .vercel/output/static",
     "start": "next start",
     "lint": "next lint"
   },
@@ -59,6 +61,7 @@
     "webpack": "^5.99.6"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "^1.13.12",
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
@@ -67,6 +70,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vercel": "^41.6.2"
   }
 }
