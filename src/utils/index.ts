@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js'
+
 export function formatNumberWithUnit(num: number, decimals = 2): string {
   // 处理零值和负值
   if (num === 0) return '0'
@@ -367,7 +369,8 @@ export function calculateTokensFromCurrency(
   currencyAmount: number,
   mintAmount: number,
   mintRate?: string,
-  tokenDecimals: number = 6
+  tokenDecimals: number = 6,
+  liquiditySol?: string
 ): number {
   if (
     !currencyAmount ||
@@ -391,8 +394,26 @@ export function calculateTokensFromCurrency(
       parsedTotalSupply / Math.pow(10, tokenDecimals) / mintAmount / 2
   }
 
+  const liquiditySolAmount = new BigNumber(liquiditySol || 0)
+    .div(1e9)
+    .toNumber()
+  console.log(
+    liquiditySol,
+    'liquiditySol',
+    parsedTotalSupply,
+    'parsedTotalSupply',
+    mintAmount,
+    'mintAmount',
+    currencyAmount,
+    'currencyAmount',
+    exchangeRate,
+    'exchangeRate'
+  )
+
   // 计算代币数量 = 输入金额 * 铸造比率
-  return Math.floor(parsedTotalSupply * currencyAmount * exchangeRate)
+  return (
+    (Math.floor(parsedTotalSupply / 2) * currencyAmount) / liquiditySolAmount
+  )
 }
 
 /**
@@ -543,15 +564,15 @@ export function calculatePiFromTokens(
  * @returns 如果格式看起来像合约地址则返回true
  */
 export function isPossibleContractAddress(address: string): boolean {
-  if (!address) return false;
-  
+  if (!address) return false
+
   // Solana地址通常是base58编码的44个字符
   // 这里使用简单的正则表达式验证基本格式
-  const solanaAddressRegex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
-  
+  const solanaAddressRegex = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/
+
   // Pi Network地址也有特定格式
   // 这是一个宽松的验证，实际格式可能需要调整
-  const piAddressRegex = /^[0-9a-zA-Z]{30,50}$/;
-  
-  return solanaAddressRegex.test(address) || piAddressRegex.test(address);
+  const piAddressRegex = /^[0-9a-zA-Z]{30,50}$/
+
+  return solanaAddressRegex.test(address) || piAddressRegex.test(address)
 }

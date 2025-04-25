@@ -112,6 +112,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
       mintRate: fairCurveData?.feeRate,
       currencyUnit: token.currencyUnit || 'SOL',
       tokenDecimals: token.tokenDecimal || 0,
+      liquiditySol: fairCurveData?.liquiditySol,
     })
 
     // 在组件顶部添加 inputFocus 状态
@@ -787,11 +788,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
                   border="1px solid"
                   borderColor="purple.100"
                 >
-                  <Text
-                    fontWeight="bold"
-                    fontSize="md"
-                    color="brand.primary"
-                  >
+                  <Text fontWeight="bold" fontSize="md" color="brand.primary">
                     {currencyUnit}
                   </Text>
                 </Box>

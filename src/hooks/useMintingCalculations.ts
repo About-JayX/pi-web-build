@@ -16,10 +16,11 @@ interface MintingCalculationParams {
   mintRate?: string
   currencyUnit?: string
   tokenDecimals?: number
+  liquiditySol?: string
 }
 
 /**
- * 自定义Hook，用于处理所有与铸造相关的计算
+ * 自定义Hook，用于处理所有与铸造 相关的计算
  * 通过useMemo缓存计算结果，并提供统一的接口访问铸造计算函数
  * @param params 铸造计算所需参数
  * @returns 铸造计算相关的值和函数
@@ -30,6 +31,7 @@ export function useMintingCalculations({
   mintRate,
   currencyUnit = 'SOL',
   tokenDecimals = 6,
+  liquiditySol,
 }: MintingCalculationParams) {
   // 从目标值(target)中提取铸造总额
   const mintAmount = useMemo(() => {
@@ -125,7 +127,8 @@ export function useMintingCalculations({
       currencyAmount,
       mintAmount,
       mintRate,
-      tokenDecimals
+      tokenDecimals,
+      liquiditySol
     )
   }
 
