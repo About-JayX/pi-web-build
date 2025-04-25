@@ -70,7 +70,7 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
         // 简单验证连接是否工作 - 例如获取最新区块高度
         const blockHeight = await conn.getBlockHeight()
         
-        // 仅保留重要的连接验证日志
+        // 仅在开发环境中输出连接状态日志
         if (process.env.NODE_ENV === 'development') {
           console.log(`Solana connection valid, block height: ${blockHeight}`)
         }
@@ -273,8 +273,12 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
       // 如果钱包已连接，直接使用当前公钥
       if (isPhantomConnected && window.solana.publicKey) {
         const currentKey = window.solana.publicKey.toString()
-        // 重要的连接状态变更
-        console.log(`User already logged in, no restoration needed`)
+        
+        // 重要的连接状态变更，仅在开发环境输出
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`User already logged in, no restoration needed`)
+        }
+        
         setPublicKey(currentKey)
         return
       }
@@ -290,7 +294,12 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
           const result = await window.solana.connect({ onlyIfTrusted: true })
           if (result.publicKey) {
             const newPublicKey = result.publicKey.toString()
-            console.log(`User session restored via saved token and wallet address`)
+            
+            // 重要的状态变更，但简化输出
+            if (process.env.NODE_ENV === 'development') {
+              console.log(`User session restored via saved token and wallet address`)
+            }
+            
             setPublicKey(newPublicKey)
             setAutoConnected(true)
             return
@@ -302,6 +311,7 @@ export const SolanaProvider = ({ children }: { children: ReactNode }) => {
         }
       }
     } catch (error) {
+      // 保留错误日志
       console.error(`Wallet connection check failed: ${error}`)
     } finally {
       setIsConnecting(false)
