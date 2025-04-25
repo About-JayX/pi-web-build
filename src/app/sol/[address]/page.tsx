@@ -191,9 +191,44 @@ export default function TokenMintPage() {
     return `${rateValue}%`
   }
 
+  // 计算单个代币价格
+  const calculateTokenPrice = () => {
+    if (!tokenInfo?.total_supply || !tokenInfo?.liquidity_amount) return "0 SOL"
+
+    const totalSupply = new BigNumber(tokenInfo.total_supply)
+      .div(10 ** (tokenInfo?.token_decimal || 6))
+    const targetAmount = new BigNumber(tokenInfo.liquidity_amount).div(1e9)
+
+    if (totalSupply.isZero() || targetAmount.isZero()) {
+      return "0 SOL"
+    }
+
+    // 单个代币价格 = 铸造金额 / (总量/2)
+    const singlePrice = targetAmount.div(totalSupply.div(2))
+    return `${singlePrice.toNumber().toLocaleString('en-US', {
+      maximumFractionDigits: 8,
+    })} SOL`
+  }
+
   // 格式化合约地址（显示前12位和后16位）
   const formatContractAddress = (address: string) => {
     return address.slice(0, 12) + '...' + address.slice(-16);
+  };
+
+  // 格式化部署时间
+  const formatDeployTime = (dateString: string) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    
+    // 格式化为 YYYY-MM-DD HH:MM:SS
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    
+    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
   // 复制合约地址到剪贴板
@@ -285,8 +320,7 @@ export default function TokenMintPage() {
     console.log('Token socials:', token.socials);
     console.log('Processed social links:', links);
     
-    if (links.length === 0) return null;
-    
+    // 移除条件判断，确保至少显示分享按钮
     return (
       <HStack spacing={1} mt={2} justify="center">
         {links.map((social, index) => (
@@ -551,8 +585,15 @@ export default function TokenMintPage() {
             align={{ base: 'flex-start', md: 'center' }}
           >
             <Box>
-              <Heading as="h2" size="lg" mb={2}>
-                {t('tokenInfoNetwork').replace('{network}', 'Solana')}
+              <Heading as="h2" size="lg" mb={2} display="flex" alignItems="center">
+                {t('tokenInfoNetwork').replace('{network}', '')}
+                <Image 
+                  src="/sol.png" 
+                  alt="Solana Logo" 
+                  boxSize="24px" 
+                  ml={1} 
+                  display="inline-block" 
+                />
               </Heading>
               <Text color="gray.500">{t('mintTokenCancel')}</Text>
             </Box>
@@ -565,7 +606,24 @@ export default function TokenMintPage() {
                 <CardBody p={{ base: 3, md: 4 }}>
                   <VStack spacing={{ base: 4, md: 6 }} align="stretch">
                     {/* 代币标题部分 - 添加logo和社交媒体链接 */}
-                    <Flex direction={{ base: 'column', sm: 'row' }} align={{ base: 'center', sm: 'flex-start' }} gap={4}>
+                    <Flex direction={{ base: 'column', sm: 'row' }} align={{ base: 'center', sm: 'flex-start' }} gap={4} position="relative">
+                      {/* 部署时间显示在右上角 */}
+                      <Box 
+                        position="absolute" 
+                        top={0} 
+                        right={0} 
+                        fontSize="xs" 
+                        color="gray.500"
+                        textAlign="right"
+                      >
+                        <Text fontSize="xs" fontWeight="medium" color="gray.500">
+                          {t('deployed')}:
+                        </Text>
+                        <Text fontSize="xs" fontFamily="mono">
+                          {formatDeployTime(tokenInfo.created_at)}
+                        </Text>
+                      </Box>
+                      
                       {/* 代币logo */}
                       <Flex direction="column" alignItems="center">
                         <Image
@@ -623,48 +681,48 @@ export default function TokenMintPage() {
                     {/* 进度部分 */}
                     <Box>
                       <Flex justifyContent="space-between" alignItems="center" mb={1}>
-                        <Text
-                          as="span"
-                          fontSize="xs"
-                          display="flex"
-                          flexDirection="row"
-                          alignItems="center"
-                          gap={1}
-                          transition="color 0.2s"
-                        >
-                          {selectedToken.progress.toFixed(2)}%
+                        <HStack>
                           <Text
-                            as="span"
+                            fontWeight="bold"
+                            fontSize="sm"
                             color="brand.primary"
-                            fontSize="xs"
-                            transition="color 0.2s"
                           >
-                            ({selectedToken.raised})
+                            {selectedToken.progress.toFixed(2)}%
                           </Text>
-                        </Text>
+                          {selectedToken.progress > 0 && (
+                            <Text
+                              fontWeight="medium" 
+                              fontSize="sm" 
+                              color="brand.600"
+                            >
+                              ({selectedToken.raised})
+                            </Text>
+                          )}
+                        </HStack>
                         <Text
-                          as="span"
-                          color="gray.500"
-                          fontSize="xs"
-                          transition="color 0.2s"
+                          fontWeight="medium"
+                          fontSize="sm"
                         >
-                          {selectedToken.target}
+                          / {selectedToken.target}
                         </Text>
                       </Flex>
-                      <Progress
-                        value={selectedToken.progress}
-                        size="sm"
-                        borderRadius="full"
-                        mb={3}
-                        bg="#E7E3FC"
-                        sx={{
-                          // 进度条颜色
-                          '& > div:last-of-type': {
-                            bg: 'brand.primary !important',
-                            transition: 'width 0.5s ease-in-out',
-                          },
-                        }}
-                      />
+                      <HStack spacing={2} align="center">
+                        <Progress
+                          value={selectedToken.progress}
+                          variant="subtle"
+                          borderRadius="full"
+                          size="sm"
+                          flex="1"
+                          bg="#E7E3FC"
+                          sx={{
+                            // 进度条颜色
+                            "& > div:last-of-type": {
+                              bg: "brand.primary !important",
+                              transition: "width 0.3s ease-in-out",
+                            },
+                          }}
+                        />
+                      </HStack>
                     </Box>
 
                     {/* 统计数据部分 */}
@@ -698,27 +756,6 @@ export default function TokenMintPage() {
                         textAlign="center"
                       >
                         <Icon
-                          as={FaUsers}
-                          color="blue.500"
-                          boxSize="24px"
-                          mb={2}
-                        />
-                        <Text color="gray.600" fontSize="sm">
-                          {t('participantsColumn')}
-                        </Text>
-                        <Text fontWeight="bold" fontSize="xl" color="blue.500">
-                          {selectedToken.minterCounts}
-                        </Text>
-                      </Box>
-
-                      <Box
-                        bg={statBg}
-                        p={4}
-                        borderRadius="lg"
-                        boxShadow="sm"
-                        textAlign="center"
-                      >
-                        <Icon
                           as={FaChartPie}
                           color="purple.500"
                           boxSize="24px"
@@ -733,6 +770,27 @@ export default function TokenMintPage() {
                           color="purple.500"
                         >
                           {formatTokenAmount(formattedData.supplied)}
+                        </Text>
+                      </Box>
+
+                      <Box
+                        bg={statBg}
+                        p={4}
+                        borderRadius="lg"
+                        boxShadow="sm"
+                        textAlign="center"
+                      >
+                        <Icon
+                          as={FaUsers}
+                          color="blue.500"
+                          boxSize="24px"
+                          mb={2}
+                        />
+                        <Text color="gray.600" fontSize="sm">
+                          {t('participantsColumn')}
+                        </Text>
+                        <Text fontWeight="bold" fontSize="xl" color="blue.500">
+                          {selectedToken.minterCounts}
                         </Text>
                       </Box>
                     </SimpleGrid>
@@ -763,6 +821,51 @@ export default function TokenMintPage() {
                           </Text>
                         </HStack>
 
+                        {/* 添加代币价格 */}
+                        <HStack
+                          justify="space-between"
+                          p={3}
+                          bg={statBg}
+                          borderRadius="md"
+                        >
+                          <Text color="gray.600" fontSize="sm">
+                            {t('tokenPrice')}:
+                          </Text>
+                          <Text fontWeight="bold">
+                            {calculateTokenPrice()}
+                          </Text>
+                        </HStack>
+
+                        {/* 添加铸造总额 */}
+                        <HStack
+                          justify="space-between"
+                          p={3}
+                          bg={statBg}
+                          borderRadius="md"
+                        >
+                          <Text color="gray.600" fontSize="sm">
+                            {t('target')}:
+                          </Text>
+                          <Text fontWeight="bold">
+                            {selectedToken.target}
+                          </Text>
+                        </HStack>
+                        
+                        {/* 添加已铸额度 */}
+                        <HStack
+                          justify="space-between"
+                          p={3}
+                          bg={statBg}
+                          borderRadius="md"
+                        >
+                          <Text color="gray.600" fontSize="sm">
+                            {t('raised')}:
+                          </Text>
+                          <Text fontWeight="bold">
+                            {selectedToken.raised}
+                          </Text>
+                        </HStack>
+                        
                         <HStack
                           justify="space-between"
                           p={3}
@@ -777,22 +880,20 @@ export default function TokenMintPage() {
                           </Text>
                         </HStack>
                         
-                        {/* 添加我的代币到代币信息栏 */}
-                        {tokenAccount && tokenBalance !== null && (
-                          <HStack
-                            justify="space-between"
-                            p={3}
-                            bg={statBg}
-                            borderRadius="md"
-                          >
-                            <Text color="gray.600" fontSize="sm">
-                              {t('myTokenBalance')}:
-                            </Text>
-                            <Text fontWeight="bold">
-                              {tokenBalance?.toLocaleString()}
-                            </Text>
-                          </HStack>
-                        )}
+                        {/* 添加我的代币到代币信息栏 - 总是显示，即使余额为0 */}
+                        <HStack
+                          justify="space-between"
+                          p={3}
+                          bg={statBg}
+                          borderRadius="md"
+                        >
+                          <Text color="gray.600" fontSize="sm">
+                            {t('myTokenBalance')}:
+                          </Text>
+                          <Text fontWeight="bold">
+                            {wallet?.publicKey ? (tokenBalance?.toLocaleString() || "0") : "-"}
+                          </Text>
+                        </HStack>
                       </SimpleGrid>
                     </Box>
                   </VStack>

@@ -45,7 +45,7 @@ export default {
   
   // 代币详情页 - 标题和导航
   'tokenInfo': '代币信息',
-  'tokenInfoNetwork': '代币信息 ({network})',
+  'tokenInfoNetwork': '代币信息 {network}',
   'mintTokenCancel': '铸造代币/取消铸造',
   'backToMintingHome': '返回铸造主页',
   
@@ -68,7 +68,7 @@ export default {
   'deployed': '部署时间',
   'mintRate': '铸造比率',
   'mintedTokens': '已铸造代币',
-  'mintableTokens': '铸造数量',
+  'mintableTokens': '铸造总量',
   'share': '分享',
   
   // 代币详情页 - MintingForm组件
@@ -90,7 +90,7 @@ export default {
   'feePercent': '手续费 (2%)',
   'refundReceive': '退还可得',
   'cancelMint': '取消铸造',
-  'mintingAmount': '铸造数量',
+  'mintingAmount': '铸造总量',
   'mintingSuccess': '铸造成功',
   'receivedTokens': '已接收 {amount} {symbol}',
   'walletBalanceInsufficient': '钱包余额不足 ({balance} {currency})',
@@ -126,4 +126,5 @@ export default {
   'remaining': '可铸代币',
   'walletMinted': '您的铸造额度',
   'myTokenBalance': '我的代币',
+  'tokenPrice': '代币价格',
 }; 
