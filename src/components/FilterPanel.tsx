@@ -17,8 +17,6 @@ interface FilterPanelProps {
   sortColumn: string
   sortDirection: 'asc' | 'desc'
   onSort: (column: string) => void
-  searchQuery: string
-  onSearchChange: (value: string) => void
   showSortButtons?: boolean
 }
 
@@ -26,8 +24,7 @@ const FilterPanel = ({
   sortColumn,
   sortDirection,
   onSort,
-  searchQuery,
-  onSearchChange,
+
   showSortButtons = false,
 }: FilterPanelProps) => {
   const buttonBg = useColorModeValue('white', 'gray.700')
@@ -51,10 +48,14 @@ const FilterPanel = ({
       justifyContent="space-between"
       pt={{ base: 1, md: 2 }}
     >
-
       {showSortButtons && (
         <Flex align="center" gap={2} flexWrap="wrap">
-          <Text fontWeight="medium" fontSize="sm" whiteSpace="nowrap" color="gray.600">
+          <Text
+            fontWeight="medium"
+            fontSize="sm"
+            whiteSpace="nowrap"
+            color="gray.600"
+          >
             {t('sortBy')}
           </Text>
           {sortOptions.map(option => (
@@ -65,7 +66,9 @@ const FilterPanel = ({
               rightIcon={
                 sortColumn === option.column ? (
                   <Icon
-                    as={sortDirection === 'asc' ? ChevronUpIcon : ChevronDownIcon}
+                    as={
+                      sortDirection === 'asc' ? ChevronUpIcon : ChevronDownIcon
+                    }
                   />
                 ) : undefined
               }
@@ -74,11 +77,13 @@ const FilterPanel = ({
               borderColor={
                 sortColumn === option.column ? 'brand.primary' : 'gray.200'
               }
-              color={sortColumn === option.column ? 'brand.primary' : 'gray.600'}
+              color={
+                sortColumn === option.column ? 'brand.primary' : 'gray.600'
+              }
               _hover={{ borderColor: 'brand.primary', color: 'brand.primary' }}
               transition="all 0.2s ease"
-              fontWeight={sortColumn === option.column ? "semibold" : "normal"}
-              boxShadow={sortColumn === option.column ? "sm" : "none"}
+              fontWeight={sortColumn === option.column ? 'semibold' : 'normal'}
+              boxShadow={sortColumn === option.column ? 'sm' : 'none'}
             >
               {option.label}
             </Button>
@@ -89,4 +94,4 @@ const FilterPanel = ({
   )
 }
 
-export default FilterPanel 
+export default FilterPanel

@@ -10,11 +10,12 @@ import {
 } from '@/utils'
 
 interface TokenParams {
-  page: number
-  limit: number
+  page?: number
+  limit?: number
   category?: string
-  order: string
-  sort_by: string
+  order?: string
+  sort_by?: string
+  search?: string
 }
 
 interface TokenResponse {

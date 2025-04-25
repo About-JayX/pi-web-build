@@ -8,7 +8,7 @@ const USER_API_URL = apiConfig.userApiUrl
 
 // 创建主实例 (fair mint)
 const fairMintInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: "/api",
   timeout: apiConfig.timeout,
   headers: {
     'Content-Type': 'application/json',

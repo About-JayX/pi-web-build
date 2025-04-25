@@ -17,6 +17,11 @@ export interface SymbolCheckResponse {
   exists: boolean
 }
 
+export interface SearchTokenResponse {
+  tokens: Token[]
+  total: number
+}
+
 /**
  * Token 相关接口
  */

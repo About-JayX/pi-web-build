@@ -33,7 +33,7 @@ import {
   useBreakpointValue,
   useToast,
   Image,
-  Grid
+  Grid,
 } from '@chakra-ui/react'
 import { FaUpload, FaChevronDown, FaChevronUp, FaEdit } from 'react-icons/fa'
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
@@ -210,11 +210,21 @@ const TokenParametersSection = ({
           </Text>
           <Text fontWeight="bold" color={labelColor}>
             {totalSupplyOptions[totalSupplyTabIndex]}
-            {isTestEnv && totalSupplyOptions[totalSupplyTabIndex] === '1000000' && (
-              <Text as="span" ml={2} fontSize="xs" color="orange.500" bg="orange.100" px={1} py={0.5} borderRadius="sm">
-                测试
-              </Text>
-            )}
+            {isTestEnv &&
+              totalSupplyOptions[totalSupplyTabIndex] === '1000000' && (
+                <Text
+                  as="span"
+                  ml={2}
+                  fontSize="xs"
+                  color="orange.500"
+                  bg="orange.100"
+                  px={1}
+                  py={0.5}
+                  borderRadius="sm"
+                >
+                  测试
+                </Text>
+              )}
           </Text>
         </Box>
         <Box>
@@ -227,11 +237,21 @@ const TokenParametersSection = ({
                 targetAmountTabIndex
               ]
             }
-            {isTestEnv && totalSupplyOptions[totalSupplyTabIndex] === '1000000' && (
-              <Text as="span" ml={2} fontSize="xs" color="orange.500" bg="orange.100" px={1} py={0.5} borderRadius="sm">
-                测试
-              </Text>
-            )}
+            {isTestEnv &&
+              totalSupplyOptions[totalSupplyTabIndex] === '1000000' && (
+                <Text
+                  as="span"
+                  ml={2}
+                  fontSize="xs"
+                  color="orange.500"
+                  bg="orange.100"
+                  px={1}
+                  py={0.5}
+                  borderRadius="sm"
+                >
+                  测试
+                </Text>
+              )}
           </Text>
         </Box>
         <Box>
@@ -638,9 +658,11 @@ export default function DeployPage() {
   // 在开发环境下输出测试模式提示
   useEffect(() => {
     if (isTestEnv) {
-      console.info('🧪 测试模式已启用 - 额外测试选项可用: 10000000代币 / 0.1 SOL');
+      console.info(
+        '🧪 测试模式已启用 - 额外测试选项可用: 10000000代币 / 0.1 SOL'
+      )
     }
-  }, [isTestEnv]);
+  }, [isTestEnv])
 
   // 定义代币发行总量选项
   const totalSupplyOptions = useMemo(() => {
@@ -652,35 +674,32 @@ export default function DeployPage() {
   }, [isTestEnv])
 
   // 定义目标铸造金额选项映射（带单位的值）
-  const targetAmountOptionsMap = useMemo(
-    () => {
-      const baseOptions = {
-        '314000000': [
-          `314 ${currencyUnit}`,
-          `157 ${currencyUnit}`,
-          `78.5 ${currencyUnit}`,
-        ],
-        '1000000000': [
-          `100 ${currencyUnit}`,
-          `200 ${currencyUnit}`,
-          `250 ${currencyUnit}`,
-          // `400 ${currencyUnit}`,
-          `500 ${currencyUnit}`,
-        ],
+  const targetAmountOptionsMap = useMemo(() => {
+    const baseOptions = {
+      '314000000': [
+        `314 ${currencyUnit}`,
+        `157 ${currencyUnit}`,
+        `78.5 ${currencyUnit}`,
+      ],
+      '1000000000': [
+        `100 ${currencyUnit}`,
+        `200 ${currencyUnit}`,
+        `250 ${currencyUnit}`,
+        // `400 ${currencyUnit}`,
+        `500 ${currencyUnit}`,
+      ],
+    }
+
+    // 测试环境下添加小金额测试选项
+    if (isTestEnv) {
+      return {
+        '1000000': [`0.1 ${currencyUnit}`],
+        ...baseOptions,
       }
-      
-      // 测试环境下添加小金额测试选项
-      if (isTestEnv) {
-        return {
-          '1000000': [`0.1 ${currencyUnit}`],
-          ...baseOptions
-        }
-      }
-      
-      return baseOptions
-    },
-    [currencyUnit, isTestEnv]
-  )
+    }
+
+    return baseOptions
+  }, [currencyUnit, isTestEnv])
 
   // 当前选中的值
   const [selectedValues, setSelectedValues] = useState<{
@@ -697,8 +716,8 @@ export default function DeployPage() {
     setSelectedValues({
       totalSupply: totalSupplyOptions[0],
       targetAmount: isTestEnv ? '0.1' : '314',
-    });
-  }, [isTestEnv, totalSupplyOptions]);
+    })
+  }, [isTestEnv, totalSupplyOptions])
 
   const handleValuesChange = useCallback(
     (values: { totalSupply: string; targetAmount: string }) => {
@@ -740,11 +759,15 @@ export default function DeployPage() {
         return
       }
 
-      console.log("checkTokenSymbol被调用:", symbol); // 调试日志
+      console.log('checkTokenSymbol被调用:', symbol) // 调试日志
 
       // 再次检查非法代币符号列表 - 应该在handleSymbolChange中完成，这里是双重保险
-      const invalidSymbols = ["XPI", "PIS", "PiSale", "SpacePi", "Xijinpin"];
-      if (invalidSymbols.some(invalid => symbol.toUpperCase() === invalid.toUpperCase())) {
+      const invalidSymbols = ['XPI', 'PIS', 'PiSale', 'SpacePi', 'Xijinpin']
+      if (
+        invalidSymbols.some(
+          invalid => symbol.toUpperCase() === invalid.toUpperCase()
+        )
+      ) {
         // 非法符号直接设置错误状态并返回，不需要进行网络请求
         setIsSymbolValid(false)
         setErrorType('invalid')
@@ -755,11 +778,11 @@ export default function DeployPage() {
       try {
         // 开始检查符号可用性
         setIsCheckingSymbol(true)
-        console.log("开始API请求检查符号:", symbol); // 调试日志
-        
+        console.log('开始API请求检查符号:', symbol) // 调试日志
+
         const response = await TokenAPI.checkSymbol(symbol)
-        console.log("API响应:", response); // 调试日志
-        
+        console.log('API响应:', response) // 调试日志
+
         // 如果 exists 为 true 表示已注册，则不可用
         if (response.exists) {
           setIsSymbolValid(false)
@@ -794,7 +817,7 @@ export default function DeployPage() {
       // 清除之前的定时器，避免任何情况下的竞态条件
       if (timerRef.current) {
         clearTimeout(timerRef.current)
-        timerRef.current = null;
+        timerRef.current = null
       }
 
       // 1. 移除空格
@@ -806,20 +829,24 @@ export default function DeployPage() {
 
       // 限制最大长度为10个字符
       const truncatedValue = value.slice(0, 10)
-      
+
       // 更新符号值
       setTokenSymbol(truncatedValue)
-      
+
       // 如果输入为空，不进行验证
       if (!truncatedValue) {
         setIsSymbolValid(null)
         setErrorType(null)
         return
       }
-        
+
       // 步骤1: 快速检查非法代币符号
-      const invalidSymbols = ["XPI", "PIS", "PiSale", "SpacePi", "Xijinpin"];
-      if (invalidSymbols.some(invalid => truncatedValue.toUpperCase() === invalid.toUpperCase())) {
+      const invalidSymbols = ['XPI', 'PIS', 'PiSale', 'SpacePi', 'Xijinpin']
+      if (
+        invalidSymbols.some(
+          invalid => truncatedValue.toUpperCase() === invalid.toUpperCase()
+        )
+      ) {
         // 设置错误状态
         setIsSymbolValid(false)
         setErrorType('invalid')
@@ -830,16 +857,16 @@ export default function DeployPage() {
       }
 
       // 步骤2: 如果不是非法符号，继续处理
-      
+
       // 如果之前是任何错误，都重置状态，准备进行新的检查
       setIsSymbolValid(null)
       setErrorType(null)
 
       // 步骤3: 为非非法符号设置定时器，延迟检查可用性
-      console.log("准备检查符号可用性:", truncatedValue); // 调试日志
+      console.log('准备检查符号可用性:', truncatedValue) // 调试日志
       // 设置新的定时器，1500ms 后检查
       timerRef.current = setTimeout(() => {
-        console.log("正在执行符号可用性检查:", truncatedValue); // 调试日志
+        console.log('正在执行符号可用性检查:', truncatedValue) // 调试日志
         // 调用API检查符号是否已被注册
         checkTokenSymbol(truncatedValue)
       }, 1500)
@@ -878,26 +905,26 @@ export default function DeployPage() {
   } = useDisclosure()
 
   // 添加部署成功弹窗状态
-  const [deployedTokenMint, setDeployedTokenMint] = useState<string>('');
+  const [deployedTokenMint, setDeployedTokenMint] = useState<string>('')
   const {
     isOpen: isSuccessModalOpen,
     onOpen: onSuccessModalOpen,
     onClose: onSuccessModalClose,
-  } = useDisclosure();
+  } = useDisclosure()
 
   // 清空表单内容
   const resetForm = () => {
-    setTokenName('');
-    setTokenSymbol('');
-    setTokenIcon(null);
-    setWebsite('');
-    setTwitter('');
-    setTelegram('');
-    setDescription('');
+    setTokenName('')
+    setTokenSymbol('')
+    setTokenIcon(null)
+    setWebsite('')
+    setTwitter('')
+    setTelegram('')
+    setDescription('')
     // 重置到默认选项
-    setTotalSupplyTabIndex(0);
-    setTargetAmountTabIndex(0);
-  };
+    setTotalSupplyTabIndex(0)
+    setTargetAmountTabIndex(0)
+  }
 
   const handleCreateToken = async () => {
     // 如果未连接钱包，则打开钱包连接弹窗
@@ -920,14 +947,18 @@ export default function DeployPage() {
     }
 
     // 最终检查非法代币符号
-    const invalidSymbols = ["XPI", "PIS", "PiSale", "SpacePi", "Xijinpin"];
-    if (invalidSymbols.some(invalid => tokenSymbol.toUpperCase() === invalid.toUpperCase())) {
+    const invalidSymbols = ['XPI', 'PIS', 'PiSale', 'SpacePi', 'Xijinpin']
+    if (
+      invalidSymbols.some(
+        invalid => tokenSymbol.toUpperCase() === invalid.toUpperCase()
+      )
+    ) {
       // 更新状态，确保错误信息在页面上显示
       if (!(isSymbolValid === false && errorType === 'invalid')) {
         setIsSymbolValid(false)
         setErrorType('invalid')
       }
-      
+
       toast({
         title: t('error'),
         description: t('invalidSymbol'),
@@ -936,13 +967,13 @@ export default function DeployPage() {
         isClosable: true,
         position: 'top',
       })
-      
+
       // 滚动到符号输入框
-      const symbolInput = document.querySelector('[name="tokenSymbol"]');
+      const symbolInput = document.querySelector('[name="tokenSymbol"]')
       if (symbolInput) {
-        symbolInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        symbolInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
-      
+
       return
     }
 
@@ -951,19 +982,22 @@ export default function DeployPage() {
       // 根据错误类型显示不同的错误消息
       toast({
         title: t('error'),
-        description: errorType === 'invalid' ? t('invalidSymbol') : t('symbolAlreadyExists'),
+        description:
+          errorType === 'invalid'
+            ? t('invalidSymbol')
+            : t('symbolAlreadyExists'),
         status: 'error',
         duration: 5000,
         isClosable: true,
         position: 'top',
       })
-      
+
       // 滚动到符号输入框
-      const symbolInput = document.querySelector('[name="tokenSymbol"]');
+      const symbolInput = document.querySelector('[name="tokenSymbol"]')
       if (symbolInput) {
-        symbolInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        symbolInput.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
-      
+
       return
     }
 
@@ -995,13 +1029,13 @@ export default function DeployPage() {
       const { mint } = (await TokenAPI.createToken(params)) as any
 
       // 保存部署成功的代币地址
-      setDeployedTokenMint(mint);
-      
+      setDeployedTokenMint(mint)
+
       // 清空表单
-      resetForm();
-      
+      resetForm()
+
       // 打开成功弹窗
-      onSuccessModalOpen();
+      onSuccessModalOpen()
 
       toast({
         title: t('success'),
@@ -1011,7 +1045,7 @@ export default function DeployPage() {
         isClosable: true,
         position: 'top',
       })
-      
+
       // 注释掉自动跳转，因为现在用户可以通过弹窗中的按钮跳转
       // setTimeout(() => {
       //   router.push(`/sol/${mint}`)
@@ -1246,10 +1280,14 @@ export default function DeployPage() {
                         }
                         _placeholder={{ color: 'gray.400' }}
                         _focus={{
-                          borderColor: isSymbolValid === false ? 'red.500' : 'brand.primary',
-                          boxShadow: isSymbolValid === false 
-                            ? '0 0 0 1px #E53E3E'
-                            : '0 0 0 1px var(--chakra-colors-brand-primary)'
+                          borderColor:
+                            isSymbolValid === false
+                              ? 'red.500'
+                              : 'brand.primary',
+                          boxShadow:
+                            isSymbolValid === false
+                              ? '0 0 0 1px #E53E3E'
+                              : '0 0 0 1px var(--chakra-colors-brand-primary)',
                         }}
                         size="md"
                         isInvalid={isSymbolValid === false}
@@ -1271,34 +1309,46 @@ export default function DeployPage() {
                       )}
                       {/* 无论是否在检查中，只要是错误状态就显示错误提示 */}
                       {isSymbolValid === false && (
-                        <Box 
-                          mt={1} 
-                          p={2} 
-                          bg="red.50" 
-                          borderRadius="md" 
-                          borderWidth="1px" 
+                        <Box
+                          mt={1}
+                          p={2}
+                          bg="red.50"
+                          borderRadius="md"
+                          borderWidth="1px"
                           borderColor="red.200"
                         >
-                          <Text fontSize="sm" color="red.500" fontWeight="medium">
-                            {errorType === 'invalid' ? t('invalidSymbol') : t('symbolAlreadyExists')}
+                          <Text
+                            fontSize="sm"
+                            color="red.500"
+                            fontWeight="medium"
+                          >
+                            {errorType === 'invalid'
+                              ? t('invalidSymbol')
+                              : t('symbolAlreadyExists')}
                           </Text>
                         </Box>
                       )}
                       {/* 添加成功验证提示 */}
-                      {isSymbolValid === true && !isCheckingSymbol && tokenSymbol && (
-                        <Box 
-                          mt={1} 
-                          p={2} 
-                          bg="green.50" 
-                          borderRadius="md" 
-                          borderWidth="1px" 
-                          borderColor="green.200"
-                        >
-                          <Text fontSize="sm" color="green.500" fontWeight="medium">
-                            {t('symbolValidSuccess')}
-                          </Text>
-                        </Box>
-                      )}
+                      {isSymbolValid === true &&
+                        !isCheckingSymbol &&
+                        tokenSymbol && (
+                          <Box
+                            mt={1}
+                            p={2}
+                            bg="green.50"
+                            borderRadius="md"
+                            borderWidth="1px"
+                            borderColor="green.200"
+                          >
+                            <Text
+                              fontSize="sm"
+                              color="green.500"
+                              fontWeight="medium"
+                            >
+                              {t('symbolValidSuccess')}
+                            </Text>
+                          </Box>
+                        )}
                     </FormControl>
 
                     <FormControl isRequired>
@@ -1364,12 +1414,20 @@ export default function DeployPage() {
               width="full"
               isLoading={isSubmitting || isConnecting}
               loadingText={publicKey ? t('creating') : t('connecting')}
-              isDisabled={!publicKey || isSubmitting || isConnecting || !tokenIcon || !tokenName || !tokenSymbol || isSymbolValid !== true}
+              isDisabled={
+                !publicKey ||
+                isSubmitting ||
+                isConnecting ||
+                !tokenIcon ||
+                !tokenName ||
+                !tokenSymbol ||
+                isSymbolValid !== true
+              }
               _disabled={{
                 bg: 'gray.400',
                 cursor: 'not-allowed',
                 opacity: 0.6,
-                _hover: { bg: 'gray.400' }
+                _hover: { bg: 'gray.400' },
               }}
             >
               {publicKey ? t('createToken') : t('connectWallet')}
@@ -1379,21 +1437,21 @@ export default function DeployPage() {
       </Container>
 
       {/* 添加成功弹窗 */}
-      <DeploySuccessModal 
-        isOpen={isSuccessModalOpen} 
-        onClose={onSuccessModalClose} 
+      <DeploySuccessModal
+        isOpen={isSuccessModalOpen}
+        onClose={onSuccessModalClose}
         tokenMint={deployedTokenMint}
         tokenName={tokenName}
         tokenSymbol={tokenSymbol}
       />
-      
+
       {/* 钱包连接弹窗 */}
       <WalletConnectModal
         isOpen={isWalletModalOpen}
         onClose={onWalletModalClose}
         onConnect={handleWalletConnected}
       />
-      
+
       {/* 错误弹窗 */}
       <ErrorModal
         isOpen={isErrorModalOpen}
