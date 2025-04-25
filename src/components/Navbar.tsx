@@ -324,10 +324,15 @@ export const Navbar = ({
   // 统一深色页面判断
   const isDarkPage = finalIsXpiPage || finalIsSpacePiPage
   
-  // 输出调试信息以验证路径和页面类型检测是否正确
-  console.log('Current path:', pathname);
-  console.log('Is XPI page?', finalIsXpiPage);
-  console.log('Is SpacePi page?', finalIsSpacePiPage);
+  // 仅在开发环境下输出调试信息
+  if (process.env.NODE_ENV === 'development') {
+    // 使用 useEffect 确保只在组件挂载和更新特定依赖时才打印一次
+    useEffect(() => {
+      console.log('Current path:', pathname);
+      console.log('Is XPI page?', finalIsXpiPage);
+      console.log('Is SpacePi page?', finalIsSpacePiPage);
+    }, [pathname, finalIsXpiPage, finalIsSpacePiPage]);
+  }
   
   // 所有useColorModeValue调用都放在这里，不要在下面的逻辑中调用
   const xpiBgColorLight = useColorModeValue("rgba(0, 0, 0, 0.36)", "rgba(0, 0, 0, 0.36)")
@@ -1194,3 +1199,5 @@ const NAV_ITEMS: Array<NavItem> = [
   },
     */
 ]
+
+export default Navbar;
