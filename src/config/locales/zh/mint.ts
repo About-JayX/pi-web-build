@@ -36,8 +36,8 @@ export default {
   'participantsColumn': '铸造人数',
   'priceColumn': '铸造比率',
   'linksColumn': '社媒链接',
-  'target': '总额',
-  'raised': '已铸',
+  'target': '铸造总额',
+  'raised': '已铸额度',
   
   // 铸造页面 - 空结果和错误状态
   'noResults': '没有找到匹配的代币项目',
@@ -68,6 +68,7 @@ export default {
   'deployed': '部署时间',
   'mintRate': '铸造比率',
   'mintedTokens': '已铸造代币',
+  'mintableTokens': '铸造数量',
   'share': '分享',
   
   // 代币详情页 - MintingForm组件
@@ -120,4 +121,8 @@ export default {
   'copyContent': '复制内容：',
   'tokenLink': '代币链接：',
   'shareTo': '分享到：',
+  
+  // Sol代币详情页特有的键值
+  'remaining': '可铸代币',
+  'walletMinted': '您的铸造额度',
 }; 

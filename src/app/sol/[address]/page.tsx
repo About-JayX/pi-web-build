@@ -36,6 +36,7 @@ import { LoadingSpinner } from '@/components'
 import { MintingInstructions } from '@/components/token-detail'
 import { TokenAPI } from '@/api/token'
 import { TokenInfo } from '@/api/types'
+import { useMintingCalculations } from '@/hooks/useMintingCalculations'
 
 export default function TokenMintPage() {
   const { address } = useParams()
@@ -124,11 +125,32 @@ export default function TokenMintPage() {
     checkTokenAccount()
   }, [conn, wallet?.publicKey, tokenInfo?.token_address])
 
+  // 使用useMintingCalculations钩子处理铸造比率计算
+  const { getFormattedMintRate } = useMintingCalculations({
+    totalSupply: tokenInfo?.total_supply 
+      ? new BigNumber(tokenInfo.total_supply)
+        .div(10 ** (tokenInfo?.token_decimal || 6))
+        .toFixed() 
+      : '0',
+    target: tokenInfo?.liquidity_amount 
+      ? `${new BigNumber(tokenInfo.liquidity_amount).div(1e9).toFixed(2)} SOL` 
+      : '0 SOL',
+    tokenDecimals: tokenInfo?.token_decimal || 6,
+    currencyUnit: currencyUnit
+  })
+
+  // 格式化铸造比率，移除千分号，与MintingTokenCard中保持一致
+  const formatMintRate = () => {
+    const rate = getFormattedMintRate();
+    // 移除数字中的千分号（逗号）
+    return rate ? rate.replace(/,/g, "") : rate;
+  }
+
   // 格式化代币数量（除以1e6）
   const formatTokenAmount = (amount: string) => {
     // 获取代币的小数位，默认为6
     const decimal = tokenInfo?.token_decimal || 6
-    return new BigNumber(amount).div(10 ** decimal).toFormat(2)
+    return new BigNumber(amount).div(10 ** decimal).toFormat(0)
   }
 
   // 格式化SOL数量（除以1e9）
@@ -138,7 +160,9 @@ export default function TokenMintPage() {
 
   // 格式化费率为百分比 (除以10000)
   const formatFeeRate = (rate: number | string) => {
-    return `${new BigNumber(rate).div(10000).toFixed(2)}%`
+    // 使用toFixed生成数字，然后转成字符串，不使用千分位分隔符
+    const rateValue = new BigNumber(rate).div(10000).toFixed(2)
+    return `${rateValue}%`
   }
 
   // 返回按钮组件
@@ -392,11 +416,11 @@ export default function TokenMintPage() {
                         {selectedToken.name} ({selectedToken.symbol})
                       </Heading>
                       <Text color="gray.500">
-                        {t('tokenAddress')}: {selectedToken.address}
+                        {t('contractAddressColumn')}: {selectedToken.address}
                       </Text>
                       {tokenAccount && tokenBalance !== null && (
                         <Text color="gray.500" mt={2}>
-                          {t('yourBalance')}: {tokenBalance}{' '}
+                          {t('walletBalance')}: {tokenBalance}{' '}
                           {selectedToken.symbol}
                         </Text>
                       )}
@@ -406,17 +430,34 @@ export default function TokenMintPage() {
 
                     {/* 进度部分 */}
                     <Box>
-                      <Flex
-                        justify="space-between"
-                        mb={1}
-                        fontSize={{ base: 'xs', md: 'sm' }}
-                      >
-                        <HStack>
-                          <Text color="gray.600">{t('progress')}:</Text>
-                          <Text fontWeight="bold" color="brand.primary">
-                            {selectedToken.progress}%
+                      <Flex justifyContent="space-between" alignItems="center" mb={1}>
+                        <Text
+                          as="span"
+                          fontSize="xs"
+                          display="flex"
+                          flexDirection="row"
+                          alignItems="center"
+                          gap={1}
+                          transition="color 0.2s"
+                        >
+                          {selectedToken.progress.toFixed(2)}%
+                          <Text
+                            as="span"
+                            color="brand.primary"
+                            fontSize="xs"
+                            transition="color 0.2s"
+                          >
+                            ({selectedToken.raised})
                           </Text>
-                        </HStack>
+                        </Text>
+                        <Text
+                          as="span"
+                          color="gray.500"
+                          fontSize="xs"
+                          transition="color 0.2s"
+                        >
+                          {selectedToken.target}
+                        </Text>
                       </Flex>
                       <Progress
                         value={selectedToken.progress}
@@ -450,10 +491,10 @@ export default function TokenMintPage() {
                           mb={2}
                         />
                         <Text color="gray.600" fontSize="sm">
-                          {t('totalSupply')}
+                          {t('totalSupplyColumn')}
                         </Text>
                         <Text fontWeight="bold" fontSize="xl" color="green.500">
-                          {selectedToken.totalSupply}
+                          {formatTokenAmount(tokenInfo.total_supply.toString())}
                         </Text>
                       </Box>
 
@@ -471,7 +512,7 @@ export default function TokenMintPage() {
                           mb={2}
                         />
                         <Text color="gray.600" fontSize="sm">
-                          {t('participants')}
+                          {t('participantsColumn')}
                         </Text>
                         <Text fontWeight="bold" fontSize="xl" color="blue.500">
                           {selectedToken.minterCounts}
@@ -492,15 +533,14 @@ export default function TokenMintPage() {
                           mb={2}
                         />
                         <Text color="gray.600" fontSize="sm">
-                          {t('supplied')}
+                          {t('mintableTokens')}
                         </Text>
                         <Text
                           fontWeight="bold"
                           fontSize="xl"
                           color="purple.500"
                         >
-                          {formatTokenAmount(formattedData.supplied)}{' '}
-                          {selectedToken.symbol}
+                          {formatTokenAmount(formattedData.supplied)}
                         </Text>
                       </Box>
                     </SimpleGrid>
@@ -527,7 +567,7 @@ export default function TokenMintPage() {
                             {t('mintRate')}:
                           </Text>
                           <Text fontWeight="bold">
-                            {formatFeeRate(formattedData.feeRate)}
+                            {formatMintRate()}
                           </Text>
                         </HStack>
 
@@ -542,36 +582,7 @@ export default function TokenMintPage() {
                           </Text>
                           <Text fontWeight="bold">
                             {formatTokenAmount(formattedData.remaining)}{' '}
-                            {selectedToken.symbol}
-                          </Text>
-                        </HStack>
-
-                        <HStack
-                          justify="space-between"
-                          p={3}
-                          bg={statBg}
-                          borderRadius="md"
-                        >
-                          <Text color="gray.600" fontSize="sm">
-                            {t('supplied')}:
-                          </Text>
-                          <Text fontWeight="bold">
-                            {formatTokenAmount(formattedData.supplied)}{' '}
-                            {selectedToken.symbol}
-                          </Text>
-                        </HStack>
-
-                        <HStack
-                          justify="space-between"
-                          p={3}
-                          bg={statBg}
-                          borderRadius="md"
-                        >
-                          <Text color="gray.600" fontSize="sm">
-                            {t('solReceived')}:
-                          </Text>
-                          <Text fontWeight="bold">
-                            {formatSolAmount(formattedData.solReceived)} SOL
+                            {/* {selectedToken.symbol} */}
                           </Text>
                         </HStack>
                       </SimpleGrid>
