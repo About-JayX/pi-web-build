@@ -91,7 +91,7 @@ export default function HomePage() {
         const data = await TokenAPI.getPlatformMetrics()
         setMetrics(data)
       } catch (error) {
-        console.error('获取平台数据失败:', error)
+        console.error('Failed to fetch platform data:', error)
       }
     }
 
@@ -118,7 +118,7 @@ export default function HomePage() {
         // 或者使用空数组代替，避免报错
         setMintingData([])
       } catch (error) {
-        console.error('获取铸造代币数据失败:', error)
+        console.error('Failed to fetch mint token data:', error)
         setMintingData([])
       }
     }

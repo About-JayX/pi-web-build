@@ -157,7 +157,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
             }
           }
         } catch (error) {
-          console.error('获取余额失败:', error)
+          console.error('Failed to get balance:', error)
           setWalletBalance(0)
         }
       }
@@ -243,7 +243,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
           }
         }
       } catch (error) {
-        console.error('更新余额失败:', error)
+        console.error('Failed to update balance:', error)
       }
     }
 
@@ -322,7 +322,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
         // 重置输入金额
         setAmount('')
       } catch (error) {
-        console.error('铸造失败:', error)
+        console.error('Minting failed:', error)
         const errorMessage =
           error instanceof Error ? error.message : t('未知错误')
 
@@ -514,7 +514,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
           setActiveTab(0)
         }
       } catch (error) {
-        console.error('退还失败:', error)
+        console.error('Refund failed:', error)
         const errorMessage =
           error instanceof Error ? error.message : t('未知错误')
 
@@ -556,7 +556,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
 
         return progress.toFixed(2)
       } catch (error) {
-        console.error('计算铸造进度时出错:', error)
+        console.error('Error calculating minting progress:', error)
         return 0
       }
     }
@@ -582,7 +582,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
 
         return num
       } catch (error) {
-        console.error('字符串转换为数字时出错:', error)
+        console.error('Error converting string to number:', error)
         return 0
       }
     }
@@ -600,7 +600,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
         const tokens = calculateTokensFromCurrency(safeAmount)
         return tokens.toString()
       } catch (error) {
-        console.error('计算代币数量时出错:', error)
+        console.error('Error calculating token amount:', error)
         return '0'
       }
     }
@@ -645,7 +645,7 @@ const MintingForm: React.FC<MintingFormProps> = memo(
         }
         setAmount(value.toString())
       } catch (error) {
-        console.error('处理金额选择时出错:', error)
+        console.error('Error handling amount selection:', error)
         toast({
           title: t('操作失败'),
           description: t('处理金额时出现错误'),

@@ -187,7 +187,7 @@ export default function MintPage() {
         window.scrollTo(0, 0)
       }
     } catch (error) {
-      console.error('获取代币列表失败:', error)
+      console.error('Failed to fetch token list:', error)
     }
   }
 

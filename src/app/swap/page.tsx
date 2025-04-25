@@ -183,7 +183,6 @@ export default function SwapPage() {
             <Image
               src={value.logo || "/pi.png"}
               alt={value.symbol}
-              fallbackSrc="https://via.placeholder.com/30"
               boxSize={{ base: "21px", md: "24px" }}
               borderRadius="full"
             />
@@ -224,7 +223,6 @@ export default function SwapPage() {
                     <Box position="relative" minW="32px">
                       <Image
                         src={token.logo || "/pi.png"}
-                        fallbackSrc="https://via.placeholder.com/30"
                         alt={token.symbol}
                         boxSize="32px"
                         borderRadius="full"
@@ -567,7 +565,6 @@ export default function SwapPage() {
                         src="/pi.png"
                         boxSize="16px"
                         borderRadius="full"
-                        fallbackSrc="https://via.placeholder.com/16"
                       />
                       <Text fontWeight="bold">12.5 PI</Text>
                       <FaExchangeAlt size="12px" />
@@ -575,7 +572,6 @@ export default function SwapPage() {
                         src="/sol.png"
                         boxSize="16px"
                         borderRadius="full"
-                        fallbackSrc="https://via.placeholder.com/16"
                       />
                       <Text fontWeight="bold">12.0 SOL</Text>
                     </HStack>
@@ -603,7 +599,6 @@ export default function SwapPage() {
                         src="/sol.png"
                         boxSize="16px"
                         borderRadius="full"
-                        fallbackSrc="https://via.placeholder.com/16"
                       />
                       <Text fontWeight="bold">0.12 SOL</Text>
                       <FaExchangeAlt size="12px" />
@@ -611,7 +606,6 @@ export default function SwapPage() {
                         src="/pi.png"
                         boxSize="16px"
                         borderRadius="full"
-                        fallbackSrc="https://via.placeholder.com/16"
                       />
                       <Text fontWeight="bold">120 PI</Text>
                     </HStack>

@@ -32,7 +32,7 @@ export default {
   'utilityTokens': 'Utility Tokens',
   'searchPlaceholder': 'Search Symbol, Name or CA',
   'marketCapRanking': 'MC Ranking',
-  'hotTokens': 'Hot Tokens',
+  'hotTokens': 'Hot',
   'totalResults': 'Total {count} results',
   'searchNameSymbolAddress': 'Search Symbol, Name or CA',
   'clickToCopyFullAddress': 'Click to copy',

@@ -349,13 +349,18 @@ export const Navbar = ({
   const finalIsSpacePiPage = isSpacePiPage || contextIsSpacePiPage;
 
   // 统一深色页面判断
-  const isDarkPage = finalIsXpiPage || finalIsSpacePiPage;
-
-  // 输出调试信息以验证路径和页面类型检测是否正确
-  console.log("当前路径:", pathname);
-  console.log("是XPI页面?", finalIsXpiPage);
-  console.log("是SpacePi页面?", finalIsSpacePiPage);
-
+  const isDarkPage = finalIsXpiPage || finalIsSpacePiPage
+  
+  // 仅在开发环境下输出调试信息
+  if (process.env.NODE_ENV === 'development') {
+    // 使用 useEffect 确保只在组件挂载和更新特定依赖时才打印一次
+    useEffect(() => {
+      console.log('Current path:', pathname);
+      console.log('Is XPI page?', finalIsXpiPage);
+      console.log('Is SpacePi page?', finalIsSpacePiPage);
+    }, [pathname, finalIsXpiPage, finalIsSpacePiPage]);
+  }
+  
   // 所有useColorModeValue调用都放在这里，不要在下面的逻辑中调用
   const xpiBgColorLight = useColorModeValue(
     "rgba(0, 0, 0, 0.36)",
@@ -464,7 +469,7 @@ export const Navbar = ({
         position: "top",
       });
     } catch (error) {
-      console.error("断开连接失败:", error);
+      console.error("Disconnect failed:", error)
       toast({
         title: t("error"),
         description: t("disconnectFailed"),
@@ -488,7 +493,7 @@ export const Navbar = ({
         position: "top",
       });
     } catch (error) {
-      console.error("重新连接失败:", error);
+      console.error("Reconnect failed:", error)
       toast({
         title: t("error"),
         description: t("reconnectFailed"),
@@ -782,6 +787,7 @@ export const Navbar = ({
                 variant="ghost"
                 icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
                 color={iconButtonColor}
+                mr={-2}
               />
             </Stack>
           </ClientSideOnly>
@@ -1007,7 +1013,7 @@ const MobileNav = ({
       });
       onClose(); // 关闭移动菜单
     } catch (error) {
-      console.error("断开连接失败:", error);
+      console.error("Disconnect failed:", error)
       toast({
         title: t("error"),
         description: t("disconnectFailed"),
@@ -1210,6 +1216,7 @@ const MobileNavItem = ({
             w={6}
             h={6}
             color={linkColor}
+            mr={-2}
           />
         )}
       </Flex>
@@ -1303,4 +1310,6 @@ const NAV_ITEMS: Array<NavItem> = [
     href: '/points',
   },
     */
-];
+]
+
+export default Navbar;

@@ -19,36 +19,36 @@ const AuthRestorer = () => {
     const restoreAuth = async () => {
       // 如果已经登录，不需要恢复
       if (isLoggedIn) {
-        console.log('用户已登录，无需恢复状态')
+        console.log('User already logged in, no restoration needed')
         return
       }
       
       // 检查是否有钱包地址和保存的token
       const savedToken = localStorage.getItem('token')
-      console.log('检查token和钱包状态', { 
-        'token存在': !!savedToken, 
-        '钱包已连接': !!publicKey,
-        '当前钱包地址': publicKey
+      console.log('Checking token and wallet status', { 
+        'token': !!savedToken, 
+        'wallet_connected': !!publicKey,
+        'wallet_address': publicKey
       })
       
       if (!savedToken) {
-        console.log('未找到保存的token，无法恢复登录状态')
+        console.log('No saved token found, cannot restore login state')
         return
       }
       
       if (!publicKey) {
-        console.log('钱包未连接，无法恢复登录状态')
+        console.log('Wallet not connected, cannot restore login state')
         return
       }
       
-      console.log('找到保存的token和钱包地址，尝试恢复登录状态')
+      console.log('Found saved token and wallet address, attempting to restore session')
       
       try {
         // 不调用API验证token，直接假设token有效并恢复登录状态
         // 创建基本用户信息
         const basicUserInfo = {
           userId: parseInt(localStorage.getItem('userId') || '0'),
-          nickname: localStorage.getItem('nickname') || '用户',
+          nickname: localStorage.getItem('nickname') || 'User',
           avatar_url: localStorage.getItem('avatar_url') || '',
           twitterId: null,
           telegramId: null,
@@ -74,10 +74,10 @@ const AuthRestorer = () => {
           })
         )
         
-        console.log('用户登录状态已恢复（通过保存的token和钱包地址）')
+        console.log('User session restored via saved token and wallet address')
         
       } catch (error) {
-        console.error('恢复登录状态时出错:', error)
+        console.error('Error restoring session:', error)
         // 出错时清除token
         localStorage.removeItem('token')
       }

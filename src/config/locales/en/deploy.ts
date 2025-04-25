@@ -25,20 +25,20 @@ export default {
   // Deploy Page - Social Media Links
   'socialLinks': 'Social Links',
   
-  // Deploy Page - Website & Form Fields
+  // Deploy Page - Buttons and Website Fields
   'website': 'Website',
   'twitter': 'Twitter',
   'telegram': 'Telegram',
-  'description': 'Project Description',
+  'description': 'Description',
   
-  // Deploy Page - Error & Success Messages
+  // Deploy Page - Error and Success Messages
   'error': 'Error',
   'pleaseCompleteForm': 'Please complete all required fields',
   'symbolAlreadyExists': 'This symbol is already in use',
   'invalidSymbol': 'Invalid symbol, please use a different one',
   'success': 'Success',
   'tokenCreated': 'Token created successfully',
-  'createTokenFailed': 'Create token failed',
+  'createTokenFailed': 'Token creation failed',
   
   // Deploy Page - Button States
   'creating': 'Creating...',
@@ -48,7 +48,7 @@ export default {
   // Deploy Success Modal
   'deploySuccess': 'Deploy Success',
   'tokenCreatedSuccessfully': 'Token Created Successfully!',
-  'yourTokenHasBeenDeployed': 'Your token {{name}} ({{symbol}}) has been deployed successfully',
+  'yourTokenHasBeenDeployed': 'Token {{name}} ({{symbol}}) has been deployed successfully',
   'tokenContract': 'Token Contract',
   'viewTokenDetails': 'View Token Details',
 }; 

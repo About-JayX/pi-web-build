@@ -219,7 +219,6 @@ const ShareModal = ({
       .catch(() => {
         toast({
           title: t('copyFailed'),
-          description: t('pleaseManualCopyContent'),
           status: 'error',
           duration: 2000,
           isClosable: true,
@@ -244,7 +243,6 @@ const ShareModal = ({
       .catch(() => {
         toast({
           title: t('copyFailed'),
-          description: t('pleaseManualCopyLink'),
           status: 'error',
           duration: 2000,
           isClosable: true,
@@ -253,7 +251,7 @@ const ShareModal = ({
       });
   };
   
-  // 复制CA
+  // 复制合约地址
   const copyContractAddress = () => {
     if (!contractAddress) return;
     
@@ -261,7 +259,7 @@ const ShareModal = ({
       .then(() => {
         toast({
           title: t('copySuccess'),
-          description: t('caCopiedToClipboard'),
+          description: t('addressCopied'),
           status: 'success',
           duration: 2000,
           isClosable: true,
@@ -271,7 +269,6 @@ const ShareModal = ({
       .catch(() => {
         toast({
           title: t('copyFailed'),
-          description: t('pleaseManualCopyCA'),
           status: 'error',
           duration: 2000,
           isClosable: true,

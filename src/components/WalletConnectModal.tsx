@@ -221,7 +221,7 @@ const WalletConnectModal = ({
           onClose()
         }
       } catch (signError: any) {
-        console.error("消息签名失败:", signError)
+        console.error("Message signing failed:", signError)
 
         // 检查是否是用户拒绝签名
         if (
@@ -251,7 +251,7 @@ const WalletConnectModal = ({
         }
       }
     } catch (connectError: any) {
-      console.error("钱包连接失败:", connectError)
+      console.error("Wallet connection failed:", connectError)
 
       // 检查是否是用户拒绝连接
       if (
@@ -289,7 +289,7 @@ const WalletConnectModal = ({
     const urlParams = new URLSearchParams(window.location.search)
     const inviteCode = urlParams.get("code")
     if (inviteCode) {
-      console.log("获取到邀请码:", inviteCode)
+      console.log("Invite code received:", inviteCode)
       setInviteCode(inviteCode)
       // 这里可以处理邀请码，比如发送到服务器等
       // sendWssMessage("use_invite_code", { code: inviteCode })
