@@ -26,24 +26,24 @@ import {
   Avatar,
   Skeleton,
   VStack,
-} from "@chakra-ui/react"
-import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons"
-import NextLink from "next/link"
-import { usePathname } from "next/navigation"
-import { useState, useEffect, useRef } from "react"
-import dynamic from "next/dynamic"
-import { useNetwork } from "@/contexts/NetworkContext"
-import { useI18n } from "@/contexts/I18nProvider"
-import { useTranslation } from "react-i18next"
-import { FaGlobeAsia } from "react-icons/fa"
-import { useSolana } from "@/contexts/solanaProvider"
-import { UserAPI } from "@/api"
-import { useAppDispatch, useAppSelector } from "@/store/hooks"
-import { setUser, clearUser } from "@/store/slices/userSlice"
-import LogoText from "./LogoText"
-import WalletConnectModal from "./WalletConnectModal"
-import LanguageSelector from "@/components/LanguageSelector"
-import { useTheme } from "@/contexts/ThemeContext"
+} from "@chakra-ui/react";
+import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import NextLink from "next/link";
+import { usePathname } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
+import { useNetwork } from "@/contexts/NetworkContext";
+import { useI18n } from "@/contexts/I18nProvider";
+import { useTranslation } from "react-i18next";
+import { FaGlobeAsia } from "react-icons/fa";
+import { useSolana } from "@/contexts/solanaProvider";
+import { UserAPI } from "@/api";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { setUser, clearUser } from "@/store/slices/userSlice";
+import LogoText from "./LogoText";
+import WalletConnectModal from "./WalletConnectModal";
+import LanguageSelector from "@/components/LanguageSelector";
+import { useTheme } from "@/contexts/ThemeContext";
 
 // 客户端专用组件，防止服务器端渲染不匹配
 const ClientSideOnly = ({
@@ -349,26 +349,26 @@ export const Navbar = ({
   const finalIsSpacePiPage = isSpacePiPage || contextIsSpacePiPage;
 
   // 统一深色页面判断
-  const isDarkPage = finalIsXpiPage || finalIsSpacePiPage
-  
+  const isDarkPage = finalIsXpiPage || finalIsSpacePiPage;
+
   // 仅在开发环境下输出调试信息
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === "development") {
     // 使用 useRef 来跟踪是否已经打印过日志
     const hasLoggedRef = useRef(false);
-    
+
     useEffect(() => {
       // 只有当尚未打印过日志时才打印
       if (!hasLoggedRef.current) {
-        console.log('Current path:', pathname);
-        console.log('Is XPI page?', finalIsXpiPage);
-        console.log('Is SpacePi page?', finalIsSpacePiPage);
-        
+        console.log("Current path:", pathname);
+        console.log("Is XPI page?", finalIsXpiPage);
+        console.log("Is SpacePi page?", finalIsSpacePiPage);
+
         // 标记已经打印过
         hasLoggedRef.current = true;
       }
     }, []); // 保持空依赖数组
   }
-  
+
   // 所有useColorModeValue调用都放在这里，不要在下面的逻辑中调用
   const xpiBgColorLight = useColorModeValue(
     "rgba(0, 0, 0, 0.36)",
@@ -477,7 +477,7 @@ export const Navbar = ({
         position: "top",
       });
     } catch (error) {
-      console.error("Disconnect failed:", error)
+      console.error("Disconnect failed:", error);
       toast({
         title: t("error"),
         description: t("disconnectFailed"),
@@ -501,7 +501,7 @@ export const Navbar = ({
         position: "top",
       });
     } catch (error) {
-      console.error("Reconnect failed:", error)
+      console.error("Reconnect failed:", error);
       toast({
         title: t("error"),
         description: t("reconnectFailed"),
@@ -795,6 +795,7 @@ export const Navbar = ({
                 variant="ghost"
                 icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
                 color={iconButtonColor}
+                display={{ base: "flex", xl: "none" }}
                 mr={-2}
               />
             </Stack>
@@ -1021,7 +1022,7 @@ const MobileNav = ({
       });
       onClose(); // 关闭移动菜单
     } catch (error) {
-      console.error("Disconnect failed:", error)
+      console.error("Disconnect failed:", error);
       toast({
         title: t("error"),
         description: t("disconnectFailed"),
@@ -1318,6 +1319,6 @@ const NAV_ITEMS: Array<NavItem> = [
     href: '/points',
   },
     */
-]
+];
 
 export default Navbar;
