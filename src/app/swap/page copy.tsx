@@ -160,7 +160,6 @@ export default function SwapPage() {
             <Image 
               src={value.logo || '/pi.png'} 
               alt={value.symbol}
-              fallbackSrc="https://via.placeholder.com/30"
               boxSize="24px"
               borderRadius="full"
             />
@@ -195,7 +194,6 @@ export default function SwapPage() {
                     <Box position="relative" minW="32px">
                       <Image 
                         src={token.logo || '/pi.png'}
-                        fallbackSrc="https://via.placeholder.com/30"
                         alt={token.symbol}
                         boxSize="32px"
                         borderRadius="full"
@@ -501,10 +499,10 @@ export default function SwapPage() {
               <HStack>
                 <VStack align="start" spacing={0}>
                   <HStack>
-                    <Image src="/pi.png" boxSize="16px" borderRadius="full" fallbackSrc="https://via.placeholder.com/16" />
+                    <Image src="/pi.png" boxSize="16px" borderRadius="full" />
                     <Text fontWeight="bold">12.5 PI</Text>
                     <FaExchangeAlt size="12px" />
-                    <Image src="/sol.png" boxSize="16px" borderRadius="full" fallbackSrc="https://via.placeholder.com/16" />
+                    <Image src="/sol.png" boxSize="16px" borderRadius="full" />
                     <Text fontWeight="bold">12.0 SOL</Text>
                   </HStack>
                   <Text fontSize="xs" color="gray.500">2 {t('minutesAgo')}</Text>
@@ -525,10 +523,10 @@ export default function SwapPage() {
               <HStack>
                 <VStack align="start" spacing={0}>
                   <HStack>
-                    <Image src="/sol.png" boxSize="16px" borderRadius="full" fallbackSrc="https://via.placeholder.com/16" />
+                    <Image src="/sol.png" boxSize="16px" borderRadius="full" />
                     <Text fontWeight="bold">0.12 SOL</Text>
                     <FaExchangeAlt size="12px" />
-                    <Image src="/pi.png" boxSize="16px" borderRadius="full" fallbackSrc="https://via.placeholder.com/16" />
+                    <Image src="/pi.png" boxSize="16px" borderRadius="full" />
                     <Text fontWeight="bold">120 PI</Text>
                   </HStack>
                   <Text fontSize="xs" color="gray.500">15 {t('minutesAgo')}</Text>

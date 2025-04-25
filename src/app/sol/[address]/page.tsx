@@ -233,14 +233,21 @@ export default function TokenMintPage() {
 
   // 复制合约地址到剪贴板
   const copyContractAddress = (address: string) => {
-    navigator.clipboard.writeText(address);
-    toast({
-      title: t('contractCopied') || t('addressCopied'),
-      status: 'success',
-      duration: 2000,
-      isClosable: true,
-      position: 'top',
-    });
+    if (address) {
+      navigator.clipboard
+        .writeText(address)
+        .then(() =>
+          toast({
+            title: t('copySuccess'),
+            description: t('copyAddressSuccess'),
+            status: 'success',
+            duration: 2000,
+            isClosable: true,
+            position: 'top',
+          })
+        )
+        .catch(err => console.error(`${t('copy')} ${t('failed')}:`, err))
+    }
   };
 
   // 返回按钮组件
@@ -634,7 +641,6 @@ export default function TokenMintPage() {
                           objectFit="cover"
                           border="2px solid"
                           borderColor="brand.light"
-                          fallbackSrc="/default-token.png"
                         />
                         
                         {/* 社交媒体链接 */}
