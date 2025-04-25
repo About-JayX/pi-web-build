@@ -176,6 +176,7 @@ export default function MintPage() {
         order: sortDirection.toUpperCase(),
         sort_by: sortColumn,
         ...(category && { category }),
+        ...(debouncedSearchQuery && { search: debouncedSearchQuery }),
       }
 
       // 先清空数据，显示加载状态
@@ -297,6 +298,7 @@ export default function MintPage() {
       ...(index === 0 && { category: 'hot' }),
       ...(index === 2 && { category: 'latest' }),
       ...(index === 3 && { category: 'completed' }),
+      ...(debouncedSearchQuery && { search: debouncedSearchQuery }),
     }
 
     // 记录本次请求的参数以防重复请求
@@ -386,6 +388,7 @@ export default function MintPage() {
       order: newDirection.toUpperCase(),
       sort_by: column,
       ...(category && { category }),
+      ...(debouncedSearchQuery && { search: debouncedSearchQuery }),
     }
 
     // 记录本次请求参数，防止重复请求
@@ -591,6 +594,7 @@ export default function MintPage() {
         ...(tabIndex === 0 && { category: 'hot' }),
         ...(tabIndex === 2 && { category: 'latest' }),
         ...(tabIndex === 3 && { category: 'completed' }),
+        ...(debouncedSearchQuery && { search: debouncedSearchQuery }),
       }
 
       // 发起数据请求
@@ -599,7 +603,7 @@ export default function MintPage() {
       // 将初始加载标志设置为false
       setIsInitialLoad(false)
     }
-  }, [isInitialLoad, currentPage, pageSize, tabIndex, sortDirection])
+  }, [isInitialLoad, currentPage, pageSize, tabIndex, sortDirection, debouncedSearchQuery])
 
   // 强制在移动设备上使用卡片视图
   useEffect(() => {
