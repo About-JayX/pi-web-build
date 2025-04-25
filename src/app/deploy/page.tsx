@@ -47,6 +47,9 @@ import ErrorModal from '@/components/ErrorModal'
 import DeploySuccessModal from '@/components/DeploySuccessModal'
 import BigNumber from 'bignumber.js'
 import { useRouter } from 'next/navigation'
+// 定义非法代币符号列表（移到函数外部）
+const INVALID_SYMBOLS = ['XPI', 'PIS', 'PiSale', 'SpacePi', 'Xijinpin']
+
 // 定义代币参数组件的属性接口
 interface TokenParametersSectionProps {
   totalSupplyTabIndex: number
@@ -761,29 +764,25 @@ export default function DeployPage() {
 
       console.log('Symbol check initiated:', symbol)
 
-      // 再次检查非法代币符号列表 - 应该在handleSymbolChange中完成，这里是双重保险
-      const invaFlidSymbols = ['XPI', 'PIS', 'PiSale', 'SpacePi', 'Xijinpin']
+      // 检查非法代币符号列表
       if (
-        invalidSymbols.some(
+        INVALID_SYMBOLS.some(
           invalid => symbol.toUpperCase() === invalid.toUpperCase()
         )
       ) {
-        // 非法符号直接设置错误状态并返回，不需要进行网络请求
         setIsSymbolValid(false)
         setErrorType('invalid')
-        setIsCheckingSymbol(false) // 确保检查状态被关闭
+        setIsCheckingSymbol(false)
         return
       }
 
       try {
-        // 开始检查符号可用性
         setIsCheckingSymbol(true)
         console.log('API request for symbol check:', symbol)
 
         const response = await TokenAPI.checkSymbol(symbol)
         console.log('API response:', response)
 
-        // 如果 exists 为 true 表示已注册，则不可用
         if (response.exists) {
           setIsSymbolValid(false)
           setErrorType('exists')
@@ -796,15 +795,12 @@ export default function DeployPage() {
             position: 'top',
           })
         } else {
-          // 符号可用，设置为有效状态
           setIsSymbolValid(true)
           setErrorType(null)
         }
       } catch (error) {
         console.error('Failed to check token symbol:', error)
-        // 发生错误时保持之前的验证状态不变
       } finally {
-        // 完成检查，无论结果如何
         setIsCheckingSymbol(false)
       }
     },
@@ -814,64 +810,46 @@ export default function DeployPage() {
   // 处理代币符号输入
   const handleSymbolChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      // 清除之前的定时器，避免任何情况下的竞态条件
       if (timerRef.current) {
         clearTimeout(timerRef.current)
         timerRef.current = null
       }
 
-      // 1. 移除空格
-      // 2. 过滤掉中文字符，只保留英文字母、数字和特殊符号
-      // 使用正则表达式匹配非中文字符
       const value = e.target.value
         .replace(/\s/g, '')
         .replace(/[\u4e00-\u9fa5]/g, '')
 
-      // 限制最大长度为10个字符
       const truncatedValue = value.slice(0, 10)
-
-      // 更新符号值
       setTokenSymbol(truncatedValue)
 
-      // 如果输入为空，不进行验证
       if (!truncatedValue) {
         setIsSymbolValid(null)
         setErrorType(null)
         return
       }
 
-      // 步骤1: 快速检查非法代币符号
-      const invalidSymbols = ['XPI', 'PIS', 'PiSale', 'SpacePi', 'Xijinpin']
+      // 使用外部定义的 INVALID_SYMBOLS
       if (
-        invalidSymbols.some(
+        INVALID_SYMBOLS.some(
           invalid => truncatedValue.toUpperCase() === invalid.toUpperCase()
         )
       ) {
-        // 设置错误状态
         setIsSymbolValid(false)
         setErrorType('invalid')
-        // 确保isCheckingSymbol为false，防止显示"正在检查符号可用性"
         setIsCheckingSymbol(false)
-        // 非法符号直接返回，不进行后续符号可用性检查
         return
       }
 
-      // 步骤2: 如果不是非法符号，继续处理
-
-      // 如果之前是任何错误，都重置状态，准备进行新的检查
       setIsSymbolValid(null)
       setErrorType(null)
 
-      // 步骤3: 为非非法符号设置定时器，延迟检查可用性
       console.log('Symbol availability check scheduled:', truncatedValue)
-      // 设置新的定时器，1500ms 后检查
       timerRef.current = setTimeout(() => {
         console.log('Executing symbol availability check:', truncatedValue)
-        // 调用API检查符号是否已被注册
         checkTokenSymbol(truncatedValue)
-      }, 1500)
+      }, 800)
     },
-    [checkTokenSymbol, setIsCheckingSymbol]
+    [checkTokenSymbol]
   )
 
   // 组件卸载时清除定时器
