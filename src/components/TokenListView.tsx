@@ -184,90 +184,30 @@ const TokenListView = ({
   const getSocials = (token: MintToken) => {
     const links: SocialLinkDisplay[] = [];
     
-    // 如果存在 socials 数组，从中提取链接
+    // 定义平台到图标的映射
+    const platformIconMap: Record<string, IconType> = {
+      website: FaGlobe,
+      twitter: FaTwitter,
+      telegram: FaTelegram
+    };
+    
+    // 处理社交媒体链接
     if (token.socials && token.socials.length > 0) {
-      // 查找网站链接 - 匹配多种可能的平台名称，忽略大小写
-      const website = token.socials.find(s => 
-        s.platform && (
-          s.platform.toLowerCase() === "website" || 
-          s.platform.toLowerCase() === "web" || 
-          s.platform.toLowerCase() === "site" ||
-          s.platform.toLowerCase() === "homepage"
-        )
-      );
-      if (website) {
-        const url = website.link; // API返回的链接
-        if (url) {
+      token.socials.forEach(social => {
+        // 确保平台名称和链接存在
+        if (!social.platform || !social.link) return;
+        
+        const platformName = social.platform.toLowerCase();
+        
+        // 只添加已知平台的链接
+        if (platformIconMap[platformName]) {
           links.push({
-            platform: "website",
-            link: url,
-            icon: FaGlobe
+            platform: platformName,
+            link: social.link,
+            icon: platformIconMap[platformName]
           });
         }
-      }
-      
-      // 查找推特链接 - 匹配多种可能的平台名称，忽略大小写
-      const twitter = token.socials.find(s => 
-        s.platform && (
-          s.platform.toLowerCase() === "twitter" || 
-          s.platform.toLowerCase() === "x" || 
-          s.platform.toLowerCase() === "tweet"
-        )
-      );
-      if (twitter) {
-        const url = twitter.link;
-        if (url) {
-          links.push({
-            platform: "twitter",
-            link: url,
-            icon: FaTwitter
-          });
-        }
-      }
-      
-      // 查找电报链接 - 匹配多种可能的平台名称，忽略大小写
-      const telegram = token.socials.find(s => 
-        s.platform && (
-          s.platform.toLowerCase() === "telegram" || 
-          s.platform.toLowerCase() === "tg" || 
-          s.platform.toLowerCase() === "tele"
-        )
-      );
-      if (telegram) {
-        const url = telegram.link;
-        if (url) {
-          links.push({
-            platform: "telegram",
-            link: url,
-            icon: FaTelegram
-          });
-        }
-      }
-    } else {
-      // 兼容旧数据格式，使用旧的独立属性
-      if (token.website) {
-        links.push({
-          platform: "website",
-          link: token.website,
-          icon: FaGlobe
-        });
-      }
-      
-      if (token.twitter) {
-        links.push({
-          platform: "twitter",
-          link: token.twitter,
-          icon: FaTwitter
-        });
-      }
-      
-      if (token.telegram) {
-        links.push({
-          platform: "telegram",
-          link: token.telegram,
-          icon: FaTelegram
-        });
-      }
+      });
     }
     
     return links;

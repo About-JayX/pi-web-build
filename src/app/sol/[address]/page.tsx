@@ -21,10 +21,13 @@ import {
   Button,
   Flex,
   SimpleGrid,
+  useToast,
+  Link as ChakraLink,
+  Image,
 } from '@chakra-ui/react'
 import { useParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { FaCoins, FaUsers, FaChartPie, FaArrowLeft, FaExclamationTriangle } from 'react-icons/fa'
+import { FaCoins, FaUsers, FaChartPie, FaArrowLeft, FaExclamationTriangle, FaFileContract, FaGlobe, FaTwitter, FaTelegram, FaShareAlt } from 'react-icons/fa'
 import MintingForm from '@/components/token-detail/MintingForm'
 import { useSolana } from '@/contexts/solanaProvider'
 import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
@@ -37,14 +40,37 @@ import { MintingInstructions } from '@/components/token-detail'
 import { TokenAPI } from '@/api/token'
 import { TokenInfo } from '@/api/types'
 import { useMintingCalculations } from '@/hooks/useMintingCalculations'
+import { IconType } from 'react-icons'
+import { ShareModal } from '@/components'
+import { useNetwork } from '@/contexts/NetworkContext'
+
+// 扩展TokenInfo接口以包含社交媒体链接
+interface ExtendedTokenInfo extends TokenInfo {
+  website?: string;
+  twitter?: string;
+  telegram?: string;
+  socials?: {
+    id: number;
+    link: string;
+    platform: string;
+  }[];
+}
+
+interface SocialLinkDisplay {
+  platform: string;
+  link: string;
+  icon: IconType;
+}
 
 export default function TokenMintPage() {
   const { address } = useParams()
   const { t } = useTranslation()
   const { conn, wallet } = useSolana()
-  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null)
+  const [tokenInfo, setTokenInfo] = useState<ExtendedTokenInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const toast = useToast()
+  const { network } = useNetwork()
 
   // 获取token详情
   useEffect(() => {
@@ -165,6 +191,23 @@ export default function TokenMintPage() {
     return `${rateValue}%`
   }
 
+  // 格式化合约地址（显示前12位和后16位）
+  const formatContractAddress = (address: string) => {
+    return address.slice(0, 12) + '...' + address.slice(-16);
+  };
+
+  // 复制合约地址到剪贴板
+  const copyContractAddress = (address: string) => {
+    navigator.clipboard.writeText(address);
+    toast({
+      title: t('contractCopied') || t('addressCopied'),
+      status: 'success',
+      duration: 2000,
+      isClosable: true,
+      position: 'top',
+    });
+  };
+
   // 返回按钮组件
   const BackButton = () => (
     <Button
@@ -182,6 +225,107 @@ export default function TokenMintPage() {
       {t('backToMintingHome')}
     </Button>
   )
+
+  // 获取社交媒体链接
+  const getSocials = (token: any) => {
+    const links: SocialLinkDisplay[] = [];
+    
+    // 定义平台到图标的映射
+    const platformIconMap: Record<string, IconType> = {
+      website: FaGlobe,
+      twitter: FaTwitter,
+      telegram: FaTelegram
+    };
+    
+    // 处理社交媒体链接
+    if (token.socials && token.socials.length > 0) {
+      token.socials.forEach((social: any) => {
+        // 确保平台名称和链接存在
+        if (!social.platform || !social.link) return;
+        
+        const platformName = social.platform.toLowerCase();
+        
+        // 只添加已知平台的链接
+        if (platformIconMap[platformName]) {
+          links.push({
+            platform: platformName,
+            link: social.link,
+            icon: platformIconMap[platformName]
+          });
+        }
+      });
+    }
+    
+    return links;
+  };
+
+  // 添加分享状态
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  
+  // 处理分享功能
+  const handleShare = () => {
+    setIsShareModalOpen(true);
+  };
+
+  // 构建分享URL
+  const getShareUrl = () => {
+    const address = tokenInfo?.token_address;
+    return typeof window !== 'undefined' 
+      ? `${window.location.origin}/sol/${address}` 
+      : `/sol/${address}`;
+  };
+
+  // 修改SocialLinks组件中的ChakraLink为ChakraLink
+  const SocialLinks = ({ token }: { token: any }) => {
+    const links = getSocials(token);
+    const iconColor = useColorModeValue("gray.600", "gray.400");
+    const iconHoverColor = useColorModeValue("brand.primary", "brand.light");
+    const bgColor = useColorModeValue("gray.50", "gray.700");
+    
+    console.log('Token socials:', token.socials);
+    console.log('Processed social links:', links);
+    
+    if (links.length === 0) return null;
+    
+    return (
+      <HStack spacing={1} mt={2} justify="center">
+        {links.map((social, index) => (
+          <ChakraLink 
+            key={`${social.platform}-${index}`}
+            href={social.link}
+            isExternal
+            p={1.5}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            borderRadius="full"
+            bg={bgColor}
+            color="brand.primary"
+            _hover={{ bg: 'brand.light', color: 'white' }}
+            transition="all 0.2s"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Icon as={social.icon} boxSize="14px" />
+          </ChakraLink>
+        ))}
+        <Box
+          as="button"
+          p={1.5}
+          borderRadius="full"
+          bg={bgColor}
+          color="brand.primary"
+          _hover={{ bg: 'brand.light', color: 'white' }}
+          transition="all 0.2s"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          onClick={handleShare}
+        >
+          <Icon as={FaShareAlt} boxSize="14px" />
+        </Box>
+      </HStack>
+    );
+  };
 
   if (loading || fairCurveLoading) {
     return (
@@ -347,6 +491,7 @@ export default function TokenMintPage() {
     )
   }
 
+  // 在此处添加selectedToken定义，确保tokenInfo不为null
   // 转换TokenInfo为组件所需的格式
   const selectedToken = {
     id: tokenInfo.token_id,
@@ -385,7 +530,16 @@ export default function TokenMintPage() {
     total_transactions: tokenInfo.total_transactions,
     liquidity_amount: tokenInfo.liquidity_amount,
     net_quote_amount: tokenInfo.net_quote_amount,
+    // 添加社交媒体链接
+    website: tokenInfo.website,
+    twitter: tokenInfo.twitter,
+    telegram: tokenInfo.telegram,
+    socials: tokenInfo.socials || [],
   }
+
+  // 定义分享用的哈希标签和内容
+  const shareHashtags = ["PIS", "PI", "Web3", selectedToken.symbol];
+  const shareContent = "";
 
   return (
     <Box w="100%" pb={10} overflowX="hidden">
@@ -410,21 +564,59 @@ export default function TokenMintPage() {
               <Card bg={cardBg} borderWidth="1px" borderColor={borderColor}>
                 <CardBody p={{ base: 3, md: 4 }}>
                   <VStack spacing={{ base: 4, md: 6 }} align="stretch">
-                    {/* 代币标题部分 */}
-                    <Box>
-                      <Heading as="h1" size="lg" mb={2} color="brand.primary">
-                        {selectedToken.name} ({selectedToken.symbol})
-                      </Heading>
-                      <Text color="gray.500">
-                        {t('contractAddressColumn')}: {selectedToken.address}
-                      </Text>
-                      {tokenAccount && tokenBalance !== null && (
-                        <Text color="gray.500" mt={2}>
-                          {t('walletBalance')}: {tokenBalance}{' '}
+                    {/* 代币标题部分 - 添加logo和社交媒体链接 */}
+                    <Flex direction={{ base: 'column', sm: 'row' }} align={{ base: 'center', sm: 'flex-start' }} gap={4}>
+                      {/* 代币logo */}
+                      <Flex direction="column" alignItems="center">
+                        <Image
+                          src={selectedToken.logo || '/default-token.png'}
+                          alt={selectedToken.name}
+                          boxSize={{ base: "80px", md: "100px" }}
+                          borderRadius="2xl"
+                          objectFit="cover"
+                          border="2px solid"
+                          borderColor="brand.light"
+                          fallbackSrc="/default-token.png"
+                        />
+                        
+                        {/* 社交媒体链接 */}
+                        <SocialLinks token={selectedToken} />
+                      </Flex>
+                      
+                      {/* 代币信息 */}
+                      <VStack align={{ base: 'center', sm: 'flex-start' }} spacing={2} flex={1}>
+                        <Heading as="h1" size="lg" color="brand.primary">
                           {selectedToken.symbol}
+                        </Heading>
+                        <Text color="gray.500" fontSize="md">
+                          {selectedToken.name}
                         </Text>
-                      )}
-                    </Box>
+                        {/* 合约地址 */}
+                        <Box
+                          as="button"
+                          px={2}
+                          py={1}
+                          borderRadius="md"
+                          fontSize="xs"
+                          fontFamily="mono"
+                          fontWeight="bold"
+                          color="brand.primary"
+                          border="1px solid"
+                          borderColor="brand.light"
+                          title={selectedToken.address}
+                          cursor="pointer"
+                          width="fit-content"
+                          onClick={() => copyContractAddress(selectedToken.address)}
+                          bg="#F7F6FE"
+                          _hover={{ bg: 'brand.light' }}
+                          _active={{ bg: '#F7F6FE' }}
+                          transition="all 0.2s"
+                        >
+                          <Icon as={FaFileContract} mr={1} fontSize="10px" />
+                          {formatContractAddress(selectedToken.address)}
+                        </Box>
+                      </VStack>
+                    </Flex>
 
                     <Divider />
 
@@ -581,10 +773,26 @@ export default function TokenMintPage() {
                             {t('remaining')}:
                           </Text>
                           <Text fontWeight="bold">
-                            {formatTokenAmount(formattedData.remaining)}{' '}
-                            {/* {selectedToken.symbol} */}
+                            {formatTokenAmount(formattedData.remaining)}
                           </Text>
                         </HStack>
+                        
+                        {/* 添加我的代币到代币信息栏 */}
+                        {tokenAccount && tokenBalance !== null && (
+                          <HStack
+                            justify="space-between"
+                            p={3}
+                            bg={statBg}
+                            borderRadius="md"
+                          >
+                            <Text color="gray.600" fontSize="sm">
+                              {t('myTokenBalance')}:
+                            </Text>
+                            <Text fontWeight="bold">
+                              {tokenBalance?.toLocaleString()}
+                            </Text>
+                          </HStack>
+                        )}
                       </SimpleGrid>
                     </Box>
                   </VStack>
@@ -632,6 +840,22 @@ export default function TokenMintPage() {
           </Grid>
         </VStack>
       </Container>
+      
+      {/* 添加分享弹窗 */}
+      {selectedToken && (
+        <ShareModal 
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          title={`分享 ${selectedToken.name} (${selectedToken.symbol})`}
+          content={shareContent}
+          url={getShareUrl()}
+          tokenTicker={selectedToken.symbol}
+          tokenName={selectedToken.name}
+          contractAddress={selectedToken.address}
+          hashtags={shareHashtags}
+        />
+      )}
     </Box>
   )
 }
+

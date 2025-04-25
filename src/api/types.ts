@@ -72,6 +72,9 @@ export interface MintToken
   raised: string // formatted from net_quote_amount
   currencyUnit?: string
   socials?: Array<{id: number, link: string, platform: string}>
+  website?: string
+  twitter?: string
+  telegram?: string
 }
 
 export type TokenList = TokenInfo[]

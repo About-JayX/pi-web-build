@@ -125,4 +125,5 @@ export default {
   // Sol代币详情页特有的键值
   'remaining': '可铸代币',
   'walletMinted': '您的铸造额度',
+  'myTokenBalance': '我的代币',
 }; 
