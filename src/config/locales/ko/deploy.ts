@@ -11,11 +11,12 @@ export default {
   'symbolMaxLength': '심볼 최대 10자',
   'enterSymbol': '토큰 심볼 입력',
   'checkingSymbol': '심볼 가용성 확인 중',
+  'symbolValidSuccess': '사용 가능한 토큰 심볼입니다',
   
   // Deploy Page - Token Parameters
   'tokenParameters': '토큰 파라미터',
   'totalSupply': '총 공급량',
-  'mintingAmount': '민팅 금액',
+  'mintingAmount': '민팅 수량',
   'exchangeRate': '교환 비율',
   'tokenPrice': '토큰 가격',
   'settings': '설정',
@@ -33,8 +34,8 @@ export default {
   // Deploy Page - Error and Success Messages
   'error': '오류',
   'pleaseCompleteForm': '모든 필수 필드를 완성해주세요',
-  'symbolAlreadyExists': '이 토큰 심볼은 이미 사용 중입니다',
-  'invalidSymbol': '유효하지 않은 토큰 심볼입니다. 다른 심볼을 사용해주세요',
+  'symbolAlreadyExists': '이 심볼은 이미 사용 중입니다',
+  'invalidSymbol': '유효하지 않은 심볼입니다. 다른 심볼을 사용해주세요',
   'success': '성공',
   'tokenCreated': '토큰이 성공적으로 생성되었습니다',
   'createTokenFailed': '토큰 생성에 실패했습니다',
@@ -46,8 +47,8 @@ export default {
   
   // Deploy Success Modal
   'deploySuccess': '배포 성공',
-  'tokenCreatedSuccessfully': '토큰이 성공적으로 생성되었습니다!',
-  'yourTokenHasBeenDeployed': '토큰 {{name}} ({{symbol}})이(가) 성공적으로 배포되었습니다',
-  'tokenContract': '토큰 계약',
+  'tokenCreatedSuccessfully': '토큰 생성 성공!',
+  'yourTokenHasBeenDeployed': '토큰 {{name}} ({{symbol}})(이)가 성공적으로 배포되었습니다',
+  'tokenContract': '토큰 컨트랙트',
   'viewTokenDetails': '토큰 상세 보기',
 }; 
