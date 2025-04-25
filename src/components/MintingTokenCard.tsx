@@ -8,7 +8,6 @@ import {
   Text,
   Card,
   CardBody,
-  Progress,
   Divider,
   Button,
   useColorModeValue,
@@ -21,7 +20,6 @@ import {
 } from "@chakra-ui/react";
 import {
   FaGlobe,
-  FaTwitter,
   FaTelegram,
   FaShareAlt,
   FaFileContract,
@@ -30,7 +28,7 @@ import {
   FaCoins,
   FaExchangeAlt,
 } from "react-icons/fa";
-import { FaUser } from "react-icons/fa6";
+import { FaUser,FaXTwitter } from "react-icons/fa6";
 import { IconType } from "react-icons";
 import NextLink from "next/link";
 import { useTranslation } from "react-i18next";
@@ -40,15 +38,16 @@ import { useMintingCalculations } from "@/hooks/useMintingCalculations";
 import { useNetwork } from "@/contexts/NetworkContext";
 import { useRouter } from "next/navigation";
 import { ShareModal } from "./index";
+import Progress from "./Progress";
 
 // 判断是否为测试环境
-const isTestEnv = process.env.NODE_ENV === 'development';
+const isTestEnv = process.env.NODE_ENV === "development";
 
 // 定义社交媒体链接类型
 interface SocialLink {
   id?: number;
   link?: string; // API可能返回link
-  url?: string;  // 或者返回url
+  url?: string; // 或者返回url
   platform?: string;
 }
 
@@ -94,7 +93,7 @@ export default function MintingTokenCard({
   const { t } = useTranslation();
   const { network } = useNetwork();
   const router = useRouter();
-  
+
   // 添加状态管理分享弹窗
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
@@ -189,33 +188,33 @@ export default function MintingTokenCard({
   // 获取社交媒体链接
   const getSocials = () => {
     const links: SocialLinkDisplay[] = [];
-    
+
     // 定义平台到图标的映射
     const platformIconMap: Record<string, IconType> = {
       website: FaGlobe,
-      twitter: FaTwitter,
-      telegram: FaTelegram
+      twitter: FaXTwitter,
+      telegram: FaTelegram,
     };
-    
+
     // 处理社交媒体链接
     if (token.socials && token.socials.length > 0) {
-      token.socials.forEach(social => {
+      token.socials.forEach((social) => {
         // 确保平台名称和链接存在
         if (!social.platform || !social.link) return;
-        
+
         const platformName = social.platform.toLowerCase();
-        
+
         // 只添加已知平台的链接
         if (platformIconMap[platformName]) {
           links.push({
             platform: platformName,
             link: social.link,
-            icon: platformIconMap[platformName]
+            icon: platformIconMap[platformName],
           });
         }
       });
     }
-    
+
     return links;
   };
 
@@ -223,12 +222,13 @@ export default function MintingTokenCard({
   const socialLinks = getSocials();
 
   // 构建分享信息
-  const shareUrl = typeof window !== 'undefined' 
-    ? `${window.location.origin}/${network.toLowerCase()}/${token.address}` 
-    : `/${network.toLowerCase()}/${token.address}`;
-    
+  const shareUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/${network.toLowerCase()}/${token.address}`
+      : `/${network.toLowerCase()}/${token.address}`;
+
   const shareContent = "";
-  
+
   // 定义分享用的哈希标签
   const shareHashtags = ["PIS", "PI", "Web3", token.symbol];
 
@@ -375,30 +375,16 @@ export default function MintingTokenCard({
               <Text as="span" fontSize="xs" color="gray.500" mt={-1}>
                 {token.name}
               </Text>
-              
+
               {/* 社交媒体图标已移至logo下方 */}
             </Flex>
-            
+
             <Grid mt={1} gap={0.5}>
               <HStack spacing={2} align="center">
                 <Progress
                   value={token.progress || 0}
                   borderRadius="full"
                   size="sm"
-                  flex="1"
-                  bg="#E7E3FC"
-                  sx={{
-                    // 进度条颜色
-                    "& > div:last-of-type": {
-                      bg: "brand.primary !important",
-                      transition: "width 0.5s ease-in-out",
-                    },
-                  }}
-                  _groupHover={{
-                    "& > div:last-of-type": {
-                      bg: "brand.600 !important",
-                    },
-                  }}
                 />
               </HStack>
               <Flex justifyContent="space-between" alignItems="center">
@@ -438,7 +424,7 @@ export default function MintingTokenCard({
               </Flex>
             </Grid>
             <Divider my={1.5} />
-            
+
             <Flex justifyContent="space-between" alignItems="center">
               {/* 总供应量 */}
               <HStack spacing={1}>
@@ -488,9 +474,9 @@ export default function MintingTokenCard({
           </Flex>
         </CardBody>
       </Card>
-      
+
       {/* 添加分享弹窗 */}
-      <ShareModal 
+      <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         title={`分享 ${token.name} (${token.symbol})`}

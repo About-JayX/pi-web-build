@@ -38,7 +38,7 @@ import {
   FaUsers,
   FaInfoCircle,
   FaGlobe,
-  FaTwitter,
+  FaXTwitter,
   FaTelegram,
   FaShareAlt,
   FaExchangeAlt,
@@ -312,7 +312,7 @@ export default function TokenInfo({
                         _hover={{ bg: 'brand.light', color: 'white' }}
                         transition="all 0.2s"
                       >
-                        <Icon as={FaTwitter} boxSize="14px" />
+                        <Icon as={FaXTwitter} boxSize="14px" />
                       </Box>
                     )}
                     {token.telegram && (
@@ -443,7 +443,7 @@ export default function TokenInfo({
                       transition="all 0.2s"
                     >
                       <Icon
-                        as={FaTwitter}
+                        as={FaXTwitter}
                         boxSize={{ base: '16px', md: '18px' }}
                       />
                     </Box>

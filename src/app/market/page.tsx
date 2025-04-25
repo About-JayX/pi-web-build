@@ -44,7 +44,7 @@ import {
   FaArrowDown,
   FaSort,
   FaGlobe,
-  FaTwitter,
+  FaXTwitter,
   FaTelegram,
   FaShareAlt,
   FaLayerGroup,
@@ -388,7 +388,7 @@ function TokenListView({
                       _hover={{ color: iconHoverColor }}
                       transition="color 0.2s"
                     >
-                      <Icon as={FaTwitter} boxSize="16px" />
+                      <Icon as={FaXTwitter} boxSize="16px" />
                     </Box>
                   )}
                   {token.Telegram && (

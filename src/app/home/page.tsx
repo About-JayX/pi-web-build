@@ -30,7 +30,7 @@ import {
   FaChartLine,
   FaLayerGroup,
   FaGlobe,
-  FaTwitter,
+  FaXTwitter,
   FaTelegram,
   FaShareAlt,
   FaUsers,
@@ -1094,7 +1094,7 @@ export default function HomePage() {
                                 _hover={{ color: iconHoverColor }}
                                 transition="color 0.2s"
                               >
-                                <Icon as={FaTwitter} boxSize="16px" />
+                                <Icon as={FaXTwitter} boxSize="16px" />
                               </Box>
                             )}
                             {token.telegram && (

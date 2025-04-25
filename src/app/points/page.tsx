@@ -37,7 +37,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react"
 import {
-  FaTwitter,
+  FaXTwitter,
   FaTelegram,
   FaGift,
   FaGem,
@@ -595,7 +595,7 @@ export default function PointsPage() {
                                 }
                               : {}
                           }>
-                          <Icon as={FaTwitter} color="white" boxSize={4} />
+                          <Icon as={FaXTwitter} color="white" boxSize={4} />
                           <Text fontSize="sm" fontWeight="medium" color="white">
                             {userInfo.twitterId ? t("socialBound") : t("bind")}
                           </Text>
@@ -726,7 +726,7 @@ export default function PointsPage() {
                                     <Icon as={FaTelegram} color="blue.500" />
                                   )}
                                   {entry.activity === "twitterConnected" && (
-                                    <Icon as={FaTwitter} color="twitter.500" />
+                                    <Icon as={FaXTwitter} color="twitter.500" />
                                   )} */}
                                   <Text>
                                     {getActivityDescription(entry.title)}
@@ -998,7 +998,7 @@ export default function PointsPage() {
                       onClick={handleShareToX}
                       _hover={{ bg: "#0d8bd9" }}
                       mb={{ base: 2, md: 0 }}>
-                      <Icon as={FaTwitter} color="white" boxSize={4} />
+                      <Icon as={FaXTwitter} color="white" boxSize={4} />
                       <Text fontSize="sm" fontWeight="bold" color="white">
                         {t("share")}
                       </Text>

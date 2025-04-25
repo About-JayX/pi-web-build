@@ -27,7 +27,7 @@ import {
 } from '@chakra-ui/react'
 import { useParams } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { FaCoins, FaUsers, FaChartPie, FaArrowLeft, FaExclamationTriangle, FaFileContract, FaGlobe, FaTwitter, FaTelegram, FaShareAlt } from 'react-icons/fa'
+import { FaCoins, FaUsers, FaChartPie, FaArrowLeft, FaExclamationTriangle, FaFileContract, FaGlobe, FaXTwitter, FaTelegram, FaShareAlt } from 'react-icons/fa'
 import MintingForm from '@/components/token-detail/MintingForm'
 import { useSolana } from '@/contexts/solanaProvider'
 import { useFairCurve } from '@/web3/fairMint/hooks/useFairCurve'
@@ -268,7 +268,7 @@ export default function TokenMintPage() {
     // 定义平台到图标的映射
     const platformIconMap: Record<string, IconType> = {
       website: FaGlobe,
-      twitter: FaTwitter,
+      twitter: FaXTwitter,
       telegram: FaTelegram
     };
     
